@@ -1,0 +1,6 @@
+[serve.static]
+env = "BUN_PUBLIC_*"
+
+[loader]
+".ttf" = "file"
+".otf" = "file"
