@@ -1,38 +1,38 @@
-import {StrictMode} from "react";
-import {createRoot} from "react-dom/client";
-import {App} from "./App";
-import {QueryClient, QueryClientProvider} from "react-query";
-import {MantineProvider} from "@mantine/core";
-import {Notifications} from "@mantine/notifications";
-import {ModalsProvider} from "@mantine/modals";
-import {theme} from "./theme.ts";
-import {UserContextProvider} from "./context/UserContextProvider.tsx";
+import { MantineProvider } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
+import { Notifications } from "@mantine/notifications";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { App } from "./App";
+import { UserContextProvider } from "./context/UserContextProvider.tsx";
+import { theme } from "./theme.ts";
 
 const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            refetchInterval: false,
-            refetchIntervalInBackground: false,
-            refetchOnMount: false,
-            refetchOnReconnect: false,
-            refetchOnWindowFocus: false,
-            retry: false,
-        },
-    },
+	defaultOptions: {
+		queries: {
+			refetchInterval: false,
+			refetchIntervalInBackground: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			refetchOnWindowFocus: false,
+			retry: false,
+		},
+	},
 });
 const elem = document.getElementById("root")!;
 const app = (
 	<StrictMode>
-        <QueryClientProvider client={queryClient}>
-            <UserContextProvider>
-            <MantineProvider forceColorScheme={"dark"} theme={theme}>
-                <ModalsProvider>
-                    <Notifications />
-                        <App />
-                </ModalsProvider>
-            </MantineProvider>
-            </UserContextProvider>
-        </QueryClientProvider>
+		<QueryClientProvider client={queryClient}>
+			<UserContextProvider>
+				<MantineProvider theme={theme}>
+					<ModalsProvider>
+						<Notifications />
+						<App />
+					</ModalsProvider>
+				</MantineProvider>
+			</UserContextProvider>
+		</QueryClientProvider>
 	</StrictMode>
 );
 

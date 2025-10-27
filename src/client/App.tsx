@@ -1,19 +1,25 @@
 import "./index.css";
-import {AppShell, Text} from "@mantine/core";
-import { AppHeader } from "./components/AppHeader.tsx";
+import { AppShell } from "@mantine/core";
 import { HashRouter, Route, Routes } from "react-router-dom";
+import { AppHeader } from "./AppHeader.tsx";
+import { AppNavbar } from "./AppNavbar.tsx";
 import { useUserContext } from "./context/UserContext.ts";
+import { Homepage } from "./pages/HomePage.tsx";
+import { ModsPage } from "./pages/ModsPage.tsx";
 
 export function App() {
-    const { user } = useUserContext();
-    return (
-        <AppShell header={{ height: 66 }}>
-            <HashRouter>
-                <AppHeader />
-                <Routes>
-                    <Route path="/" element={<Text>Home</Text>} />
-                </Routes>
-            </HashRouter>
-        </AppShell>
-    );
+	const { user } = useUserContext();
+
+	return (
+		<AppShell header={{ height: 80 }} navbar={{ breakpoint: 0, width: 256 }}>
+			<HashRouter>
+				<AppHeader />
+				<AppNavbar />
+				<Routes>
+					<Route path="/" element={<Homepage />} />
+					<Route path={"/mods"} element={<ModsPage />} />
+				</Routes>
+			</HashRouter>
+		</AppShell>
+	);
 }

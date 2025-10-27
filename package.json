@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@hono/standard-validator": "^0.1.5",
+		"@mantine/colors-generator": "^8.3.5",
 		"@mantine/core": "^8.3.5",
 		"@mantine/dates": "^8.3.5",
 		"@mantine/form": "^8.3.5",

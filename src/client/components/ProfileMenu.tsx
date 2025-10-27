@@ -67,6 +67,7 @@ export function ProfileMenu() {
     <Stack pr="md">
       {!user && (
         <Button
+            color={"gray"}
           variant="subtle"
           onClick={login}
         >
