@@ -5,26 +5,24 @@
  * DCS Dropzone Registry API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+
 import type {
-  MutationFunction,
-  QueryFunction,
-  QueryKey,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+	MutationFunction,
+	QueryFunction,
+	QueryKey,
+	UseMutationOptions,
+	UseMutationResult,
+	UseQueryOptions,
+	UseQueryResult,
+} from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 /**
  * The health status of the server.
  */
 export const HealthValue = {
-  /** The health status of the server. */
-  status: 'UP',
+	/** The health status of the server. */
+	status: "UP",
 } as const;
 export type Health = typeof HealthValue;
 
@@ -32,1319 +30,1475 @@ export type Health = typeof HealthValue;
  * A summary of a mod
  */
 export interface ModSummary {
-  /** @pattern ^[a-z0-9-]+$ */
-  id: string;
-  /** The homepage of the mod */
-  homepage: string;
-  /** The name of the mod */
-  name: string;
-  /** A short description of the mod to be displayed in the mod tile */
-  description: string;
-  /** The authors of the mod as a list of strings */
-  authors: string[];
-  /** The tags of the mod, these are used to filter mods in the mod browser */
-  tags: string[];
-  /** The category of the mod, this is used to group mods in the mod browser */
-  category: string;
-  /** The license of the mod */
-  license: string;
-  /** The latest version of the mod to be pushed to the subscribers */
-  latest?: string;
-  /** The dependencies of the mod */
-  dependencies: string[];
-  /** The URL of the image to display in the mod tile */
-  imageUrl?: string;
-  published: boolean;
-  /**
-   * The maintainers of the mod
-   * @minItems 1
-   */
-  maintainers: string[];
+	/** @pattern ^[a-z0-9-]+$ */
+	id: string;
+	/** The homepage of the mod */
+	homepage: string;
+	/** The name of the mod */
+	name: string;
+	/** A short description of the mod to be displayed in the mod tile */
+	description: string;
+	/** The authors of the mod as a list of strings */
+	authors: string[];
+	/** The tags of the mod, these are used to filter mods in the mod browser */
+	tags: string[];
+	/** The category of the mod, this is used to group mods in the mod browser */
+	category: string;
+	/** The license of the mod */
+	license: string;
+	/** The latest version of the mod to be pushed to the subscribers */
+	latest?: string;
+	/** The dependencies of the mod */
+	dependencies: string[];
+	/** The URL of the image to display in the mod tile */
+	imageUrl?: string;
+	published: boolean;
+	/**
+	 * The maintainers of the mod
+	 * @minItems 1
+	 */
+	maintainers: string[];
 }
 
 export type ModVersionsItemAssetsItemLinksItem = {
-  /** The name of the file # separates download path and internal zip path */
-  source: string;
-  /** The name of the installation location relative to install path */
-  target: string;
-  /** Run on simulation (mission) start, note that this will execute the script before the mission environment is sanitized */
-  runonstart?: boolean;
+	/** The name of the file # separates download path and internal zip path */
+	source: string;
+	/** The name of the installation location relative to install path */
+	target: string;
+	/** Run on simulation (mission) start, note that this will execute the script before the mission environment is sanitized */
+	runonstart?: boolean;
 };
 
 export type ModVersionsItemAssetsItem = {
-  /** The URL of the file to download */
-  remoteSource: string;
-  links: ModVersionsItemAssetsItemLinksItem[];
+	/** The URL of the file to download */
+	remoteSource: string;
+	links: ModVersionsItemAssetsItemLinksItem[];
 };
 
 export type ModVersionsItem = {
-  /** The release page of the release */
-  releasepage: string;
-  /** The name of the release */
-  name: string;
-  /** The version of the release */
-  version: string;
-  /** The date of the release */
-  date: string;
-  /** Executable file specifically Tools */
-  exePath?: string;
-  /** The array of files to install */
-  assets: ModVersionsItemAssetsItem[];
+	/** The release page of the release */
+	releasepage: string;
+	/** The name of the release */
+	name: string;
+	/** The version of the release */
+	version: string;
+	/** The date of the release */
+	date: string;
+	/** Executable file specifically Tools */
+	exePath?: string;
+	/** The array of files to install */
+	assets: ModVersionsItemAssetsItem[];
 };
 
 /**
  * A mod
  */
 export interface Mod {
-  /** @pattern ^[a-z0-9-]+$ */
-  id: string;
-  /** The homepage of the mod */
-  homepage: string;
-  /** The name of the mod */
-  name: string;
-  /** A short description of the mod to be displayed in the mod tile */
-  description: string;
-  /** The authors of the mod as a list of strings */
-  authors?: string[];
-  /** The tags of the mod, these are used to filter mods in the mod browser */
-  tags?: string[];
-  /** The category of the mod, this is used to group mods in the mod browser */
-  category?: string;
-  /** The license of the mod */
-  license?: string;
-  /** The latest version of the mod to be pushed to the subscribers */
-  latest?: string;
-  /** The dependencies of the mod */
-  dependencies?: string[];
-  /** The versions of the mod */
-  versions?: ModVersionsItem[];
-  /** The URL of the image to display in the mod tile */
-  imageUrl?: string;
-  /** The content of the mod */
-  content?: string;
-  published?: boolean;
-  /**
-   * The maintainers of the mod
-   * @minItems 1
-   */
-  maintainers: string[];
+	/** @pattern ^[a-z0-9-]+$ */
+	id: string;
+	/** The homepage of the mod */
+	homepage: string;
+	/** The name of the mod */
+	name: string;
+	/** A short description of the mod to be displayed in the mod tile */
+	description: string;
+	/** The authors of the mod as a list of strings */
+	authors?: string[];
+	/** The tags of the mod, these are used to filter mods in the mod browser */
+	tags?: string[];
+	/** The category of the mod, this is used to group mods in the mod browser */
+	category?: string;
+	/** The license of the mod */
+	license?: string;
+	/** The latest version of the mod to be pushed to the subscribers */
+	latest?: string;
+	/** The dependencies of the mod */
+	dependencies?: string[];
+	/** The versions of the mod */
+	versions?: ModVersionsItem[];
+	/** The URL of the image to display in the mod tile */
+	imageUrl?: string;
+	/** The content of the mod */
+	content?: string;
+	published?: boolean;
+	/**
+	 * The maintainers of the mod
+	 * @minItems 1
+	 */
+	maintainers: string[];
 }
 
 /**
  * The currently authenticated user
  */
 export interface AuthenticatedUser {
-  /** The user's unique ID as a string, which is provided by the OAuth provider */
-  id: string;
-  /** The user's name, if available. This is not always provided by the OAuth provider */
-  name?: string;
-  /** The user's login, which is unique to the OAuth provider */
-  login: string;
-  /** The user's avatar URL, which can be used to display the user's profile picture */
-  avatarUrl: string;
-  /** The user's profile URL, which can be used to view the user's profile on the OAuth provider's website */
-  profileUrl: string;
-  /** Whether the user is a sudo user */
-  sudo: boolean;
+	/** The user's unique ID as a string, which is provided by the OAuth provider */
+	id: string;
+	/** The user's name, if available. This is not always provided by the OAuth provider */
+	name?: string;
+	/** The user's login, which is unique to the OAuth provider */
+	login: string;
+	/** The user's avatar URL, which can be used to display the user's profile picture */
+	avatarUrl: string;
+	/** The user's profile URL, which can be used to view the user's profile on the OAuth provider's website */
+	profileUrl: string;
+	/** Whether the user is a sudo user */
+	sudo: boolean;
 }
 
 export type GetSudoModSchema200 = { [key: string]: unknown };
 
 export type GetAuthByProviderCallbackParams = {
-code: string;
-state: string;
+	code: string;
+	state: string;
 };
 
 export type GetRegistryIndex200ItemAuthorsItem = {
-  name: string;
-  avatar?: string;
-  url?: string;
+	name: string;
+	avatar?: string;
+	url?: string;
 };
 
 export type GetRegistryIndex200Item = {
-  /** The name of the mod */
-  name: string;
-  /** A short description of the mod to be displayed in the mod tile */
-  description: string;
-  authors: GetRegistryIndex200ItemAuthorsItem[];
-  /** The tags of the mod, these are used to filter mods in the mod browser */
-  tags: string[];
-  /** The category of the mod, this is used to group mods in the mod browser */
-  category: string;
-  latest: string;
-  /** The dependencies of the mod */
-  dependencies?: string[];
-  /** @pattern ^[a-z0-9-]+$ */
-  id: string;
-  imageUrl: string;
+	/** The name of the mod */
+	name: string;
+	/** A short description of the mod to be displayed in the mod tile */
+	description: string;
+	authors: GetRegistryIndex200ItemAuthorsItem[];
+	/** The tags of the mod, these are used to filter mods in the mod browser */
+	tags: string[];
+	/** The category of the mod, this is used to group mods in the mod browser */
+	category: string;
+	latest: string;
+	/** The dependencies of the mod */
+	dependencies?: string[];
+	/** @pattern ^[a-z0-9-]+$ */
+	id: string;
+	imageUrl: string;
 };
 
 export type GetRegistryEntry200AuthorsItem = {
-  name: string;
-  avatar?: string;
-  url?: string;
+	name: string;
+	avatar?: string;
+	url?: string;
 };
 
 export type GetRegistryEntry200VersionsItemAssetsItemLinksItem = {
-  /** The name of the file # separates download path and internal zip path */
-  source: string;
-  /** The name of the installation location relative to install path */
-  target: string;
-  /** Run on simulation (mission) start, note that this will execute the script before the mission environment is sanitized */
-  runonstart?: boolean;
+	/** The name of the file # separates download path and internal zip path */
+	source: string;
+	/** The name of the installation location relative to install path */
+	target: string;
+	/** Run on simulation (mission) start, note that this will execute the script before the mission environment is sanitized */
+	runonstart?: boolean;
 };
 
 export type GetRegistryEntry200VersionsItemAssetsItem = {
-  /** The URL of the file to download */
-  remoteSource: string;
-  links: GetRegistryEntry200VersionsItemAssetsItemLinksItem[];
+	/** The URL of the file to download */
+	remoteSource: string;
+	links: GetRegistryEntry200VersionsItemAssetsItemLinksItem[];
 };
 
 export type GetRegistryEntry200VersionsItem = {
-  /** The release page of the release */
-  releasepage: string;
-  /** The name of the release */
-  name: string;
-  /** The version of the release */
-  version: string;
-  /** The date of the release */
-  date: string;
-  /** Executable file specifically Tools */
-  exePath?: string;
-  /** The array of files to install */
-  assets: GetRegistryEntry200VersionsItemAssetsItem[];
+	/** The release page of the release */
+	releasepage: string;
+	/** The name of the release */
+	name: string;
+	/** The version of the release */
+	version: string;
+	/** The date of the release */
+	date: string;
+	/** Executable file specifically Tools */
+	exePath?: string;
+	/** The array of files to install */
+	assets: GetRegistryEntry200VersionsItemAssetsItem[];
 };
 
 export type GetRegistryEntry200 = {
-  /** The homepage of the mod */
-  homepage: string;
-  /** The name of the mod */
-  name: string;
-  /** A short description of the mod to be displayed in the mod tile */
-  description: string;
-  authors: GetRegistryEntry200AuthorsItem[];
-  /** The tags of the mod, these are used to filter mods in the mod browser */
-  tags: string[];
-  /** The category of the mod, this is used to group mods in the mod browser */
-  category: string;
-  /** The license of the mod */
-  license: string;
-  latest: string;
-  /** The dependencies of the mod */
-  dependencies?: string[];
-  /** The versions of the mod */
-  versions: GetRegistryEntry200VersionsItem[];
-  /** @pattern ^[a-z0-9-]+$ */
-  id: string;
-  imageUrl: string;
-  content: string;
+	/** The homepage of the mod */
+	homepage: string;
+	/** The name of the mod */
+	name: string;
+	/** A short description of the mod to be displayed in the mod tile */
+	description: string;
+	authors: GetRegistryEntry200AuthorsItem[];
+	/** The tags of the mod, these are used to filter mods in the mod browser */
+	tags: string[];
+	/** The category of the mod, this is used to group mods in the mod browser */
+	category: string;
+	/** The license of the mod */
+	license: string;
+	latest: string;
+	/** The dependencies of the mod */
+	dependencies?: string[];
+	/** The versions of the mod */
+	versions: GetRegistryEntry200VersionsItem[];
+	/** @pattern ^[a-z0-9-]+$ */
+	id: string;
+	imageUrl: string;
+	content: string;
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
-
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 /**
  * Check the health of the server.
  * @summary Health Check
  */
 export type getApiHealthResponse200 = {
-  data: Health
-  status: 200
-}
-    
-export type getApiHealthResponseSuccess = (getApiHealthResponse200) & {
-  headers: Headers;
+	data: Health;
+	status: 200;
 };
-;
 
-export type getApiHealthResponse = (getApiHealthResponseSuccess)
+export type getApiHealthResponseSuccess = getApiHealthResponse200 & {
+	headers: Headers;
+};
+
+export type getApiHealthResponse = getApiHealthResponseSuccess;
 
 export const getGetApiHealthUrl = () => {
+	return `https://dcs-dropzone.app/api/health`;
+};
 
+export const getApiHealth = async (
+	options?: RequestInit,
+): Promise<getApiHealthResponse> => {
+	const res = await fetch(getGetApiHealthUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `https://dcs-dropzone.app/api/health`
-}
-
-export const getApiHealth = async ( options?: RequestInit): Promise<getApiHealthResponse> => {
-  
-  const res = await fetch(getGetApiHealthUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getApiHealthResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getApiHealthResponse
-}
-
-
-
-
+	const data: getApiHealthResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getApiHealthResponse;
+};
 
 export const getGetApiHealthQueryKey = () => {
-    return [
-    `https://dcs-dropzone.app/api/health`
-    ] as const;
-    }
+	return [`https://dcs-dropzone.app/api/health`] as const;
+};
 
-    
-export const getGetApiHealthQueryOptions = <TData = Awaited<ReturnType<typeof getApiHealth>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetApiHealthQueryOptions = <
+	TData = Awaited<ReturnType<typeof getApiHealth>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getApiHealth>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetApiHealthQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiHealthQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiHealth>>> = ({
+		signal,
+	}) => getApiHealth({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getApiHealth>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiHealth>>> = ({ signal }) => getApiHealth({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetApiHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getApiHealth>>>
-export type GetApiHealthQueryError = unknown
-
+export type GetApiHealthQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getApiHealth>>
+>;
+export type GetApiHealthQueryError = unknown;
 
 /**
  * @summary Health Check
  */
 
-export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetApiHealth<
+	TData = Awaited<ReturnType<typeof getApiHealth>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getApiHealth>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetApiHealthQueryOptions(options);
 
-  const queryOptions = getGetApiHealthQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Returns a list of all mods maintained by the authenticated user.
  * @summary Get All User Mods
  */
 export type getUserModsResponse200 = {
-  data: ModSummary[]
-  status: 200
-}
-    
-export type getUserModsResponseSuccess = (getUserModsResponse200) & {
-  headers: Headers;
+	data: ModSummary[];
+	status: 200;
 };
-;
 
-export type getUserModsResponse = (getUserModsResponseSuccess)
+export type getUserModsResponseSuccess = getUserModsResponse200 & {
+	headers: Headers;
+};
+
+export type getUserModsResponse = getUserModsResponseSuccess;
 
 export const getGetUserModsUrl = () => {
+	return `https://dcs-dropzone.app/api/user-mods`;
+};
 
+export const getUserMods = async (
+	options?: RequestInit,
+): Promise<getUserModsResponse> => {
+	const res = await fetch(getGetUserModsUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `https://dcs-dropzone.app/api/user-mods`
-}
-
-export const getUserMods = async ( options?: RequestInit): Promise<getUserModsResponse> => {
-  
-  const res = await fetch(getGetUserModsUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getUserModsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getUserModsResponse
-}
-
-
-
-
+	const data: getUserModsResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getUserModsResponse;
+};
 
 export const getGetUserModsQueryKey = () => {
-    return [
-    `https://dcs-dropzone.app/api/user-mods`
-    ] as const;
-    }
+	return [`https://dcs-dropzone.app/api/user-mods`] as const;
+};
 
-    
-export const getGetUserModsQueryOptions = <TData = Awaited<ReturnType<typeof getUserMods>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetUserModsQueryOptions = <
+	TData = Awaited<ReturnType<typeof getUserMods>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getUserMods>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetUserModsQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetUserModsQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserMods>>> = ({
+		signal,
+	}) => getUserMods({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserMods>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserMods>>> = ({ signal }) => getUserMods({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetUserModsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserMods>>>
-export type GetUserModsQueryError = unknown
-
+export type GetUserModsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUserMods>>
+>;
+export type GetUserModsQueryError = unknown;
 
 /**
  * @summary Get All User Mods
  */
 
-export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetUserMods<
+	TData = Awaited<ReturnType<typeof getUserMods>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getUserMods>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetUserModsQueryOptions(options);
 
-  const queryOptions = getGetUserModsQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Returns the mod with the specified ID if it is maintained by the authenticated user. If the mod exists, but is not maintained by the authenticated user, a 403 Forbidden error is returned.
  * @summary Get User Mod By ID
  */
 export type getUserModByIdResponse200 = {
-  data: Mod
-  status: 200
-}
+	data: Mod;
+	status: 200;
+};
 
 export type getUserModByIdResponse403 = {
-  data: void
-  status: 403
-}
+	data: void;
+	status: 403;
+};
 
 export type getUserModByIdResponse404 = {
-  data: void
-  status: 404
-}
-    
-export type getUserModByIdResponseSuccess = (getUserModByIdResponse200) & {
-  headers: Headers;
-};
-export type getUserModByIdResponseError = (getUserModByIdResponse403 | getUserModByIdResponse404) & {
-  headers: Headers;
+	data: void;
+	status: 404;
 };
 
-export type getUserModByIdResponse = (getUserModByIdResponseSuccess | getUserModByIdResponseError)
+export type getUserModByIdResponseSuccess = getUserModByIdResponse200 & {
+	headers: Headers;
+};
+export type getUserModByIdResponseError = (
+	| getUserModByIdResponse403
+	| getUserModByIdResponse404
+) & {
+	headers: Headers;
+};
 
-export const getGetUserModByIdUrl = (id: string,) => {
+export type getUserModByIdResponse =
+	| getUserModByIdResponseSuccess
+	| getUserModByIdResponseError;
 
+export const getGetUserModByIdUrl = (id: string) => {
+	return `https://dcs-dropzone.app/api/user-mods/${id}`;
+};
 
-  
+export const getUserModById = async (
+	id: string,
+	options?: RequestInit,
+): Promise<getUserModByIdResponse> => {
+	const res = await fetch(getGetUserModByIdUrl(id), {
+		...options,
+		method: "GET",
+	});
 
-  return `https://dcs-dropzone.app/api/user-mods/${id}`
-}
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-export const getUserModById = async (id: string, options?: RequestInit): Promise<getUserModByIdResponse> => {
-  
-  const res = await fetch(getGetUserModByIdUrl(id),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
+	const data: getUserModByIdResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getUserModByIdResponse;
+};
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getUserModByIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getUserModByIdResponse
-}
+export const getGetUserModByIdQueryKey = (id?: string) => {
+	return [`https://dcs-dropzone.app/api/user-mods/${id}`] as const;
+};
 
-
-
-
-
-export const getGetUserModByIdQueryKey = (id?: string,) => {
-    return [
-    `https://dcs-dropzone.app/api/user-mods/${id}`
-    ] as const;
-    }
-
-    
-export const getGetUserModByIdQueryOptions = <TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData>, fetch?: RequestInit}
+export const getGetUserModByIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof getUserModById>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getUserModById>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
 ) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetUserModByIdQueryKey(id);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetUserModByIdQueryKey(id);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserModById>>> = ({
+		signal,
+	}) => getUserModById(id, { signal, ...fetchOptions });
 
-  
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserModById>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserModById>>> = ({ signal }) => getUserModById(id, { signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetUserModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModById>>>
-export type GetUserModByIdQueryError = void
-
+export type GetUserModByIdQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUserModById>>
+>;
+export type GetUserModByIdQueryError = void;
 
 /**
  * @summary Get User Mod By ID
  */
 
-export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
- id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetUserModById<
+	TData = Awaited<ReturnType<typeof getUserModById>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getUserModById>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetUserModByIdQueryOptions(id, options);
 
-  const queryOptions = getGetUserModByIdQueryOptions(id,options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Updates the mod with the specified ID if it is maintained by the authenticated user. If the mod exists, but is not maintained by the authenticated user, a 403 Forbidden error is returned.
  * @summary Update User Mod
  */
 export type updateUserModResponse200 = {
-  data: Mod
-  status: 200
-}
+	data: Mod;
+	status: 200;
+};
 
 export type updateUserModResponse403 = {
-  data: void
-  status: 403
-}
+	data: void;
+	status: 403;
+};
 
 export type updateUserModResponse404 = {
-  data: void
-  status: 404
-}
-    
-export type updateUserModResponseSuccess = (updateUserModResponse200) & {
-  headers: Headers;
-};
-export type updateUserModResponseError = (updateUserModResponse403 | updateUserModResponse404) & {
-  headers: Headers;
+	data: void;
+	status: 404;
 };
 
-export type updateUserModResponse = (updateUserModResponseSuccess | updateUserModResponseError)
+export type updateUserModResponseSuccess = updateUserModResponse200 & {
+	headers: Headers;
+};
+export type updateUserModResponseError = (
+	| updateUserModResponse403
+	| updateUserModResponse404
+) & {
+	headers: Headers;
+};
 
-export const getUpdateUserModUrl = (id: string,) => {
+export type updateUserModResponse =
+	| updateUserModResponseSuccess
+	| updateUserModResponseError;
 
+export const getUpdateUserModUrl = (id: string) => {
+	return `https://dcs-dropzone.app/api/user-mods/${id}`;
+};
 
-  
+export const updateUserMod = async (
+	id: string,
+	mod: Mod,
+	options?: RequestInit,
+): Promise<updateUserModResponse> => {
+	const res = await fetch(getUpdateUserModUrl(id), {
+		...options,
+		method: "PUT",
+		headers: { "Content-Type": "application/json", ...options?.headers },
+		body: JSON.stringify(mod),
+	});
 
-  return `https://dcs-dropzone.app/api/user-mods/${id}`
-}
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-export const updateUserMod = async (id: string,
-    mod: Mod, options?: RequestInit): Promise<updateUserModResponse> => {
-  
-  const res = await fetch(getUpdateUserModUrl(id),
-  {      
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      mod,)
-  }
-)
+	const data: updateUserModResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as updateUserModResponse;
+};
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: updateUserModResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as updateUserModResponse
-}
+export const getUpdateUserModMutationOptions = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof updateUserMod>>,
+		TError,
+		{ id: string; data: Mod },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof updateUserMod>>,
+	TError,
+	{ id: string; data: Mod },
+	TContext
+> => {
+	const mutationKey = ["updateUserMod"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
 
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof updateUserMod>>,
+		{ id: string; data: Mod }
+	> = (props) => {
+		const { id, data } = props ?? {};
 
+		return updateUserMod(id, data, fetchOptions);
+	};
 
+	return { mutationFn, ...mutationOptions };
+};
 
-export const getUpdateUserModMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserMod>>, TError,{id: string;data: Mod}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof updateUserMod>>, TError,{id: string;data: Mod}, TContext> => {
+export type UpdateUserModMutationResult = NonNullable<
+	Awaited<ReturnType<typeof updateUserMod>>
+>;
+export type UpdateUserModMutationBody = Mod;
+export type UpdateUserModMutationError = void;
 
-const mutationKey = ['updateUserMod'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUserMod>>, {id: string;data: Mod}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateUserMod(id,data,fetchOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateUserModMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserMod>>>
-    export type UpdateUserModMutationBody = Mod
-    export type UpdateUserModMutationError = void
-
-    /**
+/**
  * @summary Update User Mod
  */
-export const useUpdateUserMod = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserMod>>, TError,{id: string;data: Mod}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateUserMod>>,
-        TError,
-        {id: string;data: Mod},
-        TContext
-      > => {
+export const useUpdateUserMod = <TError = void, TContext = unknown>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof updateUserMod>>,
+		TError,
+		{ id: string; data: Mod },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationResult<
+	Awaited<ReturnType<typeof updateUserMod>>,
+	TError,
+	{ id: string; data: Mod },
+	TContext
+> => {
+	const mutationOptions = getUpdateUserModMutationOptions(options);
 
-      const mutationOptions = getUpdateUserModMutationOptions(options);
+	return useMutation(mutationOptions);
+};
 
-      return useMutation(mutationOptions);
-    }
-    
 /**
  * Returns the schema for a mod.
  * @summary Get Sudo Mod Schema
  */
 export type getSudoModSchemaResponse200 = {
-  data: GetSudoModSchema200
-  status: 200
-}
-    
-export type getSudoModSchemaResponseSuccess = (getSudoModSchemaResponse200) & {
-  headers: Headers;
+	data: GetSudoModSchema200;
+	status: 200;
 };
-;
 
-export type getSudoModSchemaResponse = (getSudoModSchemaResponseSuccess)
+export type getSudoModSchemaResponseSuccess = getSudoModSchemaResponse200 & {
+	headers: Headers;
+};
+
+export type getSudoModSchemaResponse = getSudoModSchemaResponseSuccess;
 
 export const getGetSudoModSchemaUrl = () => {
+	return `https://dcs-dropzone.app/api/sudo-mods/schema`;
+};
 
+export const getSudoModSchema = async (
+	options?: RequestInit,
+): Promise<getSudoModSchemaResponse> => {
+	const res = await fetch(getGetSudoModSchemaUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `https://dcs-dropzone.app/api/sudo-mods/schema`
-}
-
-export const getSudoModSchema = async ( options?: RequestInit): Promise<getSudoModSchemaResponse> => {
-  
-  const res = await fetch(getGetSudoModSchemaUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getSudoModSchemaResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getSudoModSchemaResponse
-}
-
-
-
-
+	const data: getSudoModSchemaResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getSudoModSchemaResponse;
+};
 
 export const getGetSudoModSchemaQueryKey = () => {
-    return [
-    `https://dcs-dropzone.app/api/sudo-mods/schema`
-    ] as const;
-    }
+	return [`https://dcs-dropzone.app/api/sudo-mods/schema`] as const;
+};
 
-    
-export const getGetSudoModSchemaQueryOptions = <TData = Awaited<ReturnType<typeof getSudoModSchema>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSudoModSchema>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetSudoModSchemaQueryOptions = <
+	TData = Awaited<ReturnType<typeof getSudoModSchema>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoModSchema>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetSudoModSchemaQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetSudoModSchemaQueryKey();
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getSudoModSchema>>
+	> = ({ signal }) => getSudoModSchema({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoModSchema>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSudoModSchema>>> = ({ signal }) => getSudoModSchema({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSudoModSchema>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetSudoModSchemaQueryResult = NonNullable<Awaited<ReturnType<typeof getSudoModSchema>>>
-export type GetSudoModSchemaQueryError = unknown
-
+export type GetSudoModSchemaQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getSudoModSchema>>
+>;
+export type GetSudoModSchemaQueryError = unknown;
 
 /**
  * @summary Get Sudo Mod Schema
  */
 
-export function useGetSudoModSchema<TData = Awaited<ReturnType<typeof getSudoModSchema>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSudoModSchema>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetSudoModSchema<
+	TData = Awaited<ReturnType<typeof getSudoModSchema>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoModSchema>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetSudoModSchemaQueryOptions(options);
 
-  const queryOptions = getGetSudoModSchemaQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Returns a list of all mods.
  * @summary Get All User Mods.
  */
 export type getSudoModsResponse200 = {
-  data: Mod[]
-  status: 200
-}
-    
-export type getSudoModsResponseSuccess = (getSudoModsResponse200) & {
-  headers: Headers;
+	data: Mod[];
+	status: 200;
 };
-;
 
-export type getSudoModsResponse = (getSudoModsResponseSuccess)
+export type getSudoModsResponseSuccess = getSudoModsResponse200 & {
+	headers: Headers;
+};
+
+export type getSudoModsResponse = getSudoModsResponseSuccess;
 
 export const getGetSudoModsUrl = () => {
+	return `https://dcs-dropzone.app/api/sudo-mods`;
+};
 
+export const getSudoMods = async (
+	options?: RequestInit,
+): Promise<getSudoModsResponse> => {
+	const res = await fetch(getGetSudoModsUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `https://dcs-dropzone.app/api/sudo-mods`
-}
-
-export const getSudoMods = async ( options?: RequestInit): Promise<getSudoModsResponse> => {
-  
-  const res = await fetch(getGetSudoModsUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getSudoModsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getSudoModsResponse
-}
-
-
-
-
+	const data: getSudoModsResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getSudoModsResponse;
+};
 
 export const getGetSudoModsQueryKey = () => {
-    return [
-    `https://dcs-dropzone.app/api/sudo-mods`
-    ] as const;
-    }
+	return [`https://dcs-dropzone.app/api/sudo-mods`] as const;
+};
 
-    
-export const getGetSudoModsQueryOptions = <TData = Awaited<ReturnType<typeof getSudoMods>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSudoMods>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetSudoModsQueryOptions = <
+	TData = Awaited<ReturnType<typeof getSudoMods>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoMods>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetSudoModsQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetSudoModsQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getSudoMods>>> = ({
+		signal,
+	}) => getSudoMods({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoMods>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSudoMods>>> = ({ signal }) => getSudoMods({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSudoMods>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetSudoModsQueryResult = NonNullable<Awaited<ReturnType<typeof getSudoMods>>>
-export type GetSudoModsQueryError = unknown
-
+export type GetSudoModsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getSudoMods>>
+>;
+export type GetSudoModsQueryError = unknown;
 
 /**
  * @summary Get All User Mods.
  */
 
-export function useGetSudoMods<TData = Awaited<ReturnType<typeof getSudoMods>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSudoMods>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetSudoMods<
+	TData = Awaited<ReturnType<typeof getSudoMods>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoMods>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetSudoModsQueryOptions(options);
 
-  const queryOptions = getGetSudoModsQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Returns the mod with the specified ID.
  * @summary Get User Mod By ID.
  */
 export type getSudoModByIdResponse200 = {
-  data: Mod
-  status: 200
-}
+	data: Mod;
+	status: 200;
+};
 
 export type getSudoModByIdResponse404 = {
-  data: void
-  status: 404
-}
-    
-export type getSudoModByIdResponseSuccess = (getSudoModByIdResponse200) & {
-  headers: Headers;
-};
-export type getSudoModByIdResponseError = (getSudoModByIdResponse404) & {
-  headers: Headers;
+	data: void;
+	status: 404;
 };
 
-export type getSudoModByIdResponse = (getSudoModByIdResponseSuccess | getSudoModByIdResponseError)
+export type getSudoModByIdResponseSuccess = getSudoModByIdResponse200 & {
+	headers: Headers;
+};
+export type getSudoModByIdResponseError = getSudoModByIdResponse404 & {
+	headers: Headers;
+};
 
-export const getGetSudoModByIdUrl = (id: string,) => {
+export type getSudoModByIdResponse =
+	| getSudoModByIdResponseSuccess
+	| getSudoModByIdResponseError;
 
+export const getGetSudoModByIdUrl = (id: string) => {
+	return `https://dcs-dropzone.app/api/sudo-mods/${id}`;
+};
 
-  
+export const getSudoModById = async (
+	id: string,
+	options?: RequestInit,
+): Promise<getSudoModByIdResponse> => {
+	const res = await fetch(getGetSudoModByIdUrl(id), {
+		...options,
+		method: "GET",
+	});
 
-  return `https://dcs-dropzone.app/api/sudo-mods/${id}`
-}
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-export const getSudoModById = async (id: string, options?: RequestInit): Promise<getSudoModByIdResponse> => {
-  
-  const res = await fetch(getGetSudoModByIdUrl(id),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
+	const data: getSudoModByIdResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getSudoModByIdResponse;
+};
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getSudoModByIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getSudoModByIdResponse
-}
+export const getGetSudoModByIdQueryKey = (id?: string) => {
+	return [`https://dcs-dropzone.app/api/sudo-mods/${id}`] as const;
+};
 
-
-
-
-
-export const getGetSudoModByIdQueryKey = (id?: string,) => {
-    return [
-    `https://dcs-dropzone.app/api/sudo-mods/${id}`
-    ] as const;
-    }
-
-    
-export const getGetSudoModByIdQueryOptions = <TData = Awaited<ReturnType<typeof getSudoModById>>, TError = void>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSudoModById>>, TError, TData>, fetch?: RequestInit}
+export const getGetSudoModByIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof getSudoModById>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getSudoModById>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
 ) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetSudoModByIdQueryKey(id);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetSudoModByIdQueryKey(id);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getSudoModById>>> = ({
+		signal,
+	}) => getSudoModById(id, { signal, ...fetchOptions });
 
-  
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoModById>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSudoModById>>> = ({ signal }) => getSudoModById(id, { signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSudoModById>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetSudoModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getSudoModById>>>
-export type GetSudoModByIdQueryError = void
-
+export type GetSudoModByIdQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getSudoModById>>
+>;
+export type GetSudoModByIdQueryError = void;
 
 /**
  * @summary Get User Mod By ID.
  */
 
-export function useGetSudoModById<TData = Awaited<ReturnType<typeof getSudoModById>>, TError = void>(
- id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSudoModById>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetSudoModById<
+	TData = Awaited<ReturnType<typeof getSudoModById>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getSudoModById>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetSudoModByIdQueryOptions(id, options);
 
-  const queryOptions = getGetSudoModByIdQueryOptions(id,options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Updates the mod with the specified ID.
  * @summary Update User Mod
  */
 export type setSudoModbyIdResponse200 = {
-  data: Mod
-  status: 200
-}
+	data: Mod;
+	status: 200;
+};
 
 export type setSudoModbyIdResponse404 = {
-  data: void
-  status: 404
-}
-    
-export type setSudoModbyIdResponseSuccess = (setSudoModbyIdResponse200) & {
-  headers: Headers;
-};
-export type setSudoModbyIdResponseError = (setSudoModbyIdResponse404) & {
-  headers: Headers;
+	data: void;
+	status: 404;
 };
 
-export type setSudoModbyIdResponse = (setSudoModbyIdResponseSuccess | setSudoModbyIdResponseError)
+export type setSudoModbyIdResponseSuccess = setSudoModbyIdResponse200 & {
+	headers: Headers;
+};
+export type setSudoModbyIdResponseError = setSudoModbyIdResponse404 & {
+	headers: Headers;
+};
 
-export const getSetSudoModbyIdUrl = (id: string,) => {
+export type setSudoModbyIdResponse =
+	| setSudoModbyIdResponseSuccess
+	| setSudoModbyIdResponseError;
 
+export const getSetSudoModbyIdUrl = (id: string) => {
+	return `https://dcs-dropzone.app/api/sudo-mods/${id}`;
+};
 
-  
+export const setSudoModbyId = async (
+	id: string,
+	mod: Mod,
+	options?: RequestInit,
+): Promise<setSudoModbyIdResponse> => {
+	const res = await fetch(getSetSudoModbyIdUrl(id), {
+		...options,
+		method: "PUT",
+		headers: { "Content-Type": "application/json", ...options?.headers },
+		body: JSON.stringify(mod),
+	});
 
-  return `https://dcs-dropzone.app/api/sudo-mods/${id}`
-}
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-export const setSudoModbyId = async (id: string,
-    mod: Mod, options?: RequestInit): Promise<setSudoModbyIdResponse> => {
-  
-  const res = await fetch(getSetSudoModbyIdUrl(id),
-  {      
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      mod,)
-  }
-)
+	const data: setSudoModbyIdResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as setSudoModbyIdResponse;
+};
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: setSudoModbyIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as setSudoModbyIdResponse
-}
+export const getSetSudoModbyIdMutationOptions = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof setSudoModbyId>>,
+		TError,
+		{ id: string; data: Mod },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof setSudoModbyId>>,
+	TError,
+	{ id: string; data: Mod },
+	TContext
+> => {
+	const mutationKey = ["setSudoModbyId"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
 
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof setSudoModbyId>>,
+		{ id: string; data: Mod }
+	> = (props) => {
+		const { id, data } = props ?? {};
 
+		return setSudoModbyId(id, data, fetchOptions);
+	};
 
+	return { mutationFn, ...mutationOptions };
+};
 
-export const getSetSudoModbyIdMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setSudoModbyId>>, TError,{id: string;data: Mod}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof setSudoModbyId>>, TError,{id: string;data: Mod}, TContext> => {
+export type SetSudoModbyIdMutationResult = NonNullable<
+	Awaited<ReturnType<typeof setSudoModbyId>>
+>;
+export type SetSudoModbyIdMutationBody = Mod;
+export type SetSudoModbyIdMutationError = void;
 
-const mutationKey = ['setSudoModbyId'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setSudoModbyId>>, {id: string;data: Mod}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  setSudoModbyId(id,data,fetchOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SetSudoModbyIdMutationResult = NonNullable<Awaited<ReturnType<typeof setSudoModbyId>>>
-    export type SetSudoModbyIdMutationBody = Mod
-    export type SetSudoModbyIdMutationError = void
-
-    /**
+/**
  * @summary Update User Mod
  */
-export const useSetSudoModbyId = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setSudoModbyId>>, TError,{id: string;data: Mod}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof setSudoModbyId>>,
-        TError,
-        {id: string;data: Mod},
-        TContext
-      > => {
+export const useSetSudoModbyId = <TError = void, TContext = unknown>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof setSudoModbyId>>,
+		TError,
+		{ id: string; data: Mod },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationResult<
+	Awaited<ReturnType<typeof setSudoModbyId>>,
+	TError,
+	{ id: string; data: Mod },
+	TContext
+> => {
+	const mutationOptions = getSetSudoModbyIdMutationOptions(options);
 
-      const mutationOptions = getSetSudoModbyIdMutationOptions(options);
+	return useMutation(mutationOptions);
+};
 
-      return useMutation(mutationOptions);
-    }
-    
 /**
  * Deletes the mod with the specified ID.
  * @summary Delete User Mod By ID.
  */
 export type deleteSudoModByIdResponse200 = {
-  data: void
-  status: 200
-}
+	data: void;
+	status: 200;
+};
 
 export type deleteSudoModByIdResponse404 = {
-  data: void
-  status: 404
-}
-    
-export type deleteSudoModByIdResponseSuccess = (deleteSudoModByIdResponse200) & {
-  headers: Headers;
-};
-export type deleteSudoModByIdResponseError = (deleteSudoModByIdResponse404) & {
-  headers: Headers;
+	data: void;
+	status: 404;
 };
 
-export type deleteSudoModByIdResponse = (deleteSudoModByIdResponseSuccess | deleteSudoModByIdResponseError)
+export type deleteSudoModByIdResponseSuccess = deleteSudoModByIdResponse200 & {
+	headers: Headers;
+};
+export type deleteSudoModByIdResponseError = deleteSudoModByIdResponse404 & {
+	headers: Headers;
+};
 
-export const getDeleteSudoModByIdUrl = (id: string,) => {
+export type deleteSudoModByIdResponse =
+	| deleteSudoModByIdResponseSuccess
+	| deleteSudoModByIdResponseError;
 
+export const getDeleteSudoModByIdUrl = (id: string) => {
+	return `https://dcs-dropzone.app/api/sudo-mods/${id}`;
+};
 
-  
+export const deleteSudoModById = async (
+	id: string,
+	options?: RequestInit,
+): Promise<deleteSudoModByIdResponse> => {
+	const res = await fetch(getDeleteSudoModByIdUrl(id), {
+		...options,
+		method: "DELETE",
+	});
 
-  return `https://dcs-dropzone.app/api/sudo-mods/${id}`
-}
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-export const deleteSudoModById = async (id: string, options?: RequestInit): Promise<deleteSudoModByIdResponse> => {
-  
-  const res = await fetch(getDeleteSudoModByIdUrl(id),
-  {      
-    ...options,
-    method: 'DELETE'
-    
-    
-  }
-)
+	const data: deleteSudoModByIdResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as deleteSudoModByIdResponse;
+};
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: deleteSudoModByIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteSudoModByIdResponse
-}
+export const getDeleteSudoModByIdMutationOptions = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof deleteSudoModById>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof deleteSudoModById>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationKey = ["deleteSudoModById"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
 
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof deleteSudoModById>>,
+		{ id: string }
+	> = (props) => {
+		const { id } = props ?? {};
 
+		return deleteSudoModById(id, fetchOptions);
+	};
 
+	return { mutationFn, ...mutationOptions };
+};
 
-export const getDeleteSudoModByIdMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSudoModById>>, TError,{id: string}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteSudoModById>>, TError,{id: string}, TContext> => {
+export type DeleteSudoModByIdMutationResult = NonNullable<
+	Awaited<ReturnType<typeof deleteSudoModById>>
+>;
 
-const mutationKey = ['deleteSudoModById'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+export type DeleteSudoModByIdMutationError = void;
 
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSudoModById>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteSudoModById(id,fetchOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteSudoModByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSudoModById>>>
-    
-    export type DeleteSudoModByIdMutationError = void
-
-    /**
+/**
  * @summary Delete User Mod By ID.
  */
-export const useDeleteSudoModById = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSudoModById>>, TError,{id: string}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteSudoModById>>,
-        TError,
-        {id: string},
-        TContext
-      > => {
+export const useDeleteSudoModById = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof deleteSudoModById>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationResult<
+	Awaited<ReturnType<typeof deleteSudoModById>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationOptions = getDeleteSudoModByIdMutationOptions(options);
 
-      const mutationOptions = getDeleteSudoModByIdMutationOptions(options);
+	return useMutation(mutationOptions);
+};
 
-      return useMutation(mutationOptions);
-    }
-    
 /**
  * Handles the OAuth provider's callback after the user has authenticated. The callback URL includes the user's access token and other information.
  * @summary OAuth provider callback
  */
 export type getAuthByProviderCallbackResponseDefault = {
-  data: unknown
-  status: number
-}
-    
-;
-export type getAuthByProviderCallbackResponseError = (getAuthByProviderCallbackResponseDefault) & {
-  headers: Headers;
+	data: unknown;
+	status: number;
+};
+export type getAuthByProviderCallbackResponseError =
+	getAuthByProviderCallbackResponseDefault & {
+		headers: Headers;
+	};
+
+export type getAuthByProviderCallbackResponse =
+	getAuthByProviderCallbackResponseError;
+
+export const getGetAuthByProviderCallbackUrl = (
+	provider: "github",
+	params: GetAuthByProviderCallbackParams,
+) => {
+	const normalizedParams = new URLSearchParams();
+
+	Object.entries(params || {}).forEach(([key, value]) => {
+		if (value !== undefined) {
+			normalizedParams.append(key, value === null ? "null" : value.toString());
+		}
+	});
+
+	const stringifiedParams = normalizedParams.toString();
+
+	return stringifiedParams.length > 0
+		? `https://dcs-dropzone.app/auth/${provider}/callback?${stringifiedParams}`
+		: `https://dcs-dropzone.app/auth/${provider}/callback`;
 };
 
-export type getAuthByProviderCallbackResponse = (getAuthByProviderCallbackResponseError)
+export const getAuthByProviderCallback = async (
+	provider: "github",
+	params: GetAuthByProviderCallbackParams,
+	options?: RequestInit,
+): Promise<getAuthByProviderCallbackResponse> => {
+	const res = await fetch(getGetAuthByProviderCallbackUrl(provider, params), {
+		...options,
+		method: "GET",
+	});
 
-export const getGetAuthByProviderCallbackUrl = (provider: 'github',
-    params: GetAuthByProviderCallbackParams,) => {
-  const normalizedParams = new URLSearchParams();
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
-    }
-  });
+	const data: getAuthByProviderCallbackResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthByProviderCallbackResponse;
+};
 
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `https://dcs-dropzone.app/auth/${provider}/callback?${stringifiedParams}` : `https://dcs-dropzone.app/auth/${provider}/callback`
-}
-
-export const getAuthByProviderCallback = async (provider: 'github',
-    params: GetAuthByProviderCallbackParams, options?: RequestInit): Promise<getAuthByProviderCallbackResponse> => {
-  
-  const res = await fetch(getGetAuthByProviderCallbackUrl(provider,params),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthByProviderCallbackResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthByProviderCallbackResponse
-}
-
-
-
-
-
-export const getGetAuthByProviderCallbackQueryKey = (provider?: 'github',
-    params?: GetAuthByProviderCallbackParams,) => {
-    return [
-    `https://dcs-dropzone.app/auth/${provider}/callback`, ...(params ? [params]: [])
-    ] as const;
-    }
-
-    
-export const getGetAuthByProviderCallbackQueryOptions = <TData = Awaited<ReturnType<typeof getAuthByProviderCallback>>, TError = unknown>(provider: 'github',
-    params: GetAuthByProviderCallbackParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderCallback>>, TError, TData>, fetch?: RequestInit}
+export const getGetAuthByProviderCallbackQueryKey = (
+	provider?: "github",
+	params?: GetAuthByProviderCallbackParams,
 ) => {
+	return [
+		`https://dcs-dropzone.app/auth/${provider}/callback`,
+		...(params ? [params] : []),
+	] as const;
+};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+export const getGetAuthByProviderCallbackQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthByProviderCallback>>,
+	TError = unknown,
+>(
+	provider: "github",
+	params: GetAuthByProviderCallbackParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthByProviderCallback>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthByProviderCallbackQueryKey(provider,params);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getGetAuthByProviderCallbackQueryKey(provider, params);
 
-  
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getAuthByProviderCallback>>
+	> = ({ signal }) =>
+		getAuthByProviderCallback(provider, params, { signal, ...fetchOptions });
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthByProviderCallback>>> = ({ signal }) => getAuthByProviderCallback(provider,params, { signal, ...fetchOptions });
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!provider,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthByProviderCallback>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(provider), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderCallback>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthByProviderCallbackQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthByProviderCallback>>>
-export type GetAuthByProviderCallbackQueryError = unknown
-
+export type GetAuthByProviderCallbackQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthByProviderCallback>>
+>;
+export type GetAuthByProviderCallbackQueryError = unknown;
 
 /**
  * @summary OAuth provider callback
  */
 
-export function useGetAuthByProviderCallback<TData = Awaited<ReturnType<typeof getAuthByProviderCallback>>, TError = unknown>(
- provider: 'github',
-    params: GetAuthByProviderCallbackParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderCallback>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthByProviderCallback<
+	TData = Awaited<ReturnType<typeof getAuthByProviderCallback>>,
+	TError = unknown,
+>(
+	provider: "github",
+	params: GetAuthByProviderCallbackParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthByProviderCallback>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthByProviderCallbackQueryOptions(
+		provider,
+		params,
+		options,
+	);
 
-  const queryOptions = getGetAuthByProviderCallbackQueryOptions(provider,params,options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Redirects the user to the OAuth provider's authorization page (e.g., GitHub) to initiate the authentication process.
  * @summary Redirect to OAuth provider login page
  */
 export type getAuthByProviderLoginResponseDefault = {
-  data: unknown
-  status: number
-}
-    
-;
-export type getAuthByProviderLoginResponseError = (getAuthByProviderLoginResponseDefault) & {
-  headers: Headers;
+	data: unknown;
+	status: number;
+};
+export type getAuthByProviderLoginResponseError =
+	getAuthByProviderLoginResponseDefault & {
+		headers: Headers;
+	};
+
+export type getAuthByProviderLoginResponse =
+	getAuthByProviderLoginResponseError;
+
+export const getGetAuthByProviderLoginUrl = (provider: "github") => {
+	return `https://dcs-dropzone.app/auth/${provider}/login`;
 };
 
-export type getAuthByProviderLoginResponse = (getAuthByProviderLoginResponseError)
+export const getAuthByProviderLogin = async (
+	provider: "github",
+	options?: RequestInit,
+): Promise<getAuthByProviderLoginResponse> => {
+	const res = await fetch(getGetAuthByProviderLoginUrl(provider), {
+		...options,
+		method: "GET",
+	});
 
-export const getGetAuthByProviderLoginUrl = (provider: 'github',) => {
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
+	const data: getAuthByProviderLoginResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthByProviderLoginResponse;
+};
 
-  
+export const getGetAuthByProviderLoginQueryKey = (provider?: "github") => {
+	return [`https://dcs-dropzone.app/auth/${provider}/login`] as const;
+};
 
-  return `https://dcs-dropzone.app/auth/${provider}/login`
-}
-
-export const getAuthByProviderLogin = async (provider: 'github', options?: RequestInit): Promise<getAuthByProviderLoginResponse> => {
-  
-  const res = await fetch(getGetAuthByProviderLoginUrl(provider),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthByProviderLoginResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthByProviderLoginResponse
-}
-
-
-
-
-
-export const getGetAuthByProviderLoginQueryKey = (provider?: 'github',) => {
-    return [
-    `https://dcs-dropzone.app/auth/${provider}/login`
-    ] as const;
-    }
-
-    
-export const getGetAuthByProviderLoginQueryOptions = <TData = Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError = unknown>(provider: 'github', options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError, TData>, fetch?: RequestInit}
+export const getGetAuthByProviderLoginQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthByProviderLogin>>,
+	TError = unknown,
+>(
+	provider: "github",
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthByProviderLogin>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
 ) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey =
+		queryOptions?.queryKey ?? getGetAuthByProviderLoginQueryKey(provider);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthByProviderLoginQueryKey(provider);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getAuthByProviderLogin>>
+	> = ({ signal }) =>
+		getAuthByProviderLogin(provider, { signal, ...fetchOptions });
 
-  
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!provider,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthByProviderLogin>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthByProviderLogin>>> = ({ signal }) => getAuthByProviderLogin(provider, { signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(provider), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthByProviderLoginQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthByProviderLogin>>>
-export type GetAuthByProviderLoginQueryError = unknown
-
+export type GetAuthByProviderLoginQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthByProviderLogin>>
+>;
+export type GetAuthByProviderLoginQueryError = unknown;
 
 /**
  * @summary Redirect to OAuth provider login page
  */
 
-export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError = unknown>(
- provider: 'github', options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthByProviderLogin<
+	TData = Awaited<ReturnType<typeof getAuthByProviderLogin>>,
+	TError = unknown,
+>(
+	provider: "github",
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthByProviderLogin>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthByProviderLoginQueryOptions(provider, options);
 
-  const queryOptions = getGetAuthByProviderLoginQueryOptions(provider,options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Returns the details of the authenticated user, including their ID, login, avatar URL, and profile URL.
@@ -1352,375 +1506,398 @@ export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getA
  * @summary Get authenticated user data
  */
 export type getAuthUserResponse200 = {
-  data: AuthenticatedUser
-  status: 200
-}
-    
-export type getAuthUserResponseSuccess = (getAuthUserResponse200) & {
-  headers: Headers;
+	data: AuthenticatedUser;
+	status: 200;
 };
-;
 
-export type getAuthUserResponse = (getAuthUserResponseSuccess)
+export type getAuthUserResponseSuccess = getAuthUserResponse200 & {
+	headers: Headers;
+};
+
+export type getAuthUserResponse = getAuthUserResponseSuccess;
 
 export const getGetAuthUserUrl = () => {
+	return `https://dcs-dropzone.app/auth/user`;
+};
 
+export const getAuthUser = async (
+	options?: RequestInit,
+): Promise<getAuthUserResponse> => {
+	const res = await fetch(getGetAuthUserUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `https://dcs-dropzone.app/auth/user`
-}
-
-export const getAuthUser = async ( options?: RequestInit): Promise<getAuthUserResponse> => {
-  
-  const res = await fetch(getGetAuthUserUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthUserResponse
-}
-
-
-
-
+	const data: getAuthUserResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthUserResponse;
+};
 
 export const getGetAuthUserQueryKey = () => {
-    return [
-    `https://dcs-dropzone.app/auth/user`
-    ] as const;
-    }
+	return [`https://dcs-dropzone.app/auth/user`] as const;
+};
 
-    
-export const getGetAuthUserQueryOptions = <TData = Awaited<ReturnType<typeof getAuthUser>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetAuthUserQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthUser>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthUser>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetAuthUserQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthUserQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthUser>>> = ({
+		signal,
+	}) => getAuthUser({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthUser>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthUser>>> = ({ signal }) => getAuthUser({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthUserQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthUser>>>
-export type GetAuthUserQueryError = unknown
-
+export type GetAuthUserQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthUser>>
+>;
+export type GetAuthUserQueryError = unknown;
 
 /**
  * @summary Get authenticated user data
  */
 
-export function useGetAuthUser<TData = Awaited<ReturnType<typeof getAuthUser>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthUser<
+	TData = Awaited<ReturnType<typeof getAuthUser>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthUser>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthUserQueryOptions(options);
 
-  const queryOptions = getGetAuthUserQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Logs the user out by clearing the session cookie.
  * @summary Logout
  */
 export type getAuthLogoutResponseDefault = {
-  data: unknown
-  status: number
-}
-    
-;
-export type getAuthLogoutResponseError = (getAuthLogoutResponseDefault) & {
-  headers: Headers;
+	data: unknown;
+	status: number;
+};
+export type getAuthLogoutResponseError = getAuthLogoutResponseDefault & {
+	headers: Headers;
 };
 
-export type getAuthLogoutResponse = (getAuthLogoutResponseError)
+export type getAuthLogoutResponse = getAuthLogoutResponseError;
 
 export const getGetAuthLogoutUrl = () => {
+	return `https://dcs-dropzone.app/auth/logout`;
+};
 
+export const getAuthLogout = async (
+	options?: RequestInit,
+): Promise<getAuthLogoutResponse> => {
+	const res = await fetch(getGetAuthLogoutUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `https://dcs-dropzone.app/auth/logout`
-}
-
-export const getAuthLogout = async ( options?: RequestInit): Promise<getAuthLogoutResponse> => {
-  
-  const res = await fetch(getGetAuthLogoutUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthLogoutResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthLogoutResponse
-}
-
-
-
-
+	const data: getAuthLogoutResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthLogoutResponse;
+};
 
 export const getGetAuthLogoutQueryKey = () => {
-    return [
-    `https://dcs-dropzone.app/auth/logout`
-    ] as const;
-    }
+	return [`https://dcs-dropzone.app/auth/logout`] as const;
+};
 
-    
-export const getGetAuthLogoutQueryOptions = <TData = Awaited<ReturnType<typeof getAuthLogout>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetAuthLogoutQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthLogout>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthLogout>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetAuthLogoutQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthLogoutQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthLogout>>> = ({
+		signal,
+	}) => getAuthLogout({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthLogout>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthLogout>>> = ({ signal }) => getAuthLogout({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthLogoutQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthLogout>>>
-export type GetAuthLogoutQueryError = unknown
-
+export type GetAuthLogoutQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthLogout>>
+>;
+export type GetAuthLogoutQueryError = unknown;
 
 /**
  * @summary Logout
  */
 
-export function useGetAuthLogout<TData = Awaited<ReturnType<typeof getAuthLogout>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthLogout<
+	TData = Awaited<ReturnType<typeof getAuthLogout>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthLogout>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthLogoutQueryOptions(options);
 
-  const queryOptions = getGetAuthLogoutQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * @summary Get Registry Index
  */
 export type getRegistryIndexResponse200 = {
-  data: GetRegistryIndex200Item[]
-  status: 200
-}
-    
-export type getRegistryIndexResponseSuccess = (getRegistryIndexResponse200) & {
-  headers: Headers;
+	data: GetRegistryIndex200Item[];
+	status: 200;
 };
-;
 
-export type getRegistryIndexResponse = (getRegistryIndexResponseSuccess)
+export type getRegistryIndexResponseSuccess = getRegistryIndexResponse200 & {
+	headers: Headers;
+};
+
+export type getRegistryIndexResponse = getRegistryIndexResponseSuccess;
 
 export const getGetRegistryIndexUrl = () => {
+	return `https://dcs-dropzone.app/api/registry/index.json`;
+};
 
+export const getRegistryIndex = async (
+	options?: RequestInit,
+): Promise<getRegistryIndexResponse> => {
+	const res = await fetch(getGetRegistryIndexUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `https://dcs-dropzone.app/api/registry/index.json`
-}
-
-export const getRegistryIndex = async ( options?: RequestInit): Promise<getRegistryIndexResponse> => {
-  
-  const res = await fetch(getGetRegistryIndexUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getRegistryIndexResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getRegistryIndexResponse
-}
-
-
-
-
+	const data: getRegistryIndexResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getRegistryIndexResponse;
+};
 
 export const getGetRegistryIndexQueryKey = () => {
-    return [
-    `https://dcs-dropzone.app/api/registry/index.json`
-    ] as const;
-    }
+	return [`https://dcs-dropzone.app/api/registry/index.json`] as const;
+};
 
-    
-export const getGetRegistryIndexQueryOptions = <TData = Awaited<ReturnType<typeof getRegistryIndex>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryIndex>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetRegistryIndexQueryOptions = <
+	TData = Awaited<ReturnType<typeof getRegistryIndex>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getRegistryIndex>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetRegistryIndexQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetRegistryIndexQueryKey();
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getRegistryIndex>>
+	> = ({ signal }) => getRegistryIndex({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getRegistryIndex>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistryIndex>>> = ({ signal }) => getRegistryIndex({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegistryIndex>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetRegistryIndexQueryResult = NonNullable<Awaited<ReturnType<typeof getRegistryIndex>>>
-export type GetRegistryIndexQueryError = unknown
-
+export type GetRegistryIndexQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getRegistryIndex>>
+>;
+export type GetRegistryIndexQueryError = unknown;
 
 /**
  * @summary Get Registry Index
  */
 
-export function useGetRegistryIndex<TData = Awaited<ReturnType<typeof getRegistryIndex>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryIndex>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetRegistryIndex<
+	TData = Awaited<ReturnType<typeof getRegistryIndex>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getRegistryIndex>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetRegistryIndexQueryOptions(options);
 
-  const queryOptions = getGetRegistryIndexQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * @summary Get Registry Entry
  */
 export type getRegistryEntryResponse200 = {
-  data: GetRegistryEntry200
-  status: 200
-}
-    
-export type getRegistryEntryResponseSuccess = (getRegistryEntryResponse200) & {
-  headers: Headers;
+	data: GetRegistryEntry200;
+	status: 200;
 };
-;
 
-export type getRegistryEntryResponse = (getRegistryEntryResponseSuccess)
+export type getRegistryEntryResponseSuccess = getRegistryEntryResponse200 & {
+	headers: Headers;
+};
 
-export const getGetRegistryEntryUrl = (id: string,) => {
+export type getRegistryEntryResponse = getRegistryEntryResponseSuccess;
 
+export const getGetRegistryEntryUrl = (id: string) => {
+	return `https://dcs-dropzone.app/api/registry/${id}/index.json`;
+};
 
-  
+export const getRegistryEntry = async (
+	id: string,
+	options?: RequestInit,
+): Promise<getRegistryEntryResponse> => {
+	const res = await fetch(getGetRegistryEntryUrl(id), {
+		...options,
+		method: "GET",
+	});
 
-  return `https://dcs-dropzone.app/api/registry/${id}/index.json`
-}
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-export const getRegistryEntry = async (id: string, options?: RequestInit): Promise<getRegistryEntryResponse> => {
-  
-  const res = await fetch(getGetRegistryEntryUrl(id),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
+	const data: getRegistryEntryResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getRegistryEntryResponse;
+};
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getRegistryEntryResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getRegistryEntryResponse
-}
+export const getGetRegistryEntryQueryKey = (id?: string) => {
+	return [`https://dcs-dropzone.app/api/registry/${id}/index.json`] as const;
+};
 
-
-
-
-
-export const getGetRegistryEntryQueryKey = (id?: string,) => {
-    return [
-    `https://dcs-dropzone.app/api/registry/${id}/index.json`
-    ] as const;
-    }
-
-    
-export const getGetRegistryEntryQueryOptions = <TData = Awaited<ReturnType<typeof getRegistryEntry>>, TError = unknown>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryEntry>>, TError, TData>, fetch?: RequestInit}
+export const getGetRegistryEntryQueryOptions = <
+	TData = Awaited<ReturnType<typeof getRegistryEntry>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getRegistryEntry>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
 ) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetRegistryEntryQueryKey(id);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetRegistryEntryQueryKey(id);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getRegistryEntry>>
+	> = ({ signal }) => getRegistryEntry(id, { signal, ...fetchOptions });
 
-  
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getRegistryEntry>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistryEntry>>> = ({ signal }) => getRegistryEntry(id, { signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegistryEntry>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetRegistryEntryQueryResult = NonNullable<Awaited<ReturnType<typeof getRegistryEntry>>>
-export type GetRegistryEntryQueryError = unknown
-
+export type GetRegistryEntryQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getRegistryEntry>>
+>;
+export type GetRegistryEntryQueryError = unknown;
 
 /**
  * @summary Get Registry Entry
  */
 
-export function useGetRegistryEntry<TData = Awaited<ReturnType<typeof getRegistryEntry>>, TError = unknown>(
- id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryEntry>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetRegistryEntry<
+	TData = Awaited<ReturnType<typeof getRegistryEntry>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getRegistryEntry>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetRegistryEntryQueryOptions(id, options);
 
-  const queryOptions = getGetRegistryEntryQueryOptions(id,options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }

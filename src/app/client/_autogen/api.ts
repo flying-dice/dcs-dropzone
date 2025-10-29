@@ -5,249 +5,296 @@
  * API documentation for the DCS Dropzone Registry.
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
+
 import type {
-  QueryFunction,
-  QueryKey,
-  UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+	QueryFunction,
+	QueryKey,
+	UseQueryOptions,
+	UseQueryResult,
+} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export type GetAuthProviderCallbackParams = {
-code: string;
-state: string;
+	code: string;
+	state: string;
 };
 
 export type GetAuthUser200 = {
-  id: string;
-  name?: string;
-  login: string;
-  avatarUrl: string;
-  profileUrl: string;
-  sudo: boolean;
+	id: string;
+	name?: string;
+	login: string;
+	avatarUrl: string;
+	profileUrl: string;
+	sudo: boolean;
 };
 
 export type GetApiHealth200 = {
-  status: 'UP';
+	status: "UP";
 };
 
 export type GetApiHealth503 = {
-  status: 'DOWN';
-  error: string;
+	status: "DOWN";
+	error: string;
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
-
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 /**
  * Handles the OAuth provider's callback after the user has authenticated. The callback URL includes the user's access token and other information.
  * @summary OAuth provider callback
  */
 export type getAuthProviderCallbackResponseDefault = {
-  data: unknown
-  status: number
-}
-    
-;
-export type getAuthProviderCallbackResponseError = (getAuthProviderCallbackResponseDefault) & {
-  headers: Headers;
+	data: unknown;
+	status: number;
+};
+export type getAuthProviderCallbackResponseError =
+	getAuthProviderCallbackResponseDefault & {
+		headers: Headers;
+	};
+
+export type getAuthProviderCallbackResponse =
+	getAuthProviderCallbackResponseError;
+
+export const getGetAuthProviderCallbackUrl = (
+	provider: "github",
+	params: GetAuthProviderCallbackParams,
+) => {
+	const normalizedParams = new URLSearchParams();
+
+	Object.entries(params || {}).forEach(([key, value]) => {
+		if (value !== undefined) {
+			normalizedParams.append(key, value === null ? "null" : value.toString());
+		}
+	});
+
+	const stringifiedParams = normalizedParams.toString();
+
+	return stringifiedParams.length > 0
+		? `/auth/${provider}/callback?${stringifiedParams}`
+		: `/auth/${provider}/callback`;
 };
 
-export type getAuthProviderCallbackResponse = (getAuthProviderCallbackResponseError)
+export const getAuthProviderCallback = async (
+	provider: "github",
+	params: GetAuthProviderCallbackParams,
+	options?: RequestInit,
+): Promise<getAuthProviderCallbackResponse> => {
+	const res = await fetch(getGetAuthProviderCallbackUrl(provider, params), {
+		...options,
+		method: "GET",
+	});
 
-export const getGetAuthProviderCallbackUrl = (provider: 'github',
-    params: GetAuthProviderCallbackParams,) => {
-  const normalizedParams = new URLSearchParams();
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
-    }
-  });
+	const data: getAuthProviderCallbackResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthProviderCallbackResponse;
+};
 
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/auth/${provider}/callback?${stringifiedParams}` : `/auth/${provider}/callback`
-}
-
-export const getAuthProviderCallback = async (provider: 'github',
-    params: GetAuthProviderCallbackParams, options?: RequestInit): Promise<getAuthProviderCallbackResponse> => {
-  
-  const res = await fetch(getGetAuthProviderCallbackUrl(provider,params),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthProviderCallbackResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthProviderCallbackResponse
-}
-
-
-
-
-
-export const getGetAuthProviderCallbackQueryKey = (provider?: 'github',
-    params?: GetAuthProviderCallbackParams,) => {
-    return [
-    `/auth/${provider}/callback`, ...(params ? [params]: [])
-    ] as const;
-    }
-
-    
-export const getGetAuthProviderCallbackQueryOptions = <TData = Awaited<ReturnType<typeof getAuthProviderCallback>>, TError = unknown>(provider: 'github',
-    params: GetAuthProviderCallbackParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthProviderCallback>>, TError, TData>, fetch?: RequestInit}
+export const getGetAuthProviderCallbackQueryKey = (
+	provider?: "github",
+	params?: GetAuthProviderCallbackParams,
 ) => {
+	return [`/auth/${provider}/callback`, ...(params ? [params] : [])] as const;
+};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+export const getGetAuthProviderCallbackQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthProviderCallback>>,
+	TError = unknown,
+>(
+	provider: "github",
+	params: GetAuthProviderCallbackParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthProviderCallback>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthProviderCallbackQueryKey(provider,params);
+	const queryKey =
+		queryOptions?.queryKey ??
+		getGetAuthProviderCallbackQueryKey(provider, params);
 
-  
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getAuthProviderCallback>>
+	> = ({ signal }) =>
+		getAuthProviderCallback(provider, params, { signal, ...fetchOptions });
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthProviderCallback>>> = ({ signal }) => getAuthProviderCallback(provider,params, { signal, ...fetchOptions });
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!provider,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthProviderCallback>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(provider), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthProviderCallback>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthProviderCallbackQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthProviderCallback>>>
-export type GetAuthProviderCallbackQueryError = unknown
-
+export type GetAuthProviderCallbackQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthProviderCallback>>
+>;
+export type GetAuthProviderCallbackQueryError = unknown;
 
 /**
  * @summary OAuth provider callback
  */
 
-export function useGetAuthProviderCallback<TData = Awaited<ReturnType<typeof getAuthProviderCallback>>, TError = unknown>(
- provider: 'github',
-    params: GetAuthProviderCallbackParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthProviderCallback>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthProviderCallback<
+	TData = Awaited<ReturnType<typeof getAuthProviderCallback>>,
+	TError = unknown,
+>(
+	provider: "github",
+	params: GetAuthProviderCallbackParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthProviderCallback>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthProviderCallbackQueryOptions(
+		provider,
+		params,
+		options,
+	);
 
-  const queryOptions = getGetAuthProviderCallbackQueryOptions(provider,params,options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Redirects the user to the OAuth provider's authorization page (e.g., GitHub) to initiate the authentication process.
  * @summary Redirect to OAuth provider login page
  */
 export type getAuthProviderLoginResponseDefault = {
-  data: unknown
-  status: number
-}
-    
-;
-export type getAuthProviderLoginResponseError = (getAuthProviderLoginResponseDefault) & {
-  headers: Headers;
+	data: unknown;
+	status: number;
+};
+export type getAuthProviderLoginResponseError =
+	getAuthProviderLoginResponseDefault & {
+		headers: Headers;
+	};
+
+export type getAuthProviderLoginResponse = getAuthProviderLoginResponseError;
+
+export const getGetAuthProviderLoginUrl = (provider: "github") => {
+	return `/auth/${provider}/login`;
 };
 
-export type getAuthProviderLoginResponse = (getAuthProviderLoginResponseError)
+export const getAuthProviderLogin = async (
+	provider: "github",
+	options?: RequestInit,
+): Promise<getAuthProviderLoginResponse> => {
+	const res = await fetch(getGetAuthProviderLoginUrl(provider), {
+		...options,
+		method: "GET",
+	});
 
-export const getGetAuthProviderLoginUrl = (provider: 'github',) => {
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
+	const data: getAuthProviderLoginResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthProviderLoginResponse;
+};
 
-  
+export const getGetAuthProviderLoginQueryKey = (provider?: "github") => {
+	return [`/auth/${provider}/login`] as const;
+};
 
-  return `/auth/${provider}/login`
-}
-
-export const getAuthProviderLogin = async (provider: 'github', options?: RequestInit): Promise<getAuthProviderLoginResponse> => {
-  
-  const res = await fetch(getGetAuthProviderLoginUrl(provider),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthProviderLoginResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthProviderLoginResponse
-}
-
-
-
-
-
-export const getGetAuthProviderLoginQueryKey = (provider?: 'github',) => {
-    return [
-    `/auth/${provider}/login`
-    ] as const;
-    }
-
-    
-export const getGetAuthProviderLoginQueryOptions = <TData = Awaited<ReturnType<typeof getAuthProviderLogin>>, TError = unknown>(provider: 'github', options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthProviderLogin>>, TError, TData>, fetch?: RequestInit}
+export const getGetAuthProviderLoginQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthProviderLogin>>,
+	TError = unknown,
+>(
+	provider: "github",
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthProviderLogin>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
 ) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey =
+		queryOptions?.queryKey ?? getGetAuthProviderLoginQueryKey(provider);
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthProviderLoginQueryKey(provider);
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getAuthProviderLogin>>
+	> = ({ signal }) =>
+		getAuthProviderLogin(provider, { signal, ...fetchOptions });
 
-  
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!provider,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthProviderLogin>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthProviderLogin>>> = ({ signal }) => getAuthProviderLogin(provider, { signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, enabled: !!(provider), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthProviderLogin>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthProviderLoginQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthProviderLogin>>>
-export type GetAuthProviderLoginQueryError = unknown
-
+export type GetAuthProviderLoginQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthProviderLogin>>
+>;
+export type GetAuthProviderLoginQueryError = unknown;
 
 /**
  * @summary Redirect to OAuth provider login page
  */
 
-export function useGetAuthProviderLogin<TData = Awaited<ReturnType<typeof getAuthProviderLogin>>, TError = unknown>(
- provider: 'github', options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthProviderLogin>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthProviderLogin<
+	TData = Awaited<ReturnType<typeof getAuthProviderLogin>>,
+	TError = unknown,
+>(
+	provider: "github",
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getAuthProviderLogin>>,
+			TError,
+			TData
+		>;
+		fetch?: RequestInit;
+	},
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthProviderLoginQueryOptions(provider, options);
 
-  const queryOptions = getGetAuthProviderLoginQueryOptions(provider,options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Returns the details of the authenticated user, including their ID, login, avatar URL, and profile URL.
@@ -255,284 +302,295 @@ export function useGetAuthProviderLogin<TData = Awaited<ReturnType<typeof getAut
  * @summary Get authenticated user data
  */
 export type getAuthUserResponse200 = {
-  data: GetAuthUser200
-  status: 200
-}
-    
-export type getAuthUserResponseSuccess = (getAuthUserResponse200) & {
-  headers: Headers;
+	data: GetAuthUser200;
+	status: 200;
 };
-;
 
-export type getAuthUserResponse = (getAuthUserResponseSuccess)
+export type getAuthUserResponseSuccess = getAuthUserResponse200 & {
+	headers: Headers;
+};
+
+export type getAuthUserResponse = getAuthUserResponseSuccess;
 
 export const getGetAuthUserUrl = () => {
+	return `/auth/user`;
+};
 
+export const getAuthUser = async (
+	options?: RequestInit,
+): Promise<getAuthUserResponse> => {
+	const res = await fetch(getGetAuthUserUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `/auth/user`
-}
-
-export const getAuthUser = async ( options?: RequestInit): Promise<getAuthUserResponse> => {
-  
-  const res = await fetch(getGetAuthUserUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthUserResponse
-}
-
-
-
-
+	const data: getAuthUserResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthUserResponse;
+};
 
 export const getGetAuthUserQueryKey = () => {
-    return [
-    `/auth/user`
-    ] as const;
-    }
+	return [`/auth/user`] as const;
+};
 
-    
-export const getGetAuthUserQueryOptions = <TData = Awaited<ReturnType<typeof getAuthUser>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetAuthUserQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthUser>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthUser>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetAuthUserQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthUserQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthUser>>> = ({
+		signal,
+	}) => getAuthUser({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthUser>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthUser>>> = ({ signal }) => getAuthUser({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthUserQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthUser>>>
-export type GetAuthUserQueryError = unknown
-
+export type GetAuthUserQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthUser>>
+>;
+export type GetAuthUserQueryError = unknown;
 
 /**
  * @summary Get authenticated user data
  */
 
-export function useGetAuthUser<TData = Awaited<ReturnType<typeof getAuthUser>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthUser<
+	TData = Awaited<ReturnType<typeof getAuthUser>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthUser>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthUserQueryOptions(options);
 
-  const queryOptions = getGetAuthUserQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Logs the user out by clearing the session cookie.
  * @summary Logout
  */
 export type getAuthLogoutResponseDefault = {
-  data: unknown
-  status: number
-}
-    
-;
-export type getAuthLogoutResponseError = (getAuthLogoutResponseDefault) & {
-  headers: Headers;
+	data: unknown;
+	status: number;
+};
+export type getAuthLogoutResponseError = getAuthLogoutResponseDefault & {
+	headers: Headers;
 };
 
-export type getAuthLogoutResponse = (getAuthLogoutResponseError)
+export type getAuthLogoutResponse = getAuthLogoutResponseError;
 
 export const getGetAuthLogoutUrl = () => {
+	return `/auth/logout`;
+};
 
+export const getAuthLogout = async (
+	options?: RequestInit,
+): Promise<getAuthLogoutResponse> => {
+	const res = await fetch(getGetAuthLogoutUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `/auth/logout`
-}
-
-export const getAuthLogout = async ( options?: RequestInit): Promise<getAuthLogoutResponse> => {
-  
-  const res = await fetch(getGetAuthLogoutUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAuthLogoutResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAuthLogoutResponse
-}
-
-
-
-
+	const data: getAuthLogoutResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getAuthLogoutResponse;
+};
 
 export const getGetAuthLogoutQueryKey = () => {
-    return [
-    `/auth/logout`
-    ] as const;
-    }
+	return [`/auth/logout`] as const;
+};
 
-    
-export const getGetAuthLogoutQueryOptions = <TData = Awaited<ReturnType<typeof getAuthLogout>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetAuthLogoutQueryOptions = <
+	TData = Awaited<ReturnType<typeof getAuthLogout>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthLogout>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetAuthLogoutQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAuthLogoutQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthLogout>>> = ({
+		signal,
+	}) => getAuthLogout({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthLogout>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthLogout>>> = ({ signal }) => getAuthLogout({ signal, ...fetchOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetAuthLogoutQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthLogout>>>
-export type GetAuthLogoutQueryError = unknown
-
+export type GetAuthLogoutQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getAuthLogout>>
+>;
+export type GetAuthLogoutQueryError = unknown;
 
 /**
  * @summary Logout
  */
 
-export function useGetAuthLogout<TData = Awaited<ReturnType<typeof getAuthLogout>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAuthLogout<
+	TData = Awaited<ReturnType<typeof getAuthLogout>>,
+	TError = unknown,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthLogout>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetAuthLogoutQueryOptions(options);
 
-  const queryOptions = getGetAuthLogoutQueryOptions(options)
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	query.queryKey = queryOptions.queryKey;
 
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }
-
-
-
-
 
 /**
  * Say hello to the user
  */
 export type getApiHealthResponse200 = {
-  data: GetApiHealth200
-  status: 200
-}
+	data: GetApiHealth200;
+	status: 200;
+};
 
 export type getApiHealthResponse503 = {
-  data: GetApiHealth503
-  status: 503
-}
-    
-export type getApiHealthResponseSuccess = (getApiHealthResponse200) & {
-  headers: Headers;
-};
-export type getApiHealthResponseError = (getApiHealthResponse503) & {
-  headers: Headers;
+	data: GetApiHealth503;
+	status: 503;
 };
 
-export type getApiHealthResponse = (getApiHealthResponseSuccess | getApiHealthResponseError)
+export type getApiHealthResponseSuccess = getApiHealthResponse200 & {
+	headers: Headers;
+};
+export type getApiHealthResponseError = getApiHealthResponse503 & {
+	headers: Headers;
+};
+
+export type getApiHealthResponse =
+	| getApiHealthResponseSuccess
+	| getApiHealthResponseError;
 
 export const getGetApiHealthUrl = () => {
+	return `/api/health`;
+};
 
+export const getApiHealth = async (
+	options?: RequestInit,
+): Promise<getApiHealthResponse> => {
+	const res = await fetch(getGetApiHealthUrl(), {
+		...options,
+		method: "GET",
+	});
 
-  
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  return `/api/health`
-}
-
-export const getApiHealth = async ( options?: RequestInit): Promise<getApiHealthResponse> => {
-  
-  const res = await fetch(getGetApiHealthUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getApiHealthResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getApiHealthResponse
-}
-
-
-
-
+	const data: getApiHealthResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getApiHealthResponse;
+};
 
 export const getGetApiHealthQueryKey = () => {
-    return [
-    `/api/health`
-    ] as const;
-    }
+	return [`/api/health`] as const;
+};
 
-    
-export const getGetApiHealthQueryOptions = <TData = Awaited<ReturnType<typeof getApiHealth>>, TError = GetApiHealth503>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>, fetch?: RequestInit}
-) => {
+export const getGetApiHealthQueryOptions = <
+	TData = Awaited<ReturnType<typeof getApiHealth>>,
+	TError = GetApiHealth503,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getApiHealth>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetApiHealthQueryKey();
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiHealthQueryKey();
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiHealth>>> = ({
+		signal,
+	}) => getApiHealth({ signal, ...fetchOptions });
 
-  
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getApiHealth>>,
+		TError,
+		TData
+	> & { queryKey: QueryKey };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiHealth>>> = ({ signal }) => getApiHealth({ signal, ...fetchOptions });
+export type GetApiHealthQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getApiHealth>>
+>;
+export type GetApiHealthQueryError = GetApiHealth503;
 
-      
+export function useGetApiHealth<
+	TData = Awaited<ReturnType<typeof getApiHealth>>,
+	TError = GetApiHealth503,
+>(options?: {
+	query?: UseQueryOptions<
+		Awaited<ReturnType<typeof getApiHealth>>,
+		TError,
+		TData
+	>;
+	fetch?: RequestInit;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	const queryOptions = getGetApiHealthQueryOptions(options);
 
-      
+	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData> & { queryKey: QueryKey }
-}
+	query.queryKey = queryOptions.queryKey;
 
-export type GetApiHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getApiHealth>>>
-export type GetApiHealthQueryError = GetApiHealth503
-
-
-
-export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = GetApiHealth503>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetApiHealthQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
+	return query;
 }

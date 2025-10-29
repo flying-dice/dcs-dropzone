@@ -8,14 +8,14 @@ import { getLogger } from "./logger.ts";
 const logger = getLogger("index");
 
 const server = serve({
-  hostname: appConfig.server.host,
-  port: appConfig.server.port,
-  development: process.env.NODE_ENV !== "production",
-  routes: {
-    "/api": app.fetch,
-    "/api/**": app.fetch,
-    "/v3/api-docs": app.fetch,
-  },
+	hostname: appConfig.server.host,
+	port: appConfig.server.port,
+	development: process.env.NODE_ENV !== "production",
+	routes: {
+		"/api": app.fetch,
+		"/api/**": app.fetch,
+		"/v3/api-docs": app.fetch,
+	},
 });
 
 logger.info(`🚀 Server running at ${server.url}`);

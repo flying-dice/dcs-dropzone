@@ -10,8 +10,8 @@ const server = serve({
 	development: process.env.NODE_ENV !== "production",
 	routes: {
 		"/*": index,
-        "/auth": app.fetch,
-        "/auth/**": app.fetch,
+		"/auth": app.fetch,
+		"/auth/**": app.fetch,
 		"/api": app.fetch,
 		"/api/**": app.fetch,
 		"/v3/api-docs": app.fetch,
