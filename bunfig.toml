@@ -1,0 +1,15 @@
+[serve.static]
+env = "BUN_PUBLIC_*"
+
+[test]
+coverage = true
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = ["src/daemon/database/schema.ts"]
+coverageReporter = ["text", "lcov"]
+
+[test.reporter]
+junit = "unit.junit.xml"
+
+[loader]
+".ttf" = "file"
+".otf" = "file"

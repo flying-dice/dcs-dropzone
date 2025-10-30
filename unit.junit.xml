@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="bun test" tests="6" assertions="10" failures="0" skipped="0" time="0.083939586">
+  <testsuite name="tests/daemon/health.test.ts" file="tests/daemon/health.test.ts" tests="1" assertions="2" failures="0" skipped="0" time="0.004" hostname="omarchy">
+    <testcase name="Health check" classname="" time="0.004" file="tests/daemon/health.test.ts" line="4" assertions="2" />
+  </testsuite>
+  <testsuite name="src/common/sha256.test.ts" file="src/common/sha256.test.ts" tests="2" assertions="2" failures="0" skipped="0" time="0" hostname="omarchy">
+    <testcase name="computes sha256 hash correctly for a string" classname="" time="0" file="src/common/sha256.test.ts" line="4" assertions="1" />
+    <testcase name="computes sha256 hash correctly for a Buffer" classname="" time="0" file="src/common/sha256.test.ts" line="11" assertions="1" />
+  </testsuite>
+  <testsuite name="src/daemon/middleware/logger.test.ts" file="src/daemon/middleware/logger.test.ts" tests="1" assertions="2" failures="0" skipped="0" time="0" hostname="omarchy">
+    <testcase name="calls logger.debug when middleware runs" classname="" time="0" file="src/daemon/middleware/logger.test.ts" line="6" assertions="2" />
+  </testsuite>
+  <testsuite name="src/daemon/database/app-database-migration.test.ts" file="src/daemon/database/app-database-migration.test.ts" tests="1" assertions="1" failures="0" skipped="0" time="0" hostname="omarchy">
+    <testcase name="computes sha256 hash from name in constructor" classname="" time="0" file="src/daemon/database/app-database-migration.test.ts" line="5" assertions="1" />
+  </testsuite>
+  <testsuite name="src/daemon/database/app-database.test.ts" file="src/daemon/database/app-database.test.ts" tests="1" assertions="3" failures="0" skipped="0" time="0.001" hostname="omarchy">
+    <testcase name="applies migrations once and skips already-applied ones" classname="" time="0.001" file="src/daemon/database/app-database.test.ts" line="6" assertions="3" />
+  </testsuite>
+</testsuites>
