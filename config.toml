@@ -9,9 +9,9 @@ port = 3001        # Port to listen on
 # Logging Configuration (Pino)
 # =======================================
 [logging]
-level = "info"                  # Options: trace, debug, info, warn, error, fatal
-# destination = "app.log"       # Optional file path or leave empty for console
-colorize = true                 # Should log be colorized, set to true for better readability in terminal
+level = "debug"                  # Options: trace, debug, info, warn, error, fatal
+destination = "app.log"       # Optional file path or leave empty for console
+colorize = false                 # Should log be colorized, set to true for better readability in terminal
 
 # =======================================
 # Database Configuration
