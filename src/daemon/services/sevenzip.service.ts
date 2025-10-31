@@ -71,8 +71,6 @@ export class SevenzipService {
 		targetDir,
 		onProgress,
 	}: SevenzipExtractOptions): Promise<string> {
-		statSync(this.exePath);
-
 		const absoluteArchivePath = resolve(archivePath);
 		const absoluteTargetDir = resolve(targetDir);
 
@@ -99,7 +97,7 @@ export class SevenzipService {
 			if (!data) return;
 			const summary = data.toString().trim();
 			const progress = extractPercentage(summary);
-			if (progress && onProgress) {
+			if (progress) {
 				onProgress({ progress, summary });
 			}
 		});
@@ -108,7 +106,7 @@ export class SevenzipService {
 			if (!data) return;
 			const summary = data.toString().trim();
 			const progress = extractPercentage(summary);
-			if (progress && onProgress) {
+			if (progress) {
 				onProgress({ progress, summary });
 			}
 		});
