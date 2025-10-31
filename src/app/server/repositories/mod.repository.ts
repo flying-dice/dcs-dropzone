@@ -1,4 +1,4 @@
-import type { Collection } from "mongodb";
+import type { Collection, WithId } from "mongodb";
 import type {
 	CreateMod,
 	Mod,
@@ -6,6 +6,11 @@ import type {
 	UpdateMod,
 } from "../domain/mod.schema.ts";
 import { modSchema, modSummarySchema } from "../domain/mod.schema.ts";
+
+/**
+ * MongoDB document type for Mod (includes _id field)
+ */
+type ModDocument = WithId<Mod>;
 
 /**
  * Repository interface for Mod domain entity
@@ -105,8 +110,8 @@ export class MongoModRepository implements ModRepository {
 		// Parse the create schema and create a full mod with defaults
 		const newMod = modSchema.parse(mod);
 
-		// MongoDB expects Document type, but our Mod type is compatible
-		await this.collection.insertOne(newMod as Record<string, unknown>);
+		// Insert as ModDocument (MongoDB will add _id)
+		await this.collection.insertOne(newMod as ModDocument);
 
 		return newMod;
 	}

@@ -1,6 +1,13 @@
 import { z } from "zod";
 
 /**
+ * Default content for new mods (base64 encoded message)
+ * Decoded: "Add a good readme so users can understand your mod..."
+ */
+export const DEFAULT_MOD_CONTENT =
+	"QWRkIGEgZ29vZCByZWFkbWUgc28gdXNlcnMgY2FuIHVuZGVyc3RhbmQgeW91ciBtb2QuLi4=";
+
+/**
  * Schema for a release/version of a mod
  */
 export const releaseSchema = z.object({
@@ -99,11 +106,12 @@ export const modSchema = z.object({
 		.describe("The URL of the image to display in the mod tile"),
 	content: z
 		.string()
-		.default(
-			"QWRkIGEgZ29vZCByZWFkbWUgc28gdXNlcnMgY2FuIHVuZGVyc3RhbmQgeW91ciBtb2QuLi4=",
-		)
+		.default(DEFAULT_MOD_CONTENT)
 		.describe("The content of the mod"),
-	published: z.boolean().default(false),
+	published: z
+		.boolean()
+		.default(false)
+		.describe("Whether the mod is published and visible to users"),
 	maintainers: z
 		.array(z.string())
 		.min(1)

@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import type {
-	CreateMod,
-	Mod,
-	ModSummary,
-	UpdateMod,
+import {
+	type CreateMod,
+	DEFAULT_MOD_CONTENT,
+	type Mod,
+	type ModSummary,
+	type UpdateMod,
 } from "../../src/app/server/domain/mod.schema.ts";
 import type { ModRepository } from "../../src/app/server/repositories/mod.repository.ts";
 import { ModService } from "../../src/app/server/services/mod.service.ts";
@@ -85,9 +86,7 @@ class MockModRepository implements ModRepository {
 			license: mod.license || "MIT License",
 			dependencies: mod.dependencies || [],
 			versions: mod.versions || [],
-			content:
-				mod.content ||
-				"QWRkIGEgZ29vZCByZWFkbWUgc28gdXNlcnMgY2FuIHVuZGVyc3RhbmQgeW91ciBtb2QuLi4=",
+			content: mod.content || DEFAULT_MOD_CONTENT,
 			published: mod.published || false,
 		};
 		this.mods.set(newMod.id, newMod);
