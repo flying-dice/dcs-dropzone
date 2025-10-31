@@ -3,7 +3,10 @@ import { CategoryShortcut } from "./components/CategoryShortcut.tsx";
 import { NavShortcut } from "./components/NavShortcut.tsx";
 import { AppIcons } from "./icons.ts";
 
-export function AppNavbar() {
+export type AppNavbarProps = {
+	withMyMods: boolean;
+};
+export function AppNavbar(props: AppNavbarProps) {
 	return (
 		<AppShell.Navbar>
 			<Stack p={"md"} gap={"xl"}>
@@ -32,6 +35,13 @@ export function AppNavbar() {
 						count={3}
 						countColor={"red"}
 					/>
+					{props.withMyMods && (
+						<NavShortcut
+							icon={AppIcons.UserMods}
+							label={"My Mods"}
+							to={"/user-mods"}
+						/>
+					)}
 				</Stack>
 				<Stack gap="0">
 					<Text fw={"bold"} fz={12} c={"gray"} pb={"sm"}>

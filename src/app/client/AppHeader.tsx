@@ -9,7 +9,6 @@ import {
 	useMantineColorScheme,
 } from "@mantine/core";
 import { BsLaptop, BsMoon, BsSun } from "react-icons/bs";
-import { FaBell } from "react-icons/fa";
 import logo from "./assets/logo.svg";
 import { ProfileMenu } from "./components/ProfileMenu.tsx";
 

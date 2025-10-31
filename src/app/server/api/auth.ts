@@ -4,6 +4,7 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import appConfig from "../app-config.ts";
+import { User } from "../database/schema.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import type { AuthService } from "../services/auth.service.ts";
 import { githubAuthService } from "../services/github-auth.service.ts";
@@ -71,9 +72,22 @@ router.get(
 		const provider = c.req.valid("param").provider;
 		const authService = authServices[provider];
 
-		const { token } = await authService.handleCallback(
+		const { token, user } = await authService.handleCallback(
 			c.req.valid("query").code,
 			c.req.valid("query").state,
+		);
+
+		await User.updateOne(
+			{ id: user.userId },
+			{
+				$set: {
+					name: user.userName,
+					login: user.userLogin,
+					avatarUrl: user.userAvatarUrl,
+					profileUrl: user.userProfileUrl,
+				},
+			},
+			{ upsert: true },
 		);
 
 		setCookie(c, appConfig.sessionCookieName, token);

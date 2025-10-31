@@ -76,7 +76,7 @@ level = "info"
 colorize = true
 
 [database]
-url = "db.sqlite"
+url = "index.sqlite"
 ```
 
 ### Development
@@ -163,7 +163,7 @@ bun run drizzle
 bun run postdrizzle
 ```
 
-Migrations are stored in `src/daemon/database/ddl/` and bundled into `db-ddl.ts` for runtime use.
+Migrations are stored in `src/daemon/database/ddl/` and bundled into `index-ddl.ts` for runtime use.
 
 ## 📁 Project Structure
 

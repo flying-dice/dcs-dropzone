@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import { db } from "../db.ts";
+import { ping } from "../database";
 
 const router = new Hono();
 
@@ -40,7 +40,7 @@ router.get(
 	}),
 	async (c) => {
 		try {
-			await db.ping();
+			await ping();
 			return c.json({ status: "UP" }, StatusCodes.OK);
 		} catch (error) {
 			return c.json(

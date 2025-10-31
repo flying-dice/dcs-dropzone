@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { AuthenticatedUser } from "../_autogen/api.ts";
+import type { AuthenticatedUser } from "../_autogen/legacy_api.ts";
 
 export const UserContext = createContext<{
 	login: () => void;

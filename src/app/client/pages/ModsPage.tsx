@@ -16,11 +16,12 @@ export function ModsPage() {
 	return (
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
 			<Container size={"xl"}>
-				<Stack py={"xl"} gap={"xl"}>
+				<Stack py={"md"}>
 					<Stack>
 						<Text fz={"lg"} fw={"bold"}>
 							Browse mods
 						</Text>
+
 						{mods.data?.data.map((mod) => (
 							<ModCard
 								key={mod.id}
@@ -30,7 +31,6 @@ export function ModsPage() {
 								title={mod.name}
 								summary={mod.description || ""}
 								subscribers={1250}
-								isSubscribed={false}
 								onSubscribeToggle={noop}
 								variant={"list"}
 							/>

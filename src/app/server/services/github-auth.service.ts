@@ -37,9 +37,9 @@ export class GithubAuthService implements AuthService {
 		const user: UserData = {
 			userId: data.id.toString(),
 			userLogin: data.login,
+			userName: data.name ?? undefined,
 			userAvatarUrl: data.avatar_url,
 			userProfileUrl: data.html_url,
-			userName: data.name ?? undefined,
 		};
 
 		const token = await new SignJWT(user)

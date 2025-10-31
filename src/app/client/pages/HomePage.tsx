@@ -9,27 +9,21 @@ import {
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
-import { useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWindowSize } from "react-use";
 import { useGetRegistryIndex } from "../_autogen/legacy_api.ts";
 import { ModCard } from "../components/ModCard.tsx";
 import { StatCard } from "../components/StatCard.tsx";
 import { AppIcons } from "../icons.ts";
-import { calculateColumns } from "../utils/calculateColumns.ts";
 
 export function Homepage() {
 	const nav = useNavigate();
 	const colorScheme = useComputedColorScheme();
-	const grid = useRef<HTMLDivElement>(null);
 	const { width } = useWindowSize();
 
-	const cols = useMemo(
-		() => calculateColumns(grid.current?.scrollWidth || 0, 300),
-		[width, grid.current?.scrollWidth],
-	);
-
 	const mods = useGetRegistryIndex();
+
+	const cols = width < 600 ? 1 : width < 900 ? 2 : width < 1200 ? 3 : 4;
 
 	return (
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
@@ -60,8 +54,8 @@ export function Homepage() {
 						<Text fz={"lg"} fw={"bold"}>
 							Featured Mods
 						</Text>
-						<SimpleGrid ref={grid} cols={cols} spacing={"xl"}>
-							{mods.data?.data.slice(0, 3).map((mod) => (
+						<SimpleGrid cols={cols} spacing={"xl"}>
+							{mods.data?.data.slice(0, cols).map((mod) => (
 								<ModCard
 									key={mod.id}
 									imageUrl={mod.imageUrl}

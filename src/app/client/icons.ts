@@ -1,5 +1,5 @@
-import { FaHome, FaSyncAlt } from "react-icons/fa";
-import { FaBox, FaDownload, FaToggleOn } from "react-icons/fa6";
+import { FaHome, FaStar, FaSyncAlt } from "react-icons/fa";
+import { FaBox, FaDownload, FaToggleOn, FaUser } from "react-icons/fa6";
 
 export const AppIcons = {
 	Home: FaHome,
@@ -7,4 +7,6 @@ export const AppIcons = {
 	Subscribed: FaDownload,
 	Enabled: FaToggleOn,
 	Updates: FaSyncAlt,
+	UserMods: FaUser,
+	Ratings: FaStar,
 };

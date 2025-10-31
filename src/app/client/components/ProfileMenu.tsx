@@ -94,15 +94,6 @@ export function ProfileMenu() {
 							</Menu.Item>
 						)}
 
-						{user.sudo && (
-							<Menu.Item
-								onClick={() => nav("/sudo-mods")}
-								leftSection={<BiData />}
-							>
-								Sudo Mods
-							</Menu.Item>
-						)}
-
 						<Menu.Divider />
 
 						<Menu.Item onClick={viewUserDetails} leftSection={<BiDetail />}>

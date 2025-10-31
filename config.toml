@@ -17,7 +17,7 @@ colorize = false                 # Should log be colorized, set to true for bett
 # Database Configuration
 # =======================================
 [database]
-url = "db.sqlite"      # Database URL
+url = "index.sqlite"      # Database URL
 
 # =======================================
 # Third Party Binaries Configuration

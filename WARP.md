@@ -50,11 +50,11 @@ bun run orval
 ```
 
 - Drizzle SQL migrations (daemon)
-  - Generate SQL from schema.ts into src/daemon/database/ddl/ then bundle to db-ddl.ts used at runtime:
+  - Generate SQL from schema.ts into src/daemon/database/ddl/ then bundle to index-ddl.ts used at runtime:
 
 ```bash path=null start=null
 bun run drizzle       # runs: drizzle-kit generate --config drizzle.config.ts --name=init
-bun run postdrizzle   # builds src/daemon/database/db-ddl.ts
+bun run postdrizzle   # builds src/daemon/database/index-ddl.ts
 ```
 
 - Tests: none configured in package.json (no test runner present).
@@ -62,7 +62,7 @@ bun run postdrizzle   # builds src/daemon/database/db-ddl.ts
 ## Environment & config
 
 - Web app (src/app)
-  - Required env vars (see src/app/server/app-config.ts and src/app/server/db.ts):
+  - Required env vars (see src/app/server/app-config.ts and src/app/server/index.ts):
     - PORT, LOG_LEVEL, JWT_SECRET, SESSION_COOKIE_NAME (optional, default JSESSIONID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, SUDO_USERS (comma-separated IDs), GH_HOMEPAGE_URL, MONGODB_URI
   - Example (replace placeholders):
 
@@ -116,7 +116,7 @@ url = "/tmp/dcs-dropzone.sqlite"
         - GitHub OAuth via octokit OAuthApp
         - On callback, signs a JWT with user profile; cookie-based session via SESSION_COOKIE_NAME
       - Auth middlewares: cookieAuth (validates JWT and exposes getUser), sudoUser (enforces SUDO_USERS)
-    - Data: src/app/server/db.ts
+    - Data: src/app/server/index.ts
       - Connects to MongoDB via MONGODB_URI, exposes collection mods and ping()
     - Client: src/app/client
       - React 19 + Mantine UI + React Router (HashRouter) + TanStack Query
@@ -129,7 +129,7 @@ url = "/tmp/dcs-dropzone.sqlite"
     - Database: src/daemon/database
       - drizzle with bun:sqlite
       - SQL migrations stored in src/daemon/database/ddl (generated via drizzle-kit)
-      - At boot, src/daemon/database/index.ts loads compiled SQL from db-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
+      - At boot, src/daemon/database/index.ts loads compiled SQL from index-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
 
 - Build & deploy
   - bun build compiles each runtime to a single native binary (dist/app, dist/appd)
