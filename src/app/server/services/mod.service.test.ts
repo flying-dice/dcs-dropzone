@@ -5,9 +5,9 @@ import {
 	type Mod,
 	type ModSummary,
 	type UpdateMod,
-} from "../../src/app/server/domain/mod.schema.ts";
-import type { ModRepository } from "../../src/app/server/repositories/mod.repository.ts";
-import { ModService } from "../../src/app/server/services/mod.service.ts";
+} from "../domain/mod.schema.ts";
+import type { ModRepository } from "../repositories/mod.repository.ts";
+import { ModService } from "./mod.service.ts";
 
 // Mock data
 const mockMod: Mod = {
