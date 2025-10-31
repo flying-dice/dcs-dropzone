@@ -105,7 +105,8 @@ export class MongoModRepository implements ModRepository {
 		// Parse the create schema and create a full mod with defaults
 		const newMod = modSchema.parse(mod);
 
-		await this.collection.insertOne(newMod as any);
+		// MongoDB expects Document type, but our Mod type is compatible
+		await this.collection.insertOne(newMod as Record<string, unknown>);
 
 		return newMod;
 	}

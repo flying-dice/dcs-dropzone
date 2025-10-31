@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import type {
+	CreateMod,
 	Mod,
 	ModSummary,
+	UpdateMod,
 } from "../../src/app/server/domain/mod.schema.ts";
 import type { ModRepository } from "../../src/app/server/repositories/mod.repository.ts";
 import { ModService } from "../../src/app/server/services/mod.service.ts";
@@ -75,7 +77,7 @@ class MockModRepository implements ModRepository {
 			});
 	}
 
-	async create(mod: any): Promise<Mod> {
+	async create(mod: CreateMod): Promise<Mod> {
 		const newMod: Mod = {
 			...mod,
 			tags: mod.tags || [],
@@ -92,7 +94,7 @@ class MockModRepository implements ModRepository {
 		return newMod;
 	}
 
-	async update(id: string, updates: any): Promise<Mod | undefined> {
+	async update(id: string, updates: UpdateMod): Promise<Mod | undefined> {
 		const mod = this.mods.get(id);
 		if (!mod) return undefined;
 		const updatedMod = { ...mod, ...updates };

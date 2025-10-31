@@ -47,6 +47,34 @@ router.get(
 );
 
 /**
+ * GET /api/mods/maintainer/:userId - Get mods by maintainer
+ */
+router.get(
+	"/maintainer/:userId",
+	describeRoute({
+		summary: "Get mods by maintainer",
+		description: "Get all mods maintained by a specific user",
+		tags: ["Mods"],
+		responses: {
+			[StatusCodes.OK]: {
+				description: "List of mods maintained by the user",
+				content: {
+					"application/json": {
+						schema: resolver(z.array(modSummarySchema)),
+					},
+				},
+			},
+		},
+	}),
+	validator("param", z.object({ userId: z.string() })),
+	async (c) => {
+		const { userId } = c.req.valid("param");
+		const mods = await modService.getModsByMaintainer(userId);
+		return c.json(mods, StatusCodes.OK);
+	},
+);
+
+/**
  * GET /api/mods/:id - Get a specific mod by ID
  */
 router.get(
@@ -303,34 +331,6 @@ router.delete(
 				StatusCodes.FORBIDDEN,
 			);
 		}
-	},
-);
-
-/**
- * GET /api/mods/maintainer/:userId - Get mods by maintainer
- */
-router.get(
-	"/maintainer/:userId",
-	describeRoute({
-		summary: "Get mods by maintainer",
-		description: "Get all mods maintained by a specific user",
-		tags: ["Mods"],
-		responses: {
-			[StatusCodes.OK]: {
-				description: "List of mods maintained by the user",
-				content: {
-					"application/json": {
-						schema: resolver(z.array(modSummarySchema)),
-					},
-				},
-			},
-		},
-	}),
-	validator("param", z.object({ userId: z.string() })),
-	async (c) => {
-		const { userId } = c.req.valid("param");
-		const mods = await modService.getModsByMaintainer(userId);
-		return c.json(mods, StatusCodes.OK);
 	},
 );
 
