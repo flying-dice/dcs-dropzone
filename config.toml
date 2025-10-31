@@ -10,7 +10,7 @@ port = 3001        # Port to listen on
 # =======================================
 [logging]
 level = "debug"                  # Options: trace, debug, info, warn, error, fatal
-destination = "app.log"       # Optional file path or leave empty for console
+#destination = "app.log"       # Optional file path or leave empty for console
 colorize = false                 # Should log be colorized, set to true for better readability in terminal
 
 # =======================================
@@ -18,3 +18,10 @@ colorize = false                 # Should log be colorized, set to true for bett
 # =======================================
 [database]
 url = "db.sqlite"      # Database URL
+
+# =======================================
+# Third Party Binaries Configuration
+# =======================================
+[binaries]
+target_directory = ".bin"
+wget = "https://eternallybored.org/misc/wget/1.21.4/64/wget.exe"          # Path to download the winget binary
