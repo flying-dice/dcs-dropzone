@@ -1,11 +1,13 @@
 import type { Collection, WithId } from "mongodb";
-import type {
-	CreateMod,
-	Mod,
-	ModSummary,
-	UpdateMod,
+import {
+	type CreateMod,
+	DEFAULT_MOD_CONTENT,
+	type Mod,
+	type ModSummary,
+	modSchema,
+	modSummarySchema,
+	type UpdateMod,
 } from "../domain/mod.schema.ts";
-import { modSchema, modSummarySchema } from "../domain/mod.schema.ts";
 
 /**
  * MongoDB document type for Mod (includes _id field)
@@ -107,8 +109,20 @@ export class MongoModRepository implements ModRepository {
 	}
 
 	async create(mod: CreateMod): Promise<Mod> {
-		// Parse the create schema and create a full mod with defaults
-		const newMod = modSchema.parse(mod);
+		// Create a full mod with defaults for fields not in CreateMod
+		const modWithDefaults = {
+			...mod,
+			tags: [],
+			category: "Uncategorized",
+			license: "MIT License",
+			dependencies: [],
+			versions: [],
+			content: DEFAULT_MOD_CONTENT,
+			published: false,
+		};
+
+		// Parse with modSchema to ensure validation
+		const newMod = modSchema.parse(modWithDefaults);
 
 		// Insert as ModDocument (MongoDB will add _id)
 		await this.collection.insertOne(newMod as ModDocument);

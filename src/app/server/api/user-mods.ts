@@ -254,12 +254,32 @@ router.put(
 
 			return c.json(mod, StatusCodes.OK);
 		} catch (error) {
+			// Differentiate error types for proper status codes
+			if (
+				error &&
+				typeof error === "object" &&
+				"message" in error &&
+				typeof error.message === "string"
+			) {
+				if (
+					error.message.includes("not a maintainer") ||
+					error.message.includes("not authorized")
+				) {
+					return c.json({ error: error.message }, StatusCodes.FORBIDDEN);
+				}
+				if (
+					error.message.includes("not found") ||
+					error.message.includes("does not exist")
+				) {
+					return c.json({ error: error.message }, StatusCodes.NOT_FOUND);
+				}
+				// Validation errors or other known errors
+				return c.json({ error: error.message }, StatusCodes.BAD_REQUEST);
+			}
+			// Unknown error type
 			return c.json(
-				{
-					error:
-						error instanceof Error ? error.message : "Failed to update mod",
-				},
-				StatusCodes.FORBIDDEN,
+				{ error: "Failed to update mod" },
+				StatusCodes.INTERNAL_SERVER_ERROR,
 			);
 		}
 	},
@@ -338,18 +358,12 @@ router.delete(
 					error.message.includes("not a maintainer") ||
 					error.message.includes("not authorized")
 				) {
-					return c.json(
-						{ error: error.message },
-						StatusCodes.FORBIDDEN,
-					);
+					return c.json({ error: error.message }, StatusCodes.FORBIDDEN);
 				} else if (
 					error.message.includes("not found") ||
 					error.message.includes("does not exist")
 				) {
-					return c.json(
-						{ error: error.message },
-						StatusCodes.NOT_FOUND,
-					);
+					return c.json({ error: error.message }, StatusCodes.NOT_FOUND);
 				} else {
 					return c.json(
 						{ error: error.message },
