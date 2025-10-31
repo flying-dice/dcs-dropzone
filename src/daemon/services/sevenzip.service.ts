@@ -111,12 +111,13 @@ export class SevenzipService {
 			}
 		});
 
-		_7zip.on("error", (err) => {
-			_7zip.removeAllListeners();
-			this.logger.error(`Failed to start Seven Zip: ${err}`);
-		});
 
 		await new Promise((resolve, reject) => {
+			_7zip.on("error", (err) => {
+				_7zip.removeAllListeners();
+				this.logger.error(`Failed to start Seven Zip: ${err}`);
+				reject(err);
+			});
 			_7zip.on("close", (code) => {
 				if (code === 0) {
 					_7zip.removeAllListeners();
