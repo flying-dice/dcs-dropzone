@@ -327,13 +327,41 @@ router.delete(
 
 			return c.body(null, StatusCodes.NO_CONTENT);
 		} catch (error) {
-			return c.json(
-				{
-					error:
-						error instanceof Error ? error.message : "Failed to delete mod",
-				},
-				StatusCodes.FORBIDDEN,
-			);
+			// Differentiate error types for proper status codes
+			if (
+				error &&
+				typeof error === "object" &&
+				"message" in error &&
+				typeof error.message === "string"
+			) {
+				if (
+					error.message.includes("not a maintainer") ||
+					error.message.includes("not authorized")
+				) {
+					return c.json(
+						{ error: error.message },
+						StatusCodes.FORBIDDEN,
+					);
+				} else if (
+					error.message.includes("not found") ||
+					error.message.includes("does not exist")
+				) {
+					return c.json(
+						{ error: error.message },
+						StatusCodes.NOT_FOUND,
+					);
+				} else {
+					return c.json(
+						{ error: error.message },
+						StatusCodes.INTERNAL_SERVER_ERROR,
+					);
+				}
+			} else {
+				return c.json(
+					{ error: "Failed to delete mod" },
+					StatusCodes.INTERNAL_SERVER_ERROR,
+				);
+			}
 		}
 	},
 );
