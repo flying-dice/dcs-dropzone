@@ -10,7 +10,7 @@
 		"test": "bun test",
 		"orval": "orval --config orval.config.cjs",
 		"build": "bun build ./src/app/index.ts --minify --sourcemap --compile --env='BUN_PUBLIC_*' --define:process.env.NODE_ENV='\"production\"' --outfile ./dist/app",
-		"build:daemon": "bun build ./src/daemon/index.ts --minify --sourcemap --compile --env='BUN_PUBLIC_*' --define:process.env.NODE_ENV='\"production\"' --outfile ./dist/appd",
+		"build:daemon": "bun scripts/build-daemon.ts",
 		"start": "docker compose up",
 		"drizzle": "drizzle-kit generate --config drizzle.config.ts --name=init",
 		"postdrizzle": "bun drizzle-migration.setup.ts"
