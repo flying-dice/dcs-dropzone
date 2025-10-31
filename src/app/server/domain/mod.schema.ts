@@ -66,7 +66,7 @@ export const modSchema = z.object({
 		.describe("A short description of the mod to be displayed in the mod tile"),
 	authors: z
 		.array(z.string())
-		.default([])
+		.min(1)
 		.describe("The authors of the mod as a list of strings"),
 	tags: z
 		.array(z.string())
