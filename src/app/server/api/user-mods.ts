@@ -20,70 +20,49 @@ const modRepository = new MongoModRepository(db.mods);
 const modService = new ModService(modRepository);
 
 /**
- * GET /api/mods - List all mods (summary view)
+ * GET /api/user-mods - List all user's mods (summary view)
  */
 router.get(
 	"/",
 	describeRoute({
-		summary: "List all mods",
+		summary: "List all user's mods",
 		description:
-			"Get a list of all mods with summary information (without content and versions)",
-		tags: ["Mods"],
+			"Get a list of all mods where the authenticated user is in the maintainers list (without content and versions)",
+		tags: ["User Mods"],
+		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.OK]: {
-				description: "List of mods",
+				description: "List of user's mods",
 				content: {
 					"application/json": {
 						schema: resolver(z.array(modSummarySchema)),
 					},
 				},
 			},
-		},
-	}),
-	async (c) => {
-		const mods = await modService.getAllMods();
-		return c.json(mods, StatusCodes.OK);
-	},
-);
-
-/**
- * GET /api/mods/maintainer/:userId - Get mods by maintainer
- */
-router.get(
-	"/maintainer/:userId",
-	describeRoute({
-		summary: "Get mods by maintainer",
-		description: "Get all mods maintained by a specific user",
-		tags: ["Mods"],
-		responses: {
-			[StatusCodes.OK]: {
-				description: "List of mods maintained by the user",
-				content: {
-					"application/json": {
-						schema: resolver(z.array(modSummarySchema)),
-					},
-				},
+			[StatusCodes.UNAUTHORIZED]: {
+				description: "Authentication required",
 			},
 		},
 	}),
-	validator("param", z.object({ userId: z.string() })),
+	cookieAuth(),
 	async (c) => {
-		const { userId } = c.req.valid("param");
-		const mods = await modService.getModsByMaintainer(userId);
+		const user = c.var.getUser();
+		const mods = await modService.getModsByMaintainer(user.userId);
 		return c.json(mods, StatusCodes.OK);
 	},
 );
 
 /**
- * GET /api/mods/:id - Get a specific mod by ID
+ * GET /api/user-mods/:id - Get a specific user mod by ID
  */
 router.get(
 	"/:id",
 	describeRoute({
-		summary: "Get mod by ID",
+		summary: "Get user mod by ID",
 		description:
-			"Get detailed information about a specific mod including content and versions",
-		tags: ["Mods"],
+			"Get detailed information about a specific mod where the user is a maintainer, including content and versions",
+		tags: ["User Mods"],
+		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.OK]: {
 				description: "Mod details",
@@ -105,11 +84,28 @@ router.get(
 					},
 				},
 			},
+			[StatusCodes.FORBIDDEN]: {
+				description: "User is not a maintainer of this mod",
+				content: {
+					"application/json": {
+						schema: resolver(
+							z.object({
+								error: z.string(),
+							}),
+						),
+					},
+				},
+			},
+			[StatusCodes.UNAUTHORIZED]: {
+				description: "Authentication required",
+			},
 		},
 	}),
+	cookieAuth(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");
+		const user = c.var.getUser();
 		const mod = await modService.getModById(id);
 
 		if (!mod) {
@@ -119,12 +115,20 @@ router.get(
 			);
 		}
 
+		// Check if user is a maintainer
+		if (!mod.maintainers.includes(user.userId)) {
+			return c.json(
+				{ error: "User is not a maintainer of this mod" },
+				StatusCodes.FORBIDDEN,
+			);
+		}
+
 		return c.json(mod, StatusCodes.OK);
 	},
 );
 
 /**
- * POST /api/mods - Create a new mod
+ * POST /api/user-mods - Create a new mod
  */
 router.post(
 	"/",
@@ -132,7 +136,7 @@ router.post(
 		summary: "Create a new mod",
 		description:
 			"Create a new mod. Requires authentication. The authenticated user will be added as a maintainer.",
-		tags: ["Mods"],
+		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.CREATED]: {
@@ -182,7 +186,7 @@ router.post(
 );
 
 /**
- * PUT /api/mods/:id - Update an existing mod
+ * PUT /api/user-mods/:id - Update an existing mod
  */
 router.put(
 	"/:id",
@@ -190,7 +194,7 @@ router.put(
 		summary: "Update a mod",
 		description:
 			"Update an existing mod. Requires authentication and user must be a maintainer.",
-		tags: ["Mods"],
+		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.OK]: {
@@ -262,7 +266,7 @@ router.put(
 );
 
 /**
- * DELETE /api/mods/:id - Delete a mod
+ * DELETE /api/user-mods/:id - Delete a mod
  */
 router.delete(
 	"/:id",
@@ -270,7 +274,7 @@ router.delete(
 		summary: "Delete a mod",
 		description:
 			"Delete an existing mod. Requires authentication and user must be a maintainer.",
-		tags: ["Mods"],
+		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.NO_CONTENT]: {
