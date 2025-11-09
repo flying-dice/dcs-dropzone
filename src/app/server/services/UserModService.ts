@@ -1,13 +1,18 @@
-import { Mod } from "../../domain/Mod.ts";
-import type { User } from "../../domain/User.ts";
-import { type ModDto, serializeMod, serializeMods } from "../../dto/ModDto.ts";
-import type { UserDto } from "../../dto/UserDto.ts";
-import { getLogger } from "../../logger.ts";
-import type { ModRepository } from "../../repsotiory/ModRepository.ts";
-import type { UserRepository } from "../../repsotiory/UserRepository.ts";
-import { type ModService, ModServiceError } from "../ModService.ts";
+import { Mod } from "../domain/Mod.ts";
+import type { User } from "../domain/User.ts";
+import { type ModDto, serializeMod, serializeMods } from "../dto/ModDto.ts";
+import type { UserDto } from "../dto/UserDto.ts";
+import { getLogger } from "../logger.ts";
+import type { ModRepository } from "../repsotiory/ModRepository.ts";
+import type { UserRepository } from "../repsotiory/UserRepository.ts";
 
-export class UserModService implements ModService {
+export enum UserModServiceError {
+	NotMaintainer = "NotMaintainer",
+	NotFound = "NotFound",
+	UserNotFound = "UserNotFound",
+}
+
+export class UserModService {
 	private readonly logger = getLogger(UserModService.name);
 
 	constructor(
@@ -16,11 +21,11 @@ export class UserModService implements ModService {
 		protected readonly user: UserDto,
 	) {}
 
-	async findAllUserMods(): Promise<ModDto[] | ModServiceError> {
+	async findAllUserMods(): Promise<ModDto[] | UserModServiceError> {
 		const user = await this.userRepository.getById(this.user.id);
 
 		if (!user) {
-			return ModServiceError.UserNotFound;
+			return UserModServiceError.UserNotFound;
 		}
 
 		const mods = await this.modRepository.getByMaintainer(user);
@@ -28,31 +33,31 @@ export class UserModService implements ModService {
 		return serializeMods(mods);
 	}
 
-	async findUserModById(modId: string): Promise<ModDto | ModServiceError> {
+	async findUserModById(modId: string): Promise<ModDto | UserModServiceError> {
 		const user = await this.userRepository.getById(this.user.id);
 
 		if (!user) {
-			return ModServiceError.UserNotFound;
+			return UserModServiceError.UserNotFound;
 		}
 
 		const mod = await this.modRepository.getById(modId);
 
 		if (!mod) {
-			return ModServiceError.NotFound;
+			return UserModServiceError.NotFound;
 		}
 
 		if (!mod.canBeUpdatedBy(user)) {
-			return ModServiceError.NotMaintainer;
+			return UserModServiceError.NotMaintainer;
 		}
 
 		return serializeMod(mod);
 	}
 
-	async createMod(name: string): Promise<void | ModServiceError> {
+	async createMod(name: string): Promise<void | UserModServiceError> {
 		const user = await this.userRepository.getById(this.user.id);
 
 		if (!user) {
-			return ModServiceError.UserNotFound;
+			return UserModServiceError.UserNotFound;
 		}
 
 		const id = await this.modRepository.getNextId();
@@ -66,21 +71,21 @@ export class UserModService implements ModService {
 		await this.modRepository.save(mod);
 	}
 
-	async updateMod(modDto: ModDto): Promise<undefined | ModServiceError> {
+	async updateMod(modDto: ModDto): Promise<undefined | UserModServiceError> {
 		const user = await this.userRepository.getById(this.user.id);
 
 		if (!user) {
-			return ModServiceError.UserNotFound;
+			return UserModServiceError.UserNotFound;
 		}
 
 		const mod = await this.modRepository.getById(modDto.id);
 
 		if (!mod) {
-			return ModServiceError.NotFound;
+			return UserModServiceError.NotFound;
 		}
 
 		if (!mod.canBeUpdatedBy(user)) {
-			return ModServiceError.NotMaintainer;
+			return UserModServiceError.NotMaintainer;
 		}
 
 		const newMaintainers: User[] = [];
@@ -112,21 +117,21 @@ export class UserModService implements ModService {
 		await this.modRepository.save(mod);
 	}
 
-	async deleteMod(id: string): Promise<undefined | ModServiceError> {
+	async deleteMod(id: string): Promise<undefined | UserModServiceError> {
 		const user = await this.userRepository.getById(this.user.id);
 
 		if (!user) {
-			return ModServiceError.UserNotFound;
+			return UserModServiceError.UserNotFound;
 		}
 
 		const mod = await this.modRepository.getById(id);
 
 		if (!mod) {
-			return ModServiceError.NotFound;
+			return UserModServiceError.NotFound;
 		}
 
 		if (!mod.canBeDeletedBy(user)) {
-			return ModServiceError.NotMaintainer;
+			return UserModServiceError.NotMaintainer;
 		}
 
 		await this.modRepository.delete(mod.id);

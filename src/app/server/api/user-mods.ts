@@ -5,8 +5,8 @@ import { z } from "zod";
 import { ModDtoSchema } from "../dto/ModDto.ts";
 import { getLogger } from "../logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { userModService } from "../middleware/userModService.ts";
-import { ModServiceError } from "../services/ModService.ts";
+import { getUserModService } from "../services";
+import { UserModServiceError } from "../services/UserModService.ts";
 
 const router = new Hono();
 
@@ -39,9 +39,9 @@ router.get(
 		},
 	}),
 	cookieAuth(),
-	userModService(),
 	async (c) => {
-		const service = c.var.getUserModService();
+		const user = c.var.getUser();
+		const service = getUserModService(user);
 
 		const mods = await service.findAllUserMods();
 
@@ -82,23 +82,22 @@ router.get(
 		},
 	}),
 	cookieAuth(),
-	userModService(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = c.var.getUserModService();
+		const service = getUserModService(user);
 
 		const result = await service.findUserModById(id);
 
-		if (result === ModServiceError.NotMaintainer) {
+		if (result === UserModServiceError.NotMaintainer) {
 			logger.warn(
 				`User '${user.id}' attempted to access mod '${id}' which they do not maintain`,
 			);
 			return c.body(null, StatusCodes.NOT_FOUND);
 		}
 
-		if (result === ModServiceError.NotFound) {
+		if (result === UserModServiceError.NotFound) {
 			return c.body(null, StatusCodes.NOT_FOUND);
 		}
 
@@ -140,11 +139,11 @@ router.post(
 		},
 	}),
 	cookieAuth(),
-	userModService(),
 	validator("json", ModDtoSchema.pick({ name: true })),
 	async (c) => {
 		const createRequest = c.req.valid("json");
-		const service = c.var.getUserModService();
+		const user = c.var.getUser();
+		const service = getUserModService(user);
 
 		await service.createMod(createRequest.name);
 
@@ -186,28 +185,27 @@ router.put(
 		},
 	}),
 	cookieAuth(),
-	userModService(),
 	validator("param", z.object({ id: z.string() })),
 	validator("json", ModDtoSchema.omit({ id: true })),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = c.var.getUserModService();
+		const service = getUserModService(user);
 
 		const result = await service.updateMod({
 			id,
 			...updates,
 		});
 
-		if (result === ModServiceError.NotFound) {
+		if (result === UserModServiceError.NotFound) {
 			return c.json(
 				{ error: `Mod with id '${id}' not found` },
 				StatusCodes.NOT_FOUND,
 			);
 		}
 
-		if (result === ModServiceError.NotMaintainer) {
+		if (result === UserModServiceError.NotMaintainer) {
 			logger.warn(
 				`User '${user.id}' attempted to update mod '${id}' which they do not maintain`,
 			);
@@ -267,23 +265,22 @@ router.delete(
 		},
 	}),
 	cookieAuth(),
-	userModService(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = c.var.getUserModService();
+		const service = getUserModService(user);
 
 		const result = await service.deleteMod(id);
 
-		if (result === ModServiceError.NotFound) {
+		if (result === UserModServiceError.NotFound) {
 			return c.json(
 				{ error: `Mod with id '${id}' not found` },
 				StatusCodes.NOT_FOUND,
 			);
 		}
 
-		if (result === ModServiceError.NotMaintainer) {
+		if (result === UserModServiceError.NotMaintainer) {
 			logger.warn(
 				`User '${user.id}' attempted to delete mod '${id}' which they do not maintain`,
 			);

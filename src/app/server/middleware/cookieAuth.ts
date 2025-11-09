@@ -5,8 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import appConfig from "../app-config.ts";
 import { UserToken } from "../domain/UserToken.ts";
 import type { UserDto } from "../dto/UserDto.ts";
-import { MongooseUserRepository } from "../repsotiory/impl/MongooseUserRepository.ts";
-import { BaseUserService } from "../services/impl/BaseUserService.ts";
+import { userService } from "../services";
 
 type Env = {
 	Variables: {
@@ -24,7 +23,6 @@ export const cookieAuth = () =>
 		}
 
 		const userToken = await UserToken.fromTokenString(token);
-		const userService = new BaseUserService(new MongooseUserRepository());
 		const user = await userService.getUserById(userToken.userId);
 
 		c.set("getUser", () => user);

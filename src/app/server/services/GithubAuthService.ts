@@ -1,6 +1,6 @@
 import { OAuthApp, Octokit } from "octokit";
-import appConfig from "../../app-config.ts";
-import type { AuthResult, AuthService } from "../AuthService.ts";
+import appConfig from "../app-config.ts";
+import type { AuthResult, AuthService } from "./AuthService.ts";
 
 export class GithubAuthService implements AuthService {
 	private readonly app: OAuthApp;

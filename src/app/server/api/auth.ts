@@ -5,13 +5,8 @@ import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import appConfig from "../app-config.ts";
 import { UserDtoSchema } from "../dto/UserDto.ts";
-import {
-	AuthServiceFactory,
-	AuthServiceProvider,
-} from "../factory/AuthServiceFactory.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { MongooseUserRepository } from "../repsotiory/impl/MongooseUserRepository.ts";
-import { BaseUserService } from "../services/impl/BaseUserService.ts";
+import { AuthServiceProvider, getAuthService, userService } from "../services";
 
 const params = z.object({
 	provider: z.enum(AuthServiceProvider),
@@ -31,14 +26,13 @@ router.get(
 	validator("query", z.object({ code: z.string(), state: z.string() })),
 	async (c) => {
 		const provider = c.req.valid("param").provider;
-		const authService = AuthServiceFactory.getAuthService(provider);
+		const authService = getAuthService(provider);
 
 		const authResult = await authService.handleCallback(
 			c.req.valid("query").code,
 			c.req.valid("query").state,
 		);
 
-		const userService = new BaseUserService(new MongooseUserRepository());
 		const token = await userService.issueTokenForAuthResult(authResult);
 
 		setCookie(c, appConfig.sessionCookieName, token);
@@ -58,7 +52,7 @@ router.get(
 	validator("param", params),
 	(c) => {
 		const provider = c.req.valid("param").provider;
-		const authService = AuthServiceFactory.getAuthService(provider);
+		const authService = getAuthService(provider);
 
 		return c.redirect(authService.getWebFlowAuthorizationUrl());
 	},
