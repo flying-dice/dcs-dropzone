@@ -112,7 +112,7 @@ url = "/tmp/dcs-dropzone.sqlite"
         - /api/health: Mongo connectivity check
         - /v3/api-docs + /api: OpenAPI JSON + Scalar UI
     - Services
-      - Auth: src/app/server/services/github-auth.service.ts implements AuthService
+      - Auth: src/app/server/services/github-AuthService.ts implements AuthService
         - GitHub OAuth via octokit OAuthApp
         - On callback, signs a JWT with user profile; cookie-based session via SESSION_COOKIE_NAME
       - Auth middlewares: cookieAuth (validates JWT and exposes getUser), sudoUser (enforces SUDO_USERS)

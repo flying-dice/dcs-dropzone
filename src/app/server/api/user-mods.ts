@@ -2,22 +2,15 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import { db } from "../db.ts";
-import {
-	createModSchema,
-	modSchema,
-	modSummarySchema,
-	updateModSchema,
-} from "../domain/mod.schema.ts";
+import { ModDtoSchema } from "../dto/ModDto.ts";
+import { getLogger } from "../logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { MongoModRepository } from "../repositories/mod.repository.ts";
-import { ModService } from "../services/mod.service.ts";
+import { userModService } from "../middleware/userModService.ts";
+import { ModServiceError } from "../services/ModService.ts";
 
 const router = new Hono();
 
-// Initialize repository and service
-const modRepository = new MongoModRepository(db.mods);
-const modService = new ModService(modRepository);
+const logger = getLogger("api/user-mods");
 
 /**
  * GET /api/user-mods - List all user's mods (summary view)
@@ -25,6 +18,7 @@ const modService = new ModService(modRepository);
 router.get(
 	"/",
 	describeRoute({
+		operationId: "getUserMods",
 		summary: "List all user's mods",
 		description:
 			"Get a list of all mods where the authenticated user is in the maintainers list (without content and versions)",
@@ -35,7 +29,7 @@ router.get(
 				description: "List of user's mods",
 				content: {
 					"application/json": {
-						schema: resolver(z.array(modSummarySchema)),
+						schema: resolver(z.array(ModDtoSchema)),
 					},
 				},
 			},
@@ -45,10 +39,13 @@ router.get(
 		},
 	}),
 	cookieAuth(),
+	userModService(),
 	async (c) => {
-		const user = c.var.getUser();
-		const mods = await modService.getModsByMaintainer(user.userId);
-		return c.json(mods, StatusCodes.OK);
+		const service = c.var.getUserModService();
+
+		const mods = await service.findAllUserMods();
+
+		return c.json(ModDtoSchema.array().parse(mods), StatusCodes.OK);
 	},
 );
 
@@ -58,6 +55,7 @@ router.get(
 router.get(
 	"/:id",
 	describeRoute({
+		operationId: "getUserModById",
 		summary: "Get user mod by ID",
 		description:
 			"Get detailed information about a specific mod where the user is a maintainer, including content and versions",
@@ -68,33 +66,15 @@ router.get(
 				description: "Mod details",
 				content: {
 					"application/json": {
-						schema: resolver(modSchema),
+						schema: resolver(ModDtoSchema),
 					},
 				},
 			},
 			[StatusCodes.NOT_FOUND]: {
 				description: "Mod not found",
-				content: {
-					"application/json": {
-						schema: resolver(
-							z.object({
-								error: z.string(),
-							}),
-						),
-					},
-				},
 			},
 			[StatusCodes.FORBIDDEN]: {
 				description: "User is not a maintainer of this mod",
-				content: {
-					"application/json": {
-						schema: resolver(
-							z.object({
-								error: z.string(),
-							}),
-						),
-					},
-				},
 			},
 			[StatusCodes.UNAUTHORIZED]: {
 				description: "Authentication required",
@@ -102,28 +82,27 @@ router.get(
 		},
 	}),
 	cookieAuth(),
+	userModService(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const mod = await modService.getModById(id);
+		const service = c.var.getUserModService();
 
-		if (!mod) {
-			return c.json(
-				{ error: `Mod with id '${id}' not found` },
-				StatusCodes.NOT_FOUND,
+		const result = await service.findUserModById(id);
+
+		if (result === ModServiceError.NotMaintainer) {
+			logger.warn(
+				`User '${user.id}' attempted to access mod '${id}' which they do not maintain`,
 			);
+			return c.body(null, StatusCodes.NOT_FOUND);
 		}
 
-		// Check if user is a maintainer
-		if (!mod.maintainers.includes(user.userId)) {
-			return c.json(
-				{ error: "User is not a maintainer of this mod" },
-				StatusCodes.FORBIDDEN,
-			);
+		if (result === ModServiceError.NotFound) {
+			return c.body(null, StatusCodes.NOT_FOUND);
 		}
 
-		return c.json(mod, StatusCodes.OK);
+		return c.json(ModDtoSchema.parse(result), StatusCodes.OK);
 	},
 );
 
@@ -133,6 +112,7 @@ router.get(
 router.post(
 	"/",
 	describeRoute({
+		operationId: "createUserMod",
 		summary: "Create a new mod",
 		description:
 			"Create a new mod. Requires authentication. The authenticated user will be added as a maintainer.",
@@ -141,14 +121,9 @@ router.post(
 		responses: {
 			[StatusCodes.CREATED]: {
 				description: "Mod created successfully",
-				content: {
-					"application/json": {
-						schema: resolver(modSchema),
-					},
-				},
 			},
-			[StatusCodes.BAD_REQUEST]: {
-				description: "Invalid input or mod already exists",
+			[StatusCodes.INTERNAL_SERVER_ERROR]: {
+				description: "Failed to create mod",
 				content: {
 					"application/json": {
 						schema: resolver(
@@ -165,23 +140,15 @@ router.post(
 		},
 	}),
 	cookieAuth(),
-	validator("json", createModSchema),
+	userModService(),
+	validator("json", ModDtoSchema.pick({ name: true })),
 	async (c) => {
-		const modData = c.req.valid("json");
-		const user = c.var.getUser();
+		const createRequest = c.req.valid("json");
+		const service = c.var.getUserModService();
 
-		try {
-			const mod = await modService.createMod(modData, user.userId);
-			return c.json(mod, StatusCodes.CREATED);
-		} catch (error) {
-			return c.json(
-				{
-					error:
-						error instanceof Error ? error.message : "Failed to create mod",
-				},
-				StatusCodes.BAD_REQUEST,
-			);
-		}
+		await service.createMod(createRequest.name);
+
+		return c.body(null, StatusCodes.CREATED);
 	},
 );
 
@@ -191,6 +158,7 @@ router.post(
 router.put(
 	"/:id",
 	describeRoute({
+		operationId: "updateUserMod",
 		summary: "Update a mod",
 		description:
 			"Update an existing mod. Requires authentication and user must be a maintainer.",
@@ -199,11 +167,6 @@ router.put(
 		responses: {
 			[StatusCodes.OK]: {
 				description: "Mod updated successfully",
-				content: {
-					"application/json": {
-						schema: resolver(modSchema),
-					},
-				},
 			},
 			[StatusCodes.NOT_FOUND]: {
 				description: "Mod not found",
@@ -217,71 +180,44 @@ router.put(
 					},
 				},
 			},
-			[StatusCodes.FORBIDDEN]: {
-				description: "User is not a maintainer of this mod",
-				content: {
-					"application/json": {
-						schema: resolver(
-							z.object({
-								error: z.string(),
-							}),
-						),
-					},
-				},
-			},
 			[StatusCodes.UNAUTHORIZED]: {
 				description: "Authentication required",
 			},
 		},
 	}),
 	cookieAuth(),
+	userModService(),
 	validator("param", z.object({ id: z.string() })),
-	validator("json", updateModSchema),
+	validator("json", ModDtoSchema.omit({ id: true })),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
+		const service = c.var.getUserModService();
 
-		try {
-			const mod = await modService.updateMod(id, updates, user.userId);
+		const result = await service.updateMod({
+			id,
+			...updates,
+		});
 
-			if (!mod) {
-				return c.json(
-					{ error: `Mod with id '${id}' not found` },
-					StatusCodes.NOT_FOUND,
-				);
-			}
-
-			return c.json(mod, StatusCodes.OK);
-		} catch (error) {
-			// Differentiate error types for proper status codes
-			if (
-				error &&
-				typeof error === "object" &&
-				"message" in error &&
-				typeof error.message === "string"
-			) {
-				if (
-					error.message.includes("not a maintainer") ||
-					error.message.includes("not authorized")
-				) {
-					return c.json({ error: error.message }, StatusCodes.FORBIDDEN);
-				}
-				if (
-					error.message.includes("not found") ||
-					error.message.includes("does not exist")
-				) {
-					return c.json({ error: error.message }, StatusCodes.NOT_FOUND);
-				}
-				// Validation errors or other known errors
-				return c.json({ error: error.message }, StatusCodes.BAD_REQUEST);
-			}
-			// Unknown error type
+		if (result === ModServiceError.NotFound) {
 			return c.json(
-				{ error: "Failed to update mod" },
-				StatusCodes.INTERNAL_SERVER_ERROR,
+				{ error: `Mod with id '${id}' not found` },
+				StatusCodes.NOT_FOUND,
 			);
 		}
+
+		if (result === ModServiceError.NotMaintainer) {
+			logger.warn(
+				`User '${user.id}' attempted to update mod '${id}' which they do not maintain`,
+			);
+			return c.json(
+				{ error: `Mod with id '${id}' not found` },
+				StatusCodes.NOT_FOUND,
+			);
+		}
+
+		return c.body(null, StatusCodes.OK);
 	},
 );
 
@@ -291,13 +227,14 @@ router.put(
 router.delete(
 	"/:id",
 	describeRoute({
+		operationId: "deleteUserMod",
 		summary: "Delete a mod",
 		description:
 			"Delete an existing mod. Requires authentication and user must be a maintainer.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.NO_CONTENT]: {
+			[StatusCodes.OK]: {
 				description: "Mod deleted successfully",
 			},
 			[StatusCodes.NOT_FOUND]: {
@@ -330,53 +267,33 @@ router.delete(
 		},
 	}),
 	cookieAuth(),
+	userModService(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
+		const service = c.var.getUserModService();
 
-		try {
-			const deleted = await modService.deleteMod(id, user.userId);
+		const result = await service.deleteMod(id);
 
-			if (!deleted) {
-				return c.json(
-					{ error: `Mod with id '${id}' not found` },
-					StatusCodes.NOT_FOUND,
-				);
-			}
-
-			return c.body(null, StatusCodes.NO_CONTENT);
-		} catch (error) {
-			// Differentiate error types for proper status codes
-			if (
-				error &&
-				typeof error === "object" &&
-				"message" in error &&
-				typeof error.message === "string"
-			) {
-				if (
-					error.message.includes("not a maintainer") ||
-					error.message.includes("not authorized")
-				) {
-					return c.json({ error: error.message }, StatusCodes.FORBIDDEN);
-				} else if (
-					error.message.includes("not found") ||
-					error.message.includes("does not exist")
-				) {
-					return c.json({ error: error.message }, StatusCodes.NOT_FOUND);
-				} else {
-					return c.json(
-						{ error: error.message },
-						StatusCodes.INTERNAL_SERVER_ERROR,
-					);
-				}
-			} else {
-				return c.json(
-					{ error: "Failed to delete mod" },
-					StatusCodes.INTERNAL_SERVER_ERROR,
-				);
-			}
+		if (result === ModServiceError.NotFound) {
+			return c.json(
+				{ error: `Mod with id '${id}' not found` },
+				StatusCodes.NOT_FOUND,
+			);
 		}
+
+		if (result === ModServiceError.NotMaintainer) {
+			logger.warn(
+				`User '${user.id}' attempted to delete mod '${id}' which they do not maintain`,
+			);
+			return c.json(
+				{ error: `Mod with id '${id}' not found` },
+				StatusCodes.NOT_FOUND,
+			);
+		}
+
+		return c.body(null, StatusCodes.OK);
 	},
 );
 

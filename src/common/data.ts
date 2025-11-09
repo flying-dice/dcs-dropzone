@@ -10,11 +10,11 @@ export enum ModCategory {
 	Other = "Other",
 }
 
-export const ModVisibility = {
-	Public: "Public",
-	Private: "Private",
-	Unlisted: "Unlisted",
-};
+export enum ModVisibility {
+	Public = "Public",
+	Private = "Private",
+	Unlisted = "Unlisted",
+}
 
 export const data = {
 	categories: Object.values(ModCategory),

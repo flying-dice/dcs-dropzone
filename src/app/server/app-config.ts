@@ -17,7 +17,6 @@ const configSchema = z.object({
 	ghClientId: z.string(),
 	ghClientSecret: z.string(),
 	ghAuthorizationCallbackUrl: z.string().url(),
-	sudoUsers: z.array(z.string()),
 	ghHomepageUrl: z.string().url(),
 });
 

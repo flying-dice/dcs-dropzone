@@ -2,14 +2,15 @@ import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
-import { jwtVerify } from "jose";
 import appConfig from "../app-config.ts";
-import type { UserData } from "../services/auth.service.ts";
-import { userDataSchema } from "../services/auth.service.ts";
+import { UserToken } from "../domain/UserToken.ts";
+import type { UserDto } from "../dto/UserDto.ts";
+import { MongooseUserRepository } from "../repsotiory/impl/MongooseUserRepository.ts";
+import { BaseUserService } from "../services/impl/BaseUserService.ts";
 
 type Env = {
 	Variables: {
-		getUser: () => UserData;
+		getUser: () => UserDto;
 	};
 };
 
@@ -22,12 +23,9 @@ export const cookieAuth = () =>
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
-		const userToken = await jwtVerify(
-			token,
-			new TextEncoder().encode(appConfig.jwtSecret),
-		);
-
-		const user = userDataSchema.parse(userToken.payload);
+		const userToken = await UserToken.fromTokenString(token);
+		const userService = new BaseUserService(new MongooseUserRepository());
+		const user = await userService.getUserById(userToken.userId);
 
 		c.set("getUser", () => user);
 
