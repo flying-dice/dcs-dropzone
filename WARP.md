@@ -63,7 +63,7 @@ bun run postdrizzle   # builds src/daemon/database/index-ddl.ts
 
 - Web application (src/application)
   - Required env vars (see src/application/server/ApplicationConfig.ts and src/application/server/ApplicationContext.ts):
-    - PORT, LOG_LEVEL, JWT_SECRET, SESSION_COOKIE_NAME (optional, default JSESSIONID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, SUDO_USERS (comma-separated IDs), GH_HOMEPAGE_URL, MONGODB_URI
+    - PORT, LOG_LEVEL, JWT_SECRET, SESSION_COOKIE_NAME (optional, default JSESSIONID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, GH_HOMEPAGE_URL, MONGODB_URI
   - Example (replace placeholders):
 
 ```bash path=null start=null
@@ -74,7 +74,6 @@ export SESSION_COOKIE_NAME=JSESSIONID
 export GH_CLIENT_ID={{GH_CLIENT_ID}}
 export GH_CLIENT_SECRET={{GH_CLIENT_SECRET}}
 export GH_AUTHORIZATION_CALLBACK_URL=http://localhost:3000/auth/github/callback
-export SUDO_USERS=12345,67890
 export GH_HOMEPAGE_URL=http://localhost:3000/
 export MONGODB_URI="mongodb://localhost:27017"
 ```
@@ -115,7 +114,7 @@ url = "/tmp/dcs-dropzone.sqlite"
       - Auth: src/application/server/services/github-AuthService.ts implements AuthService
         - GitHub OAuth via octokit OAuthApp
         - On callback, signs a JWT with user profile; cookie-based session via SESSION_COOKIE_NAME
-      - Auth middlewares: cookieAuth (validates JWT and exposes getUser), sudoUser (enforces SUDO_USERS)
+      - Auth middlewares: cookieAuth (validates JWT and exposes getUser)
     - Data: src/application/server/ApplicationContext.ts
       - Connects to MongoDB via MONGODB_URI, exposes collection mods and ping()
     - Client: src/application/client

@@ -1,50 +1,31 @@
 import { Hono } from "hono";
-import { describeRoute, resolver } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
-import { z } from "zod";
 import Database from "../Database.ts";
+import Logger from "../Logger.ts";
+import { ErrorData } from "../schemas/ErrorData.ts";
+import { describeJsonRoute } from "./describeJsonRoute.ts";
 
 const router = new Hono();
+const logger = Logger.getLogger("api/health");
 
 router.get(
 	"/",
-	describeRoute({
-		description: "Say hello to the user",
+	describeJsonRoute({
 		responses: {
-			[StatusCodes.OK]: {
-				description: "Successful response",
-				content: {
-					"application/json": {
-						schema: resolver(
-							z.object({
-								status: z.literal("UP"),
-							}),
-						),
-					},
-				},
-			},
-			[StatusCodes.SERVICE_UNAVAILABLE]: {
-				description: "Service Unavailable response",
-				content: {
-					"application/json": {
-						schema: resolver(
-							z.object({
-								status: z.literal("DOWN"),
-								error: z.string(),
-							}),
-						),
-					},
-				},
-			},
+			[StatusCodes.OK]: null,
+			[StatusCodes.SERVICE_UNAVAILABLE]: ErrorData,
 		},
 	}),
 	async (c) => {
 		try {
+			logger.debug("Health check ping start");
 			await Database.ping();
-			return c.json({ status: "UP" }, StatusCodes.OK);
+			logger.debug("Health check ping success");
+			return c.body(null, StatusCodes.OK);
 		} catch (error) {
+			logger.warn({ error: String(error) }, "Health check ping failure");
 			return c.json(
-				{ status: "DOWN", error: String(error) },
+				ErrorData.parse({ error: String(error) }),
 				StatusCodes.SERVICE_UNAVAILABLE,
 			);
 		}

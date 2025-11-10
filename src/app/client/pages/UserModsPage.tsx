@@ -5,15 +5,17 @@ import {
 	Group,
 	SimpleGrid,
 	Stack,
-	Tabs,
 	useComputedColorScheme,
 } from "@mantine/core";
 import { modals, openModal } from "@mantine/modals";
 import { StatusCodes } from "http-status-codes";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { createUserMod, useGetUserMods } from "../_autogen/api.ts";
-import type { AuthenticatedUser } from "../_autogen/legacy_api.ts";
+import {
+	createUserMod,
+	type UserData,
+	useGetUserMods,
+} from "../_autogen/api.ts";
 import { ModCard } from "../components/ModCard.tsx";
 import { NewModForm } from "../components/NewModForm.tsx";
 import { StatCard } from "../components/StatCard.tsx";
@@ -21,7 +23,7 @@ import { AppIcons } from "../icons.ts";
 import { showErrorNotification } from "../utils/showErrorNotification.tsx";
 
 export type UserModsPageProps = {
-	user: AuthenticatedUser;
+	user: UserData;
 };
 
 export function UserModsPage(props: UserModsPageProps) {
@@ -85,7 +87,7 @@ export function UserModsPage(props: UserModsPageProps) {
 							mods.data?.data.map((mod) => (
 								<ModCard
 									key={mod.id}
-									imageUrl={mod.imageUrl}
+									imageUrl={mod.thumbnail}
 									category={mod.category}
 									averageRating={4.8}
 									title={mod.name}

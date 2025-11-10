@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
-import type { AuthenticatedUser } from "../_autogen/legacy_api.ts";
+import type { UserData } from "../_autogen/api.ts";
 
 export const UserContext = createContext<{
 	login: () => void;
 	logout: () => void;
-	user: AuthenticatedUser | null;
+	user: UserData | null;
 }>({
 	login: () => {},
 	logout: () => {},

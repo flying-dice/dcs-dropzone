@@ -30,10 +30,6 @@ const appConfig = configSchema.parse({
 	ghClientId: string("GH_CLIENT_ID"),
 	ghClientSecret: string("GH_CLIENT_SECRET"),
 	ghAuthorizationCallbackUrl: string("GH_AUTHORIZATION_CALLBACK_URL"),
-	sudoUsers: string("SUDO_USERS")
-		.split(",")
-		.map((s) => s.trim())
-		.filter((s) => s.length > 0),
 	ghHomepageUrl: string("GH_HOMEPAGE_URL"),
 });
 

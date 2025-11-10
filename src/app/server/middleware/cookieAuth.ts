@@ -18,17 +18,41 @@ type Env = {
 
 export const cookieAuth = () =>
 	createMiddleware<Env>(async (c, next) => {
+		const requestId = c.get("requestId");
+		logger.debug({ requestId }, "Authenticating via cookie");
+
+		logger.debug({ requestId }, "Retrieving token from cookie");
 		const token = getCookie(c, appConfig.sessionCookieName);
 
 		if (!token) {
-			logger.warn("No token found in cookie");
+			logger.warn({ requestId }, "No token found in cookie");
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
-		const userToken = await UserToken.fromTokenString(token);
-		const user = await ApplicationContext.userService.getUserById(
-			userToken.userId,
-		);
+		let userToken: UserToken;
+
+		try {
+			logger.debug({ requestId, token }, "Verifying token from cookie");
+			userToken = await UserToken.fromTokenString(token);
+			logger.debug({ requestId, userId: userToken.userId }, "Token verified");
+		} catch (error) {
+			logger.warn({ requestId, error }, "Invalid token in cookie");
+			throw new HTTPException(StatusCodes.UNAUTHORIZED);
+		}
+
+		let user: UserData;
+
+		try {
+			logger.debug(
+				{ requestId, userId: userToken.userId },
+				"Loading authenticated user",
+			);
+			user = await ApplicationContext.userService.getUserById(userToken.userId);
+			logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
+		} catch (error) {
+			logger.warn({ requestId, error }, "User not found for token");
+			throw new HTTPException(StatusCodes.UNAUTHORIZED);
+		}
 
 		c.set("getUser", () => user);
 

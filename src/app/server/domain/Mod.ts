@@ -1,6 +1,9 @@
 import { ModCategory, ModVisibility } from "../../../common/data.ts";
+import Logger from "../Logger.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { DomainObject } from "./DomainObject.ts";
+
+const logger = Logger.getLogger("Mod");
 
 export class Mod extends DomainObject<typeof ModData> {
 	constructor(data: ModData) {
@@ -12,6 +15,7 @@ export class Mod extends DomainObject<typeof ModData> {
 	}
 
 	updateProps(props: Omit<ModData, "id">): void {
+		logger.debug({ id: this.data.id }, "Updating mod props");
 		this.setData({ id: this.data.id, ...props });
 	}
 
@@ -24,6 +28,7 @@ export class Mod extends DomainObject<typeof ModData> {
 	}
 
 	static default(props: Pick<ModData, "id" | "name" | "maintainers">): Mod {
+		logger.debug({ id: props.id, name: props.name }, "Creating default mod");
 		return new Mod({
 			id: props.id,
 			name: props.name,

@@ -17,16 +17,17 @@ import {
 	useComputedColorScheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
 import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaCamera } from "react-icons/fa6";
 import { useParams } from "react-router-dom";
 import { z } from "zod";
-import { data, ModCategory, ModVisibility } from "../../../common/data.ts";
+import { data } from "../../../common/data.ts";
 import {
-	type AuthenticatedUser,
-	type UserMod,
+	type ModData,
+	ModDataCategory,
+	ModDataVisibility,
+	type UserData,
 	updateUserMod,
 	useGetUserModById,
 	useGetUserMods,
@@ -42,7 +43,7 @@ import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
 
 const userModFormValues = z.object({
 	name: z.string().min(2, { message: "Name should have at least 2 letters" }),
-	category: z.enum(ModCategory),
+	category: z.enum(ModDataCategory),
 	description: z
 		.string()
 		.min(10, { message: "Short Description should have at least 10 letters" }),
@@ -53,11 +54,11 @@ const userModFormValues = z.object({
 	dependencies: z.array(z.string()),
 	thumbnail: z.string().url(),
 	screenshots: z.array(z.string().url()),
-	visibility: z.enum(ModVisibility),
+	visibility: z.enum(ModDataVisibility),
 });
 export type UserModFormValues = z.infer<typeof userModFormValues>;
 
-export function UserModPage(props: { user: AuthenticatedUser }) {
+export function UserModPage(props: { user: UserData }) {
 	const params = useParams<{ modId: string }>();
 	const mod = useGetUserModById(params.modId || "undefined");
 
@@ -77,8 +78,8 @@ export function UserModPage(props: { user: AuthenticatedUser }) {
 }
 
 type UserModPageProps = {
-	user: AuthenticatedUser;
-	mod: UserMod;
+	user: UserData;
+	mod: ModData;
 };
 
 function _UserModPage(props: UserModPageProps) {
@@ -120,7 +121,6 @@ function _UserModPage(props: UserModPageProps) {
 								content: values.content,
 								dependencies: values.dependencies,
 								description: values.description,
-								imageUrl: values.thumbnail,
 								maintainers: [props.user.id],
 								name: values.name,
 								screenshots: values.screenshots,

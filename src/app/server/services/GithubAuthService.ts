@@ -1,6 +1,9 @@
 import { OAuthApp, Octokit } from "octokit";
 import appConfig from "../ApplicationConfig.ts";
+import Logger from "../Logger.ts";
 import type { AuthResult, AuthService } from "./AuthService.ts";
+
+const logger = Logger.getLogger("GithubAuthService");
 
 export class GithubAuthService implements AuthService {
 	private readonly app: OAuthApp;
@@ -16,14 +19,20 @@ export class GithubAuthService implements AuthService {
 	}
 
 	getWebFlowAuthorizationUrl() {
+		logger.debug("Generating web flow authorization URL");
 		return this.app.getWebFlowAuthorizationUrl({}).url;
 	}
 
 	async handleCallback(code: string, state: string): Promise<AuthResult> {
+		logger.debug("Handling OAuth callback: exchanging code for token");
 		const auth = await this.app.createToken({ code, state });
 
 		const kit = new Octokit({ auth: auth.authentication.token });
 		const { data } = await kit.rest.users.getAuthenticated();
+		logger.debug(
+			{ id: data.id, login: data.login },
+			"Fetched authenticated GitHub user",
+		);
 
 		return {
 			id: data.id.toString(),

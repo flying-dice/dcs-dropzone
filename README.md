@@ -57,7 +57,6 @@ SESSION_COOKIE_NAME=JSESSIONID
 GH_CLIENT_ID=your-github-client-id
 GH_CLIENT_SECRET=your-github-client-secret
 GH_AUTHORIZATION_CALLBACK_URL=http://localhost:3000/auth/github/callback
-SUDO_USERS=comma-separated-github-user-ids
 GH_HOMEPAGE_URL=http://localhost:3000/
 MONGODB_URI=mongodb://localhost:27017
 ```
@@ -202,7 +201,6 @@ The web application uses GitHub OAuth for authentication:
 1. Register a GitHub OAuth App at https://github.com/settings/developers
 2. Set the authorization callback URL to match `GH_AUTHORIZATION_CALLBACK_URL`
 3. Configure `GH_CLIENT_ID` and `GH_CLIENT_SECRET` in your environment
-4. Add GitHub user IDs to `SUDO_USERS` for admin access
 
 ## 📚 API Documentation
 

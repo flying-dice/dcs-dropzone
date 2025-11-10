@@ -6,15 +6,14 @@ import { openAPIRouteHandler } from "hono-openapi";
 import auth from "./api/auth.ts";
 import health from "./api/health.ts";
 import userMods from "./api/user-mods.ts";
-import Logger from "./Logger.ts";
-import { loggerMiddleware } from "./middleware/logger.ts";
+import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
 
 export const application = new Hono();
 application.use("/*", cors());
 
 application.use(requestId());
 
-application.use("*", loggerMiddleware(Logger.getLogger("hono")));
+application.use("*", requestResponseLogger());
 application.route("/auth", auth);
 application.route("/api/health", health);
 application.route("/api/user-mods", userMods);
