@@ -8,13 +8,7 @@ import {
 	TextInput,
 } from "@mantine/core";
 import { openModal } from "@mantine/modals";
-import {
-	BiData,
-	BiDetail,
-	BiLogOut,
-	BiLogoGithub,
-	BiPackage,
-} from "react-icons/bi";
+import { BiDetail, BiLogOut, BiLogoGithub, BiPackage } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext.ts";
 

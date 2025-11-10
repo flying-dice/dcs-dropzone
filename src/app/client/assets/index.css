@@ -1,7 +1,0 @@
-.readme h1 {
-	margin-top: var(--mantine-spacing-md) !important;
-}
-
-.readme pre code {
-	background-color: unset;
-}

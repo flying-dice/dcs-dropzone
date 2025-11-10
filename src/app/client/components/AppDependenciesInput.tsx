@@ -8,7 +8,6 @@ import {
 	TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { openModal } from "@mantine/modals";
 import { useState } from "react";
 import { FaLink } from "react-icons/fa6";
 import { useGetRegistryIndex } from "../_autogen/legacy_api.ts";

@@ -167,7 +167,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiBold}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								makeSelectionBold(editorInstance, monacoInstance!)();
+								makeSelectionBold(editorInstance, monacoInstance)();
 							}
 						}}
 					/>

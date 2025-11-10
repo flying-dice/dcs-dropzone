@@ -1,11 +1,4 @@
-import type {
-	Collection,
-	Db,
-	DeleteResult,
-	Filter,
-	UpdateResult,
-	WithId,
-} from "mongodb";
+import type { Collection, Db, Filter, WithId } from "mongodb";
 import type { Logger } from "pino";
 import type { Identifiable, Repository } from "../Repository.ts";
 

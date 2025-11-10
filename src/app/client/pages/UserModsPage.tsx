@@ -26,7 +26,7 @@ export type UserModsPageProps = {
 	user: UserData;
 };
 
-export function UserModsPage(props: UserModsPageProps) {
+export function UserModsPage(_: UserModsPageProps) {
 	const nav = useNavigate();
 	const colorScheme = useComputedColorScheme();
 	const mods = useGetUserMods();
