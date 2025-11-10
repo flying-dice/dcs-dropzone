@@ -111,7 +111,6 @@ export class SevenzipService {
 			}
 		});
 
-
 		await new Promise((resolve, reject) => {
 			_7zip.on("error", (err) => {
 				_7zip.removeAllListeners();

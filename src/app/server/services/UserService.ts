@@ -30,7 +30,7 @@ export class UserService {
 	): Promise<string> {
 		logger.debug(
 			{ id: authResult.id, username: authResult.username },
-			"issueTokenForAuthResult start",
+			"refreshUserAndIssueTokenForAuthResult start",
 		);
 
 		const user = new User({

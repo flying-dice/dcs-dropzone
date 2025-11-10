@@ -32,7 +32,7 @@ export const cookieAuth = () =>
 		let userToken: UserToken;
 
 		try {
-			logger.debug({ requestId, token }, "Verifying token from cookie");
+			logger.debug({ requestId }, "Verifying token from cookie");
 			userToken = await UserToken.fromTokenString(token);
 			logger.debug({ requestId, userId: userToken.userId }, "Token verified");
 		} catch (error) {
