@@ -13,3 +13,6 @@ junit = "unit.junit.xml"
 [loader]
 ".ttf" = "file"
 ".otf" = "file"
+
+[install]
+registry = "https://registry.npmjs.org/"

@@ -1,8 +1,8 @@
 FROM debian:stable-slim
 
-COPY ./dist/app /usr/bin/app
+COPY ./dist/app /usr/bin/application
 
 EXPOSE 3000
 
-RUN chmod +x /usr/bin/app
-CMD ["/usr/bin/app"]
+RUN chmod +x /usr/bin/application
+CMD ["/usr/bin/application"]

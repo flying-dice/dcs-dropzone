@@ -2,15 +2,15 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import { ModDtoSchema } from "../dto/ModDto.ts";
-import { getLogger } from "../logger.ts";
+import ApplicationContext from "../ApplicationContext.ts";
+import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { getUserModService } from "../services";
+import { ModData } from "../schemas/ModData.ts";
 import { UserModServiceError } from "../services/UserModService.ts";
 
 const router = new Hono();
 
-const logger = getLogger("api/user-mods");
+const logger = Logger.getLogger("api/user-mods");
 
 /**
  * GET /api/user-mods - List all user's mods (summary view)
@@ -29,7 +29,7 @@ router.get(
 				description: "List of user's mods",
 				content: {
 					"application/json": {
-						schema: resolver(z.array(ModDtoSchema)),
+						schema: resolver(z.array(ModData)),
 					},
 				},
 			},
@@ -41,11 +41,11 @@ router.get(
 	cookieAuth(),
 	async (c) => {
 		const user = c.var.getUser();
-		const service = getUserModService(user);
+		const service = ApplicationContext.getUserModService(user);
 
 		const mods = await service.findAllUserMods();
 
-		return c.json(ModDtoSchema.array().parse(mods), StatusCodes.OK);
+		return c.json(mods, StatusCodes.OK);
 	},
 );
 
@@ -66,7 +66,7 @@ router.get(
 				description: "Mod details",
 				content: {
 					"application/json": {
-						schema: resolver(ModDtoSchema),
+						schema: resolver(ModData),
 					},
 				},
 			},
@@ -86,7 +86,7 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = getUserModService(user);
+		const service = ApplicationContext.getUserModService(user);
 
 		const result = await service.findUserModById(id);
 
@@ -101,7 +101,7 @@ router.get(
 			return c.body(null, StatusCodes.NOT_FOUND);
 		}
 
-		return c.json(ModDtoSchema.parse(result), StatusCodes.OK);
+		return c.json(result, StatusCodes.OK);
 	},
 );
 
@@ -139,11 +139,11 @@ router.post(
 		},
 	}),
 	cookieAuth(),
-	validator("json", ModDtoSchema.pick({ name: true })),
+	validator("json", ModData.pick({ name: true })),
 	async (c) => {
 		const createRequest = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = getUserModService(user);
+		const service = ApplicationContext.getUserModService(user);
 
 		await service.createMod(createRequest.name);
 
@@ -186,12 +186,12 @@ router.put(
 	}),
 	cookieAuth(),
 	validator("param", z.object({ id: z.string() })),
-	validator("json", ModDtoSchema.omit({ id: true })),
+	validator("json", ModData.omit({ id: true })),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = getUserModService(user);
+		const service = ApplicationContext.getUserModService(user);
 
 		const result = await service.updateMod({
 			id,
@@ -269,7 +269,7 @@ router.delete(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = getUserModService(user);
+		const service = ApplicationContext.getUserModService(user);
 
 		const result = await service.deleteMod(id);
 

@@ -1,23 +1,12 @@
-export interface UserProperties {
-	userId: string;
-	userLogin: string;
-	userName?: string;
-	userAvatarUrl: string;
-	userProfileUrl: string;
-}
+import { UserData } from "../schemas/UserData.ts";
+import { DomainObject } from "./DomainObject.ts";
 
-export class User implements UserProperties {
-	userId: string;
-	userLogin: string;
-	userName?: string;
-	userAvatarUrl: string;
-	userProfileUrl: string;
+export class User extends DomainObject<typeof UserData> {
+	constructor(data: UserData) {
+		super(UserData, data);
+	}
 
-	constructor(properties: UserProperties) {
-		this.userId = properties.userId;
-		this.userLogin = properties.userLogin;
-		this.userName = properties.userName;
-		this.userAvatarUrl = properties.userAvatarUrl;
-		this.userProfileUrl = properties.userProfileUrl;
+	get id(): string {
+		return this.data.id;
 	}
 }

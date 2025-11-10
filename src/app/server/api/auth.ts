@@ -3,10 +3,11 @@ import { deleteCookie, setCookie } from "hono/cookie";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import appConfig from "../app-config.ts";
-import { UserDtoSchema } from "../dto/UserDto.ts";
+import appConfig from "../ApplicationConfig.ts";
+import ApplicationContext from "../ApplicationContext.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { AuthServiceProvider, getAuthService, userService } from "../services";
+import { UserData } from "../schemas/UserData.ts";
+import { AuthServiceProvider } from "../services/AuthServiceProvider.ts";
 
 const params = z.object({
 	provider: z.enum(AuthServiceProvider),
@@ -26,14 +27,15 @@ router.get(
 	validator("query", z.object({ code: z.string(), state: z.string() })),
 	async (c) => {
 		const provider = c.req.valid("param").provider;
-		const authService = getAuthService(provider);
+		const authService = ApplicationContext.getAuthService(provider);
 
 		const authResult = await authService.handleCallback(
 			c.req.valid("query").code,
 			c.req.valid("query").state,
 		);
 
-		const token = await userService.issueTokenForAuthResult(authResult);
+		const token =
+			await ApplicationContext.userService.issueTokenForAuthResult(authResult);
 
 		setCookie(c, appConfig.sessionCookieName, token);
 
@@ -52,7 +54,7 @@ router.get(
 	validator("param", params),
 	(c) => {
 		const provider = c.req.valid("param").provider;
-		const authService = getAuthService(provider);
+		const authService = ApplicationContext.getAuthService(provider);
 
 		return c.redirect(authService.getWebFlowAuthorizationUrl());
 	},
@@ -70,7 +72,7 @@ router.get(
 			[StatusCodes.OK]: {
 				description: "Authenticated user data",
 				content: {
-					"application/json": { schema: resolver(UserDtoSchema) },
+					"application/json": { schema: resolver(UserData) },
 				},
 			},
 		},
@@ -78,15 +80,7 @@ router.get(
 	cookieAuth(),
 	(c) => {
 		const user = c.var.getUser();
-		return c.json(
-			UserDtoSchema.parse({
-				id: user.id,
-				name: user.name,
-				login: user.login,
-				avatarUrl: user.avatarUrl,
-				profileUrl: user.profileUrl,
-			}),
-		);
+		return c.json(user);
 	},
 );
 

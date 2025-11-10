@@ -1,10 +1,8 @@
 import { Mod } from "../domain/Mod.ts";
-import type { User } from "../domain/User.ts";
-import { type ModDto, serializeMod, serializeMods } from "../dto/ModDto.ts";
-import type { UserDto } from "../dto/UserDto.ts";
-import { getLogger } from "../logger.ts";
 import type { ModRepository } from "../repsotiory/ModRepository.ts";
 import type { UserRepository } from "../repsotiory/UserRepository.ts";
+import type { ModData } from "../schemas/ModData.ts";
+import type { UserData } from "../schemas/UserData.ts";
 
 export enum UserModServiceError {
 	NotMaintainer = "NotMaintainer",
@@ -13,15 +11,13 @@ export enum UserModServiceError {
 }
 
 export class UserModService {
-	private readonly logger = getLogger(UserModService.name);
-
 	constructor(
 		private readonly modRepository: ModRepository,
 		private readonly userRepository: UserRepository,
-		protected readonly user: UserDto,
+		protected readonly user: UserData,
 	) {}
 
-	async findAllUserMods(): Promise<ModDto[] | UserModServiceError> {
+	async findAllUserMods(): Promise<ModData[] | UserModServiceError> {
 		const user = await this.userRepository.getById(this.user.id);
 
 		if (!user) {
@@ -30,107 +26,77 @@ export class UserModService {
 
 		const mods = await this.modRepository.getByMaintainer(user);
 
-		return serializeMods(mods);
+		return mods.map((it) => it.toData());
 	}
 
-	async findUserModById(modId: string): Promise<ModDto | UserModServiceError> {
-		const user = await this.userRepository.getById(this.user.id);
-
-		if (!user) {
-			return UserModServiceError.UserNotFound;
-		}
-
+	async findUserModById(modId: string): Promise<ModData | UserModServiceError> {
 		const mod = await this.modRepository.getById(modId);
 
 		if (!mod) {
 			return UserModServiceError.NotFound;
 		}
 
-		if (!mod.canBeUpdatedBy(user)) {
+		if (!mod.canBeUpdatedBy(this.user.id)) {
 			return UserModServiceError.NotMaintainer;
 		}
 
-		return serializeMod(mod);
+		return mod.toData();
 	}
 
 	async createMod(name: string): Promise<void | UserModServiceError> {
-		const user = await this.userRepository.getById(this.user.id);
-
-		if (!user) {
-			return UserModServiceError.UserNotFound;
-		}
-
 		const id = await this.modRepository.getNextId();
 
 		const mod = Mod.default({
 			id,
 			name,
-			maintainers: [user],
+			maintainers: [this.user.id],
 		});
 
 		await this.modRepository.save(mod);
 	}
 
-	async updateMod(modDto: ModDto): Promise<undefined | UserModServiceError> {
-		const user = await this.userRepository.getById(this.user.id);
-
-		if (!user) {
-			return UserModServiceError.UserNotFound;
-		}
-
-		const mod = await this.modRepository.getById(modDto.id);
+	async updateMod(modData: ModData): Promise<undefined | UserModServiceError> {
+		const mod = await this.modRepository.getById(modData.id);
 
 		if (!mod) {
 			return UserModServiceError.NotFound;
 		}
 
-		if (!mod.canBeUpdatedBy(user)) {
+		if (!mod.canBeUpdatedBy(this.user.id)) {
 			return UserModServiceError.NotMaintainer;
 		}
 
-		const newMaintainers: User[] = [];
-
-		for (const maintainerDto of modDto.maintainers) {
-			const maintainer = await this.userRepository.getById(maintainerDto);
-			if (maintainer) {
-				newMaintainers.push(maintainer);
-			} else {
-				this.logger.error(
-					`Maintainer with id '${maintainerDto}' not found while updating mod '${modDto.id}'`,
-				);
+		for (const maintainerId of modData.maintainers) {
+			const maintainer = await this.userRepository.getById(maintainerId);
+			if (!maintainer) {
+				return UserModServiceError.UserNotFound;
 			}
 		}
 
 		mod.updateProps({
-			name: modDto.name,
-			category: modDto.category,
-			description: modDto.description,
-			content: modDto.content,
-			tags: modDto.tags,
-			dependencies: modDto.dependencies,
-			screenshots: modDto.screenshots,
-			thumbnail: modDto.thumbnail,
-			visibility: modDto.visibility,
-			maintainers: newMaintainers,
+			name: modData.name,
+			category: modData.category,
+			description: modData.description,
+			content: modData.content,
+			tags: modData.tags,
+			dependencies: modData.dependencies,
+			screenshots: modData.screenshots,
+			thumbnail: modData.thumbnail,
+			visibility: modData.visibility,
+			maintainers: modData.maintainers,
 		});
 
 		await this.modRepository.save(mod);
 	}
 
 	async deleteMod(id: string): Promise<undefined | UserModServiceError> {
-		const user = await this.userRepository.getById(this.user.id);
-
-		if (!user) {
-			return UserModServiceError.UserNotFound;
-		}
-
 		const mod = await this.modRepository.getById(id);
 
 		if (!mod) {
 			return UserModServiceError.NotFound;
 		}
 
-		if (!mod.canBeDeletedBy(user)) {
+		if (!mod.canBeDeletedBy(this.user.id)) {
 			return UserModServiceError.NotMaintainer;
 		}
 

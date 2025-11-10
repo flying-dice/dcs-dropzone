@@ -6,22 +6,22 @@ import { openAPIRouteHandler } from "hono-openapi";
 import auth from "./api/auth.ts";
 import health from "./api/health.ts";
 import userMods from "./api/user-mods.ts";
-import { getLogger } from "./logger.ts";
+import Logger from "./Logger.ts";
 import { loggerMiddleware } from "./middleware/logger.ts";
 
-export const app = new Hono();
-app.use("/*", cors());
+export const application = new Hono();
+application.use("/*", cors());
 
-app.use(requestId());
+application.use(requestId());
 
-app.use("*", loggerMiddleware(getLogger("hono")));
-app.route("/auth", auth);
-app.route("/api/health", health);
-app.route("/api/user-mods", userMods);
+application.use("*", loggerMiddleware(Logger.getLogger("hono")));
+application.route("/auth", auth);
+application.route("/api/health", health);
+application.route("/api/user-mods", userMods);
 
-app.get(
+application.get(
 	"/v3/api-docs",
-	openAPIRouteHandler(app, {
+	openAPIRouteHandler(application, {
 		documentation: {
 			info: {
 				title: "DCS Dropzone Registry API",
@@ -32,4 +32,4 @@ app.get(
 	}),
 );
 
-app.get("/api", Scalar({ url: "/v3/api-docs" }));
+application.get("/api", Scalar({ url: "/v3/api-docs" }));

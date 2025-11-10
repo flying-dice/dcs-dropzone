@@ -20,7 +20,7 @@ const configSchema = z.object({
 	ghHomepageUrl: z.string().url(),
 });
 
-export type AppConfig = z.infer<typeof configSchema>;
+export type ApplicationConfig = z.infer<typeof configSchema>;
 
 const appConfig = configSchema.parse({
 	port: int("PORT"),

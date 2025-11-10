@@ -1,25 +1,29 @@
 import { jwtVerify, SignJWT } from "jose";
 import { z } from "zod";
-import appConfig from "../app-config.ts";
-import type { User } from "./User.ts";
+import appConfig from "../ApplicationConfig.ts";
+import { DomainObject } from "./DomainObject.ts";
 
 const ENC_JWT_SECRET: Uint8Array<ArrayBufferLike> = new TextEncoder().encode(
 	appConfig.jwtSecret,
 );
 
-const USER_TOKEN_SCHEMA = z.object({
+export const UserTokenData = z.object({
 	userId: z.string(),
 });
 
-export class UserToken {
-	constructor(public readonly userId: string) {}
+export type UserTokenData = z.infer<typeof UserTokenData>;
+
+export class UserToken extends DomainObject<typeof UserTokenData> {
+	constructor(data: UserTokenData) {
+		super(UserTokenData, data);
+	}
+
+	get userId(): string {
+		return this.data.userId;
+	}
 
 	async toTokenString(): Promise<string> {
-		const tokenPayload = USER_TOKEN_SCHEMA.parse({
-			userId: this.userId,
-		});
-
-		return await new SignJWT(tokenPayload)
+		return await new SignJWT(this.data)
 			.setProtectedHeader({ alg: "HS256" })
 			.setIssuedAt()
 			.setExpirationTime("15m")
@@ -27,10 +31,11 @@ export class UserToken {
 	}
 
 	static async fromTokenString(tokenString: string): Promise<UserToken> {
-		const verifiedToken = await jwtVerify<User>(tokenString, ENC_JWT_SECRET);
+		const verifiedToken = await jwtVerify<UserTokenData>(
+			tokenString,
+			ENC_JWT_SECRET,
+		);
 
-		const { userId } = USER_TOKEN_SCHEMA.parse(verifiedToken.payload);
-
-		return new UserToken(userId);
+		return new UserToken(verifiedToken.payload);
 	}
 }

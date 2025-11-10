@@ -11,7 +11,7 @@ DCS Dropzone consists of two main components:
 
 ## 🏗️ Architecture
 
-### Web Application (`src/app`)
+### Web Application (`src/application`)
 - **Frontend**: React 19 with Mantine UI, React Router, and TanStack Query
 - **Backend**: Hono API with OpenAPI documentation
 - **Authentication**: GitHub OAuth with JWT-based sessions
@@ -102,7 +102,7 @@ The daemon API will be available on the port specified in `config.toml`
 Build both components to native binaries:
 
 ```bash
-# Build web application (outputs to dist/app)
+# Build web application (outputs to dist/application)
 bun run build
 
 # Build daemon (outputs to dist/appd)
@@ -121,7 +121,7 @@ Or run the built binaries directly:
 
 ```bash
 # Run web application
-./dist/app
+./dist/application
 
 # Run daemon
 ./dist/appd
@@ -145,13 +145,13 @@ Uses [Biome](https://biomejs.dev) for code linting and formatting.
 
 ### API Client Generation
 
-Generate TypeScript API clients from OpenAPI specs (requires web app running):
+Generate TypeScript API clients from OpenAPI specs (requires web application running):
 
 ```bash
 bun run orval
 ```
 
-Generated clients are available in `src/app/client/_autogen/`
+Generated clients are available in `src/application/client/_autogen/`
 
 ### Database Migrations (Daemon)
 
@@ -170,7 +170,7 @@ Migrations are stored in `src/daemon/database/ddl/` and bundled into `index-ddl.
 ```
 dcs-dropzone/
 ├── src/
-│   ├── app/                    # Web application
+│   ├── application/                    # Web application
 │   │   ├── client/             # React frontend
 │   │   │   ├── pages/          # Page components
 │   │   │   ├── components/     # Reusable UI components
@@ -180,13 +180,13 @@ dcs-dropzone/
 │   │   │   ├── api/            # API routes (auth, health)
 │   │   │   ├── services/       # Business logic (auth, etc.)
 │   │   │   ├── middleware/     # Auth & logging middleware
-│   │   │   └── app.ts          # Hono app configuration
-│   │   └── index.ts            # Server entry point
+│   │   │   └── application.ts          # Hono application configuration
+│   │   └── ApplicationContext.ts            # Server entry point
 │   ├── daemon/                 # Daemon service
 │   │   ├── api/                # Daemon API routes
 │   │   ├── database/           # SQLite database & migrations
 │   │   ├── middleware/         # Middleware
-│   │   └── index.ts            # Daemon entry point
+│   │   └── ApplicationContext.ts            # Daemon entry point
 │   └── common/                 # Shared utilities
 ├── tests/                      # Test files
 ├── config.toml                 # Daemon configuration
@@ -240,7 +240,7 @@ For detailed technical documentation and agent-specific guidance, see [WARP.md](
 - **Runtime**: [Bun](https://bun.sh)
 - **Frontend**: React 19, Mantine UI, React Router, TanStack Query
 - **Backend**: Hono, OpenAPI
-- **Databases**: MongoDB (web app), SQLite (daemon)
+- **Databases**: MongoDB (web application), SQLite (daemon)
 - **ORM**: Drizzle (daemon)
 - **Authentication**: GitHub OAuth with JWT
 - **Build Tools**: Bun, Biome

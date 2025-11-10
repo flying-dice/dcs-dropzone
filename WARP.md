@@ -11,7 +11,7 @@ bun install
 ```
 
 - Dev servers
-  - Web app (serves React SPA + Hono API on PORT):
+  - Web application (serves React SPA + Hono API on PORT):
 
 ```bash path=null start=null
 bun run dev
@@ -26,11 +26,11 @@ bun run dev:daemon
 - Build (produces native binaries in dist/)
 
 ```bash path=null start=null
-bun run build        # web app -> dist/app
+bun run build        # web application -> dist/application
 bun run build:daemon # daemon  -> dist/appd
 ```
 
-- Run via Docker Compose (app + MongoDB)
+- Run via Docker Compose (application + MongoDB)
 
 ```bash path=null start=null
 bun run start
@@ -43,7 +43,7 @@ bun run biome
 ```
 
 - API client generation (orval)
-  - Local API (requires web app running to serve /v3/api-docs):
+  - Local API (requires web application running to serve /v3/api-docs):
 
 ```bash path=null start=null
 bun run orval
@@ -61,8 +61,8 @@ bun run postdrizzle   # builds src/daemon/database/index-ddl.ts
 
 ## Environment & config
 
-- Web app (src/app)
-  - Required env vars (see src/app/server/app-config.ts and src/app/server/index.ts):
+- Web application (src/application)
+  - Required env vars (see src/application/server/ApplicationConfig.ts and src/application/server/ApplicationContext.ts):
     - PORT, LOG_LEVEL, JWT_SECRET, SESSION_COOKIE_NAME (optional, default JSESSIONID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, SUDO_USERS (comma-separated IDs), GH_HOMEPAGE_URL, MONGODB_URI
   - Example (replace placeholders):
 
@@ -80,7 +80,7 @@ export MONGODB_URI="mongodb://localhost:27017"
 ```
 
 - Daemon (src/daemon)
-  - Reads TOML config at runtime: `${cwd}/config.toml` (see src/daemon/app-config.ts)
+  - Reads TOML config at runtime: `${cwd}/config.toml` (see src/daemon/ApplicationConfig.ts)
   - Minimal example:
 
 ```toml path=null start=null
@@ -101,42 +101,42 @@ url = "/tmp/dcs-dropzone.sqlite"
 ## High-level architecture
 
 - Runtime(s)
-  - Web app (src/app)
-    - Entrypoint: src/app/index.ts (Bun.serve)
+  - Web application (src/application)
+    - Entrypoint: src/application/ApplicationContext.ts (Bun.serve)
       - Serves client HTML for "/*"
-      - Proxies API routes to Hono app: /auth, /api, /v3/api-docs
-    - API: src/app/server/app.ts (Hono)
+      - Proxies API routes to Hono application: /auth, /api, /v3/api-docs
+    - API: src/application/server/Application.ts (Hono)
       - Middleware: CORS, requestId, structured request logging (pino via loggerMiddleware)
       - Routes:
         - /auth: OAuth login/redirect/user/logout (see services below)
         - /api/health: Mongo connectivity check
         - /v3/api-docs + /api: OpenAPI JSON + Scalar UI
     - Services
-      - Auth: src/app/server/services/github-AuthService.ts implements AuthService
+      - Auth: src/application/server/services/github-AuthService.ts implements AuthService
         - GitHub OAuth via octokit OAuthApp
         - On callback, signs a JWT with user profile; cookie-based session via SESSION_COOKIE_NAME
       - Auth middlewares: cookieAuth (validates JWT and exposes getUser), sudoUser (enforces SUDO_USERS)
-    - Data: src/app/server/index.ts
+    - Data: src/application/server/ApplicationContext.ts
       - Connects to MongoDB via MONGODB_URI, exposes collection mods and ping()
-    - Client: src/app/client
+    - Client: src/application/client
       - React 19 + Mantine UI + React Router (HashRouter) + TanStack Query
-      - Generated API clients live in src/app/client/_autogen/ via orval; local target reads http://localhost:3000/v3/api-docs
+      - Generated API clients live in src/application/client/_autogen/ via orval; local target reads http://localhost:3000/v3/api-docs
 
   - Daemon (src/daemon)
-    - Entrypoint: src/daemon/index.ts (Bun.serve) -> routes /api, /v3/api-docs
-    - API: src/daemon/app.ts with similar middleware stack; health checks SQLite
-    - Config: src/daemon/app-config.ts loads TOML
+    - Entrypoint: src/daemon/ApplicationContext.ts (Bun.serve) -> routes /api, /v3/api-docs
+    - API: src/daemon/Application.ts with similar middleware stack; health checks SQLite
+    - Config: src/daemon/ApplicationConfig.ts loads TOML
     - Database: src/daemon/database
       - drizzle with bun:sqlite
       - SQL migrations stored in src/daemon/database/ddl (generated via drizzle-kit)
-      - At boot, src/daemon/database/index.ts loads compiled SQL from index-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
+      - At boot, src/daemon/database/ApplicationContext.ts loads compiled SQL from index-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
 
 - Build & deploy
-  - bun build compiles each runtime to a single native binary (dist/app, dist/appd)
-  - Dockerfile copies dist/app into a minimal Debian image and exposes 3000; docker-compose also runs mongodb
+  - bun build compiles each runtime to a single native binary (dist/application, dist/appd)
+  - Dockerfile copies dist/application into a minimal Debian image and exposes 3000; docker-compose also runs mongodb
 
 ## Notes for agents
 
-- Orval generation for local clients requires the web app running so the OpenAPI route is reachable.
-- The web app uses env-based config and will throw at startup if required vars are missing; set them before bun run dev/build.
-- Database layers differ: web app uses MongoDB; daemon uses SQLite + drizzle; don’t conflate their migration or connection logic.
+- Orval generation for local clients requires the web application running so the OpenAPI route is reachable.
+- The web application uses env-based config and will throw at startup if required vars are missing; set them before bun run dev/build.
+- Database layers differ: web application uses MongoDB; daemon uses SQLite + drizzle; don’t conflate their migration or connection logic.

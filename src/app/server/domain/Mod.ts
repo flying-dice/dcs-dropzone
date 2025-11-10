@@ -1,75 +1,29 @@
 import { ModCategory, ModVisibility } from "../../../common/data.ts";
-import type { User } from "./User.ts";
+import { ModData } from "../schemas/ModData.ts";
+import { DomainObject } from "./DomainObject.ts";
 
-export interface ModProperties {
-	id: string;
-	name: string;
-	category: ModCategory;
-	description: string;
-	content: string;
-	tags: string[];
-	dependencies: string[];
-	screenshots: string[];
-	thumbnail: string;
-	visibility: ModVisibility;
-	maintainers: User[];
-}
-
-export class Mod implements ModProperties {
-	id: string;
-	name: string;
-	category: ModCategory;
-	description: string;
-	content: string;
-	tags: string[];
-	dependencies: string[];
-	screenshots: string[];
-	thumbnail: string;
-	visibility: ModVisibility;
-	maintainers: User[];
-
-	constructor(props: ModProperties) {
-		this.id = props.id;
-		this.name = props.name;
-		this.category = props.category;
-		this.description = props.description;
-		this.content = props.content;
-		this.tags = props.tags;
-		this.dependencies = props.dependencies;
-		this.screenshots = props.screenshots;
-		this.thumbnail = props.thumbnail;
-		this.visibility = props.visibility;
-		this.maintainers = props.maintainers;
+export class Mod extends DomainObject<typeof ModData> {
+	constructor(data: ModData) {
+		super(ModData, data);
 	}
 
-	updateProps(props: Omit<ModProperties, "id">): void {
-		this.name = props.name;
-		this.category = props.category;
-		this.description = props.description;
-		this.content = props.content;
-		this.tags = props.tags;
-		this.dependencies = props.dependencies;
-		this.screenshots = props.screenshots;
-		this.thumbnail = props.thumbnail;
-		this.visibility = props.visibility;
-		this.maintainers = props.maintainers;
+	get id(): string {
+		return this.data.id;
 	}
 
-	canBeUpdatedBy(user: User): boolean {
-		return this.maintainers.some(
-			(maintainer) => maintainer.userId === user.userId,
-		);
+	updateProps(props: Omit<ModData, "id">): void {
+		this.setData({ id: this.data.id, ...props });
 	}
 
-	canBeDeletedBy(user: User): boolean {
-		return this.maintainers.some(
-			(maintainer) => maintainer.userId === user.userId,
-		);
+	canBeUpdatedBy(user: string): boolean {
+		return this.data.maintainers.includes(user);
 	}
 
-	static default(
-		props: Pick<ModProperties, "id" | "name" | "maintainers">,
-	): Mod {
+	canBeDeletedBy(user: string): boolean {
+		return this.data.maintainers.includes(user);
+	}
+
+	static default(props: Pick<ModData, "id" | "name" | "maintainers">): Mod {
 		return new Mod({
 			id: props.id,
 			name: props.name,

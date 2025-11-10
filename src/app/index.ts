@@ -1,7 +1,7 @@
 import { serve } from "bun";
 import index from "./client/index.html";
-import { app } from "./server/app.ts";
-import appConfig from "./server/app-config.ts";
+import { application } from "./server/Application.ts";
+import appConfig from "./server/ApplicationConfig.ts";
 
 console.log(`🌍 DCS Dropzone Registry Webapp Starting...`);
 
@@ -10,11 +10,11 @@ const server = serve({
 	development: process.env.NODE_ENV !== "production",
 	routes: {
 		"/*": index,
-		"/auth": app.fetch,
-		"/auth/**": app.fetch,
-		"/api": app.fetch,
-		"/api/**": app.fetch,
-		"/v3/api-docs": app.fetch,
+		"/auth": application.fetch,
+		"/auth/**": application.fetch,
+		"/api": application.fetch,
+		"/api/**": application.fetch,
+		"/v3/api-docs": application.fetch,
 	},
 });
 

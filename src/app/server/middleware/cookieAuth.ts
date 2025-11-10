@@ -2,14 +2,17 @@ import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
-import appConfig from "../app-config.ts";
+import appConfig from "../ApplicationConfig.ts";
+import ApplicationContext from "../ApplicationContext.ts";
 import { UserToken } from "../domain/UserToken.ts";
-import type { UserDto } from "../dto/UserDto.ts";
-import { userService } from "../services";
+import Logger from "../Logger.ts";
+import type { UserData } from "../schemas/UserData.ts";
+
+const logger = Logger.getLogger("cookieAuth");
 
 type Env = {
 	Variables: {
-		getUser: () => UserDto;
+		getUser: () => UserData;
 	};
 };
 
@@ -18,12 +21,14 @@ export const cookieAuth = () =>
 		const token = getCookie(c, appConfig.sessionCookieName);
 
 		if (!token) {
-			console.warn("No token found in cookie");
+			logger.warn("No token found in cookie");
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
 		const userToken = await UserToken.fromTokenString(token);
-		const user = await userService.getUserById(userToken.userId);
+		const user = await ApplicationContext.userService.getUserById(
+			userToken.userId,
+		);
 
 		c.set("getUser", () => user);
 
