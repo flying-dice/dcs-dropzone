@@ -30,10 +30,9 @@ router.get(
 		logger.debug({ provider }, "Auth callback start");
 		const authService = ApplicationContext.getAuthService(provider);
 
-		const authResult = await authService.handleCallback(
-			c.req.valid("query").code,
-			c.req.valid("query").state,
-		);
+		const { code, state } = c.req.valid("query");
+
+		const authResult = await authService.handleCallback(code, state);
 
 		logger.debug(
 			{ provider, userId: authResult.id, username: authResult.username },

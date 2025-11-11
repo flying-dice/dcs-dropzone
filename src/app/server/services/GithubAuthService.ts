@@ -26,7 +26,9 @@ export class GithubAuthService implements AuthService {
 	async handleCallback(code: string, state: string): Promise<AuthResult> {
 		logger.debug("Handling OAuth callback: exchanging code for token");
 		const auth = await this.app.createToken({ code, state });
+		logger.debug("Token obtained from GitHub OAuth");
 
+		logger.debug("Fetching authenticated user information from GitHub");
 		const kit = new Octokit({ auth: auth.authentication.token });
 		const { data } = await kit.rest.users.getAuthenticated();
 		logger.debug(

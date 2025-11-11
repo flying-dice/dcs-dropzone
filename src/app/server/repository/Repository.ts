@@ -1,3 +1,5 @@
+import type { PageData } from "../schemas/PageData.ts";
+
 export interface Identifiable {
 	id: string;
 }
@@ -21,6 +23,11 @@ export interface Repository<T extends Identifiable> {
 	 * @returns A promise that resolves when the initialization is complete.
 	 */
 	postConstruct(): Promise<void>;
+
+	getAll(
+		page: number,
+		size: number,
+	): Promise<{ data: T[]; page: { total: number } }>;
 
 	/**
 	 * Retrieves an entity by its unique identifier.

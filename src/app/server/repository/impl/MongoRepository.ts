@@ -16,6 +16,32 @@ export abstract class MongoRepository<
 		this.col = db.collection<DOCUMENT>(collectionName);
 	}
 
+	async getAll(
+		page: number,
+		size: number,
+		projectFields?: Partial<Record<keyof DOCUMENT, 1 | 0>>,
+	): Promise<{ data: DOMAIN[]; page: { total: number } }> {
+		this.logger.debug({ page }, "getAll called");
+
+		const countDocs = await this.col.countDocuments();
+
+		let cursor = this.col.find({});
+
+		if (projectFields) {
+			this.logger.debug({ projectFields }, "getAll applying projection");
+			cursor = cursor.project(projectFields);
+		}
+
+		cursor = cursor.skip((page - 1) * size).limit(size);
+
+		const docs = await cursor.toArray();
+		this.logger.debug({ count: docs.length }, "getAll fetched");
+		return {
+			data: docs.map((d) => this.toDomain(d)),
+			page: { total: countDocs },
+		};
+	}
+
 	async getById(id: string): Promise<DOMAIN | undefined> {
 		this.logger.debug({ id }, "getById called");
 		const doc = await this.col.findOne({ id } as Filter<DOCUMENT>);
