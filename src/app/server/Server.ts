@@ -6,7 +6,9 @@ import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
 import auth from "./api/auth.ts";
 import health from "./api/health.ts";
+import modReleases from "./api/mod-releases.ts";
 import mods from "./api/mods.ts";
+import userModReleases from "./api/user-mod-releases.ts";
 import userMods from "./api/user-mods.ts";
 import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
 
@@ -19,7 +21,9 @@ server.use("*", requestResponseLogger());
 server.route("/auth", auth);
 server.route("/api/health", health);
 server.route("/api/user-mods", userMods);
+server.route("/api/user-mods", userModReleases);
 server.route("/api/mods", mods);
+server.route("/api/mods", modReleases);
 
 server.get(
 	"/v3/api-docs",
