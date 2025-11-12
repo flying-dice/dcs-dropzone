@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { ModVisibility } from "../../../src/common/data.ts";
-import { ModReleaseData } from "../../../src/app/server/schemas/ModReleaseData.ts";
 import { ModReleaseCreateData } from "../../../src/app/server/schemas/ModReleaseCreateData.ts";
+import { ModReleaseData } from "../../../src/app/server/schemas/ModReleaseData.ts";
+import { ModVisibility } from "../../../src/common/data.ts";
 
 describe("ModRelease Schemas", () => {
 	describe("ModReleaseData", () => {
