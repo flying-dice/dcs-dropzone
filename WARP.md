@@ -61,16 +61,16 @@ bun run postdrizzle   # builds src/daemon/database/index-ddl.ts
 
 ## Environment & config
 
-- Web application (src/application)
-  - Required env vars (see src/application/server/ApplicationConfig.ts and src/application/server/Application.ts):
-    - PORT, LOG_LEVEL, JWT_SECRET, SESSION_COOKIE_NAME (optional, default JSESSIONID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, GH_HOMEPAGE_URL, MONGODB_URI
+- Web application (src/app)
+  - Required env vars (see src/app/server/ApplicationConfig.ts and src/app/server/Application.ts):
+    - PORT, LOG_LEVEL, USER_COOKIE_SECRET, USER_COOKIE_NAME (optional, default __Secure-USERID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, GH_HOMEPAGE_URL, MONGODB_URI
   - Example (replace placeholders):
 
 ```bash path=null start=null
 export PORT=3000
 export LOG_LEVEL=info
-export JWT_SECRET={{JWT_SECRET}}
-export SESSION_COOKIE_NAME=JSESSIONID
+export USER_COOKIE_SECRET={{USER_COOKIE_SECRET}}
+export USER_COOKIE_NAME=__Secure-USERID
 export GH_CLIENT_ID={{GH_CLIENT_ID}}
 export GH_CLIENT_SECRET={{GH_CLIENT_SECRET}}
 export GH_AUTHORIZATION_CALLBACK_URL=http://localhost:3000/auth/github/callback
@@ -100,26 +100,26 @@ url = "/tmp/dcs-dropzone.sqlite"
 ## High-level architecture
 
 - Runtime(s)
-  - Web application (src/application)
-    - Entrypoint: src/application/Application.ts (Bun.serve)
+  - Web application (src/app)
+    - Entrypoint: src/app/Application.ts (Bun.serve)
       - Serves client HTML for "/*"
       - Proxies API routes to Hono application: /auth, /api, /v3/api-docs
-    - API: src/application/server/Application.ts (Hono)
+    - API: src/app/server/Application.ts (Hono)
       - Middleware: CORS, requestId, structured request logging (pino via loggerMiddleware)
       - Routes:
         - /auth: OAuth login/redirect/user/logout (see services below)
         - /api/health: Mongo connectivity check
+        - /api/user-mods: CRUD for user mods
         - /v3/api-docs + /api: OpenAPI JSON + Scalar UI
-    - Services
-      - Auth: src/application/server/services/github-AuthService.ts implements AuthService
-        - GitHub OAuth via octokit OAuthApp
-        - On callback, signs a JWT with user profile; cookie-based session via SESSION_COOKIE_NAME
-      - Auth middlewares: cookieAuth (validates JWT and exposes getUser)
-    - Data: src/application/server/Application.ts
-      - Connects to MongoDB via MONGODB_URI, exposes collection mods and ping()
-    - Client: src/application/client
+    - Services and data model
+- Services (e.g., ModService, UserService, UserModService) encapsulate domain logic and persistence.
+- Services interact with Mongoose entities in src/app/server/entities (Mod, ModSummary, User) and never return raw Mongoose docs.
+- All inputs to and outputs from services are validated with Zod. Non-trivial responses are returned in the shape of the Zod Data schemas under src/app/server/schemas so routes can return them directly.
+- Auth flow: on `/:provider/callback` the server persists/updates the user and sets a signed cookie (`USER_COOKIE_NAME`) holding the user id. The `cookieAuth` middleware reads it via `getSignedCookie`, loads the user, and exposes it via `c.var.getUser()`. Logout deletes the cookie.
+- Mongo connection is managed in src/app/server/Database.ts using MONGODB_URI.
+    - Client: src/app/client
       - React 19 + Mantine UI + React Router (HashRouter) + TanStack Query
-      - Generated API clients live in src/application/client/_autogen/ via orval; local target reads http://localhost:3000/v3/api-docs
+      - Generated API clients live in src/app/client/_autogen/ via orval; local target reads http://localhost:3000/v3/api-docs
 
   - Daemon (src/daemon)
     - Entrypoint: src/daemon/Application.ts (Bun.serve) -> routes /api, /v3/api-docs

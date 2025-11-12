@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { deleteCookie, setCookie } from "hono/cookie";
+import { deleteCookie, setSignedCookie } from "hono/cookie";
 import { describeRoute, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
@@ -39,17 +39,26 @@ router.get(
 			"Auth callback success",
 		);
 
-		const token =
-			await ApplicationContext.userService.refreshUserAndIssueTokenForAuthResult(
-				authResult,
-			);
+		const userData =
+			await ApplicationContext.userService.handleAuthResult(authResult);
 
 		logger.debug(
 			{ userId: authResult.id },
 			"Session token issued; setting cookie",
 		);
 
-		setCookie(c, appConfig.sessionCookieName, token);
+		await setSignedCookie(
+			c,
+			appConfig.userCookieName,
+			userData.id,
+			appConfig.userCookieSecret,
+			{
+				secure: true,
+				sameSite: "strict",
+				prefix: "secure",
+				maxAge: appConfig.userCookieMaxAge,
+			},
+		);
 
 		return c.redirect(appConfig.ghHomepageUrl);
 	},
@@ -96,7 +105,11 @@ router.get(
 		security: [{ cookieAuth: [] }],
 	}),
 	(c) => {
-		deleteCookie(c, appConfig.sessionCookieName);
+		deleteCookie(c, appConfig.userCookieName, {
+			secure: true,
+			sameSite: "strict",
+			prefix: "secure",
+		});
 		return c.redirect(appConfig.ghHomepageUrl);
 	},
 );

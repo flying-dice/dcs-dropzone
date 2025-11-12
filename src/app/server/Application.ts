@@ -7,13 +7,11 @@ import { GithubAuthService } from "./services/GithubAuthService.ts";
 import { ModService } from "./services/ModService.ts";
 import { UserModService } from "./services/UserModService.ts";
 import { UserService } from "./services/UserService.ts";
-import { UserTokenService } from "./services/UserTokenService.ts";
 
 const logger = Logger.getLogger("ApplicationContext");
 
 logger.debug("Initializing services");
-const userTokenService: UserTokenService = new UserTokenService();
-const userService: UserService = new UserService(userTokenService);
+const userService: UserService = new UserService();
 const modService: ModService = new ModService();
 logger.debug("Services initialized");
 

@@ -11,11 +11,11 @@ DCS Dropzone consists of two main components:
 
 ## 🏗️ Architecture
 
-### Web Application (`src/application`)
+### Web Application (`src/app`)
 - **Frontend**: React 19 with Mantine UI, React Router, and TanStack Query
 - **Backend**: Hono API with OpenAPI documentation
-- **Authentication**: GitHub OAuth with JWT-based sessions
-- **Database**: MongoDB
+- **Authentication**: GitHub OAuth with signed cookie sessions
+- **Database**: MongoDB via Mongoose (ODM)
 - **Port**: 3000 (configurable via `PORT` env var)
 
 ### Daemon (`src/daemon`)
@@ -23,6 +23,18 @@ DCS Dropzone consists of two main components:
 - **Database**: SQLite with Drizzle ORM
 - **Configuration**: TOML-based configuration file
 - **Port**: Configurable via `config.toml`
+
+## Data model, services, and validation
+
+- Schemas under `src/app/server/schemas` define the domain data (Data schemas) used across the server. These are the canonical shapes for API responses and service contracts.
+- Services encapsulate all persistence and domain logic and interact with Mongoose entities under `src/app/server/entities` (for example, `Mod`, `ModSummary`, `User`).
+- All data that enters and leaves the service layer is validated with Zod:
+  - Inputs are parsed/validated before any processing (e.g., route validators via `hono-openapi` feed validated objects to services).
+  - Service outputs are parsed into the appropriate Data schema so API routes can return them directly without reshaping.
+- Non-trivial service responses should be returned in the shape of the Data schema expected by the API routes. Examples:
+  - Listing user mods returns `{ data: ModSummaryData[], meta: UserModsMetaData }`.
+  - Fetching/creating a mod returns `ModData`.
+- MongoDB access uses Mongoose models defined in `src/app/server/entities`, with connection management in `src/app/server/Database.ts`.
 
 ## 📋 Prerequisites
 
@@ -52,8 +64,8 @@ Create a `.env` file or set environment variables:
 ```bash
 PORT=3000
 LOG_LEVEL=info
-JWT_SECRET=your-secret-key
-SESSION_COOKIE_NAME=JSESSIONID
+USER_COOKIE_SECRET=your-strong-secret
+USER_COOKIE_NAME=__Secure-USERID
 GH_CLIENT_ID=your-github-client-id
 GH_CLIENT_SECRET=your-github-client-secret
 GH_AUTHORIZATION_CALLBACK_URL=http://localhost:3000/auth/github/callback
@@ -150,7 +162,7 @@ Generate TypeScript API clients from OpenAPI specs (requires web application run
 bun run orval
 ```
 
-Generated clients are available in `src/application/client/_autogen/`
+Generated clients are available in `src/app/client/_autogen/`
 
 ### Database Migrations (Daemon)
 
@@ -169,29 +181,32 @@ Migrations are stored in `src/daemon/database/ddl/` and bundled into `index-ddl.
 ```
 dcs-dropzone/
 ├── src/
-│   ├── application/                    # Web application
-│   │   ├── client/             # React frontend
-│   │   │   ├── pages/          # Page components
-│   │   │   ├── components/     # Reusable UI components
-│   │   │   ├── _autogen/       # Generated API clients
-│   │   │   └── index.tsx       # Frontend entry point
-│   │   ├── server/             # Hono API backend
-│   │   │   ├── api/            # API routes (auth, health)
-│   │   │   ├── services/       # Business logic (auth, etc.)
-│   │   │   ├── middleware/     # Auth & logging middleware
-│   │   │   └── application.ts          # Hono application configuration
-│   │   └── Application.ts            # Server entry point
-│   ├── daemon/                 # Daemon service
-│   │   ├── api/                # Daemon API routes
-│   │   ├── database/           # SQLite database & migrations
-│   │   ├── middleware/         # Middleware
-│   │   └── Application.ts            # Daemon entry point
-│   └── common/                 # Shared utilities
-├── tests/                      # Test files
-├── config.toml                 # Daemon configuration
-├── docker-compose.yml          # Docker orchestration
-├── Dockerfile                  # Container image definition
-└── package.json                # Dependencies and scripts
+│   ├── app/                           # Web application (API + client)
+│   │   ├── client/                    # React frontend
+│   │   │   ├── pages/                 # Page components
+│   │   │   ├── components/            # Reusable UI components
+│   │   │   ├── _autogen/              # Generated API clients (orval)
+│   │   │   └── index.tsx              # Frontend entry point
+│   │   ├── server/                    # Hono API backend
+│   │   │   ├── api/                   # API routes (auth, user-mods, health)
+│   │   │   ├── entities/              # Mongoose models (Mod, ModSummary, User)
+│   │   │   ├── schemas/               # Zod data schemas (domain + response shapes)
+│   │   │   ├── services/              # Services using Mongoose, return Zod data
+│   │   │   ├── middleware/            # Auth & logging middleware
+│   │   │   ├── Database.ts            # Mongoose connection and ping()
+│   │   │   └── Application.ts         # Service wiring and context
+│   │   └── Application.ts             # Server entry point (Bun.serve)
+│   ├── daemon/                        # Daemon service
+│   │   ├── api/                       # Daemon API routes
+│   │   ├── database/                  # SQLite database & migrations
+│   │   ├── middleware/                # Middleware
+│   │   └── Application.ts             # Daemon entry point
+│   └── common/                        # Shared utilities
+├── tests/                             # Test files
+├── config.toml                        # Daemon configuration
+├── docker-compose.yml                 # Docker orchestration
+├── Dockerfile                         # Container image definition
+└── package.json                       # Dependencies and scripts
 ```
 
 ## 🔐 Authentication
@@ -201,6 +216,11 @@ The web application uses GitHub OAuth for authentication:
 1. Register a GitHub OAuth App at https://github.com/settings/developers
 2. Set the authorization callback URL to match `GH_AUTHORIZATION_CALLBACK_URL`
 3. Configure `GH_CLIENT_ID` and `GH_CLIENT_SECRET` in your environment
+
+Session management
+- On successful OAuth callback, the server persists/updates the user and sets a signed cookie named by `USER_COOKIE_NAME` containing only the user’s id.
+- Cookies are signed using `USER_COOKIE_SECRET` and set with `Secure` and `SameSite=strict`.
+- The `cookieAuth` middleware reads the signed cookie, loads the user from MongoDB, and exposes it via `c.var.getUser()` to secured routes.
 
 ## 📚 API Documentation
 
@@ -231,7 +251,7 @@ Interactive API documentation is available via Scalar UI at the same endpoints.
 
 ## 📝 Additional Documentation
 
-For detailed technical documentation and agent-specific guidance, see [WARP.md](./WARP.md).
+For detailed technical documentation and agent-specific guidance, see [warp.md](./warp.md).
 
 ## 🛠️ Tech Stack
 
@@ -240,7 +260,7 @@ For detailed technical documentation and agent-specific guidance, see [WARP.md](
 - **Backend**: Hono, OpenAPI
 - **Databases**: MongoDB (web application), SQLite (daemon)
 - **ORM**: Drizzle (daemon)
-- **Authentication**: GitHub OAuth with JWT
+- **Authentication**: GitHub OAuth with signed cookies
 - **Build Tools**: Bun, Biome
 - **Deployment**: Docker, Docker Compose
 

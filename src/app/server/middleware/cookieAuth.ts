@@ -1,4 +1,4 @@
-import { getCookie } from "hono/cookie";
+import { getSignedCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
@@ -21,21 +21,23 @@ export const cookieAuth = () =>
 		logger.debug({ requestId }, "Authenticating via cookie");
 
 		logger.debug({ requestId }, "Retrieving token from cookie");
-		const token = getCookie(c, appConfig.sessionCookieName);
+		const userId = await getSignedCookie(
+			c,
+			appConfig.userCookieSecret,
+			appConfig.userCookieName,
+			"secure",
+		);
 
-		if (!token) {
-			logger.warn({ requestId }, "No token found in cookie");
+		if (!userId) {
+			logger.warn({ requestId }, "No signed cookie found");
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
 		let user: UserData;
 
 		try {
-			logger.debug(
-				{ requestId, token },
-				"Loading authenticated user for token",
-			);
-			user = await ApplicationContext.userService.getUserByToken(token);
+			logger.debug({ requestId, userId }, "Loading authenticated user");
+			user = await ApplicationContext.userService.getUserById(userId);
 			logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
 		} catch (error) {
 			logger.warn({ requestId, error }, "User not found for token");

@@ -2,12 +2,10 @@ import { User } from "../entities/User.ts";
 import Logger from "../Logger.ts";
 import { UserData } from "../schemas/UserData.ts";
 import type { AuthResult } from "./AuthService.ts";
-import type { UserTokenService } from "./UserTokenService.ts";
 
 const logger = Logger.getLogger("UserService");
 
 export class UserService {
-	constructor(private readonly tokenService: UserTokenService) {}
 	async getUserById(userId: string): Promise<UserData> {
 		logger.debug({ userId }, "getUserById start");
 		const user = await User.findOne({ id: userId }).lean().exec();
@@ -22,18 +20,10 @@ export class UserService {
 		return UserData.parse(user);
 	}
 
-	async getUserByToken(tokenString: string): Promise<UserData> {
-		logger.debug("getUserByToken start");
-		const tokenData = await this.tokenService.parseTokenString(tokenString);
-		return this.getUserById(tokenData.userId);
-	}
-
-	async refreshUserAndIssueTokenForAuthResult(
-		authResult: AuthResult,
-	): Promise<string> {
+	async handleAuthResult(authResult: AuthResult): Promise<UserData> {
 		logger.debug(
 			{ id: authResult.id, username: authResult.username },
-			"refreshUserAndIssueTokenForAuthResult start",
+			"registerUserDetails start",
 		);
 
 		const user = UserData.parse({
@@ -45,10 +35,8 @@ export class UserService {
 		});
 
 		await User.updateOne({ id: authResult.id }, user, { upsert: true }).exec();
-		logger.debug({ userId: user.id }, "User persisted");
+		logger.debug({ userId: user.id }, "User registered/persisted");
 
-		const token = await this.tokenService.issueTokenString(user.id);
-		logger.debug({ userId: user.id }, "Token issued for user");
-		return token;
+		return user;
 	}
 }
