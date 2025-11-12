@@ -1,28 +1,31 @@
-import { User } from "../domain/User.ts";
-import { UserToken } from "../domain/UserToken.ts";
+import { User } from "../entities/User.ts";
 import Logger from "../Logger.ts";
-import type { UserRepository } from "../repository/UserRepository.ts";
-import type { UserData } from "../schemas/UserData.ts";
+import { UserData } from "../schemas/UserData.ts";
 import type { AuthResult } from "./AuthService.ts";
+import type { UserTokenService } from "./UserTokenService.ts";
 
 const logger = Logger.getLogger("UserService");
 
 export class UserService {
-	constructor(protected userRepository: UserRepository) {}
-
+	constructor(private readonly tokenService: UserTokenService) {}
 	async getUserById(userId: string): Promise<UserData> {
 		logger.debug({ userId }, "getUserById start");
-		const user = await this.userRepository.getById(userId);
+		const user = await User.findOne({ id: userId }).lean().exec();
 		if (!user) {
 			logger.warn({ userId }, "getUserById user not found");
 			throw new Error("User not found");
 		}
-		const data = user.toData();
 		logger.debug(
-			{ userId: data.id, username: data.username },
+			{ userId: user.id, username: user.username },
 			"getUserById success",
 		);
-		return data;
+		return UserData.parse(user);
+	}
+
+	async getUserByToken(tokenString: string): Promise<UserData> {
+		logger.debug("getUserByToken start");
+		const tokenData = await this.tokenService.parseTokenString(tokenString);
+		return this.getUserById(tokenData.userId);
 	}
 
 	async refreshUserAndIssueTokenForAuthResult(
@@ -33,7 +36,7 @@ export class UserService {
 			"refreshUserAndIssueTokenForAuthResult start",
 		);
 
-		const user = new User({
+		const user = UserData.parse({
 			id: authResult.id,
 			name: authResult.name,
 			username: authResult.username,
@@ -41,10 +44,10 @@ export class UserService {
 			profileUrl: authResult.profileUrl,
 		});
 
-		await this.userRepository.save(user);
+		await User.updateOne({ id: authResult.id }, user, { upsert: true }).exec();
 		logger.debug({ userId: user.id }, "User persisted");
 
-		const token = await new UserToken({ userId: user.id }).toTokenString();
+		const token = await this.tokenService.issueTokenString(user.id);
 		logger.debug({ userId: user.id }, "Token issued for user");
 		return token;
 	}

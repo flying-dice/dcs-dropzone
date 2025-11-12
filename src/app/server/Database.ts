@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import * as mongoose from "mongoose";
 import Logger from "./Logger.ts";
 
 const logger = Logger.getLogger("Database");
@@ -13,8 +13,7 @@ if (!MONGODB_URI) {
 
 logger.info("Connecting to MongoDB...");
 
-const client = new MongoClient(MONGODB_URI);
-const instance = client.db();
+await mongoose.connect(MONGODB_URI);
 
 logger.info("Connected to MongoDB.");
 
@@ -24,13 +23,14 @@ logger.info("Connected to MongoDB.");
  */
 async function ping(): Promise<boolean> {
 	logger.debug("Pinging MongoDB");
-	const result = await instance?.command({ ping: 1 }, { timeoutMS: 3000 });
+
+	const result = await mongoose.connection.db?.command({ ping: 1 });
 	const ok = result?.ok === 1;
+
 	logger.debug({ ok }, "MongoDB ping result");
 	return ok;
 }
 
 export default {
-	instance,
 	ping,
 };

@@ -180,12 +180,12 @@ dcs-dropzone/
 │   │   │   ├── services/       # Business logic (auth, etc.)
 │   │   │   ├── middleware/     # Auth & logging middleware
 │   │   │   └── application.ts          # Hono application configuration
-│   │   └── ApplicationContext.ts            # Server entry point
+│   │   └── Application.ts            # Server entry point
 │   ├── daemon/                 # Daemon service
 │   │   ├── api/                # Daemon API routes
 │   │   ├── database/           # SQLite database & migrations
 │   │   ├── middleware/         # Middleware
-│   │   └── ApplicationContext.ts            # Daemon entry point
+│   │   └── Application.ts            # Daemon entry point
 │   └── common/                 # Shared utilities
 ├── tests/                      # Test files
 ├── config.toml                 # Daemon configuration

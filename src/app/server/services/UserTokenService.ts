@@ -2,26 +2,19 @@ import { jwtVerify, SignJWT } from "jose";
 import appConfig from "../ApplicationConfig.ts";
 import Logger from "../Logger.ts";
 import { UserTokenData } from "../schemas/UserTokenData.ts";
-import { DomainObject } from "./DomainObject.ts";
-
-const logger = Logger.getLogger("UserToken");
 
 const ENC_JWT_SECRET: Uint8Array<ArrayBufferLike> = new TextEncoder().encode(
 	appConfig.jwtSecret,
 );
 
-export class UserToken extends DomainObject<typeof UserTokenData> {
-	constructor(data: UserTokenData) {
-		super(UserTokenData, data);
-	}
+const logger = Logger.getLogger("UserTokenService");
 
-	get userId(): string {
-		return this.data.userId;
-	}
+export class UserTokenService {
+	async issueTokenString(userId: string): Promise<string> {
+		logger.debug({ userId }, "Signing user token");
+		const payload: UserTokenData = { userId };
 
-	async toTokenString(): Promise<string> {
-		logger.debug({ userId: this.data.userId }, "Signing user token");
-		return await new SignJWT(this.data)
+		return await new SignJWT(UserTokenData.parse(payload))
 			.setProtectedHeader({ alg: "HS256" })
 			.setIssuedAt()
 			.setExpirationTime("15m")
@@ -35,7 +28,7 @@ export class UserToken extends DomainObject<typeof UserTokenData> {
 	 * @returns A Promise that resolves to a UserToken instance.
 	 * @throws An error if the token is invalid or verification fails.
 	 */
-	static async fromTokenString(tokenString: string): Promise<UserToken> {
+	async parseTokenString(tokenString: string): Promise<UserTokenData> {
 		logger.debug("Verifying user token");
 		const verifiedToken = await jwtVerify<UserTokenData>(
 			tokenString,
@@ -45,6 +38,6 @@ export class UserToken extends DomainObject<typeof UserTokenData> {
 			{ userId: verifiedToken.payload.userId },
 			"User token verified",
 		);
-		return new UserToken(verifiedToken.payload);
+		return UserTokenData.parse(verifiedToken.payload);
 	}
 }

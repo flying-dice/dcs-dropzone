@@ -62,7 +62,7 @@ bun run postdrizzle   # builds src/daemon/database/index-ddl.ts
 ## Environment & config
 
 - Web application (src/application)
-  - Required env vars (see src/application/server/ApplicationConfig.ts and src/application/server/ApplicationContext.ts):
+  - Required env vars (see src/application/server/ApplicationConfig.ts and src/application/server/Application.ts):
     - PORT, LOG_LEVEL, JWT_SECRET, SESSION_COOKIE_NAME (optional, default JSESSIONID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, GH_HOMEPAGE_URL, MONGODB_URI
   - Example (replace placeholders):
 
@@ -101,7 +101,7 @@ url = "/tmp/dcs-dropzone.sqlite"
 
 - Runtime(s)
   - Web application (src/application)
-    - Entrypoint: src/application/ApplicationContext.ts (Bun.serve)
+    - Entrypoint: src/application/Application.ts (Bun.serve)
       - Serves client HTML for "/*"
       - Proxies API routes to Hono application: /auth, /api, /v3/api-docs
     - API: src/application/server/Application.ts (Hono)
@@ -115,20 +115,20 @@ url = "/tmp/dcs-dropzone.sqlite"
         - GitHub OAuth via octokit OAuthApp
         - On callback, signs a JWT with user profile; cookie-based session via SESSION_COOKIE_NAME
       - Auth middlewares: cookieAuth (validates JWT and exposes getUser)
-    - Data: src/application/server/ApplicationContext.ts
+    - Data: src/application/server/Application.ts
       - Connects to MongoDB via MONGODB_URI, exposes collection mods and ping()
     - Client: src/application/client
       - React 19 + Mantine UI + React Router (HashRouter) + TanStack Query
       - Generated API clients live in src/application/client/_autogen/ via orval; local target reads http://localhost:3000/v3/api-docs
 
   - Daemon (src/daemon)
-    - Entrypoint: src/daemon/ApplicationContext.ts (Bun.serve) -> routes /api, /v3/api-docs
+    - Entrypoint: src/daemon/Application.ts (Bun.serve) -> routes /api, /v3/api-docs
     - API: src/daemon/Application.ts with similar middleware stack; health checks SQLite
     - Config: src/daemon/ApplicationConfig.ts loads TOML
     - Database: src/daemon/database
       - drizzle with bun:sqlite
       - SQL migrations stored in src/daemon/database/ddl (generated via drizzle-kit)
-      - At boot, src/daemon/database/ApplicationContext.ts loads compiled SQL from index-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
+      - At boot, src/daemon/database/Application.ts loads compiled SQL from index-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
 
 - Build & deploy
   - bun build compiles each runtime to a single native binary (dist/application, dist/appd)

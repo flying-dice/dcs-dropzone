@@ -3,10 +3,13 @@ import { HTTPException } from "hono/http-exception";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import ApplicationContext from "../ApplicationContext.ts";
+import ApplicationContext from "../Application.ts";
 import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
+import { ModSummaryData } from "../schemas/ModSummaryData.ts";
+import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
 import { UserModServiceError } from "../services/UserModService.ts";
 import { describeJsonRoute } from "./describeJsonRoute.ts";
 
@@ -24,7 +27,10 @@ router.get(
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.OK]: z.array(ModData),
+			[StatusCodes.OK]: z.object({
+				data: ModSummaryData.array(),
+				meta: UserModsMetaData,
+			}),
 			[StatusCodes.UNAUTHORIZED]: null,
 		},
 	}),
@@ -70,13 +76,6 @@ router.get(
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
-		if (result === UserModServiceError.NotMaintainer) {
-			logger.warn(
-				`User '${user.id}' attempted to access mod '${id}' which they do not maintain`,
-			);
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
 		return c.json(result, StatusCodes.OK);
 	},
 );
@@ -98,13 +97,16 @@ router.post(
 		},
 	}),
 	cookieAuth(),
-	validator("json", ModData.pick({ name: true })),
+	validator("json", ModCreateData),
 	async (c) => {
 		const createRequest = c.req.valid("json");
 		const user = c.var.getUser();
 		const service = ApplicationContext.getUserModService(user);
 
-		const result = await service.createMod(createRequest.name);
+		logger.debug(
+			`User '${user.id}' is creating a new mod '${createRequest.name}'`,
+		);
+		const result = await service.createMod(createRequest);
 
 		return c.json(result, StatusCodes.CREATED);
 	},
@@ -144,13 +146,6 @@ router.put(
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
-		if (result === UserModServiceError.NotMaintainer) {
-			logger.warn(
-				`User '${user.id}' attempted to update mod '${id}' which they do not maintain`,
-			);
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
 		return c.body(null, StatusCodes.OK);
 	},
 );
@@ -181,13 +176,6 @@ router.delete(
 		const result = await service.deleteMod(id);
 
 		if (result === UserModServiceError.NotFound) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		if (result === UserModServiceError.NotMaintainer) {
-			logger.warn(
-				`User '${user.id}' attempted to delete mod '${id}' which they do not maintain`,
-			);
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 

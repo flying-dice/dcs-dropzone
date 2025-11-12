@@ -39,6 +39,49 @@ export interface ErrorData {
   error: string;
 }
 
+export type ModSummaryDataCategory = typeof ModSummaryDataCategory[keyof typeof ModSummaryDataCategory];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModSummaryDataCategory = {
+  Campaign: 'Campaign',
+  Device_Profiles: 'Device Profiles',
+  Mod: 'Mod',
+  Mission: 'Mission',
+  Skin: 'Skin',
+  Sound: 'Sound',
+  Terrain: 'Terrain',
+  Utility: 'Utility',
+  Other: 'Other',
+} as const;
+
+/**
+ * Summary Data representation of a mod.
+ */
+export interface ModSummaryData {
+  id: string;
+  name: string;
+  category: ModSummaryDataCategory;
+  description: string;
+  thumbnail: string;
+  /** @minItems 1 */
+  maintainers: string[];
+  tags: string[];
+}
+
+/**
+ * Metadata representation of a user's mods.
+ */
+export interface UserModsMetaData {
+  published: number;
+  totalDownloads: number;
+  /**
+   * @minimum 0
+   * @maximum 5
+   */
+  averageRating: number;
+}
+
 export type ModDataCategory = typeof ModDataCategory[keyof typeof ModDataCategory];
 
 
@@ -83,13 +126,39 @@ export interface ModData {
   maintainers: string[];
 }
 
+export type ModCreateDataCategory = typeof ModCreateDataCategory[keyof typeof ModCreateDataCategory];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModCreateDataCategory = {
+  Campaign: 'Campaign',
+  Device_Profiles: 'Device Profiles',
+  Mod: 'Mod',
+  Mission: 'Mission',
+  Skin: 'Skin',
+  Sound: 'Sound',
+  Terrain: 'Terrain',
+  Utility: 'Utility',
+  Other: 'Other',
+} as const;
+
+/**
+ * Data required to create a new mod.
+ */
+export interface ModCreateData {
+  name: string;
+  category: ModCreateDataCategory;
+  description: string;
+}
+
 export type GetAuthProviderCallbackParams = {
 code: string;
 state: string;
 };
 
-export type CreateUserModBody = {
-  name: string;
+export type GetUserMods200 = {
+  data: ModSummaryData[];
+  meta: UserModsMetaData;
 };
 
 export type UpdateUserModBodyCategory = typeof UpdateUserModBodyCategory[keyof typeof UpdateUserModBodyCategory];
@@ -754,7 +823,7 @@ export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>
 
 
 export type getUserModsResponse200 = {
-  data: ModData[]
+  data: GetUserMods200
   status: 200
 }
 
@@ -905,7 +974,7 @@ export const getCreateUserModUrl = () => {
   return `/api/user-mods`
 }
 
-export const createUserMod = async (createUserModBody: CreateUserModBody, options?: RequestInit): Promise<createUserModResponse> => {
+export const createUserMod = async (modCreateData: ModCreateData, options?: RequestInit): Promise<createUserModResponse> => {
   
   const res = await fetch(getCreateUserModUrl(),
   {      
@@ -913,7 +982,7 @@ export const createUserMod = async (createUserModBody: CreateUserModBody, option
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      createUserModBody,)
+      modCreateData,)
   }
 )
 
@@ -927,8 +996,8 @@ export const createUserMod = async (createUserModBody: CreateUserModBody, option
 
 
 export const getCreateUserModMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError,{data: CreateUserModBody}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError,{data: CreateUserModBody}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError,{data: ModCreateData}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError,{data: ModCreateData}, TContext> => {
 
 const mutationKey = ['createUserMod'];
 const {mutation: mutationOptions, fetch: fetchOptions} = options ?
@@ -940,7 +1009,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUserMod>>, {data: CreateUserModBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUserMod>>, {data: ModCreateData}> = (props) => {
           const {data} = props ?? {};
 
           return  createUserMod(data,fetchOptions)
@@ -952,15 +1021,15 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateUserModMutationResult = NonNullable<Awaited<ReturnType<typeof createUserMod>>>
-    export type CreateUserModMutationBody = CreateUserModBody
+    export type CreateUserModMutationBody = ModCreateData
     export type CreateUserModMutationError = void
 
     export const useCreateUserMod = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError,{data: CreateUserModBody}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError,{data: ModCreateData}, TContext>, fetch?: RequestInit}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createUserMod>>,
         TError,
-        {data: CreateUserModBody},
+        {data: ModCreateData},
         TContext
       > => {
 
@@ -1290,20 +1359,13 @@ export type getModsResponse200 = {
   data: GetMods200
   status: 200
 }
-
-export type getModsResponse401 = {
-  data: void
-  status: 401
-}
     
 export type getModsResponseSuccess = (getModsResponse200) & {
   headers: Headers;
 };
-export type getModsResponseError = (getModsResponse401) & {
-  headers: Headers;
-};
+;
 
-export type getModsResponse = (getModsResponseSuccess | getModsResponseError)
+export type getModsResponse = (getModsResponseSuccess)
 
 export const getGetModsUrl = (params: GetModsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -1348,7 +1410,7 @@ export const getGetModsQueryKey = (params?: GetModsParams,) => {
     }
 
     
-export const getGetModsQueryOptions = <TData = Awaited<ReturnType<typeof getMods>>, TError = void>(params: GetModsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>>, fetch?: RequestInit}
+export const getGetModsQueryOptions = <TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(params: GetModsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
@@ -1367,10 +1429,10 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetModsQueryResult = NonNullable<Awaited<ReturnType<typeof getMods>>>
-export type GetModsQueryError = void
+export type GetModsQueryError = unknown
 
 
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = void>(
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
  params: GetModsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMods>>,
@@ -1380,7 +1442,7 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
       >, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = void>(
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
  params: GetModsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getMods>>,
@@ -1390,12 +1452,12 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
       >, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = void>(
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
  params: GetModsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = void>(
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
  params: GetModsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

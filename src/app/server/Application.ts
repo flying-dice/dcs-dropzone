@@ -1,36 +1,41 @@
-import { Scalar } from "@scalar/hono-api-reference";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { requestId } from "hono/request-id";
-import { openAPIRouteHandler } from "hono-openapi";
-import auth from "./api/auth.ts";
-import health from "./api/health.ts";
-import mods from "./api/mods.ts";
-import userMods from "./api/user-mods.ts";
-import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
+import Logger from "./Logger.ts";
+import { server } from "./Server.ts";
+import type { UserData } from "./schemas/UserData.ts";
+import type { AuthService } from "./services/AuthService.ts";
+import { AuthServiceProvider } from "./services/AuthServiceProvider.ts";
+import { GithubAuthService } from "./services/GithubAuthService.ts";
+import { ModService } from "./services/ModService.ts";
+import { UserModService } from "./services/UserModService.ts";
+import { UserService } from "./services/UserService.ts";
+import { UserTokenService } from "./services/UserTokenService.ts";
 
-export const application = new Hono();
-application.use("/*", cors());
+const logger = Logger.getLogger("ApplicationContext");
 
-application.use(requestId());
+logger.debug("Initializing services");
+const userTokenService: UserTokenService = new UserTokenService();
+const userService: UserService = new UserService(userTokenService);
+const modService: ModService = new ModService();
+logger.debug("Services initialized");
 
-application.use("*", requestResponseLogger());
-application.route("/auth", auth);
-application.route("/api/health", health);
-application.route("/api/user-mods", userMods);
-application.route("/api/mods", mods);
+export function getAuthService(provider: AuthServiceProvider): AuthService {
+	logger.debug({ provider }, "Selecting AuthService provider");
+	switch (provider) {
+		case AuthServiceProvider.GITHUB:
+			return new GithubAuthService();
+		default:
+			throw new Error(`Unsupported auth service provider: ${provider}`);
+	}
+}
 
-application.get(
-	"/v3/api-docs",
-	openAPIRouteHandler(application, {
-		documentation: {
-			info: {
-				title: "DCS Dropzone Registry API",
-				version: "1.0.0",
-				description: "API documentation for the DCS Dropzone Registry.",
-			},
-		},
-	}),
-);
+export function getUserModService(user: UserData): UserModService {
+	logger.debug({ userId: user.id }, "Creating UserModService for user");
+	return new UserModService(user);
+}
 
-application.get("/api", Scalar({ url: "/v3/api-docs" }));
+export default {
+	server,
+	userService,
+	modService,
+	getAuthService,
+	getUserModService,
+};

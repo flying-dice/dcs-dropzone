@@ -67,24 +67,40 @@ export function UserModsPage(_: UserModsPageProps) {
 					</Group>
 
 					<SimpleGrid cols={3} spacing={"xl"}>
-						<StatCard icon={AppIcons.Mods} label={"Published Mods"} value={3} />
+						<StatCard
+							icon={AppIcons.Mods}
+							label={"Published Mods"}
+							value={
+								mods.data?.status === StatusCodes.OK
+									? mods.data.data.meta.published
+									: "-"
+							}
+						/>
 						<StatCard
 							icon={AppIcons.Subscribed}
 							iconColor={"grape"}
 							label={"Total Downloads"}
-							value={3}
+							value={
+								mods.data?.status === StatusCodes.OK
+									? mods.data.data.meta.totalDownloads
+									: "-"
+							}
 						/>
 						<StatCard
 							icon={AppIcons.Ratings}
 							iconColor={"green"}
 							label={"Average Rating"}
-							value={4.8}
+							value={
+								mods.data?.status === StatusCodes.OK
+									? mods.data.data.meta.averageRating.toFixed(2)
+									: "-"
+							}
 						/>
 					</SimpleGrid>
 
 					<Stack p={"md"}>
 						{mods.data?.status === StatusCodes.OK &&
-							mods.data?.data.map((mod) => (
+							mods.data?.data.data.map((mod) => (
 								<ModCard
 									key={mod.id}
 									imageUrl={mod.thumbnail}

@@ -2,9 +2,8 @@ import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
+import ApplicationContext from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
-import ApplicationContext from "../ApplicationContext.ts";
-import { UserToken } from "../domain/UserToken.ts";
 import Logger from "../Logger.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
@@ -29,25 +28,14 @@ export const cookieAuth = () =>
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
-		let userToken: UserToken;
-
-		try {
-			logger.debug({ requestId }, "Verifying token from cookie");
-			userToken = await UserToken.fromTokenString(token);
-			logger.debug({ requestId, userId: userToken.userId }, "Token verified");
-		} catch (error) {
-			logger.warn({ requestId, error }, "Invalid token in cookie");
-			throw new HTTPException(StatusCodes.UNAUTHORIZED);
-		}
-
 		let user: UserData;
 
 		try {
 			logger.debug(
-				{ requestId, userId: userToken.userId },
-				"Loading authenticated user",
+				{ requestId, token },
+				"Loading authenticated user for token",
 			);
-			user = await ApplicationContext.userService.getUserById(userToken.userId);
+			user = await ApplicationContext.userService.getUserByToken(token);
 			logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
 		} catch (error) {
 			logger.warn({ requestId, error }, "User not found for token");
