@@ -1,0 +1,198 @@
+import { ModVisibility } from "../../../common/data.ts";
+import { ModRelease } from "../entities/ModRelease.ts";
+import Logger from "../Logger.ts";
+import type { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
+import { ModReleaseData } from "../schemas/ModReleaseData.ts";
+import type { UserData } from "../schemas/UserData.ts";
+
+const logger = Logger.getLogger("ModReleaseService");
+
+export enum ModReleaseServiceError {
+	NotFound = "NotFound",
+	ModNotFound = "ModNotFound",
+}
+
+export class ModReleaseService {
+	constructor(protected readonly user: UserData) {}
+
+	/**
+	 * Find all releases for a user-owned mod (includes private releases)
+	 */
+	async findUserModReleases(
+		modId: string,
+	): Promise<ModReleaseData[] | ModReleaseServiceError> {
+		logger.debug({ userId: this.user.id, modId }, "findUserModReleases start");
+
+		const releases = await ModRelease.find({ mod_id: modId })
+			.sort({ createdAt: -1 })
+			.lean()
+			.exec();
+
+		return ModReleaseData.array().parse(releases);
+	}
+
+	/**
+	 * Find a specific release for a user-owned mod
+	 */
+	async findUserModReleaseById(
+		modId: string,
+		releaseId: string,
+	): Promise<ModReleaseData | ModReleaseServiceError> {
+		logger.debug(
+			{ userId: this.user.id, modId, releaseId },
+			"findUserModReleaseById start",
+		);
+
+		const release = await ModRelease.findOne({
+			id: releaseId,
+			mod_id: modId,
+		})
+			.lean()
+			.exec();
+
+		if (!release) {
+			logger.debug({ releaseId }, "Release not found");
+			return ModReleaseServiceError.NotFound;
+		}
+
+		return ModReleaseData.parse(release);
+	}
+
+	/**
+	 * Create a new release for a user-owned mod
+	 */
+	async createRelease(
+		modId: string,
+		createData: ModReleaseCreateData,
+	): Promise<ModReleaseData | ModReleaseServiceError> {
+		logger.debug(
+			{ userId: this.user.id, modId, createData },
+			"createRelease start",
+		);
+
+		const id = crypto.randomUUID();
+
+		const releaseData: ModReleaseData = {
+			id,
+			mod_id: modId,
+			version: createData.version,
+			changelog: createData.changelog,
+			assets: createData.assets,
+			visibility: createData.visibility,
+		};
+
+		const result = await ModRelease.create(ModReleaseData.parse(releaseData));
+		logger.debug({ releaseId: id }, "User successfully created release");
+
+		return ModReleaseData.parse(result);
+	}
+
+	/**
+	 * Update an existing release
+	 */
+	async updateRelease(
+		modId: string,
+		releaseId: string,
+		updateData: ModReleaseCreateData,
+	): Promise<undefined | ModReleaseServiceError> {
+		logger.debug(
+			{ userId: this.user.id, modId, releaseId, updateData },
+			"updateRelease start",
+		);
+
+		const release = await ModRelease.findOneAndUpdate(
+			{ id: releaseId, mod_id: modId },
+			{
+				version: updateData.version,
+				changelog: updateData.changelog,
+				assets: updateData.assets,
+				visibility: updateData.visibility,
+			},
+		).exec();
+
+		if (!release) {
+			logger.warn(
+				{ releaseId },
+				"User attempted to update release but it was not found",
+			);
+			return ModReleaseServiceError.NotFound;
+		}
+
+		logger.debug({ releaseId }, "User successfully updated release");
+	}
+
+	/**
+	 * Delete a release
+	 */
+	async deleteRelease(
+		modId: string,
+		releaseId: string,
+	): Promise<undefined | ModReleaseServiceError> {
+		logger.debug(
+			{ userId: this.user.id, modId, releaseId },
+			"deleteRelease start",
+		);
+
+		const result = await ModRelease.findOneAndDelete({
+			id: releaseId,
+			mod_id: modId,
+		}).exec();
+
+		if (!result) {
+			logger.warn(
+				{ releaseId },
+				"User attempted to delete release but it was not found",
+			);
+			return ModReleaseServiceError.NotFound;
+		}
+
+		logger.debug({ releaseId }, "User successfully deleted release");
+	}
+}
+
+/**
+ * Public service for accessing releases (no authentication required)
+ */
+export class PublicModReleaseService {
+	/**
+	 * Find all public releases for a mod
+	 */
+	async findPublicModReleases(modId: string): Promise<ModReleaseData[]> {
+		logger.debug({ modId }, "findPublicModReleases start");
+
+		const releases = await ModRelease.find({
+			mod_id: modId,
+			visibility: ModVisibility.Public,
+		})
+			.sort({ createdAt: -1 })
+			.lean()
+			.exec();
+
+		return ModReleaseData.array().parse(releases);
+	}
+
+	/**
+	 * Find a specific public release
+	 */
+	async findPublicModReleaseById(
+		modId: string,
+		releaseId: string,
+	): Promise<ModReleaseData | ModReleaseServiceError> {
+		logger.debug({ modId, releaseId }, "findPublicModReleaseById start");
+
+		const release = await ModRelease.findOne({
+			id: releaseId,
+			mod_id: modId,
+			visibility: ModVisibility.Public,
+		})
+			.lean()
+			.exec();
+
+		if (!release) {
+			logger.debug({ releaseId }, "Public release not found");
+			return ModReleaseServiceError.NotFound;
+		}
+
+		return ModReleaseData.parse(release);
+	}
+}

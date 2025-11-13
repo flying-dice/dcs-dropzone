@@ -10,7 +10,7 @@ import { describeJsonRoute } from "./describeJsonRoute.ts";
 
 const router = new Hono();
 
-const logger = Logger.getLogger("api/mods");
+const _logger = Logger.getLogger("api/mods");
 
 /**
  * GET /api/mods - List all mods (summary view)
