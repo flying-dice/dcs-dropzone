@@ -23,7 +23,7 @@ export function ProfileMenu() {
 			title: (
 				<Group>
 					<Avatar src={user.avatarUrl} />
-					<Text>{user.login}</Text>
+					<Text>{user.username}</Text>
 				</Group>
 			),
 			children: (
@@ -32,25 +32,25 @@ export function ProfileMenu() {
 						readOnly
 						label="User ID"
 						value={user.id}
-						description="This is your User ID, all mods you publish will be bound to this ID"
+						description="This is your ID, all mods you publish will be bound to this ID"
 					/>
 					<TextInput
 						readOnly
 						label="User Login"
-						value={user.login}
-						description="This is your User Login"
+						value={user.username}
+						description="This is your Username"
 					/>
 					<TextInput
 						readOnly
 						label="User Name"
 						value={user.name}
-						description="This is your User Name"
+						description="This is your Name"
 					/>
 					<TextInput
 						readOnly
 						label="User Profile URL"
 						value={user.profileUrl}
-						description="This is your User Profile URL"
+						description="This is your Profile URL"
 					/>
 				</Stack>
 			),
@@ -60,7 +60,7 @@ export function ProfileMenu() {
 	return (
 		<Stack pr="md">
 			{!user && (
-				<Button color={"gray"} variant="subtle" onClick={login}>
+				<Button variant="default" onClick={login}>
 					Login
 				</Button>
 			)}
@@ -72,7 +72,7 @@ export function ProfileMenu() {
 					<Menu.Dropdown>
 						<Stack gap={0} p="xs">
 							<Text size="sm" fw="bold">
-								{user.login}
+								{user.username}
 							</Text>
 							<Text size="sm" c="dimmed">
 								{user.name}
