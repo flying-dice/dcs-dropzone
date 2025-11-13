@@ -149,6 +149,47 @@ export interface ModCreateData {
 	description: string;
 }
 
+/**
+ * Data representation of a mod release asset.
+ */
+export interface ModReleaseAssetData {
+	/** @minLength 1 */
+	name: string;
+	urls: string[];
+	isArchive: boolean;
+}
+
+export type ModReleaseDataVisibility =
+	(typeof ModReleaseDataVisibility)[keyof typeof ModReleaseDataVisibility];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModReleaseDataVisibility = {
+	Public: "Public",
+	Private: "Private",
+	Unlisted: "Unlisted",
+} as const;
+
+/**
+ * Data representation of a mod release.
+ */
+export interface ModReleaseData {
+	id: string;
+	mod_id: string;
+	version: string;
+	changelog: string;
+	assets: ModReleaseAssetData[];
+	visibility: ModReleaseDataVisibility;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+/**
+ * Data required to create a new mod release.
+ */
+export interface ModReleaseCreateData {
+	version: string;
+}
+
 export type GetAuthProviderCallbackParams = {
 	code: string;
 	state: string;
@@ -199,6 +240,29 @@ export type UpdateUserModBody = {
 	maintainers: string[];
 };
 
+export type GetUserModReleases200 = {
+	data: ModReleaseData[];
+};
+
+export type UpdateUserModReleaseBodyVisibility =
+	(typeof UpdateUserModReleaseBodyVisibility)[keyof typeof UpdateUserModReleaseBodyVisibility];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateUserModReleaseBodyVisibility = {
+	Public: "Public",
+	Private: "Private",
+	Unlisted: "Unlisted",
+} as const;
+
+export type UpdateUserModReleaseBody = {
+	version: string;
+	changelog: string;
+	assets: ModReleaseAssetData[];
+	visibility: UpdateUserModReleaseBodyVisibility;
+	createdAt?: string;
+	updatedAt?: string;
+};
+
 export type GetModsParams = {
 	/**
 	 * @minimum 1
@@ -224,6 +288,10 @@ export type GetMods200Page = {
 export type GetMods200 = {
 	data: ModData[];
 	page: GetMods200Page;
+};
+
+export type GetModReleases200 = {
+	data: ModReleaseData[];
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -1800,6 +1868,792 @@ export const useDeleteUserMod = <TError = void, TContext = unknown>(
 	return useMutation(mutationOptions, queryClient);
 };
 
+export type getUserModReleasesResponse200 = {
+	data: GetUserModReleases200;
+	status: 200;
+};
+
+export type getUserModReleasesResponse401 = {
+	data: void;
+	status: 401;
+};
+
+export type getUserModReleasesResponseSuccess =
+	getUserModReleasesResponse200 & {
+		headers: Headers;
+	};
+export type getUserModReleasesResponseError = getUserModReleasesResponse401 & {
+	headers: Headers;
+};
+
+export type getUserModReleasesResponse =
+	| getUserModReleasesResponseSuccess
+	| getUserModReleasesResponseError;
+
+export const getGetUserModReleasesUrl = (id: string) => {
+	return `/api/user-mods/${id}/releases`;
+};
+
+export const getUserModReleases = async (
+	id: string,
+	options?: RequestInit,
+): Promise<getUserModReleasesResponse> => {
+	const res = await fetch(getGetUserModReleasesUrl(id), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getUserModReleasesResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getUserModReleasesResponse;
+};
+
+export const getGetUserModReleasesQueryKey = (id?: string) => {
+	return [`/api/user-mods/${id}/releases`] as const;
+};
+
+export const getGetUserModReleasesQueryOptions = <
+	TData = Awaited<ReturnType<typeof getUserModReleases>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleases>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetUserModReleasesQueryKey(id);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getUserModReleases>>
+	> = ({ signal }) => getUserModReleases(id, { signal, ...fetchOptions });
+
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserModReleases>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUserModReleasesQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUserModReleases>>
+>;
+export type GetUserModReleasesQueryError = void;
+
+export function useGetUserModReleases<
+	TData = Awaited<ReturnType<typeof getUserModReleases>>,
+	TError = void,
+>(
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleases>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getUserModReleases>>,
+					TError,
+					Awaited<ReturnType<typeof getUserModReleases>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserModReleases<
+	TData = Awaited<ReturnType<typeof getUserModReleases>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleases>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getUserModReleases>>,
+					TError,
+					Awaited<ReturnType<typeof getUserModReleases>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserModReleases<
+	TData = Awaited<ReturnType<typeof getUserModReleases>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleases>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetUserModReleases<
+	TData = Awaited<ReturnType<typeof getUserModReleases>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleases>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetUserModReleasesQueryOptions(id, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+export type createUserModReleaseResponse201 = {
+	data: ModReleaseData;
+	status: 201;
+};
+
+export type createUserModReleaseResponse401 = {
+	data: void;
+	status: 401;
+};
+
+export type createUserModReleaseResponse404 = {
+	data: void;
+	status: 404;
+};
+
+export type createUserModReleaseResponseSuccess =
+	createUserModReleaseResponse201 & {
+		headers: Headers;
+	};
+export type createUserModReleaseResponseError = (
+	| createUserModReleaseResponse401
+	| createUserModReleaseResponse404
+) & {
+	headers: Headers;
+};
+
+export type createUserModReleaseResponse =
+	| createUserModReleaseResponseSuccess
+	| createUserModReleaseResponseError;
+
+export const getCreateUserModReleaseUrl = (id: string) => {
+	return `/api/user-mods/${id}/releases`;
+};
+
+export const createUserModRelease = async (
+	id: string,
+	modReleaseCreateData: ModReleaseCreateData,
+	options?: RequestInit,
+): Promise<createUserModReleaseResponse> => {
+	const res = await fetch(getCreateUserModReleaseUrl(id), {
+		...options,
+		method: "POST",
+		headers: { "Content-Type": "application/json", ...options?.headers },
+		body: JSON.stringify(modReleaseCreateData),
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: createUserModReleaseResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as createUserModReleaseResponse;
+};
+
+export const getCreateUserModReleaseMutationOptions = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof createUserModRelease>>,
+		TError,
+		{ id: string; data: ModReleaseCreateData },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof createUserModRelease>>,
+	TError,
+	{ id: string; data: ModReleaseCreateData },
+	TContext
+> => {
+	const mutationKey = ["createUserModRelease"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof createUserModRelease>>,
+		{ id: string; data: ModReleaseCreateData }
+	> = (props) => {
+		const { id, data } = props ?? {};
+
+		return createUserModRelease(id, data, fetchOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type CreateUserModReleaseMutationResult = NonNullable<
+	Awaited<ReturnType<typeof createUserModRelease>>
+>;
+export type CreateUserModReleaseMutationBody = ModReleaseCreateData;
+export type CreateUserModReleaseMutationError = void;
+
+export const useCreateUserModRelease = <TError = void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof createUserModRelease>>,
+			TError,
+			{ id: string; data: ModReleaseCreateData },
+			TContext
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<
+	Awaited<ReturnType<typeof createUserModRelease>>,
+	TError,
+	{ id: string; data: ModReleaseCreateData },
+	TContext
+> => {
+	const mutationOptions = getCreateUserModReleaseMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+export type getUserModReleaseByIdResponse200 = {
+	data: ModReleaseData;
+	status: 200;
+};
+
+export type getUserModReleaseByIdResponse401 = {
+	data: void;
+	status: 401;
+};
+
+export type getUserModReleaseByIdResponse404 = {
+	data: void;
+	status: 404;
+};
+
+export type getUserModReleaseByIdResponseSuccess =
+	getUserModReleaseByIdResponse200 & {
+		headers: Headers;
+	};
+export type getUserModReleaseByIdResponseError = (
+	| getUserModReleaseByIdResponse401
+	| getUserModReleaseByIdResponse404
+) & {
+	headers: Headers;
+};
+
+export type getUserModReleaseByIdResponse =
+	| getUserModReleaseByIdResponseSuccess
+	| getUserModReleaseByIdResponseError;
+
+export const getGetUserModReleaseByIdUrl = (id: string, releaseId: string) => {
+	return `/api/user-mods/${id}/releases/${releaseId}`;
+};
+
+export const getUserModReleaseById = async (
+	id: string,
+	releaseId: string,
+	options?: RequestInit,
+): Promise<getUserModReleaseByIdResponse> => {
+	const res = await fetch(getGetUserModReleaseByIdUrl(id, releaseId), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getUserModReleaseByIdResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getUserModReleaseByIdResponse;
+};
+
+export const getGetUserModReleaseByIdQueryKey = (
+	id?: string,
+	releaseId?: string,
+) => {
+	return [`/api/user-mods/${id}/releases/${releaseId}`] as const;
+};
+
+export const getGetUserModReleaseByIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof getUserModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleaseById>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetUserModReleaseByIdQueryKey(id, releaseId);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getUserModReleaseById>>
+	> = ({ signal }) =>
+		getUserModReleaseById(id, releaseId, { signal, ...fetchOptions });
+
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!(id && releaseId),
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserModReleaseById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUserModReleaseByIdQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUserModReleaseById>>
+>;
+export type GetUserModReleaseByIdQueryError = void;
+
+export function useGetUserModReleaseById<
+	TData = Awaited<ReturnType<typeof getUserModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleaseById>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getUserModReleaseById>>,
+					TError,
+					Awaited<ReturnType<typeof getUserModReleaseById>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserModReleaseById<
+	TData = Awaited<ReturnType<typeof getUserModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleaseById>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getUserModReleaseById>>,
+					TError,
+					Awaited<ReturnType<typeof getUserModReleaseById>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserModReleaseById<
+	TData = Awaited<ReturnType<typeof getUserModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleaseById>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetUserModReleaseById<
+	TData = Awaited<ReturnType<typeof getUserModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getUserModReleaseById>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetUserModReleaseByIdQueryOptions(
+		id,
+		releaseId,
+		options,
+	);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+export type updateUserModReleaseResponse200 = {
+	data: void;
+	status: 200;
+};
+
+export type updateUserModReleaseResponse401 = {
+	data: void;
+	status: 401;
+};
+
+export type updateUserModReleaseResponse404 = {
+	data: void;
+	status: 404;
+};
+
+export type updateUserModReleaseResponseSuccess =
+	updateUserModReleaseResponse200 & {
+		headers: Headers;
+	};
+export type updateUserModReleaseResponseError = (
+	| updateUserModReleaseResponse401
+	| updateUserModReleaseResponse404
+) & {
+	headers: Headers;
+};
+
+export type updateUserModReleaseResponse =
+	| updateUserModReleaseResponseSuccess
+	| updateUserModReleaseResponseError;
+
+export const getUpdateUserModReleaseUrl = (id: string, releaseId: string) => {
+	return `/api/user-mods/${id}/releases/${releaseId}`;
+};
+
+export const updateUserModRelease = async (
+	id: string,
+	releaseId: string,
+	updateUserModReleaseBody: UpdateUserModReleaseBody,
+	options?: RequestInit,
+): Promise<updateUserModReleaseResponse> => {
+	const res = await fetch(getUpdateUserModReleaseUrl(id, releaseId), {
+		...options,
+		method: "PUT",
+		headers: { "Content-Type": "application/json", ...options?.headers },
+		body: JSON.stringify(updateUserModReleaseBody),
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: updateUserModReleaseResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as updateUserModReleaseResponse;
+};
+
+export const getUpdateUserModReleaseMutationOptions = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof updateUserModRelease>>,
+		TError,
+		{ id: string; releaseId: string; data: UpdateUserModReleaseBody },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof updateUserModRelease>>,
+	TError,
+	{ id: string; releaseId: string; data: UpdateUserModReleaseBody },
+	TContext
+> => {
+	const mutationKey = ["updateUserModRelease"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof updateUserModRelease>>,
+		{ id: string; releaseId: string; data: UpdateUserModReleaseBody }
+	> = (props) => {
+		const { id, releaseId, data } = props ?? {};
+
+		return updateUserModRelease(id, releaseId, data, fetchOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateUserModReleaseMutationResult = NonNullable<
+	Awaited<ReturnType<typeof updateUserModRelease>>
+>;
+export type UpdateUserModReleaseMutationBody = UpdateUserModReleaseBody;
+export type UpdateUserModReleaseMutationError = void;
+
+export const useUpdateUserModRelease = <TError = void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof updateUserModRelease>>,
+			TError,
+			{ id: string; releaseId: string; data: UpdateUserModReleaseBody },
+			TContext
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<
+	Awaited<ReturnType<typeof updateUserModRelease>>,
+	TError,
+	{ id: string; releaseId: string; data: UpdateUserModReleaseBody },
+	TContext
+> => {
+	const mutationOptions = getUpdateUserModReleaseMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+export type deleteUserModReleaseResponse200 = {
+	data: void;
+	status: 200;
+};
+
+export type deleteUserModReleaseResponse401 = {
+	data: void;
+	status: 401;
+};
+
+export type deleteUserModReleaseResponse404 = {
+	data: void;
+	status: 404;
+};
+
+export type deleteUserModReleaseResponseSuccess =
+	deleteUserModReleaseResponse200 & {
+		headers: Headers;
+	};
+export type deleteUserModReleaseResponseError = (
+	| deleteUserModReleaseResponse401
+	| deleteUserModReleaseResponse404
+) & {
+	headers: Headers;
+};
+
+export type deleteUserModReleaseResponse =
+	| deleteUserModReleaseResponseSuccess
+	| deleteUserModReleaseResponseError;
+
+export const getDeleteUserModReleaseUrl = (id: string, releaseId: string) => {
+	return `/api/user-mods/${id}/releases/${releaseId}`;
+};
+
+export const deleteUserModRelease = async (
+	id: string,
+	releaseId: string,
+	options?: RequestInit,
+): Promise<deleteUserModReleaseResponse> => {
+	const res = await fetch(getDeleteUserModReleaseUrl(id, releaseId), {
+		...options,
+		method: "DELETE",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: deleteUserModReleaseResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as deleteUserModReleaseResponse;
+};
+
+export const getDeleteUserModReleaseMutationOptions = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof deleteUserModRelease>>,
+		TError,
+		{ id: string; releaseId: string },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof deleteUserModRelease>>,
+	TError,
+	{ id: string; releaseId: string },
+	TContext
+> => {
+	const mutationKey = ["deleteUserModRelease"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof deleteUserModRelease>>,
+		{ id: string; releaseId: string }
+	> = (props) => {
+		const { id, releaseId } = props ?? {};
+
+		return deleteUserModRelease(id, releaseId, fetchOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteUserModReleaseMutationResult = NonNullable<
+	Awaited<ReturnType<typeof deleteUserModRelease>>
+>;
+
+export type DeleteUserModReleaseMutationError = void;
+
+export const useDeleteUserModRelease = <TError = void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof deleteUserModRelease>>,
+			TError,
+			{ id: string; releaseId: string },
+			TContext
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<
+	Awaited<ReturnType<typeof deleteUserModRelease>>,
+	TError,
+	{ id: string; releaseId: string },
+	TContext
+> => {
+	const mutationOptions = getDeleteUserModReleaseMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
 export type getModsResponse200 = {
 	data: GetMods200;
 	status: 200;
@@ -1956,6 +2810,375 @@ export function useGetMods<
 	queryKey: DataTag<QueryKey, TData, TError>;
 } {
 	const queryOptions = getGetModsQueryOptions(params, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+export type getModReleasesResponse200 = {
+	data: GetModReleases200;
+	status: 200;
+};
+
+export type getModReleasesResponseSuccess = getModReleasesResponse200 & {
+	headers: Headers;
+};
+
+export type getModReleasesResponse = getModReleasesResponseSuccess;
+
+export const getGetModReleasesUrl = (id: string) => {
+	return `/api/mods/${id}/releases`;
+};
+
+export const getModReleases = async (
+	id: string,
+	options?: RequestInit,
+): Promise<getModReleasesResponse> => {
+	const res = await fetch(getGetModReleasesUrl(id), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getModReleasesResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getModReleasesResponse;
+};
+
+export const getGetModReleasesQueryKey = (id?: string) => {
+	return [`/api/mods/${id}/releases`] as const;
+};
+
+export const getGetModReleasesQueryOptions = <
+	TData = Awaited<ReturnType<typeof getModReleases>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetModReleasesQueryKey(id);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getModReleases>>> = ({
+		signal,
+	}) => getModReleases(id, { signal, ...fetchOptions });
+
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getModReleases>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetModReleasesQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getModReleases>>
+>;
+export type GetModReleasesQueryError = unknown;
+
+export function useGetModReleases<
+	TData = Awaited<ReturnType<typeof getModReleases>>,
+	TError = unknown,
+>(
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getModReleases>>,
+					TError,
+					Awaited<ReturnType<typeof getModReleases>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetModReleases<
+	TData = Awaited<ReturnType<typeof getModReleases>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getModReleases>>,
+					TError,
+					Awaited<ReturnType<typeof getModReleases>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetModReleases<
+	TData = Awaited<ReturnType<typeof getModReleases>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetModReleases<
+	TData = Awaited<ReturnType<typeof getModReleases>>,
+	TError = unknown,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetModReleasesQueryOptions(id, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+export type getModReleaseByIdResponse200 = {
+	data: ModReleaseData;
+	status: 200;
+};
+
+export type getModReleaseByIdResponse404 = {
+	data: void;
+	status: 404;
+};
+
+export type getModReleaseByIdResponseSuccess = getModReleaseByIdResponse200 & {
+	headers: Headers;
+};
+export type getModReleaseByIdResponseError = getModReleaseByIdResponse404 & {
+	headers: Headers;
+};
+
+export type getModReleaseByIdResponse =
+	| getModReleaseByIdResponseSuccess
+	| getModReleaseByIdResponseError;
+
+export const getGetModReleaseByIdUrl = (id: string, releaseId: string) => {
+	return `/api/mods/${id}/releases/${releaseId}`;
+};
+
+export const getModReleaseById = async (
+	id: string,
+	releaseId: string,
+	options?: RequestInit,
+): Promise<getModReleaseByIdResponse> => {
+	const res = await fetch(getGetModReleaseByIdUrl(id, releaseId), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getModReleaseByIdResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getModReleaseByIdResponse;
+};
+
+export const getGetModReleaseByIdQueryKey = (
+	id?: string,
+	releaseId?: string,
+) => {
+	return [`/api/mods/${id}/releases/${releaseId}`] as const;
+};
+
+export const getGetModReleaseByIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof getModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getModReleaseById>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetModReleaseByIdQueryKey(id, releaseId);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getModReleaseById>>
+	> = ({ signal }) =>
+		getModReleaseById(id, releaseId, { signal, ...fetchOptions });
+
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!(id && releaseId),
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getModReleaseById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetModReleaseByIdQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getModReleaseById>>
+>;
+export type GetModReleaseByIdQueryError = void;
+
+export function useGetModReleaseById<
+	TData = Awaited<ReturnType<typeof getModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getModReleaseById>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getModReleaseById>>,
+					TError,
+					Awaited<ReturnType<typeof getModReleaseById>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetModReleaseById<
+	TData = Awaited<ReturnType<typeof getModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getModReleaseById>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getModReleaseById>>,
+					TError,
+					Awaited<ReturnType<typeof getModReleaseById>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetModReleaseById<
+	TData = Awaited<ReturnType<typeof getModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getModReleaseById>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetModReleaseById<
+	TData = Awaited<ReturnType<typeof getModReleaseById>>,
+	TError = void,
+>(
+	id: string,
+	releaseId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getModReleaseById>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetModReleaseByIdQueryOptions(id, releaseId, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
 		TData,

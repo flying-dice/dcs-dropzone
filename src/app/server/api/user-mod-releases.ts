@@ -151,7 +151,7 @@ router.put(
 			releaseId: z.string(),
 		}),
 	),
-	validator("json", ModReleaseCreateData),
+	validator("json", ModReleaseData.omit({ id: true, mod_id: true })),
 	async (c) => {
 		const { id, releaseId } = c.req.valid("param");
 		const updates = c.req.valid("json");
@@ -162,7 +162,11 @@ router.put(
 			`User '${user.id}' is updating release '${releaseId}' for mod '${id}'`,
 		);
 
-		const result = await service.updateRelease(id, releaseId, updates);
+		const result = await service.updateRelease({
+			id: releaseId,
+			mod_id: id,
+			...updates,
+		});
 
 		if (result === ModReleaseServiceError.NotFound) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);

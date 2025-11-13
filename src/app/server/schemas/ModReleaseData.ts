@@ -5,7 +5,8 @@ import { ModVisibility } from "../../../common/data.ts";
 export const ModReleaseAssetData = z
 	.object({
 		name: z.string().min(1, "Asset name is required"),
-		url: z.string().url(),
+		urls: z.string().url().array(),
+		isArchive: z.boolean(),
 	})
 	.meta({
 		ref: "ModReleaseAssetData",
@@ -24,8 +25,8 @@ export const ModReleaseData = z
 		changelog: z.string(),
 		assets: z.array(ModReleaseAssetData),
 		visibility: z.enum(ModVisibility),
-		createdAt: z.string().optional(),
-		updatedAt: z.string().optional(),
+		createdAt: z.coerce.string().optional(),
+		updatedAt: z.coerce.string().optional(),
 	})
 	.meta({
 		ref: "ModReleaseData",

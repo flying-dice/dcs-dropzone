@@ -1,0 +1,78 @@
+import { Button, Card, Divider, Group, Stack, Text } from "@mantine/core";
+import { modals, openModal } from "@mantine/modals";
+import { StatusCodes } from "http-status-codes";
+import { useNavigate } from "react-router-dom";
+import {
+	createUserModRelease,
+	type ModData,
+	useGetUserModReleases,
+} from "../../_autogen/api.ts";
+import { NewReleaseForm } from "../../components/NewReleaseForm.tsx";
+import { UserModRelease } from "../../components/UserModRelease.tsx";
+import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
+import type { UserModForm } from "./form.ts";
+
+export function _Releases(props: { form: UserModForm; mod: ModData }) {
+	const nav = useNavigate();
+	const modReleases = useGetUserModReleases(props.mod.id);
+
+	const footerText =
+		modReleases.data?.status === StatusCodes.OK
+			? `Total Releases: ${modReleases.data.data.data.length}`
+			: `Loading...`;
+
+	const handleNewRelease = () => {
+		openModal({
+			title: "Create New Release",
+			size: "xl",
+			children: (
+				<NewReleaseForm
+					onSubmit={async (v) => {
+						try {
+							const res = await createUserModRelease(props.mod.id, {
+								version: v.version,
+							});
+							if (res.status !== StatusCodes.CREATED) {
+								throw new Error(`Failed to create mod: ${res.status}`);
+							}
+							await modReleases.refetch();
+							modals.closeAll();
+							nav(res.data.id);
+						} catch (e) {
+							showErrorNotification(e);
+						}
+					}}
+					onCancel={modals.closeAll}
+				/>
+			),
+		});
+	};
+
+	return (
+		<Card withBorder>
+			<Stack>
+				<Group justify={"space-between"}>
+					<Text size={"lg"} fw={"bold"}>
+						Releases
+					</Text>
+					<Button variant={"light"} onClick={handleNewRelease}>
+						New Release
+					</Button>
+				</Group>
+				{modReleases.data?.status === StatusCodes.OK &&
+					modReleases.data.data.data.map((release) => (
+						<UserModRelease
+							key={release.id}
+							release={release}
+							onClick={() => nav(`releases/${release.id}`)}
+						/>
+					))}
+
+				<Divider />
+				<Text c={"dimmed"} size={"xs"}>
+					{footerText}
+				</Text>
+			</Stack>
+		</Card>
+	);
+}

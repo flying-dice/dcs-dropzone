@@ -19,6 +19,9 @@
 			"suspicious": {
 				"noExplicitAny": "off",
 				"noConfusingVoidType": "off"
+			},
+			"style": {
+				"noNonNullAssertion": "off"
 			}
 		}
 	},

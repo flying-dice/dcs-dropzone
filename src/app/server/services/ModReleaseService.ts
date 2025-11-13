@@ -76,9 +76,9 @@ export class ModReleaseService {
 			id,
 			mod_id: modId,
 			version: createData.version,
-			changelog: createData.changelog,
-			assets: createData.assets,
-			visibility: createData.visibility,
+			changelog: "abc",
+			assets: [],
+			visibility: ModVisibility.Private,
 		};
 
 		const result = await ModRelease.create(ModReleaseData.parse(releaseData));
@@ -91,17 +91,12 @@ export class ModReleaseService {
 	 * Update an existing release
 	 */
 	async updateRelease(
-		modId: string,
-		releaseId: string,
-		updateData: ModReleaseCreateData,
+		updateData: ModReleaseData,
 	): Promise<undefined | ModReleaseServiceError> {
-		logger.debug(
-			{ userId: this.user.id, modId, releaseId, updateData },
-			"updateRelease start",
-		);
+		logger.debug({ userId: this.user.id, updateData }, "updateRelease start");
 
 		const release = await ModRelease.findOneAndUpdate(
-			{ id: releaseId, mod_id: modId },
+			{ id: updateData.id, mod_id: updateData.mod_id },
 			{
 				version: updateData.version,
 				changelog: updateData.changelog,
@@ -112,13 +107,16 @@ export class ModReleaseService {
 
 		if (!release) {
 			logger.warn(
-				{ releaseId },
+				{ releaseId: updateData.id },
 				"User attempted to update release but it was not found",
 			);
 			return ModReleaseServiceError.NotFound;
 		}
 
-		logger.debug({ releaseId }, "User successfully updated release");
+		logger.debug(
+			{ releaseId: updateData.id },
+			"User successfully updated release",
+		);
 	}
 
 	/**
