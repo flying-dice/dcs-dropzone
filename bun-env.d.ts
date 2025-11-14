@@ -15,3 +15,11 @@ declare module "*.module.css" {
 	const classes: { readonly [key: string]: string };
 	export = classes;
 }
+
+declare module "*.md" {
+	/**
+	 * The content of the Markdown file as a string
+	 */
+	const content: string;
+	export = content;
+}

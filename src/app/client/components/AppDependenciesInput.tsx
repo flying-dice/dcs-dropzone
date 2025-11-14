@@ -1,14 +1,7 @@
-import {
-	Alert,
-	Badge,
-	Button,
-	Modal,
-	Stack,
-	Text,
-	TextInput,
-} from "@mantine/core";
+import { Alert, Badge, Button, Modal, Stack, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaLink } from "react-icons/fa6";
 import { useGetRegistryIndex } from "../_autogen/legacy_api.ts";
 import { ModCard } from "./ModCard.tsx";
@@ -21,6 +14,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 	const [values, setValues] = useState<Set<string>>(new Set(props.value));
 	const mods = useGetRegistryIndex();
 	const [searchModalOpen, setSearchModalOpen] = useDisclosure(false);
+	const { t } = useTranslation();
 
 	const handleBadgeClick = (id: string) => () => {
 		const newValues = new Set(values);
@@ -36,12 +30,9 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 				onClick={setSearchModalOpen.open}
 				leftSection={<FaLink />}
 			>
-				Add Dependency
+				{t("ADD_DEPENDENCY")}
 			</Button>
 
-			<Text c="dimmed" size={"sm"}>
-				Add any dependencies required for your mod to function
-			</Text>
 			<Stack gap={"xs"}>
 				{props.value?.map((id) => {
 					const mod = mods.data?.data.find((m) => m.id === id);

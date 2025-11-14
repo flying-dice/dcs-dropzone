@@ -16,8 +16,11 @@ import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaFileArchive } from "react-icons/fa";
-import { FaFile, FaInfo, FaTrash } from "react-icons/fa6";
+import { FaFile, FaTrash } from "react-icons/fa6";
 import { z } from "zod";
+import { EmptyState } from "../../components/EmptyState.tsx";
+import { Help } from "../../components/Help.tsx";
+import assetHelp from "./AssetHelp.md" with { type: "text" };
 import type { UserModReleaseForm } from "./form.ts";
 
 const assetFormSchema = z.object({
@@ -50,15 +53,19 @@ function _AssetForm(props: {
 			<Stack gap={"lg"}>
 				<TextInput
 					label="Asset Name"
+					description={"Name of the asset, this will be shown during download."}
 					name={"name"}
 					{...form.getInputProps("name")}
 				/>
 
 				<Stack gap={"xs"}>
 					<Group justify={"space-between"}>
-						<Text fw={"bold"} size={"sm"}>
-							Asset URLs
-						</Text>
+						<Stack gap={0}>
+							<Text size={"sm"}>Asset URLs</Text>
+							<Text size={"xs"} c={"dimmed"}>
+								All URLs will be downloaded for this asset.
+							</Text>
+						</Stack>
 						<Button
 							size={"xs"}
 							variant={"subtle"}
@@ -150,6 +157,16 @@ function handleEditAsset(form: UserModReleaseForm, index: number) {
 	});
 }
 
+function _NoAssets() {
+	return (
+		<EmptyState
+			title="No assets added"
+			description="Add Assets & URLs for your mod files. These will be downloaded and extracted by the desktop client."
+			icon={FaFile}
+		/>
+	);
+}
+
 export function _Assets(props: { form: UserModReleaseForm }) {
 	return (
 		<Card withBorder>
@@ -158,23 +175,21 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 					<Text size={"lg"} fw={"bold"}>
 						Assets
 					</Text>
-					<Button variant={"light"} onClick={() => handleAddAsset(props.form)}>
-						Add Asset
-					</Button>
+					<Group gap={"xs"}>
+						<Button
+							size={"xs"}
+							variant={"light"}
+							onClick={() => handleAddAsset(props.form)}
+						>
+							Add Asset
+						</Button>
+						<Help
+							title={<Text fw={"bold"}>Assets</Text>}
+							markdown={assetHelp}
+						/>
+					</Group>
 				</Group>
-				<Alert variant="light" color="gray" icon={<FaInfo />}>
-					<Stack>
-						<Text size={"sm"}>
-							Assets are files associated with this release, such as
-							downloadable content or resources. Make sure to provide valid URLs
-							for each asset.
-						</Text>
-						<Text size={"sm"}>
-							Assets are downloaded into the Mods folder, archives are extracted
-							using 7-zip.
-						</Text>
-					</Stack>
-				</Alert>
+				{props.form.values.assets.length === 0 && <_NoAssets />}
 				{props.form.values.assets.map((it) => (
 					<Alert
 						icon={it.isArchive ? <FaFileArchive /> : <FaFile />}

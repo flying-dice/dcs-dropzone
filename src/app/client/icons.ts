@@ -4,6 +4,7 @@ import {
 	FaDownload,
 	FaEye,
 	FaEyeSlash,
+	FaTag,
 	FaToggleOn,
 	FaUser,
 } from "react-icons/fa6";
@@ -12,6 +13,7 @@ import { ModVisibility } from "../../common/data.ts";
 export const AppIcons = {
 	Home: FaHome,
 	Mods: FaBox,
+	Releases: FaTag,
 	Subscribed: FaDownload,
 	Enabled: FaToggleOn,
 	Updates: FaSyncAlt,

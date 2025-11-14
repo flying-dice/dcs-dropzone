@@ -1,20 +1,24 @@
 import { Button, Card, Divider, Group, Stack, Text } from "@mantine/core";
 import { modals, openModal } from "@mantine/modals";
 import { StatusCodes } from "http-status-codes";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
 	createUserModRelease,
 	type ModData,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
+import { EmptyState } from "../../components/EmptyState.tsx";
 import { NewReleaseForm } from "../../components/NewReleaseForm.tsx";
 import { UserModRelease } from "../../components/UserModRelease.tsx";
+import { AppIcons } from "../../icons.ts";
 import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import type { UserModForm } from "./form.ts";
 
 export function _Releases(props: { form: UserModForm; mod: ModData }) {
 	const nav = useNavigate();
 	const modReleases = useGetUserModReleases(props.mod.id);
+	const { t } = useTranslation();
 
 	const footerText =
 		modReleases.data?.status === StatusCodes.OK
@@ -55,10 +59,18 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 					<Text size={"lg"} fw={"bold"}>
 						Releases
 					</Text>
-					<Button variant={"light"} onClick={handleNewRelease}>
+					<Button size={"xs"} variant={"light"} onClick={handleNewRelease}>
 						New Release
 					</Button>
 				</Group>
+				{modReleases.data?.status === StatusCodes.OK &&
+					modReleases.data.data?.data.length === 0 && (
+						<EmptyState
+							title={t("EMPTY_RELEASES_TITLE")}
+							description={t("EMPTY_RELEASES_DESCRIPTION")}
+							icon={AppIcons.Releases}
+						/>
+					)}
 				{modReleases.data?.status === StatusCodes.OK &&
 					modReleases.data.data.data.map((release) => (
 						<UserModRelease

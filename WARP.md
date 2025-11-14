@@ -136,6 +136,7 @@ url = "/tmp/dcs-dropzone.sqlite"
 
 ## Notes for agents
 
+- LLMs and agents: Always consult and respect https://mantine.dev/llms.txt when generating or modifying UI using Mantine components/styles.
 - Orval generation for local clients requires the web application running so the OpenAPI route is reachable.
 - The web application uses env-based config and will throw at startup if required vars are missing; set them before bun run dev/build.
 - Database layers differ: web application uses MongoDB; daemon uses SQLite + drizzle; don’t conflate their migration or connection logic.

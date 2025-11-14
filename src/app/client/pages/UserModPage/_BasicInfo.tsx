@@ -1,22 +1,27 @@
 import { Card, Select, Stack, Text, TextInput } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { data } from "../../../../common/data.ts";
 import type { UserModForm } from "./form.ts";
 
 export function _BasicInfo(props: { form: UserModForm }) {
+	const { t } = useTranslation();
 	return (
 		<Card withBorder>
 			<Stack>
 				<Text size={"lg"} fw={"bold"}>
-					Basic Information
+					{t("BASIC_INFORMATION")}
 				</Text>
-				<TextInput label="Mod Name" {...props.form.getInputProps("name")} />
+				<TextInput
+					label={t("MOD_NAME")}
+					{...props.form.getInputProps("name")}
+				/>
 				<Select
-					label={"Category"}
+					label={t("CATEGORY")}
 					data={data.categories}
 					{...props.form.getInputProps("category")}
 				/>
 				<TextInput
-					label="Short Description"
+					label={t("DESCRIPTION")}
 					{...props.form.getInputProps("description")}
 				/>
 			</Stack>

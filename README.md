@@ -253,6 +253,10 @@ Interactive API documentation is available via Scalar UI at the same endpoints.
 
 For detailed technical documentation and agent-specific guidance, see [warp.md](./warp.md).
 
+### LLM/Agent Guidance
+
+- LLMs and agents should consult and respect https://mantine.dev/llms.txt when working with Mantine-based UI.
+
 ## 🛠️ Tech Stack
 
 - **Runtime**: [Bun](https://bun.sh)
