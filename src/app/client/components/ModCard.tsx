@@ -10,10 +10,12 @@ import {
 } from "@mantine/core";
 import type { IconType } from "react-icons";
 import { FaDownload, FaPlus, FaStar } from "react-icons/fa";
+import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { ModImage } from "./ModImage.tsx";
 import { Stat } from "./Stat.tsx";
 
 function GridModCard(props: ModCardProps) {
+	const { t } = useAppTranslation();
 	return (
 		<Card
 			radius={"md"}
@@ -51,7 +53,7 @@ function GridModCard(props: ModCardProps) {
 								leftSection={<FaPlus />}
 								onClick={props.onSubscribeToggle}
 							>
-								{props.isSubscribed ? "Unsubscribe" : "Subscribe"}
+								{props.isSubscribed ? t("UNSUBSCRIBE") : t("SUBSCRIBE")}
 							</Button>
 						)}
 					</Stack>
@@ -62,6 +64,7 @@ function GridModCard(props: ModCardProps) {
 }
 
 function ListModCard(props: ModCardProps) {
+	const { t } = useAppTranslation();
 	return (
 		<Card
 			radius={"md"}
@@ -100,7 +103,7 @@ function ListModCard(props: ModCardProps) {
 								leftSection={<FaPlus />}
 								onClick={props.onSubscribeToggle}
 							>
-								{props.isSubscribed ? "Unsubscribe" : "Subscribe"}
+								{props.isSubscribed ? t("UNSUBSCRIBE") : t("SUBSCRIBE")}
 							</Button>
 						)}
 					</Group>

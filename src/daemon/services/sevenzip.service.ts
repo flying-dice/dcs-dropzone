@@ -85,7 +85,7 @@ export class SevenzipService {
 			`-o${absoluteTargetDir}`,
 		];
 
-		this.logger.verbose(["\n", this.exePath, ...args].join(" "));
+		this.logger.trace(["\n", this.exePath, ...args].join(" "));
 
 		const _7zip = spawn(this.exePath, args, { stdio: "pipe" });
 

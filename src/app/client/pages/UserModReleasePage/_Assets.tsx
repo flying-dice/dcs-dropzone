@@ -15,12 +15,12 @@ import {
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { FaFileArchive } from "react-icons/fa";
+import { FaCloudDownloadAlt, FaFileArchive } from "react-icons/fa";
 import { FaFile, FaTrash } from "react-icons/fa6";
 import { z } from "zod";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
-import assetHelp from "./AssetHelp.md" with { type: "text" };
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 const assetFormSchema = z.object({
@@ -39,6 +39,7 @@ function _AssetForm(props: {
 	onSubmit: (values: AssetFormValues) => void;
 	onRemove?: () => void;
 }) {
+	const { t } = useAppTranslation();
 	const form = useForm<AssetFormValues>({
 		initialValues: props.defaultValues || {
 			name: "",
@@ -52,8 +53,8 @@ function _AssetForm(props: {
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
 				<TextInput
-					label="Asset Name"
-					description={"Name of the asset, this will be shown during download."}
+					label={t("ASSET_NAME_LABEL")}
+					description={t("ASSET_NAME_DESCRIPTION")}
 					name={"name"}
 					{...form.getInputProps("name")}
 				/>
@@ -61,9 +62,9 @@ function _AssetForm(props: {
 				<Stack gap={"xs"}>
 					<Group justify={"space-between"}>
 						<Stack gap={0}>
-							<Text size={"sm"}>Asset URLs</Text>
+							<Text size={"sm"}>{t("ASSET_URLS_LABEL")}</Text>
 							<Text size={"xs"} c={"dimmed"}>
-								All URLs will be downloaded for this asset.
+								{t("ASSET_URLS_DESCRIPTION")}
 							</Text>
 						</Stack>
 						<Button
@@ -73,11 +74,15 @@ function _AssetForm(props: {
 								form.setFieldValue("urls", [...form.values.urls, ""])
 							}
 						>
-							Add URL
+							{t("ADD_URL")}
 						</Button>
 					</Group>
 					{form.values.urls.length === 0 && !form.errors.urls && (
-						<Alert>Add a URL to the asset.</Alert>
+						<EmptyState
+							title={t("EMPTY_ASSET_URLS_TITLE")}
+							description={t("EMPTY_ASSET_URLS_DESCRIPTION")}
+							icon={FaCloudDownloadAlt}
+						/>
 					)}
 					{form.errors.urls && <Alert color="red">{form.errors.urls}</Alert>}
 					{form.values.urls.map((url, i) => (
@@ -104,18 +109,18 @@ function _AssetForm(props: {
 
 				<Divider />
 				<Checkbox
-					label={"Is Archive"}
-					description={"Asset is an archive (will be extracted using 7-zip)"}
+					label={t("ASSET_IS_ARCHIVE_LABEL")}
+					description={t("ASSET_IS_ARCHIVE_DESCRIPTION")}
 					{...form.getInputProps("isArchive", { type: "checkbox" })}
 				/>
 
 				<Group justify={"space-between"}>
 					{(props.onRemove && (
 						<Button color="red" variant="light" onClick={props.onRemove}>
-							Remove
+							{t("REMOVE")}
 						</Button>
 					)) || <span />}
-					<Button type={"submit"}>Save</Button>
+					<Button type={"submit"}>{t("SAVE")}</Button>
 				</Group>
 			</Stack>
 		</form>
@@ -168,6 +173,7 @@ function _NoAssets() {
 }
 
 export function _Assets(props: { form: UserModReleaseForm }) {
+	const { t } = useAppTranslation();
 	return (
 		<Card withBorder>
 			<Stack>
@@ -185,7 +191,7 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						</Button>
 						<Help
 							title={<Text fw={"bold"}>Assets</Text>}
-							markdown={assetHelp}
+							markdown={t("ASSET_HELP_MD")}
 						/>
 					</Group>
 				</Group>

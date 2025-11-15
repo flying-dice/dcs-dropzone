@@ -5,23 +5,25 @@ import {
 	useGetUserModById,
 	useGetUserModReleaseById,
 } from "../../_autogen/api.ts";
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _UserModReleasePage } from "./page.tsx";
 
 export function UserModReleasePage(props: { user: UserData }) {
+	const { t } = useAppTranslation();
 	const params = useParams<{ modId: string; releaseId: string }>();
 	const release = useGetUserModReleaseById(params.modId!, params.releaseId!);
 	const mod = useGetUserModById(params.modId!);
 
 	if (release.isLoading || mod.isLoading) {
-		return <div>Loading...</div>;
+		return <div>{t("LOADING")}</div>;
 	}
 
 	if (mod.isError || mod.data?.status !== StatusCodes.OK) {
-		return <div>Error loading mod.</div>;
+		return <div>{t("ERROR_LOADING_MOD")}</div>;
 	}
 
 	if (release.isError || release.data?.status !== StatusCodes.OK) {
-		return <div>Error loading release.</div>;
+		return <div>{t("ERROR_LOADING_RELEASE")}</div>;
 	}
 
 	return (

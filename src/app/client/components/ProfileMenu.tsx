@@ -8,11 +8,13 @@ import {
 	TextInput,
 } from "@mantine/core";
 import { openModal } from "@mantine/modals";
+import { useTranslation } from "react-i18next";
 import { BiDetail, BiLogOut, BiLogoGithub, BiPackage } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext.ts";
 
 export function ProfileMenu() {
+	const { t } = useTranslation();
 	const nav = useNavigate();
 	const { user, logout, login } = useUserContext();
 
@@ -30,27 +32,27 @@ export function ProfileMenu() {
 				<Stack>
 					<TextInput
 						readOnly
-						label="User ID"
+						label={t("USER_ID")}
 						value={user.id}
-						description="This is your ID, all mods you publish will be bound to this ID"
+						description={t("USER_ID_DESCRIPTION")}
 					/>
 					<TextInput
 						readOnly
-						label="User Login"
+						label={t("USER_LOGIN")}
 						value={user.username}
-						description="This is your Username"
+						description={t("USER_LOGIN_DESCRIPTION")}
 					/>
 					<TextInput
 						readOnly
-						label="User Name"
+						label={t("USER_NAME")}
 						value={user.name}
-						description="This is your Name"
+						description={t("USER_NAME_DESCRIPTION")}
 					/>
 					<TextInput
 						readOnly
-						label="User Profile URL"
+						label={t("USER_PROFILE_URL")}
 						value={user.profileUrl}
-						description="This is your Profile URL"
+						description={t("USER_PROFILE_URL_DESCRIPTION")}
 					/>
 				</Stack>
 			),
@@ -61,7 +63,7 @@ export function ProfileMenu() {
 		<Stack pr="md">
 			{!user && (
 				<Button variant="default" onClick={login}>
-					Login
+					{t("LOGIN")}
 				</Button>
 			)}
 			{user && (
@@ -84,23 +86,23 @@ export function ProfileMenu() {
 								onClick={() => nav("/user-mods")}
 								leftSection={<BiPackage />}
 							>
-								User Mods
+								{t("USER_MODS")}
 							</Menu.Item>
 						)}
 
 						<Menu.Divider />
 
 						<Menu.Item onClick={viewUserDetails} leftSection={<BiDetail />}>
-							View User Details
+							{t("VIEW_USER_DETAILS")}
 						</Menu.Item>
 						<Menu.Item
 							onClick={() => globalThis.open(user.profileUrl, "_blank")}
 							leftSection={<BiLogoGithub />}
 						>
-							View Profile
+							{t("VIEW_PROFILE")}
 						</Menu.Item>
 						<Menu.Item onClick={logout} leftSection={<BiLogOut />}>
-							Logout
+							{t("LOGOUT")}
 						</Menu.Item>
 					</Menu.Dropdown>
 				</Menu>

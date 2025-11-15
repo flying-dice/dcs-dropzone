@@ -1,11 +1,9 @@
 import {
-	Center,
 	Paper,
 	Stack,
 	Text,
 	ThemeIcon,
 	useComputedColorScheme,
-	useMantineTheme,
 } from "@mantine/core";
 import type { IconType } from "react-icons";
 

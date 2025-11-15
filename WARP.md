@@ -50,7 +50,7 @@ bun run orval
 ```
 
 - Drizzle SQL migrations (daemon)
-  - Generate SQL from schema.ts into src/daemon/database/ddl/ then bundle to index-ddl.ts used at runtime:
+  - Generate SQL from I18nKeys.ts into src/daemon/database/ddl/ then bundle to index-ddl.ts used at runtime:
 
 ```bash path=null start=null
 bun run drizzle       # runs: drizzle-kit generate --config drizzle.config.ts --name=init

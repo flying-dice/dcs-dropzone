@@ -8,7 +8,7 @@ import { App } from "./App";
 import { UserContextProvider } from "./context/UserContextProvider.tsx";
 import { theme } from "./theme.ts";
 
-import "./i18n";
+import "./i18n/index.ts";
 
 const queryClient = new QueryClient({
 	defaultOptions: {

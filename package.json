@@ -5,6 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"biome": "biome check --write",
+		"tsc": "tsc --noEmit",
+		"check": "bun run biome && bun run tsc",
 		"dev": "bun --hot src/app/index.ts",
 		"dev:daemon": "bun --hot src/daemon/index.ts",
 		"test": "bun test",

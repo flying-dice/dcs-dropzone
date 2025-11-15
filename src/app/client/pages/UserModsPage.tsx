@@ -19,6 +19,7 @@ import {
 import { ModCard } from "../components/ModCard.tsx";
 import { NewModForm } from "../components/NewModForm.tsx";
 import { StatCard } from "../components/StatCard.tsx";
+import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { AppIcons } from "../icons.ts";
 import { showErrorNotification } from "../utils/showErrorNotification.tsx";
 
@@ -27,13 +28,14 @@ export type UserModsPageProps = {
 };
 
 export function UserModsPage(_: UserModsPageProps) {
+	const { t } = useAppTranslation();
 	const nav = useNavigate();
 	const colorScheme = useComputedColorScheme();
 	const mods = useGetUserMods();
 
 	const handleNewMod = () => {
 		openModal({
-			title: "Create New Mod",
+			title: t("CREATE_NEW_MOD"),
 			size: "xl",
 			children: (
 				<NewModForm
@@ -62,14 +64,14 @@ export function UserModsPage(_: UserModsPageProps) {
 				<Stack py={"md"} gap={"xl"}>
 					<Group>
 						<Button leftSection={<FaPlus />} onClick={handleNewMod}>
-							Publish New Mod
+							{t("PUBLISH_NEW_MOD")}
 						</Button>
 					</Group>
 
 					<SimpleGrid cols={3} spacing={"xl"}>
 						<StatCard
 							icon={AppIcons.Mods}
-							label={"Published Mods"}
+							label={t("PUBLISHED_MODS")}
 							value={
 								mods.data?.status === StatusCodes.OK
 									? mods.data.data.meta.published
@@ -79,7 +81,7 @@ export function UserModsPage(_: UserModsPageProps) {
 						<StatCard
 							icon={AppIcons.Subscribed}
 							iconColor={"grape"}
-							label={"Total Downloads"}
+							label={t("TOTAL_DOWNLOADS")}
 							value={
 								mods.data?.status === StatusCodes.OK
 									? mods.data.data.meta.totalDownloads
@@ -89,7 +91,7 @@ export function UserModsPage(_: UserModsPageProps) {
 						<StatCard
 							icon={AppIcons.Ratings}
 							iconColor={"green"}
-							label={"Average Rating"}
+							label={t("AVERAGE_RATING")}
 							value={
 								mods.data?.status === StatusCodes.OK
 									? mods.data.data.meta.averageRating.toFixed(2)

@@ -9,6 +9,7 @@ import {
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useWindowSize } from "react-use";
 import { useGetRegistryIndex } from "../_autogen/legacy_api.ts";
@@ -18,6 +19,7 @@ import { AppIcons } from "../icons.ts";
 
 export function Homepage() {
 	const nav = useNavigate();
+	const { t } = useTranslation();
 	const colorScheme = useComputedColorScheme();
 	const { width } = useWindowSize();
 
@@ -30,29 +32,29 @@ export function Homepage() {
 			<Container size={"xl"}>
 				<Stack py={"xl"} gap={"xl"}>
 					<SimpleGrid cols={4} spacing={"xl"}>
-						<StatCard icon={AppIcons.Mods} label={"Total Mods"} value={20} />
+						<StatCard icon={AppIcons.Mods} label={t("TOTAL_MODS")} value={20} />
 						<StatCard
 							icon={AppIcons.Subscribed}
 							iconColor={"grape"}
-							label={"Subscribed"}
+							label={t("SUBSCRIBED")}
 							value={3}
 						/>
 						<StatCard
 							icon={AppIcons.Enabled}
 							iconColor={"green"}
-							label={"Enabled"}
+							label={t("ENABLED")}
 							value={3}
 						/>
 						<StatCard
 							icon={AppIcons.Updates}
 							iconColor={"orange"}
-							label={"Updates"}
+							label={t("UPDATES")}
 							value={1}
 						/>
 					</SimpleGrid>
 					<Stack>
 						<Text fz={"lg"} fw={"bold"}>
-							Featured Mods
+							{t("FEATURED_MODS")}
 						</Text>
 						<SimpleGrid cols={cols} spacing={"xl"}>
 							{mods.data?.data.slice(0, cols).map((mod) => (
@@ -73,7 +75,7 @@ export function Homepage() {
 					</Stack>
 					<Stack>
 						<Text fz={"lg"} fw={"bold"}>
-							Popular mods
+							{t("POPULAR_MODS")}
 						</Text>
 						{mods.data?.data.map((mod) => (
 							<ModCard
@@ -96,7 +98,7 @@ export function Homepage() {
 									await nav("/mods");
 								}}
 							>
-								View all mods
+								{t("VIEW_ALL_MODS")}
 							</Button>
 						</Group>
 					</Stack>

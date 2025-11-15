@@ -1,7 +1,6 @@
 import { Button, Card, Divider, Group, Stack, Text } from "@mantine/core";
 import { modals, openModal } from "@mantine/modals";
 import { StatusCodes } from "http-status-codes";
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
 	createUserModRelease,
@@ -11,6 +10,7 @@ import {
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { NewReleaseForm } from "../../components/NewReleaseForm.tsx";
 import { UserModRelease } from "../../components/UserModRelease.tsx";
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import type { UserModForm } from "./form.ts";
@@ -18,7 +18,7 @@ import type { UserModForm } from "./form.ts";
 export function _Releases(props: { form: UserModForm; mod: ModData }) {
 	const nav = useNavigate();
 	const modReleases = useGetUserModReleases(props.mod.id);
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 
 	const footerText =
 		modReleases.data?.status === StatusCodes.OK

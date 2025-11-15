@@ -1,10 +1,10 @@
 import { Card, Select, Stack, Text, TextInput } from "@mantine/core";
-import { useTranslation } from "react-i18next";
 import { data } from "../../../../common/data.ts";
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModForm } from "./form.ts";
 
 export function _BasicInfo(props: { form: UserModForm }) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 	return (
 		<Card withBorder>
 			<Stack>

@@ -11,9 +11,11 @@ import {
 import { BsLaptop, BsMoon, BsSun } from "react-icons/bs";
 import logo from "./assets/logo.svg";
 import { ProfileMenu } from "./components/ProfileMenu.tsx";
+import { useAppTranslation } from "./i18n/useAppTranslation.ts";
 
 export function AppHeader() {
 	const { colorScheme, setColorScheme } = useMantineColorScheme();
+	const { t } = useAppTranslation();
 
 	return (
 		<AppShell.Header>
@@ -22,7 +24,7 @@ export function AppHeader() {
 					<Image w={"min-content"} h={44} src={logo} />
 					<Stack gap={2} pr="md">
 						<Group>
-							<TextInput placeholder="Search mods..." w={320} />
+							<TextInput placeholder={t("SEARCH_MODS_PLACEHOLDER")} w={320} />
 							<Menu>
 								<Menu.Target>
 									<ActionIcon variant={"default"} size={"lg"}>
@@ -41,21 +43,21 @@ export function AppHeader() {
 										color={colorScheme === "light" ? "primary" : undefined}
 										leftSection={<BsSun />}
 									>
-										Light
+										{t("LIGHT")}
 									</Menu.Item>
 									<Menu.Item
 										onClick={() => setColorScheme("dark")}
 										color={colorScheme === "dark" ? "primary" : undefined}
 										leftSection={<BsMoon />}
 									>
-										Dark
+										{t("DARK")}
 									</Menu.Item>
 									<Menu.Item
 										onClick={() => setColorScheme("auto")}
 										color={colorScheme === "auto" ? "primary" : undefined}
 										leftSection={<BsLaptop />}
 									>
-										Auto
+										{t("AUTO")}
 									</Menu.Item>
 								</Menu.Dropdown>
 							</Menu>

@@ -1,9 +1,9 @@
 import { Alert, Badge, Button, Modal, Stack, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { FaLink } from "react-icons/fa6";
 import { useGetRegistryIndex } from "../_autogen/legacy_api.ts";
+import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { ModCard } from "./ModCard.tsx";
 
 export type AppDependenciesInputProps = {
@@ -14,7 +14,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 	const [values, setValues] = useState<Set<string>>(new Set(props.value));
 	const mods = useGetRegistryIndex();
 	const [searchModalOpen, setSearchModalOpen] = useDisclosure(false);
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 
 	const handleBadgeClick = (id: string) => () => {
 		const newValues = new Set(values);
