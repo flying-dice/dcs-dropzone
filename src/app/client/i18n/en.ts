@@ -116,5 +116,41 @@ export default {
 		SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR: "DCS Install Directory",
 		SYMBOLIC_LINK_SOURCE_LABEL: "Source",
 		SYMBOLIC_LINK_DESTINATION_LABEL: "Destination",
+
+		// Mission Scripts
+		MISSION_SCRIPTS_TITLE: "Mission Scripts",
+		ADD_MISSION_SCRIPT: "Add Mission Script",
+		EDIT_MISSION_SCRIPT: "Edit Mission Script",
+		NO_MISSION_SCRIPTS_TITLE: "No mission scripts configured",
+		NO_MISSION_SCRIPTS_DESCRIPTION:
+			"Add mission scripts to be run when missions start. Scripts can run before or after sanitization.",
+		MISSION_SCRIPT_PATH_LABEL: "Script Path",
+		MISSION_SCRIPT_PATH_DESCRIPTION:
+			"Path to the script file relative to the selected root directory",
+		MISSION_SCRIPT_PATH_PLACEHOLDER: "e.g., Scripts/Hooks/MyScript.lua",
+		MISSION_SCRIPT_PATH_DISPLAY: "Path",
+		MISSION_SCRIPT_ROOT_LABEL: "Root Directory",
+		MISSION_SCRIPT_ROOT_DESCRIPTION:
+			"Select the DCS directory root where the script is located",
+		MISSION_SCRIPT_ROOT_WORKING_DIR: "DCS Working Directory",
+		MISSION_SCRIPT_ROOT_INSTALL_DIR: "DCS Install Directory",
+		MISSION_SCRIPT_RUN_ON_LABEL: "Run On",
+		MISSION_SCRIPT_RUN_ON_DESCRIPTION:
+			"Select when the script should be executed during mission start",
+		MISSION_SCRIPT_RUN_ON_BEFORE_SANITIZE: "Mission Start (Before Sanitize)",
+		MISSION_SCRIPT_RUN_ON_AFTER_SANITIZE: "Mission Start (After Sanitize)",
+		MISSION_SCRIPT_HELP_MD: `# Mission Scripts
+
+Mission scripts allow you to specify Lua scripts that should be executed when a mission starts in DCS.
+
+## Root Directory
+- **DCS Working Directory**: User-specific DCS directory (typically in Saved Games)
+- **DCS Install Directory**: Main DCS installation directory
+
+## Run Timing
+- **Before Sanitize**: Script runs before DCS sanitizes the mission environment
+- **After Sanitize**: Script runs after DCS sanitizes the mission environment
+
+Scripts are specified as paths relative to the selected root directory.`,
 	},
 };

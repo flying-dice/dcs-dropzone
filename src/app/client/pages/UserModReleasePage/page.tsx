@@ -16,6 +16,7 @@ import { _Assets } from "./_Assets.tsx";
 import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Changelog } from "./_Changelog.tsx";
 import { _FormActions } from "./_FormActions.tsx";
+import { _MissionScripts } from "./_MissionScripts.tsx";
 import { _Summary } from "./_Summary.tsx";
 import { _SymbolicLinks } from "./_SymbolicLinks.tsx";
 import { useUserModReleaseForm, useUserModReleaseFormSubmit } from "./form.ts";
@@ -52,6 +53,7 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 							<_Changelog form={form} />
 							<_Assets form={form} />
 							<_SymbolicLinks form={form} />
+							<_MissionScripts form={form} />
 						</Stack>
 						<Stack w={300}>
 							<_Summary form={form} />
