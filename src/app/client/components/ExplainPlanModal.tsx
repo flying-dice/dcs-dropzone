@@ -1,7 +1,7 @@
 import { Button, Modal, ScrollArea, Stack, Text } from "@mantine/core";
-import { marked } from "marked";
 import type { ModReleaseData } from "../_autogen/api.ts";
 import { generateExplainPlan } from "../utils/generateExplainPlan.ts";
+import { Markdown } from "./Markdown.tsx";
 
 export type ExplainPlanModalProps = {
 	opened: boolean;
@@ -15,7 +15,6 @@ export type ExplainPlanModalProps = {
  */
 export function ExplainPlanModal(props: ExplainPlanModalProps) {
 	const planMarkdown = generateExplainPlan(props.release);
-	const planHtml = marked.parse(planMarkdown, { async: false }) as string;
 
 	return (
 		<Modal
@@ -31,14 +30,7 @@ export function ExplainPlanModal(props: ExplainPlanModalProps) {
 		>
 			<Stack>
 				<ScrollArea.Autosize mah={600}>
-					<div
-						// biome-ignore lint/security/noDangerouslySetInnerHtml: This is needed to render markdown content for the explain plan
-						dangerouslySetInnerHTML={{ __html: planHtml }}
-						style={{
-							padding: "1rem",
-							lineHeight: "1.6",
-						}}
-					/>
+					<Markdown content={planMarkdown} />
 				</ScrollArea.Autosize>
 				<Button onClick={props.onClose} fullWidth>
 					Close
