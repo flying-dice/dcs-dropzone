@@ -1,4 +1,4 @@
-import { Button, Modal, ScrollArea, Stack, Text } from "@mantine/core";
+import { Modal, Text } from "@mantine/core";
 import type { ModReleaseData } from "../_autogen/api.ts";
 import { generateExplainPlan } from "../utils/generateExplainPlan.ts";
 import { Markdown } from "./Markdown.tsx";
@@ -28,14 +28,7 @@ export function ExplainPlanModal(props: ExplainPlanModalProps) {
 			size="xl"
 			centered
 		>
-			<Stack>
-				<ScrollArea.Autosize mah={600}>
-					<Markdown content={planMarkdown} />
-				</ScrollArea.Autosize>
-				<Button onClick={props.onClose} fullWidth>
-					Close
-				</Button>
-			</Stack>
+			<Markdown content={planMarkdown} />
 		</Modal>
 	);
 }
