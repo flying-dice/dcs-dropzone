@@ -5,6 +5,24 @@ import {
 import type { ModReleaseData } from "../_autogen/api.ts";
 
 /**
+ * Escapes HTML and critical markdown special characters to prevent XSS.
+ * This ensures user-controlled content is safely displayed in markdown.
+ * We escape HTML entities and markdown formatting characters that could be
+ * exploited, while preserving common characters used in file paths and versions.
+ */
+function escapeMarkdown(text: string): string {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;")
+		.replace(/\[/g, "\\[")
+		.replace(/\]/g, "\\]")
+		.replace(/`/g, "\\`");
+}
+
+/**
  * Generates a human-readable explanation plan for a mod release installation.
  * The plan describes all actions that will be performed during installation.
  */
@@ -13,7 +31,7 @@ export function generateExplainPlan(release: ModReleaseData): string {
 
 	// Header section with release info
 	sections.push(
-		`# Installation Plan for Release ${release.version}\n\n` +
+		`# Installation Plan for Release ${escapeMarkdown(release.version)}\n\n` +
 			`This plan describes all actions that will be performed when installing this mod release.\n`,
 	);
 
@@ -23,7 +41,7 @@ export function generateExplainPlan(release: ModReleaseData): string {
 			release.changelog.length > 200
 				? `${release.changelog.substring(0, 200)}...`
 				: release.changelog;
-		sections.push(`## Release Notes\n\n${changelogPreview}\n`);
+		sections.push(`## Release Notes\n\n${escapeMarkdown(changelogPreview)}\n`);
 	}
 
 	// Assets section
@@ -39,12 +57,12 @@ export function generateExplainPlan(release: ModReleaseData): string {
 
 			if (asset.isArchive) {
 				sections.push(
-					`- **${asset.name}** will be downloaded ${downloadSource}. ` +
+					`- **${escapeMarkdown(asset.name)}** will be downloaded ${downloadSource}. ` +
 						`This is an archive file that will be automatically extracted after download.\n`,
 				);
 			} else {
 				sections.push(
-					`- **${asset.name}** will be downloaded ${downloadSource}.\n`,
+					`- **${escapeMarkdown(asset.name)}** will be downloaded ${downloadSource}.\n`,
 				);
 			}
 		}
@@ -62,7 +80,7 @@ export function generateExplainPlan(release: ModReleaseData): string {
 					: "DCS installation directory";
 
 			sections.push(
-				`- A symbolic link will be created from **${symlink.src}** to **${symlink.dest}** ` +
+				`- A symbolic link will be created from **${escapeMarkdown(symlink.src)}** to **${escapeMarkdown(symlink.dest)}** ` +
 					`within the ${rootType}.\n`,
 			);
 		}
@@ -85,7 +103,7 @@ export function generateExplainPlan(release: ModReleaseData): string {
 					: "DCS installation directory";
 
 			sections.push(
-				`- The script at **${script.path}** (in the ${rootType}) will be installed ` +
+				`- The script at **${escapeMarkdown(script.path)}** (in the ${rootType}) will be installed ` +
 					`and will run at ${timing}.\n`,
 			);
 		}

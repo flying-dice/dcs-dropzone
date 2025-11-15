@@ -354,4 +354,58 @@ describe("generateExplainPlan", () => {
 		expect(plan).toContain("Installation Plan for Release 1.0.1");
 		expect(plan).not.toContain("Release Notes");
 	});
+
+	test("escapes HTML and markdown special characters to prevent XSS", () => {
+		const release: ModReleaseData = {
+			id: "test-release-xss",
+			mod_id: "test-mod-1",
+			version: '1.0.0"><script>alert("XSS")</script>',
+			changelog: '<img src=x onerror=alert("XSS")>',
+			assets: [
+				{
+					name: 'malicious[test](javascript:alert("XSS"))',
+					urls: ["http://ex.com"],
+					isArchive: false,
+				},
+			],
+			symbolicLinks: [
+				{
+					src: "/path<script>alert('XSS')</script>",
+					dest: "/dest`alert('XSS')`",
+					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+				},
+			],
+			missionScripts: [
+				{
+					path: "script<img src=x onerror=alert('XSS')>.lua",
+					root: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+					runOn: MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
+				},
+			],
+			visibility: ModVisibility.Public,
+		};
+
+		const plan = generateExplainPlan(release);
+
+		// Verify HTML entities are escaped - this prevents XSS execution
+		expect(plan).toContain("&lt;");
+		expect(plan).toContain("&gt;");
+		expect(plan).toContain("&quot;");
+		expect(plan).toContain("&#039;");
+
+		// Verify markdown link syntax is escaped
+		expect(plan).toContain("\\[");
+		expect(plan).toContain("\\]");
+
+		// Verify backticks are escaped
+		expect(plan).toContain("\\`");
+
+		// Verify raw unescaped script tags are NOT present (key XSS prevention)
+		expect(plan).not.toContain("<script>");
+		expect(plan).not.toContain("</script>");
+
+		// The escaped versions should be present (safe to display)
+		expect(plan).toContain("&lt;script&gt;");
+		expect(plan).toContain("&lt;/script&gt;");
+	});
 });
