@@ -14,14 +14,16 @@ import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaLink } from "react-icons/fa";
 import { z } from "zod";
+import { ModReleaseSymbolicLinkDataDestRoot } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { SymbolicLinkDestRoot, type UserModReleaseForm } from "./form.ts";
 
 const symbolicLinkFormSchema = z.object({
 	src: z.string().min(1, "Source path is required"),
 	dest: z.string().min(1, "Destination path is required"),
-	destRoot: z.enum(SymbolicLinkDestRoot),
+	destRoot: z.enum(ModReleaseSymbolicLinkDataDestRoot),
 });
 type SymbolicLinkFormValues = z.infer<typeof symbolicLinkFormSchema>;
 
@@ -30,42 +32,49 @@ function _SymbolicLinkForm(props: {
 	onSubmit: (values: SymbolicLinkFormValues) => void;
 	onRemove?: () => void;
 }) {
+	const { t } = useAppTranslation();
 	const form = useForm<SymbolicLinkFormValues>({
 		initialValues: props.defaultValues || {
 			src: "",
 			dest: "",
-			destRoot: "DCS_WORKING_DIR",
+			destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
 		},
 		validate: zod4Resolver(symbolicLinkFormSchema),
 	});
 
 	const destRootOptions = [
-		{ value: "DCS_WORKING_DIR", label: "DCS Working Directory" },
-		{ value: "DCS_INSTALL_DIR", label: "DCS Install Directory" },
+		{
+			value: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+			label: t("SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR"),
+		},
+		{
+			value: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
+			label: t("SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR"),
+		},
 	];
 
 	return (
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
 				<TextInput
-					label="Source Path"
-					description="Path relative to the mod download directory"
-					placeholder="e.g., Mods/MyMod or Scripts/MyScript.lua"
+					label={t("SYMBOLIC_LINK_SRC_LABEL")}
+					description={t("SYMBOLIC_LINK_SRC_DESCRIPTION")}
+					placeholder={t("SYMBOLIC_LINK_SRC_PLACEHOLDER")}
 					name={"src"}
 					{...form.getInputProps("src")}
 				/>
 
 				<Select
-					label="Destination Root"
-					description="Select the DCS directory root where the link will be created"
+					label={t("SYMBOLIC_LINK_DEST_ROOT_LABEL")}
+					description={t("SYMBOLIC_LINK_DEST_ROOT_DESCRIPTION")}
 					data={destRootOptions}
 					{...form.getInputProps("destRoot")}
 				/>
 
 				<TextInput
-					label="Destination Path"
-					description="Path relative to the selected destination root"
-					placeholder="e.g., Mods/MyMod or Scripts/MyScript.lua"
+					label={t("SYMBOLIC_LINK_DEST_LABEL")}
+					description={t("SYMBOLIC_LINK_DEST_DESCRIPTION")}
+					placeholder={t("SYMBOLIC_LINK_DEST_PLACEHOLDER")}
 					name={"dest"}
 					{...form.getInputProps("dest")}
 				/>
@@ -73,10 +82,10 @@ function _SymbolicLinkForm(props: {
 				<Group justify={"space-between"}>
 					{(props.onRemove && (
 						<Button color="red" variant="light" onClick={props.onRemove}>
-							Remove
+							{t("REMOVE")}
 						</Button>
 					)) || <span />}
-					<Button type={"submit"}>Save</Button>
+					<Button type={"submit"}>{t("SAVE")}</Button>
 				</Group>
 			</Stack>
 		</form>
@@ -84,8 +93,9 @@ function _SymbolicLinkForm(props: {
 }
 
 function handleAddSymbolicLink(form: UserModReleaseForm) {
+	const { t } = useAppTranslation();
 	openModal({
-		title: "Add Symbolic Link",
+		title: t("ADD_SYMBOLIC_LINK"),
 		size: "xl",
 		children: (
 			<_SymbolicLinkForm
@@ -99,8 +109,9 @@ function handleAddSymbolicLink(form: UserModReleaseForm) {
 }
 
 function handleEditSymbolicLink(form: UserModReleaseForm, index: number) {
+	const { t } = useAppTranslation();
 	openModal({
-		title: "Edit Symbolic Link",
+		title: t("EDIT_SYMBOLIC_LINK"),
 		size: "xl",
 		children: (
 			<_SymbolicLinkForm
@@ -119,22 +130,24 @@ function handleEditSymbolicLink(form: UserModReleaseForm, index: number) {
 }
 
 function _NoSymbolicLinks() {
+	const { t } = useAppTranslation();
 	return (
 		<EmptyState
-			title="No symbolic links configured"
-			description="Add symbolic links to be created when users enable your mod. Links are created from the mod directory to the DCS directories."
+			title={t("NO_SYMBOLIC_LINKS_TITLE")}
+			description={t("NO_SYMBOLIC_LINKS_DESCRIPTION")}
 			icon={FaLink}
 		/>
 	);
 }
 
 export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
+	const { t } = useAppTranslation();
 	return (
 		<Card withBorder>
 			<Stack>
 				<Group justify={"space-between"}>
 					<Text size={"lg"} fw={"bold"}>
-						Symbolic Links
+						{t("SYMBOLIC_LINKS_TITLE")}
 					</Text>
 					<Group gap={"xs"}>
 						<Button
@@ -142,17 +155,11 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 							variant={"light"}
 							onClick={() => handleAddSymbolicLink(props.form)}
 						>
-							Add Symbolic Link
+							{t("ADD_SYMBOLIC_LINK")}
 						</Button>
 						<Help
-							title={<Text fw={"bold"}>Symbolic Links</Text>}
-							markdown={
-								"Configure symbolic links to be created when users enable your mod. " +
-								"These links allow your mod files to be accessed from the appropriate DCS directories.\n\n" +
-								"**Source Path**: Relative to your mod's download directory\n" +
-								"**Destination Root**: Choose between DCS Working Directory (user data) or DCS Install Directory (installation folder)\n" +
-								"**Destination Path**: Relative to the selected destination root"
-							}
+							title={<Text fw={"bold"}>{t("SYMBOLIC_LINKS_TITLE")}</Text>}
+							markdown={t("SYMBOLIC_LINK_HELP_MD")}
 						/>
 					</Group>
 				</Group>
@@ -161,14 +168,11 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 					<Alert
 						icon={<FaLink />}
 						title={
-							<Group>
-								<Text size={"sm"} fw={"bold"}>
-									{it.src} → {it.dest}
-								</Text>
+							<Group wrap="nowrap">
 								<Badge variant={"light"} style={{ textTransform: "none" }}>
-									{it.destRoot === "DCS_WORKING_DIR"
-										? "Working Dir"
-										: "Install Dir"}
+									{it.destRoot === SymbolicLinkDestRoot.DCS_WORKING_DIR
+										? t("SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR")
+										: t("SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR")}
 								</Badge>
 							</Group>
 						}
@@ -180,10 +184,10 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 					>
 						<Stack gap={"xs"}>
 							<Text size={"xs"} c={"dimmed"}>
-								Source: {it.src}
+								{t("SYMBOLIC_LINK_SOURCE_LABEL")}: {it.src}
 							</Text>
 							<Text size={"xs"} c={"dimmed"}>
-								Destination: {it.destRoot} / {it.dest}
+								{t("SYMBOLIC_LINK_DESTINATION_LABEL")}: {it.dest}
 							</Text>
 						</Stack>
 					</Alert>

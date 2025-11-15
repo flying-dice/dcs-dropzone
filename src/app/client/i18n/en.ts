@@ -1,4 +1,7 @@
 import assetHelpEnMd from "./en_AssetHelp.md" with { type: "text" };
+import symbolicLinkHelpEnMd from "./en_SymbolicLinkHelp.md" with {
+	type: "text",
+};
 
 export default {
 	translation: {
@@ -11,6 +14,7 @@ export default {
 			"Add download URLs for your mod files. These will be downloaded and extracted by the desktop client.",
 
 		ASSET_HELP_MD: assetHelpEnMd,
+		SYMBOLIC_LINK_HELP_MD: symbolicLinkHelpEnMd,
 
 		SEARCH_MODS_PLACEHOLDER: "Search mods...",
 		LIGHT: "Light",
@@ -89,5 +93,28 @@ export default {
 
 		SAVE: "Save",
 		REMOVE: "Remove",
+
+		// Symbolic Links
+		SYMBOLIC_LINKS_TITLE: "Symbolic Links",
+		ADD_SYMBOLIC_LINK: "Add Symbolic Link",
+		EDIT_SYMBOLIC_LINK: "Edit Symbolic Link",
+		NO_SYMBOLIC_LINKS_TITLE: "No symbolic links configured",
+		NO_SYMBOLIC_LINKS_DESCRIPTION:
+			"Add symbolic links to be created when users enable your mod. Links are created from the mod directory to the DCS directories.",
+		SYMBOLIC_LINK_SRC_LABEL: "Source Path",
+		SYMBOLIC_LINK_SRC_DESCRIPTION:
+			"Path relative to the mod download directory",
+		SYMBOLIC_LINK_SRC_PLACEHOLDER: "e.g., Mods/MyMod or Scripts/MyScript.lua",
+		SYMBOLIC_LINK_DEST_ROOT_LABEL: "Destination Root",
+		SYMBOLIC_LINK_DEST_ROOT_DESCRIPTION:
+			"Select the DCS directory root where the link will be created",
+		SYMBOLIC_LINK_DEST_LABEL: "Destination Path",
+		SYMBOLIC_LINK_DEST_DESCRIPTION:
+			"Path relative to the selected destination root",
+		SYMBOLIC_LINK_DEST_PLACEHOLDER: "e.g., Mods/MyMod or Scripts/MyScript.lua",
+		SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR: "DCS Working Directory",
+		SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR: "DCS Install Directory",
+		SYMBOLIC_LINK_SOURCE_LABEL: "Source",
+		SYMBOLIC_LINK_DESTINATION_LABEL: "Destination",
 	},
 };

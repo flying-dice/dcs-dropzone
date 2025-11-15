@@ -7,16 +7,15 @@ import {
 	type ModData,
 	type ModReleaseData,
 	ModReleaseDataVisibility,
+	ModReleaseSymbolicLinkDataDestRoot,
 	type UserData,
 	updateUserModRelease,
 } from "../../_autogen/api.ts";
 import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 
-export const SymbolicLinkDestRoot = [
-	"DCS_WORKING_DIR",
-	"DCS_INSTALL_DIR",
-] as const;
+// Re-export for use in component
+export { ModReleaseSymbolicLinkDataDestRoot as SymbolicLinkDestRoot };
 
 export const userModReleaseFormValues = z.object({
 	version: z.string(),
@@ -33,7 +32,7 @@ export const userModReleaseFormValues = z.object({
 		.object({
 			src: z.string().min(1, "Source path is required"),
 			dest: z.string().min(1, "Destination path is required"),
-			destRoot: z.enum(SymbolicLinkDestRoot),
+			destRoot: z.enum(ModReleaseSymbolicLinkDataDestRoot),
 		})
 		.array()
 		.default([]),
