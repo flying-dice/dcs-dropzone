@@ -1,5 +1,6 @@
-import { Button, Card, Stack, Text } from "@mantine/core";
+import { Button, Card, Divider, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
 	deleteUserModRelease,
@@ -7,6 +8,7 @@ import {
 	type ModReleaseData,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
+import { ExplainPlanModal } from "../../components/ExplainPlanModal.tsx";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
@@ -17,6 +19,7 @@ export function _FormActions(props: {
 }) {
 	const nav = useNavigate();
 	const releases = useGetUserModReleases(props.mod.id);
+	const [explainPlanOpened, setExplainPlanOpened] = useState(false);
 
 	const handleDiscard = () => {
 		openConfirmModal({
@@ -60,16 +63,27 @@ export function _FormActions(props: {
 	};
 
 	return (
-		<Card withBorder>
-			<Stack>
-				<Button type="submit">Save Changes</Button>
-				<Button variant={"default"} onClick={handleDiscard}>
-					Discard Changes
-				</Button>
-				<Button color={"red"} variant={"outline"} onClick={handleDelete}>
-					Delete Release
-				</Button>
-			</Stack>
-		</Card>
+		<>
+			<Card withBorder>
+				<Stack>
+					<Button type="submit">Save Changes</Button>
+					<Button variant={"light"} onClick={() => setExplainPlanOpened(true)}>
+						Preview Install Plan
+					</Button>
+					<Divider />
+					<Button variant={"default"} onClick={handleDiscard}>
+						Discard Changes
+					</Button>
+					<Button color={"red"} variant={"outline"} onClick={handleDelete}>
+						Delete Release
+					</Button>
+				</Stack>
+			</Card>
+			<ExplainPlanModal
+				opened={explainPlanOpened}
+				onClose={() => setExplainPlanOpened(false)}
+				release={props.release}
+			/>
+		</>
 	);
 }
