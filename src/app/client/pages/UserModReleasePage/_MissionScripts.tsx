@@ -20,7 +20,10 @@ import {
 } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
+import {
+	type TranslateFunction,
+	useAppTranslation,
+} from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 const missionScriptFormSchema = z.object({
@@ -105,8 +108,10 @@ function _MissionScriptForm(props: {
 	);
 }
 
-function handleAddMissionScript(form: UserModReleaseForm) {
-	const { t } = useAppTranslation();
+function handleAddMissionScript(
+	t: TranslateFunction,
+	form: UserModReleaseForm,
+) {
 	openModal({
 		title: t("ADD_MISSION_SCRIPT"),
 		size: "xl",
@@ -121,8 +126,11 @@ function handleAddMissionScript(form: UserModReleaseForm) {
 	});
 }
 
-function handleEditMissionScript(form: UserModReleaseForm, index: number) {
-	const { t } = useAppTranslation();
+function handleEditMissionScript(
+	t: TranslateFunction,
+	form: UserModReleaseForm,
+	index: number,
+) {
 	openModal({
 		title: t("EDIT_MISSION_SCRIPT"),
 		size: "xl",
@@ -194,7 +202,7 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 						<Button
 							size={"xs"}
 							variant={"light"}
-							onClick={() => handleAddMissionScript(props.form)}
+							onClick={() => handleAddMissionScript(t, props.form)}
 						>
 							{t("ADD_MISSION_SCRIPT")}
 						</Button>
@@ -222,7 +230,7 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 						color="violet"
 						variant="light"
 						style={{ cursor: "pointer" }}
-						onClick={() => handleEditMissionScript(props.form, index)}
+						onClick={() => handleEditMissionScript(t, props.form, index)}
 					>
 						<Stack gap={"xs"}>
 							<Text size={"xs"} c={"dimmed"}>

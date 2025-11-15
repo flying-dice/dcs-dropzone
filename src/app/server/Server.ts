@@ -6,6 +6,7 @@ import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
 import auth from "./api/auth.ts";
 import health from "./api/health.ts";
+import migrate from "./api/migrate.ts";
 import modReleases from "./api/mod-releases.ts";
 import mods from "./api/mods.ts";
 import userModReleases from "./api/user-mod-releases.ts";
@@ -24,6 +25,7 @@ server.route("/api/user-mods", userMods);
 server.route("/api/user-mods", userModReleases);
 server.route("/api/mods", mods);
 server.route("/api/mods", modReleases);
+server.route("/api/_migrate", migrate);
 
 server.get(
 	"/v3/api-docs",

@@ -17,7 +17,10 @@ import { z } from "zod";
 import { ModReleaseSymbolicLinkDataDestRoot } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
+import {
+	type TranslateFunction,
+	useAppTranslation,
+} from "../../i18n/useAppTranslation.ts";
 import { SymbolicLinkDestRoot, type UserModReleaseForm } from "./form.ts";
 
 const symbolicLinkFormSchema = z.object({
@@ -92,8 +95,7 @@ function _SymbolicLinkForm(props: {
 	);
 }
 
-function handleAddSymbolicLink(form: UserModReleaseForm) {
-	const { t } = useAppTranslation();
+function handleAddSymbolicLink(t: TranslateFunction, form: UserModReleaseForm) {
 	openModal({
 		title: t("ADD_SYMBOLIC_LINK"),
 		size: "xl",
@@ -108,8 +110,11 @@ function handleAddSymbolicLink(form: UserModReleaseForm) {
 	});
 }
 
-function handleEditSymbolicLink(form: UserModReleaseForm, index: number) {
-	const { t } = useAppTranslation();
+function handleEditSymbolicLink(
+	t: TranslateFunction,
+	form: UserModReleaseForm,
+	index: number,
+) {
 	openModal({
 		title: t("EDIT_SYMBOLIC_LINK"),
 		size: "xl",
@@ -153,7 +158,7 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 						<Button
 							size={"xs"}
 							variant={"light"}
-							onClick={() => handleAddSymbolicLink(props.form)}
+							onClick={() => handleAddSymbolicLink(t, props.form)}
 						>
 							{t("ADD_SYMBOLIC_LINK")}
 						</Button>
@@ -180,7 +185,7 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 						color="blue"
 						variant="light"
 						style={{ cursor: "pointer" }}
-						onClick={() => handleEditSymbolicLink(props.form, index)}
+						onClick={() => handleEditSymbolicLink(t, props.form, index)}
 					>
 						<Stack gap={"xs"}>
 							<Text size={"xs"} c={"dimmed"}>
