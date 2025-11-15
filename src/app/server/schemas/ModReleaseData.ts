@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { ModVisibility, SymbolicLinkDestRoot } from "../../../common/data.ts";
+import {
+	MissionScriptRunOn,
+	ModVisibility,
+	SymbolicLinkDestRoot,
+} from "../../../common/data.ts";
 
 // Asset schema
 export const ModReleaseAssetData = z
@@ -33,6 +37,23 @@ export type ModReleaseSymbolicLinkData = z.infer<
 	typeof ModReleaseSymbolicLinkData
 >;
 
+// Mission script schema
+export const ModReleaseMissionScriptData = z
+	.object({
+		path: z.string().min(1, "Path is required"),
+		root: z.nativeEnum(SymbolicLinkDestRoot),
+		runOn: z.nativeEnum(MissionScriptRunOn),
+	})
+	.meta({
+		ref: "ModReleaseMissionScriptData",
+		title: "Mod Release Mission Script Data",
+		description: "Data representation of a mission script configuration.",
+	});
+
+export type ModReleaseMissionScriptData = z.infer<
+	typeof ModReleaseMissionScriptData
+>;
+
 // ModRelease schema
 export const ModReleaseData = z
 	.object({
@@ -42,6 +63,7 @@ export const ModReleaseData = z
 		changelog: z.string(),
 		assets: z.array(ModReleaseAssetData),
 		symbolicLinks: z.array(ModReleaseSymbolicLinkData).default([]),
+		missionScripts: z.array(ModReleaseMissionScriptData).default([]),
 		visibility: z.enum(ModVisibility),
 		createdAt: z.coerce.string().optional(),
 		updatedAt: z.coerce.string().optional(),

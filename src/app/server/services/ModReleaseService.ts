@@ -79,6 +79,7 @@ export class ModReleaseService {
 			changelog: "abc",
 			assets: [],
 			symbolicLinks: [],
+			missionScripts: [],
 			visibility: ModVisibility.Private,
 		};
 
