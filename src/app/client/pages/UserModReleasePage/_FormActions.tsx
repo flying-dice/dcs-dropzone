@@ -1,6 +1,5 @@
 import { Button, Card, Divider, Stack, Text } from "@mantine/core";
-import { modals, openConfirmModal } from "@mantine/modals";
-import { useState } from "react";
+import { modals, openConfirmModal, openModal } from "@mantine/modals";
 import { useNavigate } from "react-router-dom";
 import {
 	deleteUserModRelease,
@@ -8,7 +7,8 @@ import {
 	type ModReleaseData,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
-import { ExplainPlanModal } from "../../components/ExplainPlanModal.tsx";
+import { Markdown } from "../../components/Markdown.tsx";
+import { generateExplainPlan } from "../../utils/generateExplainPlan.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
@@ -19,7 +19,20 @@ export function _FormActions(props: {
 }) {
 	const nav = useNavigate();
 	const releases = useGetUserModReleases(props.mod.id);
-	const [explainPlanOpened, setExplainPlanOpened] = useState(false);
+
+	const handlePreviewInstallPlan = () => {
+		const planMarkdown = generateExplainPlan(props.release);
+		openModal({
+			title: (
+				<Text fw="bold" size="lg">
+					Installation Plan Preview
+				</Text>
+			),
+			size: "xl",
+			centered: true,
+			children: <Markdown content={planMarkdown} />,
+		});
+	};
 
 	const handleDiscard = () => {
 		openConfirmModal({
@@ -63,27 +76,20 @@ export function _FormActions(props: {
 	};
 
 	return (
-		<>
-			<Card withBorder>
-				<Stack>
-					<Button type="submit">Save Changes</Button>
-					<Button variant={"light"} onClick={() => setExplainPlanOpened(true)}>
-						Preview Install Plan
-					</Button>
-					<Divider />
-					<Button variant={"default"} onClick={handleDiscard}>
-						Discard Changes
-					</Button>
-					<Button color={"red"} variant={"outline"} onClick={handleDelete}>
-						Delete Release
-					</Button>
-				</Stack>
-			</Card>
-			<ExplainPlanModal
-				opened={explainPlanOpened}
-				onClose={() => setExplainPlanOpened(false)}
-				release={props.release}
-			/>
-		</>
+		<Card withBorder>
+			<Stack>
+				<Button type="submit">Save Changes</Button>
+				<Button variant={"light"} onClick={handlePreviewInstallPlan}>
+					Preview Install Plan
+				</Button>
+				<Divider />
+				<Button variant={"default"} onClick={handleDiscard}>
+					Discard Changes
+				</Button>
+				<Button color={"red"} variant={"outline"} onClick={handleDelete}>
+					Delete Release
+				</Button>
+			</Stack>
+		</Card>
 	);
 }
