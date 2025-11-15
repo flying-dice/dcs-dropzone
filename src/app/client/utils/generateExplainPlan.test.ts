@@ -82,7 +82,7 @@ describe("generateExplainPlan", () => {
 		expect(plan).toContain("1 archive will be extracted");
 	});
 
-	test("generates plan with multiple mirror URLs", () => {
+	test("generates plan with multipart archive URLs", () => {
 		const release: ModReleaseData = {
 			id: "test-release-4",
 			mod_id: "test-mod-1",
@@ -92,9 +92,9 @@ describe("generateExplainPlan", () => {
 				{
 					name: "mod.zip",
 					urls: [
-						"https://mirror1.example.com/mod.zip",
-						"https://mirror2.example.com/mod.zip",
-						"https://mirror3.example.com/mod.zip",
+						"https://cdn.example.com/mod.part1.zip",
+						"https://cdn.example.com/mod.part2.zip",
+						"https://cdn.example.com/mod.part3.zip",
 					],
 					isArchive: true,
 				},
@@ -106,7 +106,7 @@ describe("generateExplainPlan", () => {
 
 		const plan = generateExplainPlan(release);
 
-		expect(plan).toContain("from one of 3 available mirror URLs");
+		expect(plan).toContain("from 3 URLs (multipart archive)");
 	});
 
 	test("generates plan with symbolic links (working directory)", () => {

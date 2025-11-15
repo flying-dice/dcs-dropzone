@@ -35,7 +35,7 @@ export function generateExplainPlan(release: ModReleaseData): string {
 			const downloadSource =
 				urlCount === 1
 					? "from the provided URL"
-					: `from one of ${urlCount} available mirror URLs`;
+					: `from ${urlCount} URLs (multipart archive)`;
 
 			if (asset.isArchive) {
 				sections.push(
