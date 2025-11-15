@@ -16,6 +16,29 @@ export const ModReleaseAssetData = z
 
 export type ModReleaseAssetData = z.infer<typeof ModReleaseAssetData>;
 
+// Symbolic link destination root options
+export const SymbolicLinkDestRoot = [
+	"DCS_WORKING_DIR",
+	"DCS_INSTALL_DIR",
+] as const;
+
+// Symbolic link schema
+export const ModReleaseSymbolicLinkData = z
+	.object({
+		src: z.string().min(1, "Source path is required"),
+		dest: z.string().min(1, "Destination path is required"),
+		destRoot: z.enum(SymbolicLinkDestRoot),
+	})
+	.meta({
+		ref: "ModReleaseSymbolicLinkData",
+		title: "Mod Release Symbolic Link Data",
+		description: "Data representation of a symbolic link configuration.",
+	});
+
+export type ModReleaseSymbolicLinkData = z.infer<
+	typeof ModReleaseSymbolicLinkData
+>;
+
 // ModRelease schema
 export const ModReleaseData = z
 	.object({
@@ -24,6 +47,7 @@ export const ModReleaseData = z
 		version: z.string(),
 		changelog: z.string(),
 		assets: z.array(ModReleaseAssetData),
+		symbolicLinks: z.array(ModReleaseSymbolicLinkData).default([]),
 		visibility: z.enum(ModVisibility),
 		createdAt: z.coerce.string().optional(),
 		updatedAt: z.coerce.string().optional(),

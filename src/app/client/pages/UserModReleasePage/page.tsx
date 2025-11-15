@@ -17,6 +17,7 @@ import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Changelog } from "./_Changelog.tsx";
 import { _FormActions } from "./_FormActions.tsx";
 import { _Summary } from "./_Summary.tsx";
+import { _SymbolicLinks } from "./_SymbolicLinks.tsx";
 import { useUserModReleaseForm, useUserModReleaseFormSubmit } from "./form.ts";
 
 type UserModReleasePageProps = {
@@ -50,6 +51,7 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 							<_BasicInfo form={form} />
 							<_Changelog form={form} />
 							<_Assets form={form} />
+							<_SymbolicLinks form={form} />
 						</Stack>
 						<Stack w={300}>
 							<_Summary form={form} />

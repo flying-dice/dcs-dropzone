@@ -78,6 +78,7 @@ export class ModReleaseService {
 			version: createData.version,
 			changelog: "abc",
 			assets: [],
+			symbolicLinks: [],
 			visibility: ModVisibility.Private,
 		};
 
@@ -101,6 +102,7 @@ export class ModReleaseService {
 				version: updateData.version,
 				changelog: updateData.changelog,
 				assets: updateData.assets,
+				symbolicLinks: updateData.symbolicLinks,
 				visibility: updateData.visibility,
 			},
 		).exec();

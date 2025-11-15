@@ -13,6 +13,11 @@ import {
 import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 
+export const SymbolicLinkDestRoot = [
+	"DCS_WORKING_DIR",
+	"DCS_INSTALL_DIR",
+] as const;
+
 export const userModReleaseFormValues = z.object({
 	version: z.string(),
 	visibility: z.enum(ModReleaseDataVisibility),
@@ -24,6 +29,14 @@ export const userModReleaseFormValues = z.object({
 			isArchive: z.boolean(),
 		})
 		.array(),
+	symbolicLinks: z
+		.object({
+			src: z.string().min(1, "Source path is required"),
+			dest: z.string().min(1, "Destination path is required"),
+			destRoot: z.enum(SymbolicLinkDestRoot),
+		})
+		.array()
+		.default([]),
 });
 
 export type UserModReleaseFormValues = z.infer<typeof userModReleaseFormValues>;
@@ -35,6 +48,7 @@ export const useUserModReleaseForm = (_mod: ModData, release: ModReleaseData) =>
 			visibility: release.visibility,
 			changelog: release.changelog,
 			assets: release.assets,
+			symbolicLinks: release.symbolicLinks || [],
 		},
 		validate: zod4Resolver(userModReleaseFormValues),
 	});
@@ -55,6 +69,7 @@ export const useUserModReleaseFormSubmit = (
 					visibility: values.visibility,
 					changelog: values.changelog,
 					assets: values.assets,
+					symbolicLinks: values.symbolicLinks,
 				});
 				if (res.status === StatusCodes.OK) {
 					await onSuccess();
