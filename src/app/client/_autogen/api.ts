@@ -179,6 +179,34 @@ export interface ModReleaseSymbolicLinkData {
 	destRoot: ModReleaseSymbolicLinkDataDestRoot;
 }
 
+export type ModReleaseMissionScriptDataRunOn =
+	(typeof ModReleaseMissionScriptDataRunOn)[keyof typeof ModReleaseMissionScriptDataRunOn];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModReleaseMissionScriptDataRunOn = {
+	MISSION_START_BEFORE_SANITIZE: "MISSION_START_BEFORE_SANITIZE",
+	MISSION_START_AFTER_SANITIZE: "MISSION_START_AFTER_SANITIZE",
+} as const;
+
+export type ModReleaseMissionScriptDataRoot =
+	(typeof ModReleaseMissionScriptDataRoot)[keyof typeof ModReleaseMissionScriptDataRoot];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModReleaseMissionScriptDataRoot = {
+	DCS_WORKING_DIR: "DCS_WORKING_DIR",
+	DCS_INSTALL_DIR: "DCS_INSTALL_DIR",
+} as const;
+
+/**
+ * Data representation of a mission script configuration.
+ */
+export interface ModReleaseMissionScriptData {
+	/** @minLength 1 */
+	path: string;
+	root: ModReleaseMissionScriptDataRoot;
+	runOn: ModReleaseMissionScriptDataRunOn;
+}
+
 export type ModReleaseDataVisibility =
 	(typeof ModReleaseDataVisibility)[keyof typeof ModReleaseDataVisibility];
 
@@ -199,6 +227,7 @@ export interface ModReleaseData {
 	changelog: string;
 	assets: ModReleaseAssetData[];
 	symbolicLinks: ModReleaseSymbolicLinkData[];
+	missionScripts: ModReleaseMissionScriptData[];
 	visibility: ModReleaseDataVisibility;
 	createdAt?: string;
 	updatedAt?: string;
@@ -280,6 +309,7 @@ export type UpdateUserModReleaseBody = {
 	changelog: string;
 	assets: ModReleaseAssetData[];
 	symbolicLinks: ModReleaseSymbolicLinkData[];
+	missionScripts: ModReleaseMissionScriptData[];
 	visibility: UpdateUserModReleaseBodyVisibility;
 	createdAt?: string;
 	updatedAt?: string;

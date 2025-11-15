@@ -3,14 +3,13 @@ import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";
 import { z } from "zod";
-import {
-	MissionScriptRunOn,
-	SymbolicLinkDestRoot,
-} from "../../../../common/data.ts";
+import { MissionScriptRunOn } from "../../../../common/data.ts";
 import {
 	type ModData,
 	type ModReleaseData,
 	ModReleaseDataVisibility,
+	ModReleaseMissionScriptDataRoot,
+	ModReleaseMissionScriptDataRunOn,
 	ModReleaseSymbolicLinkDataDestRoot,
 	type UserData,
 	updateUserModRelease,
@@ -44,8 +43,8 @@ export const userModReleaseFormValues = z.object({
 	missionScripts: z
 		.object({
 			path: z.string().min(1, "Path is required"),
-			root: z.nativeEnum(SymbolicLinkDestRoot),
-			runOn: z.nativeEnum(MissionScriptRunOn),
+			root: z.enum(ModReleaseMissionScriptDataRoot),
+			runOn: z.enum(ModReleaseMissionScriptDataRunOn),
 		})
 		.array()
 		.default([]),
@@ -61,7 +60,7 @@ export const useUserModReleaseForm = (_mod: ModData, release: ModReleaseData) =>
 			changelog: release.changelog,
 			assets: release.assets,
 			symbolicLinks: release.symbolicLinks || [],
-			missionScripts: (release as any).missionScripts || [],
+			missionScripts: release.missionScripts || [],
 		},
 		validate: zod4Resolver(userModReleaseFormValues),
 	});
@@ -84,7 +83,7 @@ export const useUserModReleaseFormSubmit = (
 					assets: values.assets,
 					symbolicLinks: values.symbolicLinks,
 					missionScripts: values.missionScripts,
-				} as any);
+				});
 				if (res.status === StatusCodes.OK) {
 					await onSuccess();
 					showSuccessNotification(

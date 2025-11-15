@@ -15,9 +15,9 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaFileCode } from "react-icons/fa";
 import { z } from "zod";
 import {
-	MissionScriptRunOn,
-	SymbolicLinkDestRoot,
-} from "../../../../common/data.ts";
+	ModReleaseMissionScriptDataRoot,
+	ModReleaseMissionScriptDataRunOn,
+} from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
@@ -25,8 +25,8 @@ import type { UserModReleaseForm } from "./form.ts";
 
 const missionScriptFormSchema = z.object({
 	path: z.string().min(1, "Path is required"),
-	root: z.nativeEnum(SymbolicLinkDestRoot),
-	runOn: z.nativeEnum(MissionScriptRunOn),
+	root: z.enum(ModReleaseMissionScriptDataRoot),
+	runOn: z.enum(ModReleaseMissionScriptDataRunOn),
 });
 type MissionScriptFormValues = z.infer<typeof missionScriptFormSchema>;
 
@@ -39,30 +39,30 @@ function _MissionScriptForm(props: {
 	const form = useForm<MissionScriptFormValues>({
 		initialValues: props.defaultValues || {
 			path: "",
-			root: SymbolicLinkDestRoot.DCS_WORKING_DIR,
-			runOn: MissionScriptRunOn.MISSION_START_AFTER_SANITIZE,
+			root: "DCS_WORKING_DIR",
+			runOn: "MISSION_START_AFTER_SANITIZE",
 		},
 		validate: zod4Resolver(missionScriptFormSchema),
 	});
 
 	const rootOptions = [
 		{
-			value: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+			value: "DCS_WORKING_DIR",
 			label: t("MISSION_SCRIPT_ROOT_WORKING_DIR"),
 		},
 		{
-			value: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
+			value: "DCS_INSTALL_DIR",
 			label: t("MISSION_SCRIPT_ROOT_INSTALL_DIR"),
 		},
 	];
 
 	const runOnOptions = [
 		{
-			value: MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
+			value: "MISSION_START_BEFORE_SANITIZE",
 			label: t("MISSION_SCRIPT_RUN_ON_BEFORE_SANITIZE"),
 		},
 		{
-			value: MissionScriptRunOn.MISSION_START_AFTER_SANITIZE,
+			value: "MISSION_START_AFTER_SANITIZE",
 			label: t("MISSION_SCRIPT_RUN_ON_AFTER_SANITIZE"),
 		},
 	];
@@ -153,22 +153,28 @@ function _NoMissionScripts() {
 	);
 }
 
-function getMissionScriptRunOnLabel(runOn: MissionScriptRunOn, t: any) {
+function getMissionScriptRunOnLabel(
+	runOn: ModReleaseMissionScriptDataRunOn,
+	t: any,
+) {
 	switch (runOn) {
-		case MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE:
+		case "MISSION_START_BEFORE_SANITIZE":
 			return t("MISSION_SCRIPT_RUN_ON_BEFORE_SANITIZE");
-		case MissionScriptRunOn.MISSION_START_AFTER_SANITIZE:
+		case "MISSION_START_AFTER_SANITIZE":
 			return t("MISSION_SCRIPT_RUN_ON_AFTER_SANITIZE");
 		default:
 			return runOn;
 	}
 }
 
-function getMissionScriptRootLabel(root: SymbolicLinkDestRoot, t: any) {
+function getMissionScriptRootLabel(
+	root: ModReleaseMissionScriptDataRoot,
+	t: any,
+) {
 	switch (root) {
-		case SymbolicLinkDestRoot.DCS_WORKING_DIR:
+		case "DCS_WORKING_DIR":
 			return t("MISSION_SCRIPT_ROOT_WORKING_DIR");
-		case SymbolicLinkDestRoot.DCS_INSTALL_DIR:
+		case "DCS_INSTALL_DIR":
 			return t("MISSION_SCRIPT_ROOT_INSTALL_DIR");
 		default:
 			return root;
