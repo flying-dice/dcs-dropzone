@@ -16,7 +16,13 @@ export enum ModVisibility {
 	Unlisted = "Unlisted",
 }
 
+export enum SymbolicLinkDestRoot {
+	DCS_WORKING_DIR = "DCS_WORKING_DIR",
+	DCS_INSTALL_DIR = "DCS_INSTALL_DIR",
+}
+
 export const data = {
 	categories: Object.values(ModCategory),
 	visibilities: Object.values(ModVisibility),
+	symbolicLinkDestRoots: Object.values(SymbolicLinkDestRoot),
 };

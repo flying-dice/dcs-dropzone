@@ -159,6 +159,26 @@ export interface ModReleaseAssetData {
 	isArchive: boolean;
 }
 
+export type ModReleaseSymbolicLinkDataDestRoot =
+	(typeof ModReleaseSymbolicLinkDataDestRoot)[keyof typeof ModReleaseSymbolicLinkDataDestRoot];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModReleaseSymbolicLinkDataDestRoot = {
+	DCS_WORKING_DIR: "DCS_WORKING_DIR",
+	DCS_INSTALL_DIR: "DCS_INSTALL_DIR",
+} as const;
+
+/**
+ * Data representation of a symbolic link configuration.
+ */
+export interface ModReleaseSymbolicLinkData {
+	/** @minLength 1 */
+	src: string;
+	/** @minLength 1 */
+	dest: string;
+	destRoot: ModReleaseSymbolicLinkDataDestRoot;
+}
+
 export type ModReleaseDataVisibility =
 	(typeof ModReleaseDataVisibility)[keyof typeof ModReleaseDataVisibility];
 
@@ -178,6 +198,7 @@ export interface ModReleaseData {
 	version: string;
 	changelog: string;
 	assets: ModReleaseAssetData[];
+	symbolicLinks: ModReleaseSymbolicLinkData[];
 	visibility: ModReleaseDataVisibility;
 	createdAt?: string;
 	updatedAt?: string;
@@ -258,6 +279,7 @@ export type UpdateUserModReleaseBody = {
 	version: string;
 	changelog: string;
 	assets: ModReleaseAssetData[];
+	symbolicLinks: ModReleaseSymbolicLinkData[];
 	visibility: UpdateUserModReleaseBodyVisibility;
 	createdAt?: string;
 	updatedAt?: string;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ModVisibility } from "../../../common/data.ts";
+import { ModVisibility, SymbolicLinkDestRoot } from "../../../common/data.ts";
 
 // Asset schema
 export const ModReleaseAssetData = z
@@ -16,6 +16,23 @@ export const ModReleaseAssetData = z
 
 export type ModReleaseAssetData = z.infer<typeof ModReleaseAssetData>;
 
+// Symbolic link schema
+export const ModReleaseSymbolicLinkData = z
+	.object({
+		src: z.string().min(1, "Source path is required"),
+		dest: z.string().min(1, "Destination path is required"),
+		destRoot: z.nativeEnum(SymbolicLinkDestRoot),
+	})
+	.meta({
+		ref: "ModReleaseSymbolicLinkData",
+		title: "Mod Release Symbolic Link Data",
+		description: "Data representation of a symbolic link configuration.",
+	});
+
+export type ModReleaseSymbolicLinkData = z.infer<
+	typeof ModReleaseSymbolicLinkData
+>;
+
 // ModRelease schema
 export const ModReleaseData = z
 	.object({
@@ -24,6 +41,7 @@ export const ModReleaseData = z
 		version: z.string(),
 		changelog: z.string(),
 		assets: z.array(ModReleaseAssetData),
+		symbolicLinks: z.array(ModReleaseSymbolicLinkData).default([]),
 		visibility: z.enum(ModVisibility),
 		createdAt: z.coerce.string().optional(),
 		updatedAt: z.coerce.string().optional(),

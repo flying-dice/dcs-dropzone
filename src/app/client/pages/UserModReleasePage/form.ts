@@ -7,11 +7,15 @@ import {
 	type ModData,
 	type ModReleaseData,
 	ModReleaseDataVisibility,
+	ModReleaseSymbolicLinkDataDestRoot,
 	type UserData,
 	updateUserModRelease,
 } from "../../_autogen/api.ts";
 import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
+
+// Re-export for use in component
+export { ModReleaseSymbolicLinkDataDestRoot as SymbolicLinkDestRoot };
 
 export const userModReleaseFormValues = z.object({
 	version: z.string(),
@@ -24,6 +28,14 @@ export const userModReleaseFormValues = z.object({
 			isArchive: z.boolean(),
 		})
 		.array(),
+	symbolicLinks: z
+		.object({
+			src: z.string().min(1, "Source path is required"),
+			dest: z.string().min(1, "Destination path is required"),
+			destRoot: z.enum(ModReleaseSymbolicLinkDataDestRoot),
+		})
+		.array()
+		.default([]),
 });
 
 export type UserModReleaseFormValues = z.infer<typeof userModReleaseFormValues>;
@@ -35,6 +47,7 @@ export const useUserModReleaseForm = (_mod: ModData, release: ModReleaseData) =>
 			visibility: release.visibility,
 			changelog: release.changelog,
 			assets: release.assets,
+			symbolicLinks: release.symbolicLinks || [],
 		},
 		validate: zod4Resolver(userModReleaseFormValues),
 	});
@@ -55,6 +68,7 @@ export const useUserModReleaseFormSubmit = (
 					visibility: values.visibility,
 					changelog: values.changelog,
 					assets: values.assets,
+					symbolicLinks: values.symbolicLinks,
 				});
 				if (res.status === StatusCodes.OK) {
 					await onSuccess();

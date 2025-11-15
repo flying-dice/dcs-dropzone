@@ -7,6 +7,7 @@ const schema = new Schema(
 		version: { type: String, required: true },
 		changelog: { type: String, required: true },
 		assets: { type: [Object], required: true },
+		symbolicLinks: { type: [Object], default: [] },
 		visibility: { type: String, required: true },
 		createdAt: { type: Date, default: Date.now },
 		updatedAt: { type: Date, default: Date.now },
