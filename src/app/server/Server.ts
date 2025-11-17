@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
+import appConfig from "./ApplicationConfig.ts";
 import auth from "./api/auth.ts";
 import health from "./api/health.ts";
 import migrate from "./api/migrate.ts";
@@ -28,16 +29,36 @@ server.route("/api/mods", modReleases);
 server.route("/api/_migrate", migrate);
 
 server.get(
-	"/v3/api-docs",
-	openAPIRouteHandler(server, {
-		documentation: {
-			info: {
-				title: "DCS Dropzone Registry API",
-				version: "1.0.0",
-				description: "API documentation for the DCS Dropzone Registry.",
-			},
-		},
-	}),
+    "/v3/api-docs",
+    openAPIRouteHandler(server, {
+        documentation: {
+            info: {
+                title: "DCS Dropzone Registry API",
+                version: "1.0.0",
+                description: "API documentation for the DCS Dropzone Registry.",
+            },
+            tags: [
+                { name: "Auth", description: "Authentication and session management" },
+                { name: "Health", description: "Service health and readiness" },
+                { name: "Mods", description: "Public mod catalogue endpoints" },
+                { name: "Mod Releases", description: "Public mod release endpoints" },
+                { name: "User Mods", description: "Manage mods owned by the authenticated user" },
+                { name: "User Mod Releases", description: "Manage releases for user-owned mods" },
+                { name: "Migration", description: "Administrative data migration endpoints" },
+            ],
+            components: {
+                securitySchemes: {
+                    cookieAuth: {
+                        type: "apiKey",
+                        in: "cookie",
+                        name: appConfig.userCookieName,
+                        description:
+                            "Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
+                    },
+                },
+            },
+        },
+    }),
 );
 
 server.get("/api", Scalar({ url: "/v3/api-docs" }));

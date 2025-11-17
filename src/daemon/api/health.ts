@@ -7,37 +7,39 @@ import { db } from "../database";
 const router = new Hono();
 
 router.get(
-	"/",
-	describeRoute({
-		description: "Say hello to the user",
-		responses: {
-			[StatusCodes.OK]: {
-				description: "Successful response",
-				content: {
-					"application/json": {
-						schema: resolver(
-							z.object({
-								status: z.literal("UP"),
-							}),
-						),
-					},
-				},
-			},
-			[StatusCodes.SERVICE_UNAVAILABLE]: {
-				description: "Service Unavailable response",
-				content: {
-					"application/json": {
-						schema: resolver(
-							z.object({
-								status: z.literal("DOWN"),
-								error: z.string(),
-							}),
-						),
-					},
-				},
-			},
-		},
-	}),
+    "/",
+    describeRoute({
+        tags: ["Health"],
+        summary: "Daemon health check",
+        description: "Checks the daemon service health by performing a lightweight database operation.",
+        responses: {
+            [StatusCodes.OK]: {
+                description: "Service is healthy",
+                content: {
+                    "application/json": {
+                        schema: resolver(
+                            z.object({
+                                status: z.literal("UP"),
+                            }),
+                        ),
+                    },
+                },
+            },
+            [StatusCodes.SERVICE_UNAVAILABLE]: {
+                description: "Service is unavailable",
+                content: {
+                    "application/json": {
+                        schema: resolver(
+                            z.object({
+                                status: z.literal("DOWN"),
+                                error: z.string(),
+                            }),
+                        ),
+                    },
+                },
+            },
+        },
+    }),
 	async (c) => {
 		try {
 			db.run("SELECT 1");

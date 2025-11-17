@@ -19,10 +19,42 @@ const router = new Hono();
 const logger = Logger.getLogger("api/auth");
 
 router.get(
-	"/:provider/callback",
-	describeRoute({
-		tags: ["Auth"],
-	}),
+    "/:provider/callback",
+    describeRoute({
+        operationId: "authProviderCallback",
+        tags: ["Auth"],
+        summary: "OAuth provider callback",
+        description:
+            "Handles the OAuth callback from the selected provider and establishes a user session via a signed cookie.",
+        parameters: [
+            {
+                in: "path",
+                name: "provider",
+                required: true,
+                description: "Authentication provider",
+                schema: { type: "string", enum: AuthServiceProvider as unknown as string[] },
+            },
+            {
+                in: "query",
+                name: "code",
+                required: true,
+                description: "OAuth authorization code returned by the provider",
+                schema: { type: "string" },
+            },
+            {
+                in: "query",
+                name: "state",
+                required: true,
+                description: "CSRF state value used during the OAuth flow",
+                schema: { type: "string" },
+            },
+        ],
+        responses: {
+            302: {
+                description: "Redirects the user to the homepage after successfully establishing a session.",
+            },
+        },
+    }),
 	validator("param", params),
 	validator("query", z.object({ code: z.string(), state: z.string() })),
 	async (c) => {
@@ -65,10 +97,26 @@ router.get(
 );
 
 router.get(
-	"/:provider/login",
-	describeRoute({
-		tags: ["Auth"],
-	}),
+    "/:provider/login",
+    describeRoute({
+        operationId: "authProviderLogin",
+        tags: ["Auth"],
+        summary: "Start OAuth login",
+        description:
+            "Initiates the OAuth web flow for the selected provider and redirects the user to the provider's authorization page.",
+        parameters: [
+            {
+                in: "path",
+                name: "provider",
+                required: true,
+                description: "Authentication provider",
+                schema: { type: "string", enum: AuthServiceProvider as unknown as string[] },
+            },
+        ],
+        responses: {
+            302: { description: "Redirects the user agent to the provider authorization URL." },
+        },
+    }),
 	validator("param", params),
 	(c) => {
 		const provider = c.req.valid("param").provider;
@@ -79,15 +127,19 @@ router.get(
 );
 
 router.get(
-	"/user",
-	describeJsonRoute({
-		tags: ["Auth"],
-		security: [{ cookieAuth: [] }],
-		responses: {
-			[StatusCodes.OK]: UserData,
-		},
-	}),
-	cookieAuth(),
+    "/user",
+    describeJsonRoute({
+        tags: ["Auth"],
+        operationId: "getAuthenticatedUser",
+        summary: "Get authenticated user",
+        description: "Returns the authenticated user's profile derived from the session cookie.",
+        security: [{ cookieAuth: [] }],
+        responses: {
+            [StatusCodes.OK]: UserData,
+            [StatusCodes.UNAUTHORIZED]: null,
+        },
+    }),
+    cookieAuth(),
 	(c) => {
 		const user = c.var.getUser();
 		logger.debug(
@@ -99,11 +151,18 @@ router.get(
 );
 
 router.get(
-	"/logout",
-	describeRoute({
-		tags: ["Auth"],
-		security: [{ cookieAuth: [] }],
-	}),
+    "/logout",
+    describeRoute({
+        operationId: "logout",
+        tags: ["Auth"],
+        summary: "Logout",
+        description: "Clears the authentication cookie and redirects to the homepage.",
+        security: [{ cookieAuth: [] }],
+        responses: {
+            302: { description: "Redirects the user to the homepage after logout." },
+            401: { description: "If the session is missing or invalid, the cookie is simply not present; redirect still occurs." },
+        },
+    }),
 	(c) => {
 		deleteCookie(c, appConfig.userCookieName, {
 			secure: true,
