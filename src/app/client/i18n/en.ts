@@ -107,6 +107,11 @@ export default {
 		NO_SYMBOLIC_LINKS_TITLE: "No symbolic links configured",
 		NO_SYMBOLIC_LINKS_DESCRIPTION:
 			"Add symbolic links to be created when users enable your mod. Links are created from the mod directory to the DCS directories.",
+
+		SYMBOLIC_LINK_NAME_LABEL: "Link Name",
+		SYMBOLIC_LINK_NAME_DESCRIPTION:
+			"Name of the symbolic link for identification",
+		SYMBOLIC_LINK_NAME_PLACEHOLDER: "e.g., My Mod Link",
 		SYMBOLIC_LINK_SRC_LABEL: "Source Path",
 		SYMBOLIC_LINK_SRC_DESCRIPTION:
 			"Path relative to the mod download directory",
@@ -130,6 +135,18 @@ export default {
 		NO_MISSION_SCRIPTS_TITLE: "No mission scripts configured",
 		NO_MISSION_SCRIPTS_DESCRIPTION:
 			"Add mission scripts to be run when missions start. Scripts can run before or after sanitization.",
+
+		MISSION_SCRIPT_NAME_LABEL: "Script Name",
+		MISSION_SCRIPT_NAME_DESCRIPTION:
+			"Name of the mission script for identification",
+		MISSION_SCRIPT_NAME_PLACEHOLDER: "e.g., Mission Initializer",
+
+		MISSION_SCRIPT_PURPOSE_LABEL: "Purpose",
+		MISSION_SCRIPT_PURPOSE_DESCRIPTION:
+			"Brief description of what the script does",
+		MISSION_SCRIPT_PURPOSE_PLACEHOLDER:
+			"e.g., Sets up initial mission conditions",
+
 		MISSION_SCRIPT_PATH_LABEL: "Script Path",
 		MISSION_SCRIPT_PATH_DESCRIPTION:
 			"Path to the script file relative to the selected root directory",

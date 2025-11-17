@@ -1,14 +1,18 @@
 import {
+	Alert,
 	Badge,
 	Button,
 	Card,
+	Grid,
 	Group,
 	Paper,
 	Select,
+	SimpleGrid,
 	Stack,
 	Text,
 	TextInput,
 	ThemeIcon,
+	useComputedColorScheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
@@ -75,6 +79,22 @@ function _MissionScriptForm(props: {
 	return (
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
+				<TextInput
+					label={t("MISSION_SCRIPT_NAME_LABEL")}
+					description={t("MISSION_SCRIPT_NAME_DESCRIPTION")}
+					placeholder={t("MISSION_SCRIPT_NAME_PLACEHOLDER")}
+					name={"name"}
+					{...form.getInputProps("name")}
+				/>
+
+				<TextInput
+					label={t("MISSION_SCRIPT_PURPOSE_LABEL")}
+					description={t("MISSION_SCRIPT_PURPOSE_DESCRIPTION")}
+					placeholder={t("MISSION_SCRIPT_PURPOSE_PLACEHOLDER")}
+					name={"purpose"}
+					{...form.getInputProps("purpose")}
+				/>
+
 				<Select
 					label={t("MISSION_SCRIPT_ROOT_LABEL")}
 					description={t("MISSION_SCRIPT_ROOT_DESCRIPTION")}
@@ -193,6 +213,7 @@ function getMissionScriptRootLabel(
 
 export function _MissionScripts(props: { form: UserModReleaseForm }) {
 	const { t } = useAppTranslation();
+	const scheme = useComputedColorScheme();
 	return (
 		<Card withBorder>
 			<Stack>
@@ -226,15 +247,42 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 						p={"md"}
 					>
 						<Stack>
-							<Paper bg={"gray.1"} p={"sm"}>
-								<PathWithRoot
-									path={it.path}
-									root={getMissionScriptRootLabel(it.root, t)}
-								/>
+							<Group>
+								<ThemeIcon variant={"light"}>
+									<FaFileCode />
+								</ThemeIcon>
+								<Text>{it.name}</Text>
+							</Group>
+
+							<SimpleGrid cols={2}>
+								<Stack gap={2}>
+									<Text size={"xs"} fw={"bold"}>
+										{t("MISSION_SCRIPT_PATH_LABEL")}:
+									</Text>
+									<PathWithRoot
+										size={"xs"}
+										path={it.path}
+										root={getMissionScriptRootLabel(it.root, t)}
+									/>
+								</Stack>
+								<Stack gap={2}>
+									<Text size={"xs"} fw={"bold"}>
+										{t("MISSION_SCRIPT_RUN_ON_LABEL")}:
+									</Text>
+									<Text size={"xs"}>
+										{getMissionScriptRunOnLabel(it.runOn, t)}
+									</Text>
+								</Stack>
+							</SimpleGrid>
+
+							<Paper p={"md"} bg={scheme === "light" ? "gray.1" : "dark.5"}>
+								<Stack gap={"xs"}>
+									<Text size={"xs"} fw={"bold"}>
+										{t("MISSION_SCRIPT_PURPOSE_LABEL")}:
+									</Text>
+									<Text size={"xs"}>{it.purpose}</Text>
+								</Stack>
 							</Paper>
-							<Badge variant={"light"} style={{ textTransform: "none" }}>
-								{getMissionScriptRunOnLabel(it.runOn, t)}
-							</Badge>
 						</Stack>
 					</Paper>
 				))}

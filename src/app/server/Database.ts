@@ -1,4 +1,4 @@
-import { MongoInstance, MongoMemoryServer } from "mongodb-memory-server";
+import { MongoMemoryServer } from "mongodb-memory-server";
 import * as mongoose from "mongoose";
 import applicationConfig from "./ApplicationConfig.ts";
 import Logger from "./Logger.ts";

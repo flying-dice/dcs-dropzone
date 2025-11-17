@@ -1,13 +1,10 @@
 import {
-	ActionIcon,
-	Badge,
 	Button,
 	Card,
-	Center,
-	Divider,
 	Group,
 	Paper,
 	Select,
+	SimpleGrid,
 	Stack,
 	Text,
 	TextInput,
@@ -16,8 +13,7 @@ import {
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { FaLink } from "react-icons/fa";
-import { FaArrowDown } from "react-icons/fa6";
+import { FaFileCode, FaLink } from "react-icons/fa";
 import { z } from "zod";
 import { ModReleaseSymbolicLinkDataDestRoot } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
@@ -71,6 +67,14 @@ function _SymbolicLinkForm(props: {
 	return (
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
+				<TextInput
+					label={t("SYMBOLIC_LINK_NAME_LABEL")}
+					description={t("SYMBOLIC_LINK_NAME_DESCRIPTION")}
+					placeholder={t("SYMBOLIC_LINK_NAME_PLACEHOLDER")}
+					name={"name"}
+					{...form.getInputProps("name")}
+				/>
+
 				<TextInput
 					label={t("SYMBOLIC_LINK_SRC_LABEL")}
 					description={t("SYMBOLIC_LINK_SRC_DESCRIPTION")}
@@ -190,25 +194,36 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 						onClick={() => handleEditSymbolicLink(t, props.form, index)}
 						p={"md"}
 					>
-						<Stack gap={"xs"}>
-							<Paper bg={"gray.1"} p={"sm"}>
-								<Text size={"sm"}>{it.src}</Text>
-							</Paper>
-							<Center>
-								<ThemeIcon size={"sm"} variant={"light"}>
-									<FaArrowDown size={12} />
+						<Stack>
+							<Group>
+								<ThemeIcon variant={"light"}>
+									<FaFileCode />
 								</ThemeIcon>
-							</Center>
-							<Paper bg={"gray.1"} p={"sm"}>
-								<PathWithRoot
-									root={
-										it.destRoot === SymbolicLinkDestRoot.DCS_WORKING_DIR
-											? t("SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR")
-											: t("SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR")
-									}
-									path={it.dest}
-								/>
-							</Paper>
+								<Text>{it.name}</Text>
+							</Group>
+
+							<SimpleGrid cols={2}>
+								<Stack gap={2}>
+									<Text size={"xs"} fw={"bold"}>
+										{t("SYMBOLIC_LINK_SRC_LABEL")}:
+									</Text>
+									<Text size={"xs"}>{it.src}</Text>
+								</Stack>
+								<Stack gap={2}>
+									<Text size={"xs"} fw={"bold"}>
+										{t("SYMBOLIC_LINK_DEST_LABEL")}:
+									</Text>
+									<PathWithRoot
+										size={"xs"}
+										path={it.dest}
+										root={
+											it.destRoot === SymbolicLinkDestRoot.DCS_WORKING_DIR
+												? t("SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR")
+												: t("SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR")
+										}
+									/>
+								</Stack>
+							</SimpleGrid>
 						</Stack>
 					</Paper>
 				))}

@@ -208,14 +208,14 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						onClick={() =>
 							handleEditAsset(props.form, props.form.values.assets.indexOf(it))
 						}
-						p={"sm"}
+						p={"md"}
 					>
-						<Stack gap={"xs"}>
+						<Stack>
 							<Group gap={"xs"}>
-								<ThemeIcon variant={"transparent"}>
+								<ThemeIcon variant={"light"}>
 									{it.isArchive ? <FaFileArchive /> : <FaFile />}
 								</ThemeIcon>
-								<Text size={"sm"}>{it.name}</Text>
+								<Text>{it.name}</Text>
 								{it.isArchive && (
 									<Badge variant={"light"} style={{ textTransform: "none" }}>
 										Archive
@@ -223,11 +223,16 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 								)}
 							</Group>
 							<Stack gap={"xs"}>
-								{it.urls.map((url) => (
-									<Paper bg={"gray.1"} p={"sm"} key={url}>
-										<Text size={"sm"}>{url}</Text>
-									</Paper>
-								))}
+								<Stack gap={2}>
+									<Text size={"xs"} fw={"bold"}>
+										{t("ASSET_URLS_LABEL")}:
+									</Text>
+									{it.urls.map((url) => (
+										<Text size={"xs"} key={url}>
+											- {url}
+										</Text>
+									))}
+								</Stack>
 							</Stack>
 						</Stack>
 					</Paper>

@@ -23,9 +23,10 @@ export type ModReleaseAssetData = z.infer<typeof ModReleaseAssetData>;
 // Symbolic link schema
 export const ModReleaseSymbolicLinkData = z
 	.object({
+		name: z.string().min(1, "Asset name is required"),
 		src: z.string().min(1, "Source path is required"),
 		dest: z.string().min(1, "Destination path is required"),
-		destRoot: z.nativeEnum(SymbolicLinkDestRoot),
+		destRoot: z.enum(SymbolicLinkDestRoot),
 	})
 	.meta({
 		ref: "ModReleaseSymbolicLinkData",
@@ -40,9 +41,11 @@ export type ModReleaseSymbolicLinkData = z.infer<
 // Mission script schema
 export const ModReleaseMissionScriptData = z
 	.object({
+		name: z.string().min(1, "Mission Script Name required"),
+		purpose: z.string().min(1, "Mission Script Purpose required"),
 		path: z.string().min(1, "Path is required"),
-		root: z.nativeEnum(SymbolicLinkDestRoot),
-		runOn: z.nativeEnum(MissionScriptRunOn),
+		root: z.enum(SymbolicLinkDestRoot),
+		runOn: z.enum(MissionScriptRunOn),
 	})
 	.meta({
 		ref: "ModReleaseMissionScriptData",

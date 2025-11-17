@@ -34,6 +34,7 @@ export const userModReleaseFormValues = z.object({
 		.array(),
 	symbolicLinks: z
 		.object({
+			name: z.string().min(1, "Name is required"),
 			src: z.string().min(1, "Source path is required"),
 			dest: z.string().min(1, "Destination path is required"),
 			destRoot: z.enum(ModReleaseSymbolicLinkDataDestRoot),
@@ -42,6 +43,8 @@ export const userModReleaseFormValues = z.object({
 		.default([]),
 	missionScripts: z
 		.object({
+			name: z.string().min(1, "Name is required"),
+			purpose: z.string().min(1, "Purpose is required"),
 			path: z.string().min(1, "Path is required"),
 			root: z.enum(ModReleaseMissionScriptDataRoot),
 			runOn: z.enum(ModReleaseMissionScriptDataRunOn),

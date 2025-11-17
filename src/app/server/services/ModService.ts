@@ -115,6 +115,7 @@ export class ModService {
 							const legacyTarget = this.convertLegacyPath(link.target);
 
 							return {
+								name: basename(link.source),
 								src: link.source,
 								dest: legacyTarget.path,
 								destRoot: legacyTarget.root,
@@ -127,6 +128,8 @@ export class ModService {
 							.map(
 								(link): ModReleaseMissionScriptData => ({
 									...this.convertLegacyPath(link.target),
+									name: basename(link.source),
+									purpose: "Unknown",
 									runOn: MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
 								}),
 							),

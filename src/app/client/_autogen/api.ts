@@ -173,20 +173,13 @@ export const ModReleaseSymbolicLinkDataDestRoot = {
  */
 export interface ModReleaseSymbolicLinkData {
 	/** @minLength 1 */
+	name: string;
+	/** @minLength 1 */
 	src: string;
 	/** @minLength 1 */
 	dest: string;
 	destRoot: ModReleaseSymbolicLinkDataDestRoot;
 }
-
-export type ModReleaseMissionScriptDataRunOn =
-	(typeof ModReleaseMissionScriptDataRunOn)[keyof typeof ModReleaseMissionScriptDataRunOn];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ModReleaseMissionScriptDataRunOn = {
-	MISSION_START_BEFORE_SANITIZE: "MISSION_START_BEFORE_SANITIZE",
-	MISSION_START_AFTER_SANITIZE: "MISSION_START_AFTER_SANITIZE",
-} as const;
 
 export type ModReleaseMissionScriptDataRoot =
 	(typeof ModReleaseMissionScriptDataRoot)[keyof typeof ModReleaseMissionScriptDataRoot];
@@ -197,10 +190,23 @@ export const ModReleaseMissionScriptDataRoot = {
 	DCS_INSTALL_DIR: "DCS_INSTALL_DIR",
 } as const;
 
+export type ModReleaseMissionScriptDataRunOn =
+	(typeof ModReleaseMissionScriptDataRunOn)[keyof typeof ModReleaseMissionScriptDataRunOn];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModReleaseMissionScriptDataRunOn = {
+	MISSION_START_BEFORE_SANITIZE: "MISSION_START_BEFORE_SANITIZE",
+	MISSION_START_AFTER_SANITIZE: "MISSION_START_AFTER_SANITIZE",
+} as const;
+
 /**
  * Data representation of a mission script configuration.
  */
 export interface ModReleaseMissionScriptData {
+	/** @minLength 1 */
+	name: string;
+	/** @minLength 1 */
+	purpose: string;
 	/** @minLength 1 */
 	path: string;
 	root: ModReleaseMissionScriptDataRoot;
@@ -226,8 +232,8 @@ export interface ModReleaseData {
 	version: string;
 	changelog: string;
 	assets: ModReleaseAssetData[];
-	symbolicLinks: ModReleaseSymbolicLinkData[];
-	missionScripts: ModReleaseMissionScriptData[];
+	symbolicLinks?: ModReleaseSymbolicLinkData[];
+	missionScripts?: ModReleaseMissionScriptData[];
 	visibility: ModReleaseDataVisibility;
 	createdAt?: string;
 	updatedAt?: string;
@@ -308,8 +314,8 @@ export type UpdateUserModReleaseBody = {
 	version: string;
 	changelog: string;
 	assets: ModReleaseAssetData[];
-	symbolicLinks: ModReleaseSymbolicLinkData[];
-	missionScripts: ModReleaseMissionScriptData[];
+	symbolicLinks?: ModReleaseSymbolicLinkData[];
+	missionScripts?: ModReleaseMissionScriptData[];
 	visibility: UpdateUserModReleaseBodyVisibility;
 	createdAt?: string;
 	updatedAt?: string;
@@ -1057,95 +1063,99 @@ export function useGetAuthLogout<
 	return query;
 }
 
-export type getApiHealthResponse200 = {
+/**
+ * Checks the health status of the application.
+ * @summary Health Check
+ */
+export type checkHealthResponse200 = {
 	data: void;
 	status: 200;
 };
 
-export type getApiHealthResponse503 = {
+export type checkHealthResponse503 = {
 	data: ErrorData;
 	status: 503;
 };
 
-export type getApiHealthResponseSuccess = getApiHealthResponse200 & {
+export type checkHealthResponseSuccess = checkHealthResponse200 & {
 	headers: Headers;
 };
-export type getApiHealthResponseError = getApiHealthResponse503 & {
+export type checkHealthResponseError = checkHealthResponse503 & {
 	headers: Headers;
 };
 
-export type getApiHealthResponse =
-	| getApiHealthResponseSuccess
-	| getApiHealthResponseError;
+export type checkHealthResponse =
+	| checkHealthResponseSuccess
+	| checkHealthResponseError;
 
-export const getGetApiHealthUrl = () => {
+export const getCheckHealthUrl = () => {
 	return `/api/health`;
 };
 
-export const getApiHealth = async (
+export const checkHealth = async (
 	options?: RequestInit,
-): Promise<getApiHealthResponse> => {
-	const res = await fetch(getGetApiHealthUrl(), {
+): Promise<checkHealthResponse> => {
+	const res = await fetch(getCheckHealthUrl(), {
 		...options,
 		method: "GET",
 	});
 
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-	const data: getApiHealthResponse["data"] = body ? JSON.parse(body) : {};
+	const data: checkHealthResponse["data"] = body ? JSON.parse(body) : {};
 	return {
 		data,
 		status: res.status,
 		headers: res.headers,
-	} as getApiHealthResponse;
+	} as checkHealthResponse;
 };
 
-export const getGetApiHealthQueryKey = () => {
+export const getCheckHealthQueryKey = () => {
 	return [`/api/health`] as const;
 };
 
-export const getGetApiHealthQueryOptions = <
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
+export const getCheckHealthQueryOptions = <
+	TData = Awaited<ReturnType<typeof checkHealth>>,
 	TError = ErrorData,
 >(options?: {
 	query?: Partial<
-		UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
+		UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>
 	>;
 	fetch?: RequestInit;
 }) => {
 	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-	const queryKey = queryOptions?.queryKey ?? getGetApiHealthQueryKey();
+	const queryKey = queryOptions?.queryKey ?? getCheckHealthQueryKey();
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiHealth>>> = ({
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof checkHealth>>> = ({
 		signal,
-	}) => getApiHealth({ signal, ...fetchOptions });
+	}) => checkHealth({ signal, ...fetchOptions });
 
 	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-		Awaited<ReturnType<typeof getApiHealth>>,
+		Awaited<ReturnType<typeof checkHealth>>,
 		TError,
 		TData
 	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetApiHealthQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getApiHealth>>
+export type CheckHealthQueryResult = NonNullable<
+	Awaited<ReturnType<typeof checkHealth>>
 >;
-export type GetApiHealthQueryError = ErrorData;
+export type CheckHealthQueryError = ErrorData;
 
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
+export function useCheckHealth<
+	TData = Awaited<ReturnType<typeof checkHealth>>,
 	TError = ErrorData,
 >(
 	options: {
 		query: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
+			UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>
 		> &
 			Pick<
 				DefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getApiHealth>>,
+					Awaited<ReturnType<typeof checkHealth>>,
 					TError,
-					Awaited<ReturnType<typeof getApiHealth>>
+					Awaited<ReturnType<typeof checkHealth>>
 				>,
 				"initialData"
 			>;
@@ -1155,19 +1165,19 @@ export function useGetApiHealth<
 ): DefinedUseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
+export function useCheckHealth<
+	TData = Awaited<ReturnType<typeof checkHealth>>,
 	TError = ErrorData,
 >(
 	options?: {
 		query?: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
+			UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>
 		> &
 			Pick<
 				UndefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getApiHealth>>,
+					Awaited<ReturnType<typeof checkHealth>>,
 					TError,
-					Awaited<ReturnType<typeof getApiHealth>>
+					Awaited<ReturnType<typeof checkHealth>>
 				>,
 				"initialData"
 			>;
@@ -1177,13 +1187,13 @@ export function useGetApiHealth<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
+export function useCheckHealth<
+	TData = Awaited<ReturnType<typeof checkHealth>>,
 	TError = ErrorData,
 >(
 	options?: {
 		query?: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
+			UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>
 		>;
 		fetch?: RequestInit;
 	},
@@ -1191,14 +1201,17 @@ export function useGetApiHealth<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Health Check
+ */
 
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
+export function useCheckHealth<
+	TData = Awaited<ReturnType<typeof checkHealth>>,
 	TError = ErrorData,
 >(
 	options?: {
 		query?: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
+			UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>
 		>;
 		fetch?: RequestInit;
 	},
@@ -1206,7 +1219,7 @@ export function useGetApiHealth<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 } {
-	const queryOptions = getGetApiHealthQueryOptions(options);
+	const queryOptions = getCheckHealthQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
 		TData,
@@ -1218,6 +1231,10 @@ export function useGetApiHealth<
 	return query;
 }
 
+/**
+ * Retrieves a list of all mods owned by the authenticated user.
+ * @summary Get user mods
+ */
 export type getUserModsResponse200 = {
 	data: GetUserMods200;
 	status: 200;
@@ -1352,6 +1369,9 @@ export function useGetUserMods<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get user mods
+ */
 
 export function useGetUserMods<
 	TData = Awaited<ReturnType<typeof getUserMods>>,
@@ -1379,6 +1399,10 @@ export function useGetUserMods<
 	return query;
 }
 
+/**
+ * Creates a new mod owned by the authenticated user.
+ * @summary Create user mod
+ */
 export type createUserModResponse201 = {
 	data: ModData;
 	status: 201;
@@ -1477,6 +1501,9 @@ export type CreateUserModMutationResult = NonNullable<
 export type CreateUserModMutationBody = ModCreateData;
 export type CreateUserModMutationError = void;
 
+/**
+ * @summary Create user mod
+ */
 export const useCreateUserMod = <TError = void, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
@@ -1499,6 +1526,10 @@ export const useCreateUserMod = <TError = void, TContext = unknown>(
 	return useMutation(mutationOptions, queryClient);
 };
 
+/**
+ * Retrieves a specific mod owned by the authenticated user by its ID.
+ * @summary Get user mod by ID
+ */
 export type getUserModByIdResponse200 = {
 	data: ModData;
 	status: 200;
@@ -1653,6 +1684,9 @@ export function useGetUserModById<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get user mod by ID
+ */
 
 export function useGetUserModById<
 	TData = Awaited<ReturnType<typeof getUserModById>>,
@@ -1681,6 +1715,10 @@ export function useGetUserModById<
 	return query;
 }
 
+/**
+ * Updates an existing mod owned by the authenticated user.
+ * @summary Update user mod
+ */
 export type updateUserModResponse200 = {
 	data: void;
 	status: 200;
@@ -1780,6 +1818,9 @@ export type UpdateUserModMutationResult = NonNullable<
 export type UpdateUserModMutationBody = UpdateUserModBody;
 export type UpdateUserModMutationError = void;
 
+/**
+ * @summary Update user mod
+ */
 export const useUpdateUserMod = <TError = void, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
@@ -1802,6 +1843,10 @@ export const useUpdateUserMod = <TError = void, TContext = unknown>(
 	return useMutation(mutationOptions, queryClient);
 };
 
+/**
+ * Deletes an existing mod owned by the authenticated user.
+ * @summary Delete user mod
+ */
 export type deleteUserModResponse200 = {
 	data: void;
 	status: 200;
@@ -1898,6 +1943,9 @@ export type DeleteUserModMutationResult = NonNullable<
 
 export type DeleteUserModMutationError = void;
 
+/**
+ * @summary Delete user mod
+ */
 export const useDeleteUserMod = <TError = void, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
@@ -1920,6 +1968,10 @@ export const useDeleteUserMod = <TError = void, TContext = unknown>(
 	return useMutation(mutationOptions, queryClient);
 };
 
+/**
+ * Retrieves all releases for a specific mod owned by the authenticated user.
+ * @summary Get user mod releases
+ */
 export type getUserModReleasesResponse200 = {
 	data: GetUserModReleases200;
 	status: 200;
@@ -2083,6 +2135,9 @@ export function useGetUserModReleases<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get user mod releases
+ */
 
 export function useGetUserModReleases<
 	TData = Awaited<ReturnType<typeof getUserModReleases>>,
@@ -2239,6 +2294,10 @@ export const useCreateUserModRelease = <TError = void, TContext = unknown>(
 	return useMutation(mutationOptions, queryClient);
 };
 
+/**
+ * Retrieves a specific release for a user-owned mod by its ID.
+ * @summary Get user mod release by ID
+ */
 export type getUserModReleaseByIdResponse200 = {
 	data: ModReleaseData;
 	status: 200;
@@ -2422,6 +2481,9 @@ export function useGetUserModReleaseById<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get user mod release by ID
+ */
 
 export function useGetUserModReleaseById<
 	TData = Awaited<ReturnType<typeof getUserModReleaseById>>,
@@ -2706,6 +2768,10 @@ export const useDeleteUserModRelease = <TError = void, TContext = unknown>(
 	return useMutation(mutationOptions, queryClient);
 };
 
+/**
+ * Retrieves a paginated list of all published mods.
+ * @summary Get mods
+ */
 export type getModsResponse200 = {
 	data: GetMods200;
 	status: 200;
@@ -2845,6 +2911,9 @@ export function useGetMods<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get mods
+ */
 
 export function useGetMods<
 	TData = Awaited<ReturnType<typeof getMods>>,
@@ -2873,6 +2942,10 @@ export function useGetMods<
 	return query;
 }
 
+/**
+ * Retrieves all public releases for a specific mod.
+ * @summary Get mod releases
+ */
 export type getModReleasesResponse200 = {
 	data: GetModReleases200;
 	status: 200;
@@ -3009,6 +3082,9 @@ export function useGetModReleases<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get mod releases
+ */
 
 export function useGetModReleases<
 	TData = Awaited<ReturnType<typeof getModReleases>>,
@@ -3037,6 +3113,10 @@ export function useGetModReleases<
 	return query;
 }
 
+/**
+ * Retrieves a specific public release for a mod by its ID.
+ * @summary Get mod release by ID
+ */
 export type getModReleaseByIdResponse200 = {
 	data: ModReleaseData;
 	status: 200;
@@ -3209,6 +3289,9 @@ export function useGetModReleaseById<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get mod release by ID
+ */
 
 export function useGetModReleaseById<
 	TData = Awaited<ReturnType<typeof getModReleaseById>>,
@@ -3231,6 +3314,198 @@ export function useGetModReleaseById<
 	queryKey: DataTag<QueryKey, TData, TError>;
 } {
 	const queryOptions = getGetModReleaseByIdQueryOptions(id, releaseId, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * Migrates data from the legacy registry to the new system. Only accessible by the admin users.
+ * @summary Migrate Legacy Registry
+ */
+export type migrateLegacyRegistryResponse200 = {
+	data: void;
+	status: 200;
+};
+
+export type migrateLegacyRegistryResponse401 = {
+	data: void;
+	status: 401;
+};
+
+export type migrateLegacyRegistryResponseSuccess =
+	migrateLegacyRegistryResponse200 & {
+		headers: Headers;
+	};
+export type migrateLegacyRegistryResponseError =
+	migrateLegacyRegistryResponse401 & {
+		headers: Headers;
+	};
+
+export type migrateLegacyRegistryResponse =
+	| migrateLegacyRegistryResponseSuccess
+	| migrateLegacyRegistryResponseError;
+
+export const getMigrateLegacyRegistryUrl = () => {
+	return `/api/_migrate`;
+};
+
+export const migrateLegacyRegistry = async (
+	options?: RequestInit,
+): Promise<migrateLegacyRegistryResponse> => {
+	const res = await fetch(getMigrateLegacyRegistryUrl(), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: migrateLegacyRegistryResponse["data"] = body
+		? JSON.parse(body)
+		: {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as migrateLegacyRegistryResponse;
+};
+
+export const getMigrateLegacyRegistryQueryKey = () => {
+	return [`/api/_migrate`] as const;
+};
+
+export const getMigrateLegacyRegistryQueryOptions = <
+	TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+	TError = void,
+>(options?: {
+	query?: Partial<
+		UseQueryOptions<
+			Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+			TError,
+			TData
+		>
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getMigrateLegacyRegistryQueryKey();
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof migrateLegacyRegistry>>
+	> = ({ signal }) => migrateLegacyRegistry({ signal, ...fetchOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MigrateLegacyRegistryQueryResult = NonNullable<
+	Awaited<ReturnType<typeof migrateLegacyRegistry>>
+>;
+export type MigrateLegacyRegistryQueryError = void;
+
+export function useMigrateLegacyRegistry<
+	TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+	TError = void,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+					TError,
+					Awaited<ReturnType<typeof migrateLegacyRegistry>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMigrateLegacyRegistry<
+	TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+	TError = void,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+					TError,
+					Awaited<ReturnType<typeof migrateLegacyRegistry>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMigrateLegacyRegistry<
+	TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+	TError = void,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Migrate Legacy Registry
+ */
+
+export function useMigrateLegacyRegistry<
+	TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+	TError = void,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof migrateLegacyRegistry>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getMigrateLegacyRegistryQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
 		TData,
