@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import Application from "../Application.ts";
+import appConfig from "../ApplicationConfig.ts";
 import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
@@ -13,15 +14,24 @@ const logger = Logger.getLogger("api/migrate");
 router.get(
 	"/",
 	describeJsonRoute({
+		operationId: "migrateLegacyRegistry",
+		summary: "Migrate Legacy Registry",
+		description:
+			"Migrates data from the legacy registry to the new system. Only accessible by the admin users.",
+		tags: ["Migration"],
 		responses: {
 			[StatusCodes.OK]: null,
-			[StatusCodes.SERVICE_UNAVAILABLE]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: null,
 		},
 	}),
 	cookieAuth(),
 	async (c) => {
-		const user = await c.var.getUser();
-		if (user.id !== "16135506") {
+		const user = c.var.getUser();
+		logger.debug(
+			{ userId: user.id, admins: appConfig.admins },
+			"Migration requested by user",
+		);
+		if (!appConfig.admins.includes(user.id)) {
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 

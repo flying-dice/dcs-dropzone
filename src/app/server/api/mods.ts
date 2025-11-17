@@ -19,6 +19,8 @@ router.get(
 	"/",
 	describeJsonRoute({
 		operationId: "getMods",
+		summary: "Get mods",
+		description: "Retrieves a paginated list of all published mods.",
 		tags: ["Mods"],
 		responses: {
 			[StatusCodes.OK]: z.object({

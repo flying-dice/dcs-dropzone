@@ -1,19 +1,23 @@
+import { MongoInstance, MongoMemoryServer } from "mongodb-memory-server";
 import * as mongoose from "mongoose";
+import applicationConfig from "./ApplicationConfig.ts";
 import Logger from "./Logger.ts";
 
 const logger = Logger.getLogger("Database");
 
-const MONGODB_URI = process.env.MONGODB_URI;
+if (applicationConfig.mongoMemoryServer) {
+	logger.info("Starting in-memory MongoDB server...");
+	const mongod = await MongoMemoryServer.create({
+		instance: { port: applicationConfig.mongoMemoryServerPort },
+	});
 
-if (!MONGODB_URI) {
-	throw new Error(
-		"Please define the MONGODB_URI environment variable inside .env",
-	);
+	const mongoUri = mongod.getUri();
+	logger.info(`In-memory MongoDB server started at ${mongoUri}`);
 }
 
 logger.info("Connecting to MongoDB...");
 
-await mongoose.connect(MONGODB_URI);
+await mongoose.connect(applicationConfig.mongoUri);
 
 logger.info("Connected to MongoDB.");
 

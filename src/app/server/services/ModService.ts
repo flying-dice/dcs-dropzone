@@ -98,9 +98,11 @@ export class ModService {
 					changelog: version.name,
 					visibility: ModVisibility.Public,
 					assets: version.assets.map((assets) => ({
-						name: basename(assets.remoteSource).replace(
-							extname(assets.remoteSource),
-							"",
+						name: decodeURIComponent(
+							basename(assets.remoteSource).replace(
+								extname(assets.remoteSource),
+								"",
+							),
 						),
 						urls: [assets.remoteSource],
 						isArchive:

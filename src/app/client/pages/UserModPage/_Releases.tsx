@@ -27,7 +27,7 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 
 	const handleNewRelease = () => {
 		openModal({
-			title: "Create New Release",
+			title: t("CREATE_NEW_RELEASE"),
 			size: "xl",
 			children: (
 				<NewReleaseForm
@@ -41,7 +41,7 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 							}
 							await modReleases.refetch();
 							modals.closeAll();
-							nav(res.data.id);
+							nav(`releases/${res.data.id}`);
 						} catch (e) {
 							showErrorNotification(e);
 						}

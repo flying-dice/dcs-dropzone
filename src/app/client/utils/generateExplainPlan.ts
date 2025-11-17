@@ -49,11 +49,7 @@ export function generateExplainPlan(release: ModReleaseData): string {
 		sections.push(`## Assets\n`);
 
 		for (const asset of release.assets) {
-			const urlCount = asset.urls.length;
-			const downloadSource =
-				urlCount === 1
-					? "from the provided URL"
-					: `from ${urlCount} URLs (multipart archive)`;
+			const downloadSource = `from ${asset.urls}`;
 
 			if (asset.isArchive) {
 				sections.push(

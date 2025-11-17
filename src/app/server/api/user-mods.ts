@@ -24,6 +24,9 @@ router.get(
 	"/",
 	describeJsonRoute({
 		operationId: "getUserMods",
+		summary: "Get user mods",
+		description:
+			"Retrieves a list of all mods owned by the authenticated user.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -52,6 +55,9 @@ router.get(
 	"/:id",
 	describeJsonRoute({
 		operationId: "getUserModById",
+		summary: "Get user mod by ID",
+		description:
+			"Retrieves a specific mod owned by the authenticated user by its ID.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -87,6 +93,8 @@ router.post(
 	"/",
 	describeJsonRoute({
 		operationId: "createUserMod",
+		summary: "Create user mod",
+		description: "Creates a new mod owned by the authenticated user.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -119,6 +127,8 @@ router.put(
 	"/:id",
 	describeJsonRoute({
 		operationId: "updateUserMod",
+		summary: "Update user mod",
+		description: "Updates an existing mod owned by the authenticated user.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -157,6 +167,8 @@ router.delete(
 	"/:id",
 	describeJsonRoute({
 		operationId: "deleteUserMod",
+		summary: "Delete user mod",
+		description: "Deletes an existing mod owned by the authenticated user.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {

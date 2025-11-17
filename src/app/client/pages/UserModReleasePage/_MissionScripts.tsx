@@ -1,13 +1,14 @@
 import {
-	Alert,
 	Badge,
 	Button,
 	Card,
 	Group,
+	Paper,
 	Select,
 	Stack,
 	Text,
 	TextInput,
+	ThemeIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
@@ -20,6 +21,7 @@ import {
 } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
+import { PathWithRoot } from "../../components/PathWithRoot.tsx";
 import {
 	type TranslateFunction,
 	useAppTranslation,
@@ -73,19 +75,19 @@ function _MissionScriptForm(props: {
 	return (
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
+				<Select
+					label={t("MISSION_SCRIPT_ROOT_LABEL")}
+					description={t("MISSION_SCRIPT_ROOT_DESCRIPTION")}
+					data={rootOptions}
+					{...form.getInputProps("root")}
+				/>
+
 				<TextInput
 					label={t("MISSION_SCRIPT_PATH_LABEL")}
 					description={t("MISSION_SCRIPT_PATH_DESCRIPTION")}
 					placeholder={t("MISSION_SCRIPT_PATH_PLACEHOLDER")}
 					name={"path"}
 					{...form.getInputProps("path")}
-				/>
-
-				<Select
-					label={t("MISSION_SCRIPT_ROOT_LABEL")}
-					description={t("MISSION_SCRIPT_ROOT_DESCRIPTION")}
-					data={rootOptions}
-					{...form.getInputProps("root")}
 				/>
 
 				<Select
@@ -214,30 +216,27 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 				</Group>
 				{props.form.values.missionScripts.length === 0 && <_NoMissionScripts />}
 				{props.form.values.missionScripts.map((it, index) => (
-					<Alert
-						icon={<FaFileCode />}
-						title={
-							<Group wrap="nowrap">
-								<Badge variant={"light"} style={{ textTransform: "none" }}>
-									{getMissionScriptRunOnLabel(it.runOn, t)}
-								</Badge>
-								<Badge variant={"outline"} style={{ textTransform: "none" }}>
-									{getMissionScriptRootLabel(it.root, t)}
-								</Badge>
-							</Group>
-						}
+					<Paper
+						withBorder
 						key={`${it.path}-${it.root}-${it.runOn}-${index}`}
 						color="violet"
 						variant="light"
 						style={{ cursor: "pointer" }}
 						onClick={() => handleEditMissionScript(t, props.form, index)}
+						p={"md"}
 					>
-						<Stack gap={"xs"}>
-							<Text size={"xs"} c={"dimmed"}>
-								{t("MISSION_SCRIPT_PATH_DISPLAY")}: {it.path}
-							</Text>
+						<Stack>
+							<Paper bg={"gray.1"} p={"sm"}>
+								<PathWithRoot
+									path={it.path}
+									root={getMissionScriptRootLabel(it.root, t)}
+								/>
+							</Paper>
+							<Badge variant={"light"} style={{ textTransform: "none" }}>
+								{getMissionScriptRunOnLabel(it.runOn, t)}
+							</Badge>
 						</Stack>
-					</Alert>
+					</Paper>
 				))}
 			</Stack>
 		</Card>

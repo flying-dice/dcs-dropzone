@@ -22,6 +22,9 @@ router.get(
 	"/:id/releases",
 	describeJsonRoute({
 		operationId: "getUserModReleases",
+		summary: "Get user mod releases",
+		description:
+			"Retrieves all releases for a specific mod owned by the authenticated user.",
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -57,6 +60,8 @@ router.get(
 	"/:id/releases/:releaseId",
 	describeJsonRoute({
 		operationId: "getUserModReleaseById",
+		summary: "Get user mod release by ID",
+		description: "Retrieves a specific release for a user-owned mod by its ID.",
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {

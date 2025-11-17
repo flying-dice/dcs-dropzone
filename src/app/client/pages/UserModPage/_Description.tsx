@@ -10,7 +10,7 @@ export function _Description(props: { form: UserModForm }) {
 				<Text size={"lg"} fw={"bold"}>
 					Detailed Description
 				</Text>
-				<Tabs defaultValue={"write"}>
+				<Tabs defaultValue={"preview"}>
 					<Tabs.List>
 						<Tabs.Tab value="write">Write</Tabs.Tab>
 						<Tabs.Tab value="preview">Preview</Tabs.Tab>

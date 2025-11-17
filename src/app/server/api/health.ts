@@ -11,6 +11,10 @@ const logger = Logger.getLogger("api/health");
 router.get(
 	"/",
 	describeJsonRoute({
+		operationId: "checkHealth",
+		summary: "Health Check",
+		description: "Checks the health status of the application.",
+		tags: ["Health"],
 		responses: {
 			[StatusCodes.OK]: null,
 			[StatusCodes.SERVICE_UNAVAILABLE]: ErrorData,

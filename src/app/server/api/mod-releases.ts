@@ -20,6 +20,8 @@ router.get(
 	"/:id/releases",
 	describeJsonRoute({
 		operationId: "getModReleases",
+		summary: "Get mod releases",
+		description: "Retrieves all public releases for a specific mod.",
 		tags: ["Mod Releases"],
 		responses: {
 			[StatusCodes.OK]: z.object({
@@ -49,6 +51,8 @@ router.get(
 	"/:id/releases/:releaseId",
 	describeJsonRoute({
 		operationId: "getModReleaseById",
+		summary: "Get mod release by ID",
+		description: "Retrieves a specific public release for a mod by its ID.",
 		tags: ["Mod Releases"],
 		responses: {
 			[StatusCodes.OK]: ModReleaseData,

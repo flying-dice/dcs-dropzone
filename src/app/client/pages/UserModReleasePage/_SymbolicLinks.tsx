@@ -1,31 +1,43 @@
 import {
-	Alert,
+	ActionIcon,
 	Badge,
 	Button,
 	Card,
+	Center,
+	Divider,
 	Group,
+	Paper,
 	Select,
 	Stack,
 	Text,
 	TextInput,
+	ThemeIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaLink } from "react-icons/fa";
+import { FaArrowDown } from "react-icons/fa6";
 import { z } from "zod";
 import { ModReleaseSymbolicLinkDataDestRoot } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
+import { PathWithRoot } from "../../components/PathWithRoot.tsx";
 import {
 	type TranslateFunction,
 	useAppTranslation,
 } from "../../i18n/useAppTranslation.ts";
+import { isRelativePath } from "../../utils/isRelativePath.ts";
 import { SymbolicLinkDestRoot, type UserModReleaseForm } from "./form.ts";
 
 const symbolicLinkFormSchema = z.object({
 	src: z.string().min(1, "Source path is required"),
-	dest: z.string().min(1, "Destination path is required"),
+	dest: z
+		.string()
+		.min(1, "Destination path is required")
+		.refine(isRelativePath, {
+			message: "Destination path must be a relative path from the root",
+		}),
 	destRoot: z.enum(ModReleaseSymbolicLinkDataDestRoot),
 });
 type SymbolicLinkFormValues = z.infer<typeof symbolicLinkFormSchema>;
@@ -170,32 +182,35 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 				</Group>
 				{props.form.values.symbolicLinks.length === 0 && <_NoSymbolicLinks />}
 				{props.form.values.symbolicLinks.map((it, index) => (
-					<Alert
-						icon={<FaLink />}
-						title={
-							<Group wrap="nowrap">
-								<Badge variant={"light"} style={{ textTransform: "none" }}>
-									{it.destRoot === SymbolicLinkDestRoot.DCS_WORKING_DIR
-										? t("SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR")
-										: t("SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR")}
-								</Badge>
-							</Group>
-						}
+					<Paper
 						key={`${it.src}-${it.dest}-${index}`}
-						color="blue"
-						variant="light"
+						withBorder
+						variant="outline"
 						style={{ cursor: "pointer" }}
 						onClick={() => handleEditSymbolicLink(t, props.form, index)}
+						p={"md"}
 					>
 						<Stack gap={"xs"}>
-							<Text size={"xs"} c={"dimmed"}>
-								{t("SYMBOLIC_LINK_SOURCE_LABEL")}: {it.src}
-							</Text>
-							<Text size={"xs"} c={"dimmed"}>
-								{t("SYMBOLIC_LINK_DESTINATION_LABEL")}: {it.dest}
-							</Text>
+							<Paper bg={"gray.1"} p={"sm"}>
+								<Text size={"sm"}>{it.src}</Text>
+							</Paper>
+							<Center>
+								<ThemeIcon size={"sm"} variant={"light"}>
+									<FaArrowDown size={12} />
+								</ThemeIcon>
+							</Center>
+							<Paper bg={"gray.1"} p={"sm"}>
+								<PathWithRoot
+									root={
+										it.destRoot === SymbolicLinkDestRoot.DCS_WORKING_DIR
+											? t("SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR")
+											: t("SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR")
+									}
+									path={it.dest}
+								/>
+							</Paper>
 						</Stack>
-					</Alert>
+					</Paper>
 				))}
 			</Stack>
 		</Card>

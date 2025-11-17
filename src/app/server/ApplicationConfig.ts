@@ -1,8 +1,11 @@
-import { int, string } from "getenv";
+import { boolish, int, string } from "getenv";
 import { z } from "zod";
 
 const configSchema = z.object({
 	port: z.number().int().min(1).max(65535),
+	mongoUri: z.string(),
+	mongoMemoryServer: z.boolean(),
+	mongoMemoryServerPort: z.number().int().min(0).max(65535),
 	logLevel: z.enum([
 		"fatal",
 		"error",
@@ -19,12 +22,16 @@ const configSchema = z.object({
 	ghClientSecret: z.string(),
 	ghAuthorizationCallbackUrl: z.string().url(),
 	ghHomepageUrl: z.string().url(),
+	admins: z.string().transform((it) => it.split(",").map((id) => id.trim())),
 });
 
 export type ApplicationConfig = z.infer<typeof configSchema>;
 
 const appConfig = configSchema.parse({
 	port: int("PORT"),
+	mongoUri: string("MONGO_URI"),
+	mongoMemoryServer: boolish("MONGO_MEMORY_SERVER", false),
+	mongoMemoryServerPort: int("MONGO_MEMORY_SERVER_PORT", 0),
 	logLevel: string("LOG_LEVEL"),
 	userCookieSecret: string("USER_COOKIE_SECRET"),
 	userCookieName: string("USER_COOKIE_NAME", "USERID"),
@@ -33,6 +40,7 @@ const appConfig = configSchema.parse({
 	ghClientSecret: string("GH_CLIENT_SECRET"),
 	ghAuthorizationCallbackUrl: string("GH_AUTHORIZATION_CALLBACK_URL"),
 	ghHomepageUrl: string("GH_HOMEPAGE_URL"),
+	admins: string("ADMIN_IDS", "16135506"),
 });
 
 export default appConfig;

@@ -49,6 +49,8 @@ export default {
 		TOTAL_DOWNLOADS: "Total Downloads",
 		AVERAGE_RATING: "Average Rating",
 
+		CREATE_NEW_RELEASE: "Create New Release",
+
 		LOADING: "Loading...",
 		ERROR_LOADING_MOD: "Error loading mod.",
 		ERROR_LOADING_RELEASE: "Error loading release.",
@@ -93,6 +95,10 @@ export default {
 
 		SAVE: "Save",
 		REMOVE: "Remove",
+
+		PUBLIC: "Public",
+		PRIVATE: "Private",
+		UNLISTED: "Unlisted",
 
 		// Symbolic Links
 		SYMBOLIC_LINKS_TITLE: "Symbolic Links",

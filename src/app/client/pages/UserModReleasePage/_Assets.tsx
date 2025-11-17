@@ -7,10 +7,11 @@ import {
 	Checkbox,
 	Divider,
 	Group,
-	List,
+	Paper,
 	Stack,
 	Text,
 	TextInput,
+	ThemeIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
@@ -85,9 +86,10 @@ function _AssetForm(props: {
 						/>
 					)}
 					{form.errors.urls && <Alert color="red">{form.errors.urls}</Alert>}
-					{form.values.urls.map((url, i) => (
+					{form.values.urls.map((_, i) => (
 						<TextInput
-							key={i + url}
+							// biome-ignore lint/suspicious/noArrayIndexKey: In this case, using the index as key is acceptable because the order of URLs is not expected to change.
+							key={`asset-url-${i}`}
 							name={`urls[${i}]`}
 							rightSection={
 								<ActionIcon
@@ -197,20 +199,8 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 				</Group>
 				{props.form.values.assets.length === 0 && <_NoAssets />}
 				{props.form.values.assets.map((it) => (
-					<Alert
-						icon={it.isArchive ? <FaFileArchive /> : <FaFile />}
-						title={
-							<Group>
-								<Text size={"sm"} fw={"bold"}>
-									{it.name}
-								</Text>
-								{it.isArchive && (
-									<Badge variant={"light"} style={{ textTransform: "none" }}>
-										Archive
-									</Badge>
-								)}
-							</Group>
-						}
+					<Paper
+						withBorder
 						key={it.name}
 						color="blue"
 						variant="light"
@@ -218,13 +208,29 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						onClick={() =>
 							handleEditAsset(props.form, props.form.values.assets.indexOf(it))
 						}
+						p={"sm"}
 					>
-						<List type="ordered">
-							{it.urls.map((url) => (
-								<List.Item key={url}>{url}</List.Item>
-							))}
-						</List>
-					</Alert>
+						<Stack gap={"xs"}>
+							<Group gap={"xs"}>
+								<ThemeIcon variant={"transparent"}>
+									{it.isArchive ? <FaFileArchive /> : <FaFile />}
+								</ThemeIcon>
+								<Text size={"sm"}>{it.name}</Text>
+								{it.isArchive && (
+									<Badge variant={"light"} style={{ textTransform: "none" }}>
+										Archive
+									</Badge>
+								)}
+							</Group>
+							<Stack gap={"xs"}>
+								{it.urls.map((url) => (
+									<Paper bg={"gray.1"} p={"sm"} key={url}>
+										<Text size={"sm"}>{url}</Text>
+									</Paper>
+								))}
+							</Stack>
+						</Stack>
+					</Paper>
 				))}
 			</Stack>
 		</Card>
