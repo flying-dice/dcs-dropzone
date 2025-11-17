@@ -1,11 +1,9 @@
-import { boolish, int, string } from "getenv";
+import { int, string } from "getenv";
 import { z } from "zod";
 
 const configSchema = z.object({
 	port: z.number().int().min(1).max(65535),
 	mongoUri: z.string(),
-	mongoMemoryServer: z.boolean(),
-	mongoMemoryServerPort: z.number().int().min(0).max(65535),
 	logLevel: z.enum([
 		"fatal",
 		"error",
@@ -30,8 +28,6 @@ export type ApplicationConfig = z.infer<typeof configSchema>;
 const appConfig = configSchema.parse({
 	port: int("PORT"),
 	mongoUri: string("MONGO_URI"),
-	mongoMemoryServer: boolish("MONGO_MEMORY_SERVER", false),
-	mongoMemoryServerPort: int("MONGO_MEMORY_SERVER_PORT", 0),
 	logLevel: string("LOG_LEVEL"),
 	userCookieSecret: string("USER_COOKIE_SECRET"),
 	userCookieName: string("USER_COOKIE_NAME", "USERID"),

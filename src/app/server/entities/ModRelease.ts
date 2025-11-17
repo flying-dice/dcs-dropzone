@@ -13,7 +13,7 @@ const schema = new Schema(
 		createdAt: { type: Date, default: Date.now },
 		updatedAt: { type: Date, default: Date.now },
 	},
-	{ timestamps: true },
+	{ timestamps: true, autoIndex: true },
 );
 
 // Create index for efficient queries

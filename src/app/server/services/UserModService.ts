@@ -26,10 +26,17 @@ export class UserModService {
 			visibility: ModVisibility.Public,
 		});
 
+		logger.debug({ countPublished }, "Counted published mods");
+
 		const docs = await ModSummary.find({ maintainers: this.user.id })
 			.sort({ createdAt: "desc" })
 			.lean()
 			.exec();
+
+		logger.debug(
+			{ docs: docs.length, countPublished },
+			"Fetched all user mods",
+		);
 
 		const meta: UserModsMetaData = {
 			published: countPublished,

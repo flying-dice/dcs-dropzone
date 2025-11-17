@@ -90,6 +90,15 @@ export class ModService {
 				throw new Error("Failed to retrieve or create mod document");
 			}
 
+			logger.debug(
+				{
+					documentId: modDocument._id,
+					name: modDocument.name,
+					id: modDocument.id,
+				},
+				`Migrated Registry Entry for ${mod.name}`,
+			);
+
 			for (const version of registryEntry.data.versions) {
 				const release: ModReleaseData = ModReleaseData.parse({
 					id: crypto.randomUUID(),
@@ -140,6 +149,24 @@ export class ModService {
 					{ mod_id: modDocument.id, version: release.version },
 					release,
 					{ upsert: true },
+				);
+
+				const releaseDocument = await ModRelease.findOne({
+					mod_id: modDocument.id,
+					version: release.version,
+				}).exec();
+				if (!releaseDocument) {
+					throw new Error("Failed to retrieve or create mod release document");
+				}
+
+				logger.debug(
+					{
+						documentId: releaseDocument._id,
+						releaseId: releaseDocument.id,
+						modId: modDocument.id,
+						version: releaseDocument.version,
+					},
+					`Migrated Mod Release ${release.version} for Mod ${mod.name}`,
 				);
 			}
 		}
