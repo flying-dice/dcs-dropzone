@@ -25,7 +25,6 @@ export const cookieAuth = () =>
 			c,
 			appConfig.userCookieSecret,
 			appConfig.userCookieName,
-			"secure",
 		);
 
 		if (!userId) {

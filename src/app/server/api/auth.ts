@@ -85,12 +85,13 @@ router.get(
 			userData.id,
 			appConfig.userCookieSecret,
 			{
-				secure: true,
-				sameSite: "strict",
-				prefix: "secure",
 				maxAge: appConfig.userCookieMaxAge,
 			},
 		);
+
+        logger.debug({
+            userId: authResult.id
+        }, "Signed Cookie Set")
 
 		return c.redirect(appConfig.ghHomepageUrl);
 	},
@@ -164,11 +165,7 @@ router.get(
         },
     }),
 	(c) => {
-		deleteCookie(c, appConfig.userCookieName, {
-			secure: true,
-			sameSite: "strict",
-			prefix: "secure",
-		});
+		deleteCookie(c, appConfig.userCookieName);
 		return c.redirect(appConfig.ghHomepageUrl);
 	},
 );
