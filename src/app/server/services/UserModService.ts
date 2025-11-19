@@ -1,5 +1,6 @@
 import { ModVisibility } from "../../../common/data.ts";
-import { Mod, ModSummary } from "../entities/Mod.ts";
+import { Mod } from "../entities/Mod.ts";
+import { ModSummary } from "../entities/ModSummary.ts";
 import Logger from "../Logger.ts";
 import type { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";

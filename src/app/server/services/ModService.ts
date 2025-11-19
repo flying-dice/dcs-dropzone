@@ -10,8 +10,9 @@ import {
 	getRegistryEntry,
 	getRegistryIndex,
 } from "../../client/_autogen/legacy_api.ts";
-import { Mod, ModSummary } from "../entities/Mod.ts";
+import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
+import { ModSummary } from "../entities/ModSummary.ts";
 import Logger from "../Logger.ts";
 import { ModData } from "../schemas/ModData.ts";
 import {

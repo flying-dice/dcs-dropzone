@@ -16,10 +16,4 @@ const schema = new Schema(
 	{ timestamps: true, autoIndex: true },
 );
 
-// Create index for efficient queries
-schema.index({ mod_id: 1, createdAt: -1 });
-schema.index({ mod_id: 1, visibility: 1, createdAt: -1 });
-
 export const ModRelease = mongoose.model("ModRelease", schema);
-
-await ModRelease.createCollection();
