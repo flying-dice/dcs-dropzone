@@ -5,6 +5,11 @@ import symbolicLinkHelpEnMd from "./en_SymbolicLinkHelp.md" with {
 
 export default {
 	translation: {
+		CONFIRM_REMOVE_SCREENSHOT_TITLE: "Confirm Remove Screenshot",
+		CONFIRM_REMOVE_SCREENSHOT_DESC:
+			"Are you sure you want to remove this screenshot?",
+		YES: "Yes",
+		NO: "No",
 		EMPTY_RELEASES_TITLE: "No Releases Added",
 		EMPTY_RELEASES_SUBTITLE:
 			"Add download URLs for your mod files. These will be downloaded and extracted by the desktop manager.",

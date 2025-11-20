@@ -27,6 +27,12 @@ export function ModImage(props: ModImageProps) {
 	const _w = props.w || parentWidth || 300;
 	const _h = _w / aspectRatio;
 
+	const _borderRadius = props.radius
+		? typeof props.radius === "number"
+			? props.radius
+			: theme.radius[props.radius]
+		: undefined;
+
 	return (
 		<Stack
 			pt={props.pt}
@@ -43,7 +49,7 @@ export function ModImage(props: ModImageProps) {
 			maw={_w}
 			mah={_h}
 			style={{
-				borderRadius: props.radius,
+				borderRadius: _borderRadius,
 				backgroundColor: theme.colors.dark[5],
 				backgroundImage: `url(${props.src})`,
 				backgroundSize: "cover",

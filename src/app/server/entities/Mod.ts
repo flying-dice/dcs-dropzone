@@ -9,7 +9,7 @@ const schema = new Schema(
 		content: { type: String, required: true },
 		tags: { type: [String], required: true },
 		dependencies: { type: [String], required: true },
-		screenshots: { type: [String], required: true },
+		screenshots: { type: [Object], required: true },
 		thumbnail: { type: String, required: true },
 		visibility: { type: String, required: true },
 		maintainers: { type: [String], required: true },

@@ -46,7 +46,7 @@ bun run biome
   - Local API (requires web application running to serve /v3/api-docs):
 
 ```bash path=null start=null
-bun run orval
+bun run clientgen
 ```
 
 - Drizzle SQL migrations (daemon)

@@ -25,7 +25,7 @@ export const userModFormValues = z.object({
 	tags: z.array(z.string()),
 	dependencies: z.array(z.string()),
 	thumbnail: z.string().url(),
-	screenshots: z.array(z.string().url()),
+	screenshots: z.string().url().array(),
 	visibility: z.enum(ModDataVisibility),
 });
 
