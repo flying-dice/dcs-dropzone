@@ -39,4 +39,11 @@ export class UserService {
 
 		return user;
 	}
+
+	async getAllUsers(): Promise<UserData[]> {
+		logger.debug("getAllUsers start");
+		const users = await User.find().lean().exec();
+		logger.debug(`getAllUsers found ${users.length} users`);
+		return UserData.array().parse(users);
+	}
 }

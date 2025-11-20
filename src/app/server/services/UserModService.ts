@@ -5,6 +5,7 @@ import Logger from "../Logger.ts";
 import type { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
+import type { ModUpdateData } from "../schemas/ModUpdateData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
 
@@ -24,7 +25,7 @@ export class UserModService {
 
 		const countPublished = await ModSummary.countDocuments({
 			maintainers: this.user.id,
-			visibility: ModVisibility.Public,
+			visibility: ModVisibility.PUBLIC,
 		});
 
 		logger.debug({ countPublished }, "Counted published mods");
@@ -39,10 +40,30 @@ export class UserModService {
 			"Fetched all user mods",
 		);
 
+		const totalSubscribers = await ModSummary.aggregate([
+			{ $match: { maintainers: this.user.id } },
+			{
+				$group: {
+					_id: null,
+					total: { $sum: "$subscribersCount" },
+				},
+			},
+		]).exec();
+
+		const averageRating = await ModSummary.aggregate([
+			{ $match: { maintainers: this.user.id } },
+			{
+				$group: {
+					_id: null,
+					average: { $avg: "$averageRating" },
+				},
+			},
+		]);
+
 		const meta: UserModsMetaData = {
 			published: countPublished,
-			totalDownloads: 0, // TODO: Placeholder for future implementation
-			averageRating: 0, // TODO: Placeholder for future implementation
+			totalSubscribers: totalSubscribers[0]?.total || 0,
+			averageRating: averageRating[0]?.average || 0,
 		};
 
 		return {
@@ -86,8 +107,11 @@ export class UserModService {
 			content: "Add your mod content here.",
 			tags: [],
 			dependencies: [],
-			visibility: ModVisibility.Private,
+			visibility: ModVisibility.PRIVATE,
 			maintainers: [this.user.id],
+			averageRating: 0,
+			ratingsCount: 0,
+			subscribersCount: 0,
 		};
 
 		const result = await Mod.create(ModData.parse(modData));
@@ -96,26 +120,26 @@ export class UserModService {
 		return ModData.parse(result);
 	}
 
-	async updateMod(modData: ModData): Promise<undefined | UserModServiceError> {
-		logger.debug(
-			{ userId: this.user.id, modId: modData.id },
-			"updateMod start",
-		);
+	async updateMod(
+		id: string,
+		modData: ModUpdateData,
+	): Promise<undefined | UserModServiceError> {
+		logger.debug({ userId: this.user.id, modId: id }, "updateMod start");
 
 		const mod = await Mod.findOneAndUpdate(
-			{ id: modData.id, maintainers: this.user.id },
+			{ id: id, maintainers: this.user.id },
 			modData,
 		).exec();
 
 		if (!mod) {
 			logger.warn(
-				{ modId: modData.id },
+				{ modId: id },
 				"User attempted to update mod but it was not found",
 			);
 			return UserModServiceError.NotFound;
 		}
 
-		logger.debug({ modId: modData.id }, "User successfully updated mod");
+		logger.debug({ modId: id }, "User successfully updated mod");
 	}
 
 	async deleteMod(id: string): Promise<undefined | UserModServiceError> {

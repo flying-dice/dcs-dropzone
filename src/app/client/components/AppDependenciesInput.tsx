@@ -2,7 +2,7 @@ import { Alert, Badge, Button, Modal, Stack, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { FaLink } from "react-icons/fa6";
-import { useGetRegistryIndex } from "../_autogen/legacy_api.ts";
+import { useGetMods } from "../_autogen/api.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { ModCard } from "./ModCard.tsx";
 
@@ -12,7 +12,7 @@ export type AppDependenciesInputProps = {
 };
 export function AppDependenciesInput(props: AppDependenciesInputProps) {
 	const [values, setValues] = useState<Set<string>>(new Set(props.value));
-	const mods = useGetRegistryIndex();
+	const mods = useGetMods({ page: 1, size: 100 });
 	const [searchModalOpen, setSearchModalOpen] = useDisclosure(false);
 	const { t } = useAppTranslation();
 
@@ -35,14 +35,14 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 
 			<Stack gap={"xs"}>
 				{props.value?.map((id) => {
-					const mod = mods.data?.data.find((m) => m.id === id);
+					const mod = mods.data?.data.data.find((m) => m.id === id);
 
 					return (
 						<>
 							{mod ? (
 								<ModCard
 									key={id}
-									imageUrl={mod.imageUrl}
+									imageUrl={mod.thumbnail}
 									category={mod.category}
 									averageRating={3}
 									title={mod.name}
@@ -72,7 +72,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 			>
 				<Stack>
 					<TextInput label={"Search"} defaultValue={"one"} />
-					{mods.data?.data.map((it) => (
+					{mods.data?.data.data.map((it) => (
 						<Stack
 							style={{ cursor: "pointer" }}
 							key={it.id}
@@ -86,7 +86,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 							}}
 						>
 							<ModCard
-								imageUrl={it.imageUrl}
+								imageUrl={it.thumbnail}
 								category={it.category}
 								averageRating={3}
 								title={it.name}

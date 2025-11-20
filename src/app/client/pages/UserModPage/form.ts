@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";
 import { z } from "zod";
+import { zKebabCaseString } from "../../../../common/zod.ts";
 import {
 	type ModData,
 	ModDataCategory,
@@ -25,7 +26,7 @@ export const userModFormValues = z.object({
 	content: z.string().min(20, {
 		message: "Detailed Description should have at least 20 letters",
 	}),
-	tags: z.array(z.string()),
+	tags: zKebabCaseString.array(),
 	dependencies: z.array(z.string()),
 	thumbnail: z.string().url(),
 	screenshots: z.string().url().array(),

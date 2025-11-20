@@ -56,7 +56,7 @@ export function UserModRelease(props: UserModReleaseProps) {
 }
 
 const colors: Record<ModDataVisibility, MantineColor> = {
-	Private: "orange",
-	Public: "green",
-	Unlisted: "yellow",
+	PRIVATE: "orange",
+	PUBLIC: "green",
+	UNLISTED: "yellow",
 };

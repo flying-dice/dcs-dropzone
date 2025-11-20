@@ -81,10 +81,10 @@ export function UserModsPage(_: UserModsPageProps) {
 						<StatCard
 							icon={AppIcons.Subscribed}
 							iconColor={"grape"}
-							label={t("TOTAL_DOWNLOADS")}
+							label={t("TOTAL_SUBSCRIPTIONS")}
 							value={
 								mods.data?.status === StatusCodes.OK
-									? mods.data.data.meta.totalDownloads
+									? mods.data.data.meta.totalSubscribers
 									: "-"
 							}
 						/>
@@ -107,10 +107,10 @@ export function UserModsPage(_: UserModsPageProps) {
 									key={mod.id}
 									imageUrl={mod.thumbnail}
 									category={mod.category}
-									averageRating={4.8}
+									averageRating={mod.averageRating}
 									title={mod.name}
 									summary={mod.description || ""}
-									subscribers={1250}
+									subscribers={mod.subscribersCount}
 									variant={"list"}
 									onClick={() => nav(mod.id)}
 								/>

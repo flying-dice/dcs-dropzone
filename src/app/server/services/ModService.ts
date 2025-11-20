@@ -1,4 +1,7 @@
 import { basename, extname } from "node:path";
+import { camelToKebabCase } from "@mantine/core";
+import { toCamelCase } from "drizzle-orm/casing";
+import type { RootFilterQuery } from "mongoose";
 import {
 	MissionScriptRunOn,
 	ModCategories,
@@ -14,6 +17,7 @@ import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import { ModSummary } from "../entities/ModSummary.ts";
 import Logger from "../Logger.ts";
+import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import {
 	ModReleaseData,
@@ -26,20 +30,99 @@ import { PageData } from "../schemas/PageData.ts";
 const logger = Logger.getLogger("ModService");
 
 export class ModService {
+	async findAllFeaturedMods(): Promise<ModSummaryData[]> {
+		const docs = await ModSummary.find({
+			visibility: ModVisibility.PUBLIC,
+			featuredAt: { $ne: null },
+		})
+			.sort({ featuredAt: -1 })
+			.limit(4)
+			.lean()
+			.exec();
+
+		return ModSummaryData.array().parse(docs);
+	}
+
 	async findAllPublishedMods(
 		page: number,
 		size: number,
-	): Promise<{ data: ModSummaryData[]; page: PageData }> {
-		const count = await ModSummary.countDocuments();
+		filter: {
+			category?: ModCategory;
+			maintainers?: string[];
+			tags?: string[];
+			term?: string;
+		} = {},
+	): Promise<{
+		data: ModSummaryData[];
+		page: PageData;
+		filter: ModAvailableFilterData;
+	}> {
+		const filterQ: RootFilterQuery<typeof ModSummary> = {
+			visibility: ModVisibility.PUBLIC,
+		};
 
-		const docs = await ModSummary.find({
-			visibility: ModVisibility.Public,
-		})
+		if (filter.category) {
+			logger.debug(
+				{ filterCategory: filter.category },
+				"Applying category filter",
+			);
+			filterQ.category = filter.category;
+		}
+
+		if (filter.maintainers && filter.maintainers.length > 0) {
+			logger.debug(
+				{ filterMaintainers: filter.maintainers },
+				"Applying maintainers filter",
+			);
+			filterQ.maintainers = { $in: filter.maintainers };
+		}
+
+		if (filter.tags && filter.tags.length > 0) {
+			logger.debug({ filterTags: filter.tags }, "Applying tags filter");
+			filterQ.tags = { $all: filter.tags };
+		}
+
+		if (filter.term) {
+			logger.debug({ filterTerm: filter.term }, "Applying term filter");
+			filterQ.name = { $regex: filter.term, $options: "i" };
+		}
+
+		logger.debug("Finding all published mods");
+		const count = await ModSummary.countDocuments(filterQ);
+
+		const docs = await ModSummary.find(filterQ)
 			.skip((page - 1) * size)
 			.sort({ createdAt: -1 })
 			.limit(size)
 			.lean()
 			.exec();
+
+		const categories = await ModSummary.distinct("category", filterQ).exec();
+		const tags = await ModSummary.distinct("tags", filterQ).exec();
+		const maintainers = await ModSummary.aggregate([
+			{ $match: filterQ },
+			{ $unwind: "$maintainers" },
+			{
+				$group: {
+					_id: "$maintainers",
+				},
+			},
+			{
+				$lookup: {
+					from: "users",
+					localField: "_id",
+					foreignField: "id",
+					as: "userDetails",
+				},
+			},
+			{ $unwind: "$userDetails" },
+			{
+				$project: {
+					id: "$userDetails.id",
+					username: "$userDetails.username",
+				},
+			},
+		]).exec();
 
 		return {
 			data: ModSummaryData.array().parse(docs),
@@ -48,6 +131,11 @@ export class ModService {
 				size: size,
 				totalPages: Math.ceil(count / size) || 1,
 				totalElements: count,
+			}),
+			filter: ModAvailableFilterData.parse({
+				categories,
+				maintainers,
+				tags,
 			}),
 		};
 	}
@@ -64,22 +152,33 @@ export class ModService {
 				`Migrating Registry Entry ${id}`,
 			);
 
+			const existingMod = await Mod.findOne({
+				name: registryEntry.data.name,
+			}).lean();
+
+			const modDocumentId = existingMod ? existingMod.id : crypto.randomUUID();
+
 			const mod: ModData = ModData.parse({
-				id: crypto.randomUUID(),
+				id: modDocumentId,
 				name: registryEntry.data.name,
 				description: registryEntry.data.description,
 				content: Buffer.from(registryEntry.data.content, "base64").toString(
 					"utf-8",
 				),
-				visibility: ModVisibility.Public,
+				visibility: ModVisibility.PUBLIC,
 				screenshots: [],
 				thumbnail: registryEntry.data.imageUrl,
-				tags: registryEntry.data.tags,
+				tags: registryEntry.data.tags.map((it) =>
+					camelToKebabCase(toCamelCase(it)),
+				),
 				category: ModCategories.includes(registryEntry.data.category as any)
 					? registryEntry.data.category
-					: ModCategory.Other,
+					: ModCategory.OTHER,
 				dependencies: registryEntry.data.dependencies || [],
 				maintainers: ["16135506"],
+				subscribersCount: 20,
+				ratingsCount: 5,
+				averageRating: 3.2,
 			});
 
 			await Mod.findOneAndUpdate({ name: mod.name }, mod, {
@@ -101,12 +200,21 @@ export class ModService {
 			);
 
 			for (const version of registryEntry.data.versions) {
+				const existingRelease = await ModRelease.findOne({
+					mod_id: modDocument.id,
+					version: version.version,
+				}).lean();
+
+				const releaseId = existingRelease
+					? existingRelease.id
+					: crypto.randomUUID();
+
 				const release: ModReleaseData = ModReleaseData.parse({
-					id: crypto.randomUUID(),
+					id: releaseId,
 					version: version.version,
 					mod_id: modDocument.id,
 					changelog: version.name,
-					visibility: ModVisibility.Public,
+					visibility: ModVisibility.PUBLIC,
 					assets: version.assets.map((assets) => ({
 						name: decodeURIComponent(
 							basename(assets.remoteSource).replace(
@@ -184,5 +292,45 @@ export class ModService {
 			};
 		}
 		throw new Error("Unsupported path root");
+	}
+
+	async getCategoryCounts() {
+		const result = await Mod.aggregate([
+			{
+				$match: {
+					visibility: ModVisibility.PUBLIC,
+				},
+			},
+			{
+				$group: {
+					_id: "$category",
+					count: { $sum: 1 },
+				},
+			},
+		]).exec();
+
+		const counts: Record<ModCategory, number> = Object.values(
+			ModCategory,
+		).reduce(
+			(acc, category) => {
+				acc[category] = 0;
+				return acc;
+			},
+			{} as Record<ModCategory, number>,
+		);
+
+		for (const entry of result) {
+			counts[entry._id as ModCategory] = entry.count;
+		}
+
+		return counts;
+	}
+
+	async getAllTags(): Promise<string[]> {
+		const tags = await Mod.distinct("tags", {
+			visibility: ModVisibility.PUBLIC,
+		}).exec();
+
+		return tags.sort();
 	}
 }

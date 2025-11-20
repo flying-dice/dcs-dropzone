@@ -42,15 +42,15 @@ export type ModSummaryDataCategory =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ModSummaryDataCategory = {
-	Campaign: "Campaign",
-	Device_Profiles: "Device Profiles",
-	Mod: "Mod",
-	Mission: "Mission",
-	Skin: "Skin",
-	Sound: "Sound",
-	Terrain: "Terrain",
-	Utility: "Utility",
-	Other: "Other",
+	CAMPAIGN: "CAMPAIGN",
+	DEVICE_PROFILES: "DEVICE_PROFILES",
+	MOD: "MOD",
+	MISSION: "MISSION",
+	SKIN: "SKIN",
+	SOUND: "SOUND",
+	TERRAIN: "TERRAIN",
+	UTILITY: "UTILITY",
+	OTHER: "OTHER",
 } as const;
 
 /**
@@ -65,6 +65,9 @@ export interface ModSummaryData {
 	/** @minItems 1 */
 	maintainers: string[];
 	tags: string[];
+	subscribersCount: number;
+	averageRating: number;
+	ratingsCount: number;
 }
 
 /**
@@ -72,7 +75,7 @@ export interface ModSummaryData {
  */
 export interface UserModsMetaData {
 	published: number;
-	totalDownloads: number;
+	totalSubscribers: number;
 	/**
 	 * @minimum 0
 	 * @maximum 5
@@ -85,15 +88,15 @@ export type ModDataCategory =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ModDataCategory = {
-	Campaign: "Campaign",
-	Device_Profiles: "Device Profiles",
-	Mod: "Mod",
-	Mission: "Mission",
-	Skin: "Skin",
-	Sound: "Sound",
-	Terrain: "Terrain",
-	Utility: "Utility",
-	Other: "Other",
+	CAMPAIGN: "CAMPAIGN",
+	DEVICE_PROFILES: "DEVICE_PROFILES",
+	MOD: "MOD",
+	MISSION: "MISSION",
+	SKIN: "SKIN",
+	SOUND: "SOUND",
+	TERRAIN: "TERRAIN",
+	UTILITY: "UTILITY",
+	OTHER: "OTHER",
 } as const;
 
 export type ModDataVisibility =
@@ -101,9 +104,9 @@ export type ModDataVisibility =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ModDataVisibility = {
-	Public: "Public",
-	Private: "Private",
-	Unlisted: "Unlisted",
+	PUBLIC: "PUBLIC",
+	PRIVATE: "PRIVATE",
+	UNLISTED: "UNLISTED",
 } as const;
 
 /**
@@ -122,6 +125,10 @@ export interface ModData {
 	visibility: ModDataVisibility;
 	/** @minItems 1 */
 	maintainers: string[];
+	featuredAt?: string;
+	subscribersCount: number;
+	ratingsCount: number;
+	averageRating: number;
 }
 
 export type ModCreateDataCategory =
@@ -129,15 +136,15 @@ export type ModCreateDataCategory =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ModCreateDataCategory = {
-	Campaign: "Campaign",
-	Device_Profiles: "Device Profiles",
-	Mod: "Mod",
-	Mission: "Mission",
-	Skin: "Skin",
-	Sound: "Sound",
-	Terrain: "Terrain",
-	Utility: "Utility",
-	Other: "Other",
+	CAMPAIGN: "CAMPAIGN",
+	DEVICE_PROFILES: "DEVICE_PROFILES",
+	MOD: "MOD",
+	MISSION: "MISSION",
+	SKIN: "SKIN",
+	SOUND: "SOUND",
+	TERRAIN: "TERRAIN",
+	UTILITY: "UTILITY",
+	OTHER: "OTHER",
 } as const;
 
 /**
@@ -147,6 +154,49 @@ export interface ModCreateData {
 	name: string;
 	category: ModCreateDataCategory;
 	description: string;
+}
+
+export type ModUpdateDataCategory =
+	(typeof ModUpdateDataCategory)[keyof typeof ModUpdateDataCategory];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModUpdateDataCategory = {
+	CAMPAIGN: "CAMPAIGN",
+	DEVICE_PROFILES: "DEVICE_PROFILES",
+	MOD: "MOD",
+	MISSION: "MISSION",
+	SKIN: "SKIN",
+	SOUND: "SOUND",
+	TERRAIN: "TERRAIN",
+	UTILITY: "UTILITY",
+	OTHER: "OTHER",
+} as const;
+
+export type ModUpdateDataVisibility =
+	(typeof ModUpdateDataVisibility)[keyof typeof ModUpdateDataVisibility];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModUpdateDataVisibility = {
+	PUBLIC: "PUBLIC",
+	PRIVATE: "PRIVATE",
+	UNLISTED: "UNLISTED",
+} as const;
+
+/**
+ * Data required to create a new mod.
+ */
+export interface ModUpdateData {
+	name: string;
+	category: ModUpdateDataCategory;
+	description: string;
+	content: string;
+	tags: string[];
+	/** @minItems 1 */
+	maintainers: string[];
+	thumbnail: string;
+	screenshots: string[];
+	dependencies: string[];
+	visibility: ModUpdateDataVisibility;
 }
 
 /**
@@ -218,9 +268,9 @@ export type ModReleaseDataVisibility =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ModReleaseDataVisibility = {
-	Public: "Public",
-	Private: "Private",
-	Unlisted: "Unlisted",
+	PUBLIC: "PUBLIC",
+	PRIVATE: "PRIVATE",
+	UNLISTED: "UNLISTED",
 } as const;
 
 /**
@@ -246,6 +296,36 @@ export interface ModReleaseCreateData {
 	version: string;
 }
 
+export type ModAvailableFilterDataCategoriesItem =
+	(typeof ModAvailableFilterDataCategoriesItem)[keyof typeof ModAvailableFilterDataCategoriesItem];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ModAvailableFilterDataCategoriesItem = {
+	CAMPAIGN: "CAMPAIGN",
+	DEVICE_PROFILES: "DEVICE_PROFILES",
+	MOD: "MOD",
+	MISSION: "MISSION",
+	SKIN: "SKIN",
+	SOUND: "SOUND",
+	TERRAIN: "TERRAIN",
+	UTILITY: "UTILITY",
+	OTHER: "OTHER",
+} as const;
+
+export type ModAvailableFilterDataMaintainersItem = {
+	id: string;
+	username: string;
+};
+
+/**
+ * Data structure for filtering mods.
+ */
+export interface ModAvailableFilterData {
+	categories: ModAvailableFilterDataCategoriesItem[];
+	maintainers: ModAvailableFilterDataMaintainersItem[];
+	tags: string[];
+}
+
 export type AuthProviderCallbackParams = {
 	code: string;
 	state: string;
@@ -254,46 +334,6 @@ export type AuthProviderCallbackParams = {
 export type GetUserMods200 = {
 	data: ModSummaryData[];
 	meta: UserModsMetaData;
-};
-
-export type UpdateUserModBodyCategory =
-	(typeof UpdateUserModBodyCategory)[keyof typeof UpdateUserModBodyCategory];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const UpdateUserModBodyCategory = {
-	Campaign: "Campaign",
-	Device_Profiles: "Device Profiles",
-	Mod: "Mod",
-	Mission: "Mission",
-	Skin: "Skin",
-	Sound: "Sound",
-	Terrain: "Terrain",
-	Utility: "Utility",
-	Other: "Other",
-} as const;
-
-export type UpdateUserModBodyVisibility =
-	(typeof UpdateUserModBodyVisibility)[keyof typeof UpdateUserModBodyVisibility];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const UpdateUserModBodyVisibility = {
-	Public: "Public",
-	Private: "Private",
-	Unlisted: "Unlisted",
-} as const;
-
-export type UpdateUserModBody = {
-	name: string;
-	category: UpdateUserModBodyCategory;
-	description: string;
-	content: string;
-	tags: string[];
-	dependencies: string[];
-	screenshots: string[];
-	thumbnail: string;
-	visibility: UpdateUserModBodyVisibility;
-	/** @minItems 1 */
-	maintainers: string[];
 };
 
 export type GetUserModReleases200 = {
@@ -305,9 +345,9 @@ export type UpdateUserModReleaseBodyVisibility =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdateUserModReleaseBodyVisibility = {
-	Public: "Public",
-	Private: "Private",
-	Unlisted: "Unlisted",
+	PUBLIC: "PUBLIC",
+	PRIVATE: "PRIVATE",
+	UNLISTED: "UNLISTED",
 } as const;
 
 export type UpdateUserModReleaseBody = {
@@ -330,7 +370,27 @@ export type GetModsParams = {
 	 * @minimum 1
 	 */
 	size: number;
+	category?: GetModsCategory;
+	maintainers?: string;
+	tags?: string;
+	term?: string;
 };
+
+export type GetModsCategory =
+	(typeof GetModsCategory)[keyof typeof GetModsCategory];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetModsCategory = {
+	CAMPAIGN: "CAMPAIGN",
+	DEVICE_PROFILES: "DEVICE_PROFILES",
+	MOD: "MOD",
+	MISSION: "MISSION",
+	SKIN: "SKIN",
+	SOUND: "SOUND",
+	TERRAIN: "TERRAIN",
+	UTILITY: "UTILITY",
+	OTHER: "OTHER",
+} as const;
 
 export type GetMods200Page = {
 	/** @minimum 1 */
@@ -346,11 +406,14 @@ export type GetMods200Page = {
 export type GetMods200 = {
 	data: ModData[];
 	page: GetMods200Page;
+	filter: ModAvailableFilterData;
 };
 
 export type GetModReleases200 = {
 	data: ModReleaseData[];
 };
+
+export type GetCategories200 = { [key: string]: number };
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -1809,14 +1872,14 @@ export const getUpdateUserModUrl = (id: string) => {
 
 export const updateUserMod = async (
 	id: string,
-	updateUserModBody: UpdateUserModBody,
+	modUpdateData: ModUpdateData,
 	options?: RequestInit,
 ): Promise<updateUserModResponse> => {
 	const res = await fetch(getUpdateUserModUrl(id), {
 		...options,
 		method: "PUT",
 		headers: { "Content-Type": "application/json", ...options?.headers },
-		body: JSON.stringify(updateUserModBody),
+		body: JSON.stringify(modUpdateData),
 	});
 
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
@@ -1836,14 +1899,14 @@ export const getUpdateUserModMutationOptions = <
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof updateUserMod>>,
 		TError,
-		{ id: string; data: UpdateUserModBody },
+		{ id: string; data: ModUpdateData },
 		TContext
 	>;
 	fetch?: RequestInit;
 }): UseMutationOptions<
 	Awaited<ReturnType<typeof updateUserMod>>,
 	TError,
-	{ id: string; data: UpdateUserModBody },
+	{ id: string; data: ModUpdateData },
 	TContext
 > => {
 	const mutationKey = ["updateUserMod"];
@@ -1857,7 +1920,7 @@ export const getUpdateUserModMutationOptions = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof updateUserMod>>,
-		{ id: string; data: UpdateUserModBody }
+		{ id: string; data: ModUpdateData }
 	> = (props) => {
 		const { id, data } = props ?? {};
 
@@ -1870,7 +1933,7 @@ export const getUpdateUserModMutationOptions = <
 export type UpdateUserModMutationResult = NonNullable<
 	Awaited<ReturnType<typeof updateUserMod>>
 >;
-export type UpdateUserModMutationBody = UpdateUserModBody;
+export type UpdateUserModMutationBody = ModUpdateData;
 export type UpdateUserModMutationError = void;
 
 /**
@@ -1881,7 +1944,7 @@ export const useUpdateUserMod = <TError = void, TContext = unknown>(
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof updateUserMod>>,
 			TError,
-			{ id: string; data: UpdateUserModBody },
+			{ id: string; data: ModUpdateData },
 			TContext
 		>;
 		fetch?: RequestInit;
@@ -1890,7 +1953,7 @@ export const useUpdateUserMod = <TError = void, TContext = unknown>(
 ): UseMutationResult<
 	Awaited<ReturnType<typeof updateUserMod>>,
 	TError,
-	{ id: string; data: UpdateUserModBody },
+	{ id: string; data: ModUpdateData },
 	TContext
 > => {
 	const mutationOptions = getUpdateUserModMutationOptions(options);
@@ -3390,6 +3453,492 @@ export function useGetModReleaseById<
 	queryKey: DataTag<QueryKey, TData, TError>;
 } {
 	const queryOptions = getGetModReleaseByIdQueryOptions(id, releaseId, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * Retrieves a set of featured mods.
+ * @summary Get Featured mods
+ */
+export type getFeaturedModsResponse200 = {
+	data: ModData[];
+	status: 200;
+};
+
+export type getFeaturedModsResponseSuccess = getFeaturedModsResponse200 & {
+	headers: Headers;
+};
+
+export type getFeaturedModsResponse = getFeaturedModsResponseSuccess;
+
+export const getGetFeaturedModsUrl = () => {
+	return `/api/featured-mods`;
+};
+
+export const getFeaturedMods = async (
+	options?: RequestInit,
+): Promise<getFeaturedModsResponse> => {
+	const res = await fetch(getGetFeaturedModsUrl(), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getFeaturedModsResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getFeaturedModsResponse;
+};
+
+export const getGetFeaturedModsQueryKey = () => {
+	return [`/api/featured-mods`] as const;
+};
+
+export const getGetFeaturedModsQueryOptions = <
+	TData = Awaited<ReturnType<typeof getFeaturedMods>>,
+	TError = unknown,
+>(options?: {
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetFeaturedModsQueryKey();
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getFeaturedMods>>> = ({
+		signal,
+	}) => getFeaturedMods({ signal, ...fetchOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getFeaturedMods>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetFeaturedModsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getFeaturedMods>>
+>;
+export type GetFeaturedModsQueryError = unknown;
+
+export function useGetFeaturedMods<
+	TData = Awaited<ReturnType<typeof getFeaturedMods>>,
+	TError = unknown,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getFeaturedMods>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getFeaturedMods>>,
+					TError,
+					Awaited<ReturnType<typeof getFeaturedMods>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetFeaturedMods<
+	TData = Awaited<ReturnType<typeof getFeaturedMods>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getFeaturedMods>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getFeaturedMods>>,
+					TError,
+					Awaited<ReturnType<typeof getFeaturedMods>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetFeaturedMods<
+	TData = Awaited<ReturnType<typeof getFeaturedMods>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getFeaturedMods>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Featured mods
+ */
+
+export function useGetFeaturedMods<
+	TData = Awaited<ReturnType<typeof getFeaturedMods>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof getFeaturedMods>>,
+				TError,
+				TData
+			>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetFeaturedModsQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * Retrieves a list of all mod categories along with the count of published mods in each category.
+ * @summary Get Categories
+ */
+export type getCategoriesResponse200 = {
+	data: GetCategories200;
+	status: 200;
+};
+
+export type getCategoriesResponseSuccess = getCategoriesResponse200 & {
+	headers: Headers;
+};
+
+export type getCategoriesResponse = getCategoriesResponseSuccess;
+
+export const getGetCategoriesUrl = () => {
+	return `/api/categories`;
+};
+
+export const getCategories = async (
+	options?: RequestInit,
+): Promise<getCategoriesResponse> => {
+	const res = await fetch(getGetCategoriesUrl(), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getCategoriesResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getCategoriesResponse;
+};
+
+export const getGetCategoriesQueryKey = () => {
+	return [`/api/categories`] as const;
+};
+
+export const getGetCategoriesQueryOptions = <
+	TData = Awaited<ReturnType<typeof getCategories>>,
+	TError = unknown,
+>(options?: {
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetCategoriesQueryKey();
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getCategories>>> = ({
+		signal,
+	}) => getCategories({ signal, ...fetchOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getCategories>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetCategoriesQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getCategories>>
+>;
+export type GetCategoriesQueryError = unknown;
+
+export function useGetCategories<
+	TData = Awaited<ReturnType<typeof getCategories>>,
+	TError = unknown,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getCategories>>,
+					TError,
+					Awaited<ReturnType<typeof getCategories>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCategories<
+	TData = Awaited<ReturnType<typeof getCategories>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getCategories>>,
+					TError,
+					Awaited<ReturnType<typeof getCategories>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCategories<
+	TData = Awaited<ReturnType<typeof getCategories>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Categories
+ */
+
+export function useGetCategories<
+	TData = Awaited<ReturnType<typeof getCategories>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetCategoriesQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * Retrieves a list of all tags.
+ * @summary Get Tags
+ */
+export type getTagsResponse200 = {
+	data: string[];
+	status: 200;
+};
+
+export type getTagsResponseSuccess = getTagsResponse200 & {
+	headers: Headers;
+};
+
+export type getTagsResponse = getTagsResponseSuccess;
+
+export const getGetTagsUrl = () => {
+	return `/api/tags`;
+};
+
+export const getTags = async (
+	options?: RequestInit,
+): Promise<getTagsResponse> => {
+	const res = await fetch(getGetTagsUrl(), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getTagsResponse["data"] = body ? JSON.parse(body) : {};
+	return { data, status: res.status, headers: res.headers } as getTagsResponse;
+};
+
+export const getGetTagsQueryKey = () => {
+	return [`/api/tags`] as const;
+};
+
+export const getGetTagsQueryOptions = <
+	TData = Awaited<ReturnType<typeof getTags>>,
+	TError = unknown,
+>(options?: {
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+	>;
+	fetch?: RequestInit;
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetTagsQueryKey();
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getTags>>> = ({
+		signal,
+	}) => getTags({ signal, ...fetchOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getTags>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetTagsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getTags>>
+>;
+export type GetTagsQueryError = unknown;
+
+export function useGetTags<
+	TData = Awaited<ReturnType<typeof getTags>>,
+	TError = unknown,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getTags>>,
+					TError,
+					Awaited<ReturnType<typeof getTags>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTags<
+	TData = Awaited<ReturnType<typeof getTags>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getTags>>,
+					TError,
+					Awaited<ReturnType<typeof getTags>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTags<
+	TData = Awaited<ReturnType<typeof getTags>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Tags
+ */
+
+export function useGetTags<
+	TData = Awaited<ReturnType<typeof getTags>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetTagsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
 		TData,

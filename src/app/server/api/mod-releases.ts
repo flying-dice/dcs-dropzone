@@ -77,7 +77,7 @@ router.get(
 				releaseId,
 			);
 
-		if (result === ModReleaseServiceError.NotFound) {
+		if (result === ModReleaseServiceError.NOT_FOUND) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 

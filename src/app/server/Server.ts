@@ -6,10 +6,13 @@ import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
 import appConfig from "./ApplicationConfig.ts";
 import auth from "./api/auth.ts";
+import categories from "./api/categories.ts";
+import featuredMods from "./api/featured-mods.ts";
 import health from "./api/health.ts";
 import migrate from "./api/migrate.ts";
 import modReleases from "./api/mod-releases.ts";
 import mods from "./api/mods.ts";
+import tags from "./api/tags.ts";
 import userModReleases from "./api/user-mod-releases.ts";
 import userMods from "./api/user-mods.ts";
 import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
@@ -26,6 +29,9 @@ server.route("/api/user-mods", userMods);
 server.route("/api/user-mods", userModReleases);
 server.route("/api/mods", mods);
 server.route("/api/mods", modReleases);
+server.route("/api/featured-mods", featuredMods);
+server.route("/api/categories", categories);
+server.route("/api/tags", tags);
 server.route("/api/_migrate", migrate);
 
 server.get(

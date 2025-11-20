@@ -8,8 +8,8 @@ import type { UserData } from "../schemas/UserData.ts";
 const logger = Logger.getLogger("ModReleaseService");
 
 export enum ModReleaseServiceError {
-	NotFound = "NotFound",
-	ModNotFound = "ModNotFound",
+	NOT_FOUND = "NOT_FOUND",
+	MOD_NOT_FOUND = "MOD_NOT_FOUND",
 }
 
 export class ModReleaseService {
@@ -52,7 +52,7 @@ export class ModReleaseService {
 
 		if (!release) {
 			logger.debug({ releaseId }, "Release not found");
-			return ModReleaseServiceError.NotFound;
+			return ModReleaseServiceError.NOT_FOUND;
 		}
 
 		return ModReleaseData.parse(release);
@@ -80,7 +80,7 @@ export class ModReleaseService {
 			assets: [],
 			symbolicLinks: [],
 			missionScripts: [],
-			visibility: ModVisibility.Private,
+			visibility: ModVisibility.PUBLIC,
 		};
 
 		const result = await ModRelease.create(ModReleaseData.parse(releaseData));
@@ -113,7 +113,7 @@ export class ModReleaseService {
 				{ releaseId: updateData.id },
 				"User attempted to update release but it was not found",
 			);
-			return ModReleaseServiceError.NotFound;
+			return ModReleaseServiceError.NOT_FOUND;
 		}
 
 		logger.debug(
@@ -144,7 +144,7 @@ export class ModReleaseService {
 				{ releaseId },
 				"User attempted to delete release but it was not found",
 			);
-			return ModReleaseServiceError.NotFound;
+			return ModReleaseServiceError.NOT_FOUND;
 		}
 
 		logger.debug({ releaseId }, "User successfully deleted release");
@@ -163,7 +163,7 @@ export class PublicModReleaseService {
 
 		const releases = await ModRelease.find({
 			mod_id: modId,
-			visibility: ModVisibility.Public,
+			visibility: ModVisibility.PUBLIC,
 		})
 			.sort({ createdAt: -1 })
 			.lean()
@@ -184,14 +184,14 @@ export class PublicModReleaseService {
 		const release = await ModRelease.findOne({
 			id: releaseId,
 			mod_id: modId,
-			visibility: ModVisibility.Public,
+			visibility: ModVisibility.PUBLIC,
 		})
 			.lean()
 			.exec();
 
 		if (!release) {
 			logger.debug({ releaseId }, "Public release not found");
-			return ModReleaseServiceError.NotFound;
+			return ModReleaseServiceError.NOT_FOUND;
 		}
 
 		return ModReleaseData.parse(release);

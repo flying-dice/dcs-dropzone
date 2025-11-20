@@ -10,6 +10,7 @@ const schema = new Schema(
 		symbolicLinks: { type: [Object], default: [] },
 		missionScripts: { type: [Object], default: [] },
 		visibility: { type: String, required: true },
+		featuredAt: { type: Date, default: null },
 		createdAt: { type: Date, default: Date.now },
 		updatedAt: { type: Date, default: Date.now },
 	},

@@ -45,7 +45,7 @@ router.get(
 
 		const result = await service.findUserModReleases(id);
 
-		if (result === ModReleaseServiceError.ModNotFound) {
+		if (result === ModReleaseServiceError.MOD_NOT_FOUND) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -89,7 +89,7 @@ router.get(
 
 		const result = await service.findUserModReleaseById(id, releaseId);
 
-		if (result === ModReleaseServiceError.NotFound) {
+		if (result === ModReleaseServiceError.NOT_FOUND) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -128,7 +128,7 @@ router.post(
 
 		const result = await service.createRelease(id, createRequest);
 
-		if (result === ModReleaseServiceError.ModNotFound) {
+		if (result === ModReleaseServiceError.MOD_NOT_FOUND) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -179,7 +179,7 @@ router.put(
 			...updates,
 		});
 
-		if (result === ModReleaseServiceError.NotFound) {
+		if (result === ModReleaseServiceError.NOT_FOUND) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -224,7 +224,7 @@ router.delete(
 
 		const result = await service.deleteRelease(id, releaseId);
 
-		if (result === ModReleaseServiceError.NotFound) {
+		if (result === ModReleaseServiceError.NOT_FOUND) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 

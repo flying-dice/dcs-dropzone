@@ -20,15 +20,15 @@ export function _BasicInfo(props: { form: UserModReleaseForm }) {
 					label={"Visibility"}
 					data={[
 						{
-							value: ModVisibility.Public,
+							value: ModVisibility.PUBLIC,
 							label: t("PUBLIC"),
 						},
 						{
-							value: ModVisibility.Unlisted,
+							value: ModVisibility.UNLISTED,
 							label: t("UNLISTED"),
 						},
 						{
-							value: ModVisibility.Private,
+							value: ModVisibility.PRIVATE,
 							label: t("PRIVATE"),
 						},
 					]}

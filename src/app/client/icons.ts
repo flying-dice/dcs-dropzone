@@ -12,6 +12,7 @@ import { ModVisibility } from "../../common/data.ts";
 
 export const AppIcons = {
 	Home: FaHome,
+	Featured: FaStar,
 	Mods: FaBox,
 	Releases: FaTag,
 	Subscribed: FaDownload,
@@ -22,7 +23,7 @@ export const AppIcons = {
 };
 
 export const VisibilityIcons = {
-	[ModVisibility.Public]: FaEye,
-	[ModVisibility.Private]: FaUser,
-	[ModVisibility.Unlisted]: FaEyeSlash,
+	[ModVisibility.PUBLIC]: FaEye,
+	[ModVisibility.PRIVATE]: FaUser,
+	[ModVisibility.UNLISTED]: FaEyeSlash,
 };

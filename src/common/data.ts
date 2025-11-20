@@ -1,21 +1,21 @@
 export enum ModCategory {
-	Campaign = "Campaign",
-	DeviceProfiles = "Device Profiles",
-	Mod = "Mod",
-	Mission = "Mission",
-	Skin = "Skin",
-	Sound = "Sound",
-	Terrain = "Terrain",
-	Utility = "Utility",
-	Other = "Other",
+	CAMPAIGN = "CAMPAIGN",
+	DEVICE_PROFILES = "DEVICE_PROFILES",
+	MOD = "MOD",
+	MISSION = "MISSION",
+	SKIN = "SKIN",
+	SOUND = "SOUND",
+	TERRAIN = "TERRAIN",
+	UTILITY = "UTILITY",
+	OTHER = "OTHER",
 }
 
 export const ModCategories: ModCategory[] = Object.values(ModCategory);
 
 export enum ModVisibility {
-	Public = "Public",
-	Private = "Private",
-	Unlisted = "Unlisted",
+	PUBLIC = "PUBLIC",
+	PRIVATE = "PRIVATE",
+	UNLISTED = "UNLISTED",
 }
 
 export enum SymbolicLinkDestRoot {

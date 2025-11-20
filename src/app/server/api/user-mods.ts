@@ -9,6 +9,7 @@ import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
+import { ModUpdateData } from "../schemas/ModUpdateData.ts";
 import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
 import { UserModServiceError } from "../services/UserModService.ts";
 import { describeJsonRoute } from "./describeJsonRoute.ts";
@@ -140,17 +141,14 @@ router.put(
 	}),
 	cookieAuth(),
 	validator("param", z.object({ id: z.string() })),
-	validator("json", ModData.omit({ id: true })),
+	validator("json", ModUpdateData),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
 		const service = ApplicationContext.getUserModService(user);
 
-		const result = await service.updateMod({
-			id,
-			...updates,
-		});
+		const result = await service.updateMod(id, updates);
 
 		if (result === UserModServiceError.NotFound) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);

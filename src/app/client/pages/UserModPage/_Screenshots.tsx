@@ -14,9 +14,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+	AspectRatio,
 	Button,
 	Card,
-	Center,
 	Group,
 	Image,
 	SimpleGrid,
@@ -66,9 +66,7 @@ function Form(props: {
 				/>
 
 				<Card withBorder>
-					<Center>
-						<Image radius={"md"} src={form.values.url} />
-					</Center>
+					<Image radius={"md"} src={form.values.url} />
 				</Card>
 				<Group justify={"space-between"}>
 					{props.onRemove ? (
@@ -153,16 +151,17 @@ function SortableItem({
 	};
 
 	return (
-		<Image
-			ref={setNodeRef}
-			style={style}
-			{...attributes}
-			{...listeners}
-			h={150}
-			radius={"md"}
-			src={item.url}
-			onClick={onClick}
-		/>
+		<AspectRatio ratio={1920 / 1080}>
+			<Image
+				ref={setNodeRef}
+				style={style}
+				{...attributes}
+				{...listeners}
+				radius={"sm"}
+				src={item.url}
+				onClick={onClick}
+			/>
+		</AspectRatio>
 	);
 }
 

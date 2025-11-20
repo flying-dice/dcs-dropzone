@@ -1,4 +1,6 @@
 import { Badge, Group, Stack, Text, TextInput } from "@mantine/core";
+import { kebabCase } from "lodash";
+import type * as React from "react";
 import { useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 
@@ -12,7 +14,7 @@ export function AppTagsInput(props: AppTagsInputProps) {
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
-			const value = e.currentTarget.value.trim().toUpperCase();
+			const value = kebabCase(e.currentTarget.value.trim());
 			if (value && !props.value.includes(value)) {
 				const newValues = new Set(values);
 				newValues.add(value);
@@ -38,7 +40,7 @@ export function AppTagsInput(props: AppTagsInputProps) {
 				placeholder={"Add Tags (press Enter to add)"}
 				onKeyDown={handleKeyDown}
 				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-					e.currentTarget.value = e.currentTarget.value.toUpperCase();
+					e.currentTarget.value = kebabCase(e.currentTarget.value.trim());
 					if (values.has(e.currentTarget.value)) {
 						setError("Duplicate tags are not allowed");
 					} else {

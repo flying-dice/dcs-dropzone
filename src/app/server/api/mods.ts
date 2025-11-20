@@ -2,8 +2,10 @@ import { Hono } from "hono";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
+import { fromCsv } from "../../../common/fromCsv.ts";
 import ApplicationContext from "../Application.ts";
 import Logger from "../Logger.ts";
+import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { PageData } from "../schemas/PageData.ts";
 import { describeJsonRoute } from "./describeJsonRoute.ts";
@@ -26,22 +28,32 @@ router.get(
 			[StatusCodes.OK]: z.object({
 				data: z.array(ModData),
 				page: PageData,
+				filter: ModAvailableFilterData,
 			}),
 		},
 	}),
 	validator(
 		"query",
-		z.object({ page: PageData.shape.number, size: PageData.shape.size }),
+		z.object({
+			page: PageData.shape.number,
+			size: PageData.shape.size,
+			category: ModData.shape.category.optional(),
+			maintainers: z.string().optional().transform(fromCsv),
+			tags: z.string().optional().transform(fromCsv),
+			term: z.string().optional(),
+		}),
 	),
 	async (c) => {
-		const { page, size } = c.req.valid("query");
+		const { page, size, category, maintainers, tags, term } =
+			c.req.valid("query");
 
 		const result = await ApplicationContext.modService.findAllPublishedMods(
 			page,
 			size,
+			{ category, maintainers, tags, term },
 		);
 
-		return c.json({ data: result.data, page: result.page }, StatusCodes.OK);
+		return c.json(result, StatusCodes.OK);
 	},
 );
 

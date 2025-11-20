@@ -5,7 +5,6 @@ import {
 	Image,
 	Menu,
 	Stack,
-	TextInput,
 	useMantineColorScheme,
 } from "@mantine/core";
 import { BsLaptop, BsMoon, BsSun } from "react-icons/bs";
@@ -24,7 +23,6 @@ export function AppHeader() {
 					<Image w={"min-content"} h={44} src={logo} />
 					<Stack gap={2} pr="md">
 						<Group>
-							<TextInput placeholder={t("SEARCH_MODS_PLACEHOLDER")} w={320} />
 							<Menu>
 								<Menu.Target>
 									<ActionIcon variant={"default"} size={"lg"}>

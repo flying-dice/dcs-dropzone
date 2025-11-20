@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ModCategory, ModVisibility } from "../../../common/data.ts";
+import { zKebabCaseString } from "../../../common/zod.ts";
 
 export const ModData = z
 	.object({
@@ -8,7 +9,7 @@ export const ModData = z
 		category: z.enum(ModCategory),
 		description: z.string(),
 		content: z.string(),
-		tags: z.array(z.string()),
+		tags: zKebabCaseString.array(),
 		dependencies: z.array(z.string()),
 		screenshots: z.array(z.string()),
 		thumbnail: z.string(),
@@ -16,6 +17,10 @@ export const ModData = z
 		maintainers: z
 			.array(z.string())
 			.min(1, "A mod must have at least one maintainer."),
+		featuredAt: z.string().optional(),
+		subscribersCount: z.number(),
+		ratingsCount: z.number(),
+		averageRating: z.number(),
 	})
 	.meta({
 		ref: "ModData",

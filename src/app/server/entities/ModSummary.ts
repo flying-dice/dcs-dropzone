@@ -13,6 +13,10 @@ const schema = new Schema(
 		thumbnail: { type: String, required: true },
 		visibility: { type: String, required: true },
 		maintainers: { type: [String], required: true },
+		featuredAt: { type: Date, default: null },
+		averageRating: { type: Number, default: 0 },
+		ratingsCount: { type: Number, default: 0 },
+		subscribersCount: { type: Number, default: 0 },
 		createdAt: { type: Date, default: Date.now },
 		updatedAt: { type: Date, default: Date.now },
 	},
@@ -21,7 +25,7 @@ const schema = new Schema(
 
 export const ModSummary = mongoose.model("ModSummary", schema);
 
-await MigrationService.runMigration("19112025_mod_summary", async () => {
+await MigrationService.runMigration("20112025_mod_summary", async () => {
 	await ModSummary.collection.drop();
 	await ModSummary.createCollection({
 		viewOn: Mod.collection.name,
@@ -37,6 +41,10 @@ await MigrationService.runMigration("19112025_mod_summary", async () => {
 					maintainers: 1,
 					tags: 1,
 					visibility: 1,
+					subscribersCount: 1,
+					ratingsCount: 1,
+					averageRating: 1,
+					featuredAt: 1,
 					createdAt: 1,
 					updatedAt: 1,
 				},

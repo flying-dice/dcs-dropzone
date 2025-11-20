@@ -31,7 +31,7 @@ export function NewModForm(props: NewModFormProps) {
 		initialValues: {
 			name: "New Mod",
 			description: "Add a short description...",
-			category: ModCategory.Mod,
+			category: ModCategory.MOD,
 		},
 		validate: zod4Resolver(NewModFormSchema),
 	});

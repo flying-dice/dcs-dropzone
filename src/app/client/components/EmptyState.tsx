@@ -11,16 +11,21 @@ export type EmptyStateProps = {
 	title: string;
 	description: string;
 	icon: IconType;
+	withoutBorder?: boolean;
 };
 export function EmptyState(props: EmptyStateProps) {
 	const scheme = useComputedColorScheme();
 	return (
 		<Paper
 			p={"xl"}
-			withBorder
+			withBorder={!props.withoutBorder}
 			bg={scheme === "light" ? "gray.0" : "dark.8"}
 			c={scheme === "light" ? "gray.5" : "gray.6"}
-			style={{ border: "dashed", borderWidth: "1px" }}
+			style={
+				props.withoutBorder
+					? undefined
+					: { border: "dashed", borderWidth: "1px" }
+			}
 		>
 			<Stack justify={"center"} align={"center"}>
 				<ThemeIcon size={48} radius={"xl"} variant={"light"}>

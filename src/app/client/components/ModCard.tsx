@@ -73,7 +73,11 @@ function ListModCard(props: ModCardProps) {
 			style={props.onClick ? { cursor: "pointer" } : {}}
 		>
 			<Flex wrap={"nowrap"} gap={"md"}>
-				<ModImage radius={5} w={150} src={props.imageUrl} />
+				<ModImage
+					radius={"sm"}
+					src={props.imageUrl}
+					props={{ aspectRatio: { maw: 150, miw: 150 } }}
+				/>
 
 				<Flex wrap={"nowrap"} flex={"auto"} gap={"md"}>
 					<Stack flex={"auto"} justify={"space-between"} gap={0}>

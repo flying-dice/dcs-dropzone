@@ -1,3 +1,4 @@
+import { ModCategory } from "../../../common/data.ts";
 import assetHelpMd from "./en_AssetHelp.md" with { type: "text" };
 import missionScriptHelp from "./en_MissionScriptHelp.md" with { type: "text" };
 import symbolicLinkHelpMd from "./en_SymbolicLinkHelp.md" with { type: "text" };
@@ -28,6 +29,14 @@ export default {
 		CANCEL: "Cancel",
 		CATEGORIES: "CATEGORIES",
 		CATEGORY: "Category",
+		AUTHOR: "Author",
+		TAGS: "Tags",
+		ALL: "All",
+		SEARCH_TERM: "Search Term",
+		SEARCH_PLACEHOLDER: "Search mods...",
+		NO_MODS_FOUND_TITLE: "No mods found",
+		NO_MODS_FOUND_SUBTITLE_DESC:
+			"Try adjusting your search or filter to find what you're looking for.",
 		CONFIRM_REMOVE_SCREENSHOT_DESC:
 			"Are you sure you want to remove this screenshot?",
 		CONFIRM_REMOVE_SCREENSHOT_TITLE: "Confirm Remove Screenshot",
@@ -118,6 +127,7 @@ export default {
 		SAVE: "Save",
 		SAVE_CHANGES: "Save Changes",
 		SEARCH_MODS_PLACEHOLDER: "Search mods...",
+		APPLY: "Apply",
 		SUBSCRIBE: "Subscribe",
 		SUBSCRIBED: "Subscribed",
 		SYMBOLIC_LINK_DEST_DESCRIPTION:
@@ -141,7 +151,7 @@ export default {
 		SYMBOLIC_LINK_SRC_LABEL: "Source Path",
 		SYMBOLIC_LINK_SRC_PLACEHOLDER: "e.g., Mods/MyMod or Scripts/MyScript.lua",
 		SYMBOLIC_LINKS_TITLE: "Symbolic Links",
-		TOTAL_DOWNLOADS: "Total Downloads",
+		TOTAL_SUBSCRIPTIONS: "Total Subscriptions",
 		TOTAL_MODS: "Total Mods",
 		UNLISTED: "Unlisted",
 		UNSUBSCRIBE: "Unsubscribe",
@@ -156,10 +166,26 @@ export default {
 		USER_NAME_DESCRIPTION: "This is your Name",
 		USER_PROFILE_URL: "User Profile URL",
 		USER_PROFILE_URL_DESCRIPTION: "This is your Profile URL",
-		VIEW_ALL_MODS: "View all mods",
 		VIEW_PROFILE: "View Profile",
 		VIEW_USER_DETAILS: "View User Details",
-		WEAPONS: "Weapons",
 		YES: "Yes",
+
+		NO_FEATURED_MODS_FOUND_TITLE: "No featured mods found",
+		NO_FEATURED_MODS_FOUND_SUBTITLE_DESC:
+			"There are currently no featured mods available.",
+
+		NO_POPULAR_MODS_FOUND_TITLE: "No popular mods found",
+		NO_POPULAR_MODS_FOUND_SUBTITLE_DESC:
+			"There are currently no popular mods available.",
+
+		[ModCategory.CAMPAIGN]: "Campaign",
+		[ModCategory.DEVICE_PROFILES]: "Device Profiles",
+		[ModCategory.MOD]: "Mod",
+		[ModCategory.MISSION]: "Mission",
+		[ModCategory.SKIN]: "Skin",
+		[ModCategory.SOUND]: "Sound",
+		[ModCategory.TERRAIN]: "Terrain",
+		[ModCategory.UTILITY]: "Utility",
+		[ModCategory.OTHER]: "Other",
 	},
 };

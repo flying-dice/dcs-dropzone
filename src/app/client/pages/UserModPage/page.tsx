@@ -57,10 +57,17 @@ export function _UserModPage(props: UserModPageProps) {
 							<_Dependencies form={form} />
 							<_Releases form={form} mod={props.mod} />
 						</Stack>
-						<Stack w={300}>
+						<Stack w={300} miw={300}>
 							<_Thumbnail form={form} />
 							<_VisibilityAndPermissions form={form} />
-							<_UserModRating subscriptions={0} rating={0} />
+							<_UserModRating
+								subscriptions={
+									mod.data?.status === 200 ? mod.data.data.subscribersCount : 0
+								}
+								rating={
+									mod.data?.status === 200 ? mod.data.data.averageRating : 0
+								}
+							/>
 							<_Screenshots form={form} />
 							<_FormActions form={form} mod={props.mod} />
 						</Stack>
