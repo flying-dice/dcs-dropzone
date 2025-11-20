@@ -1,5 +1,5 @@
 import { Button, Card, Divider, Stack, Text } from "@mantine/core";
-import { modals, openConfirmModal, openModal } from "@mantine/modals";
+import { modals, openConfirmModal } from "@mantine/modals";
 import { useNavigate } from "react-router-dom";
 import {
 	deleteUserModRelease,
@@ -7,8 +7,7 @@ import {
 	type ModReleaseData,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
-import { Markdown } from "../../components/Markdown.tsx";
-import { generateExplainPlan } from "../../utils/generateExplainPlan.ts";
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
@@ -17,33 +16,15 @@ export function _FormActions(props: {
 	mod: ModData;
 	release: ModReleaseData;
 }) {
+	const { t } = useAppTranslation();
 	const nav = useNavigate();
 	const releases = useGetUserModReleases(props.mod.id);
-
-	const handlePreviewInstallPlan = () => {
-		const planMarkdown = generateExplainPlan(props.release);
-		openModal({
-			title: (
-				<Text fw="bold" size="lg">
-					Installation Plan Preview
-				</Text>
-			),
-			size: "xl",
-			centered: true,
-			children: <Markdown content={planMarkdown} />,
-		});
-	};
 
 	const handleDiscard = () => {
 		openConfirmModal({
 			title: "Discard Changes",
-			children: (
-				<Text>
-					Are you sure you want to discard all changes? This action cannot be
-					undone.
-				</Text>
-			),
-			labels: { confirm: "Discard", cancel: "Cancel" },
+			children: <Text>{t("DISCARD_CHANGES_CONFIRMATION")}</Text>,
+			labels: { confirm: t("DISCARD"), cancel: t("CANCEL") },
 			onCancel: modals.closeAll,
 			onConfirm: () => {
 				nav(`/user-mods/${props.mod.id}`);
@@ -54,21 +35,16 @@ export function _FormActions(props: {
 	const handleDelete = async () => {
 		openConfirmModal({
 			title: "Confirm Deletion",
-			children: (
-				<Text>
-					Are you sure you want to delete this release? This action cannot be
-					undone.
-				</Text>
-			),
-			labels: { confirm: "Delete", cancel: "Cancel" },
+			children: <Text>{t("DELETE_RELEASE_CONFIRMATION")}</Text>,
+			labels: { confirm: t("DELETE"), cancel: t("CANCEL") },
 			confirmProps: { color: "red" },
 			onCancel: modals.closeAll,
 			onConfirm: async () => {
 				await deleteUserModRelease(props.mod.id, props.release.id);
 				await releases.refetch();
 				showSuccessNotification(
-					"Release deleted successfully!",
-					"Your release has been deleted.",
+					t("DELETE_RELEASE_SUCCESS_TITLE"),
+					t("DELETE_RELEASE_SUCCESS_DESC"),
 				);
 				nav(`/user-mods/${props.mod.id}`);
 			},
@@ -78,16 +54,22 @@ export function _FormActions(props: {
 	return (
 		<Card withBorder>
 			<Stack>
-				<Button type="submit">Save Changes</Button>
-				<Button variant={"light"} onClick={handlePreviewInstallPlan}>
-					Preview Install Plan
-				</Button>
+				<Button type="submit">{t("SAVE_CHANGES")}</Button>
 				<Divider />
-				<Button variant={"default"} onClick={handleDiscard}>
-					Discard Changes
-				</Button>
+				{props.form.isTouched() ? (
+					<Button variant={"default"} onClick={handleDiscard}>
+						{t("DISCARD_CHANGES")}
+					</Button>
+				) : (
+					<Button
+						variant={"default"}
+						onClick={() => nav(`/user-mods/${props.mod.id}`)}
+					>
+						{t("BACK_TO_MOD_PAGE")}
+					</Button>
+				)}
 				<Button color={"red"} variant={"outline"} onClick={handleDelete}>
-					Delete Release
+					{t("DELETE_RELEASE")}
 				</Button>
 			</Stack>
 		</Card>

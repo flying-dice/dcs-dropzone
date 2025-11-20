@@ -1,21 +1,21 @@
-import {MongoMemoryServer} from "mongodb-memory-server";
+import { MongoMemoryServer } from "mongodb-memory-server";
 import * as mongoose from "mongoose";
+import { MongoUrl } from "../../common/MongoUrl.ts";
 import applicationConfig from "./ApplicationConfig.ts";
 import Logger from "./Logger.ts";
-import {MongoUrl} from "../../common/MongoUrl.ts";
 
 const logger = Logger.getLogger("Database");
 
-const mongoUrl = new MongoUrl(applicationConfig.mongoUri)
+const mongoUrl = new MongoUrl(applicationConfig.mongoUri);
 
 if (mongoUrl.isMemoryDatabase()) {
 	logger.info(mongoUrl.toObject(), "Starting in-memory MongoDB server...");
 
 	const mongod = await MongoMemoryServer.create({
 		instance: {
-            port: mongoUrl.port,
-            dbName: mongoUrl.dbName
-        },
+			port: mongoUrl.port,
+			dbName: mongoUrl.dbName,
+		},
 	});
 
 	const mongoUri = mongod.getUri(mongoUrl.dbName);

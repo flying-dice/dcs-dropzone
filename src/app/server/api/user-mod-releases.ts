@@ -29,7 +29,7 @@ router.get(
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.OK]: z.object({
-				data: z.array(ModReleaseData),
+				data: ModReleaseData.array(),
 			}),
 			[StatusCodes.UNAUTHORIZED]: null,
 		},
@@ -101,20 +101,20 @@ router.get(
  * POST /api/user-mods/:id/releases - Create a new release for a user-owned mod
  */
 router.post(
-    "/:id/releases",
-    describeJsonRoute({
-        operationId: "createUserModRelease",
-        summary: "Create user mod release",
-        description:
-            "Creates a new release for a mod owned by the authenticated user.",
-        tags: ["User Mod Releases"],
-        security: [{ cookieAuth: [] }],
-        responses: {
-            [StatusCodes.CREATED]: ModReleaseData,
-            [StatusCodes.UNAUTHORIZED]: null,
-            [StatusCodes.NOT_FOUND]: null,
-        },
-    }),
+	"/:id/releases",
+	describeJsonRoute({
+		operationId: "createUserModRelease",
+		summary: "Create user mod release",
+		description:
+			"Creates a new release for a mod owned by the authenticated user.",
+		tags: ["User Mod Releases"],
+		security: [{ cookieAuth: [] }],
+		responses: {
+			[StatusCodes.CREATED]: ModReleaseData,
+			[StatusCodes.UNAUTHORIZED]: null,
+			[StatusCodes.NOT_FOUND]: null,
+		},
+	}),
 	cookieAuth(),
 	validator("param", z.object({ id: z.string() })),
 	validator("json", ModReleaseCreateData),
@@ -140,20 +140,20 @@ router.post(
  * PUT /api/user-mods/:id/releases/:releaseId - Update an existing release
  */
 router.put(
-    "/:id/releases/:releaseId",
-    describeJsonRoute({
-        operationId: "updateUserModRelease",
-        summary: "Update user mod release",
-        description:
-            "Updates fields of an existing release for a mod owned by the authenticated user.",
-        tags: ["User Mod Releases"],
-        security: [{ cookieAuth: [] }],
-        responses: {
-            [StatusCodes.OK]: null,
-            [StatusCodes.NOT_FOUND]: null,
-            [StatusCodes.UNAUTHORIZED]: null,
-        },
-    }),
+	"/:id/releases/:releaseId",
+	describeJsonRoute({
+		operationId: "updateUserModRelease",
+		summary: "Update user mod release",
+		description:
+			"Updates fields of an existing release for a mod owned by the authenticated user.",
+		tags: ["User Mod Releases"],
+		security: [{ cookieAuth: [] }],
+		responses: {
+			[StatusCodes.OK]: null,
+			[StatusCodes.NOT_FOUND]: null,
+			[StatusCodes.UNAUTHORIZED]: null,
+		},
+	}),
 	cookieAuth(),
 	validator(
 		"param",
@@ -191,20 +191,20 @@ router.put(
  * DELETE /api/user-mods/:id/releases/:releaseId - Delete a release
  */
 router.delete(
-    "/:id/releases/:releaseId",
-    describeJsonRoute({
-        operationId: "deleteUserModRelease",
-        summary: "Delete user mod release",
-        description:
-            "Deletes an existing release for a mod owned by the authenticated user.",
-        tags: ["User Mod Releases"],
-        security: [{ cookieAuth: [] }],
-        responses: {
-            [StatusCodes.OK]: null,
-            [StatusCodes.NOT_FOUND]: null,
-            [StatusCodes.UNAUTHORIZED]: null,
-        },
-    }),
+	"/:id/releases/:releaseId",
+	describeJsonRoute({
+		operationId: "deleteUserModRelease",
+		summary: "Delete user mod release",
+		description:
+			"Deletes an existing release for a mod owned by the authenticated user.",
+		tags: ["User Mod Releases"],
+		security: [{ cookieAuth: [] }],
+		responses: {
+			[StatusCodes.OK]: null,
+			[StatusCodes.NOT_FOUND]: null,
+			[StatusCodes.UNAUTHORIZED]: null,
+		},
+	}),
 	cookieAuth(),
 	validator(
 		"param",

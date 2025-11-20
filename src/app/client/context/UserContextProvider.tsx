@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { useGetAuthUser } from "../_autogen/api.ts";
+import { useGetAuthenticatedUser } from "../_autogen/api.ts";
 import { UserContext } from "./UserContext.ts";
 
 export function UserContextProvider({ children }: { children: ReactNode }) {
-	const user = useGetAuthUser();
+	const user = useGetAuthenticatedUser();
 
 	function handleLogin() {
 		globalThis.open("/auth/github/login", "_self");

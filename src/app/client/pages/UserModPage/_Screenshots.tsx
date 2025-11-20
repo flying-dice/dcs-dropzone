@@ -31,7 +31,6 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useEffect } from "react";
 import { FaCamera } from "react-icons/fa6";
 import { z } from "zod";
-import plus from "../../assets/plus.png";
 import {
 	type TranslateFunction,
 	useAppTranslation,
@@ -162,7 +161,6 @@ function SortableItem({
 			h={150}
 			radius={"md"}
 			src={item.url}
-			fallbackSrc={plus}
 			onClick={onClick}
 		/>
 	);

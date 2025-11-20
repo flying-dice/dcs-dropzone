@@ -40,6 +40,7 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 		async () => {
 			await release.refetch();
 			await releases.refetch();
+			form.resetTouched();
 		},
 	);
 

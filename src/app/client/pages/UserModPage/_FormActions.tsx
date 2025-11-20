@@ -6,22 +6,19 @@ import {
 	type ModData,
 	useGetUserMods,
 } from "../../_autogen/api.ts";
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModForm } from "./form.ts";
 
 export function _FormActions(props: { form: UserModForm; mod: ModData }) {
+	const { t } = useAppTranslation();
 	const nav = useNavigate();
 	const userMods = useGetUserMods();
 
 	const handleDiscard = () => {
 		openConfirmModal({
 			title: "Discard Changes",
-			children: (
-				<Text>
-					Are you sure you want to discard all changes? This action cannot be
-					undone.
-				</Text>
-			),
+			children: <Text>{t("DISCARD_CHANGES_CONFIRMATION")}</Text>,
 			labels: { confirm: "Discard", cancel: "Cancel" },
 			onCancel: modals.closeAll,
 			onConfirm: () => {
@@ -33,12 +30,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 	const handleDelete = async () => {
 		openConfirmModal({
 			title: "Confirm Deletion",
-			children: (
-				<Text>
-					Are you sure you want to delete this mod? This action cannot be
-					undone.
-				</Text>
-			),
+			children: <Text>{t("DELETE_MOD_CONFIRMATION")}</Text>,
 			labels: { confirm: "Delete", cancel: "Cancel" },
 			confirmProps: { color: "red" },
 			onCancel: modals.closeAll,
@@ -46,8 +38,8 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 				await deleteUserMod(props.mod.id);
 				await userMods.refetch();
 				showSuccessNotification(
-					"Mod deleted successfully!",
-					"Your mod has been deleted.",
+					t("DELETE_MOD_SUCCESS_TITLE"),
+					t("DELETE_MOD_SUCCESS_DESC"),
 				);
 				nav("/user-mods");
 			},
@@ -58,11 +50,20 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 		<Card withBorder>
 			<Stack>
 				<Button type="submit">Save Changes</Button>
-				<Button variant={"default"} onClick={handleDiscard}>
-					Discard Changes
-				</Button>
+				{props.form.isTouched() ? (
+					<Button variant={"default"} onClick={handleDiscard}>
+						{t("DISCARD_CHANGES")}
+					</Button>
+				) : (
+					<Button
+						variant={"default"}
+						onClick={() => nav(`/user-mods/${props.mod.id}`)}
+					>
+						{t("BACK_TO_MODS_PAGE")}
+					</Button>
+				)}
 				<Button color={"red"} variant={"outline"} onClick={handleDelete}>
-					Delete Mod
+					{t("DELETE_MOD")}
 				</Button>
 			</Stack>
 		</Card>

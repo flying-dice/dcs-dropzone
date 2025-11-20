@@ -18,7 +18,10 @@ export const userModFormValues = z.object({
 	category: z.enum(ModDataCategory),
 	description: z
 		.string()
-		.min(10, { message: "Short Description should have at least 10 letters" }),
+		.min(10, { message: "Short Description should have at least 10 letters" })
+		.max(100, {
+			message: "Short Description should have at most 100 letters",
+		}),
 	content: z.string().min(20, {
 		message: "Detailed Description should have at least 20 letters",
 	}),

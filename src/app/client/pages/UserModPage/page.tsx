@@ -41,6 +41,7 @@ export function _UserModPage(props: UserModPageProps) {
 		async () => {
 			await mod.refetch();
 			await userMods.refetch();
+			form.resetTouched();
 		},
 	);
 
@@ -58,9 +59,9 @@ export function _UserModPage(props: UserModPageProps) {
 						</Stack>
 						<Stack w={300}>
 							<_Thumbnail form={form} />
-							<_Screenshots form={form} />
 							<_VisibilityAndPermissions form={form} />
 							<_UserModRating subscriptions={0} rating={0} />
+							<_Screenshots form={form} />
 							<_FormActions form={form} mod={props.mod} />
 						</Stack>
 					</Flex>
