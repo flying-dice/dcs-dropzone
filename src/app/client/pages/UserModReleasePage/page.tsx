@@ -12,6 +12,7 @@ import {
 	useGetUserModReleaseById,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
+import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { _Assets } from "./_Assets.tsx";
 import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Changelog } from "./_Changelog.tsx";
@@ -29,6 +30,7 @@ type UserModReleasePageProps = {
 
 export function _UserModReleasePage(props: UserModReleasePageProps) {
 	const colorScheme = useComputedColorScheme();
+	const breakpoint = useBreakpoint();
 
 	const releases = useGetUserModReleases(props.mod.id);
 	const release = useGetUserModReleaseById(props.mod.id, props.release.id);
@@ -48,7 +50,7 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
 			<Container size={"xl"} p={"md"}>
 				<form onSubmit={form.onSubmit(handleSubmit)}>
-					<Flex gap={"md"}>
+					<Flex gap={"md"} direction={breakpoint.isMd ? "column" : "row"}>
 						<Stack flex={"auto"} gap={"lg"}>
 							<_BasicInfo form={form} />
 							<_Changelog form={form} />
@@ -56,7 +58,7 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 							<_SymbolicLinks form={form} />
 							<_MissionScripts form={form} />
 						</Stack>
-						<Stack w={300}>
+						<Stack w={breakpoint.isMd ? "100%" : 300} miw={300}>
 							<_Summary form={form} />
 							<_FormActions
 								form={form}

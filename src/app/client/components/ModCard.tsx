@@ -1,7 +1,7 @@
 import {
 	Badge,
-	Button,
 	Card,
+	Center,
 	Flex,
 	Group,
 	type MantineColor,
@@ -9,15 +9,14 @@ import {
 	Text,
 } from "@mantine/core";
 import type { IconType } from "react-icons";
-import { FaDownload, FaPlus, FaStar } from "react-icons/fa";
-import { useAppTranslation } from "../i18n/useAppTranslation.ts";
+import { FaDownload, FaStar } from "react-icons/fa";
 import { ModImage } from "./ModImage.tsx";
 import { Stat } from "./Stat.tsx";
 
 function GridModCard(props: ModCardProps) {
-	const { t } = useAppTranslation();
 	return (
 		<Card
+			flex={"auto"}
 			radius={"md"}
 			withBorder
 			onClick={props.onClick}
@@ -25,10 +24,12 @@ function GridModCard(props: ModCardProps) {
 		>
 			<Flex flex={"auto"} direction={"column"} gap={"sm"}>
 				<Card.Section>
-					<ModImage w={300} src={props.imageUrl} />
+					<Center>
+						<ModImage src={props.imageUrl} />
+					</Center>
 				</Card.Section>
 				<Stack flex={"auto"} gap={"xs"} justify={"space-between"}>
-					<Stack gap={"xs"}>
+					<Stack gap={"xs"} flex={"auto"}>
 						<Text fw={"bold"} lineClamp={1}>
 							{props.title}
 						</Text>
@@ -36,27 +37,17 @@ function GridModCard(props: ModCardProps) {
 							{props.summary}
 						</Text>
 					</Stack>
-					<Stack gap={"xs"}>
-						<Group justify="space-between">
-							<Badge variant={"light"}>{props.category}</Badge>
-							<Group gap={"xs"}>
-								<Stat icon={FaDownload} stat={props.subscribers} />
-								<Stat
-									iconColor={"dcsyellow"}
-									icon={FaStar}
-									stat={props.averageRating.toFixed(1)}
-								/>
-							</Group>
+					<Group justify="space-between">
+						<Badge variant={"light"}>{props.category}</Badge>
+						<Group gap={"xs"}>
+							<Stat icon={FaDownload} stat={props.subscribers} />
+							<Stat
+								iconColor={"dcsyellow"}
+								icon={FaStar}
+								stat={props.averageRating.toFixed(1)}
+							/>
 						</Group>
-						{props.onSubscribeToggle && (
-							<Button
-								leftSection={<FaPlus />}
-								onClick={props.onSubscribeToggle}
-							>
-								{props.isSubscribed ? t("UNSUBSCRIBE") : t("SUBSCRIBE")}
-							</Button>
-						)}
-					</Stack>
+					</Group>
 				</Stack>
 			</Flex>
 		</Card>
@@ -64,9 +55,9 @@ function GridModCard(props: ModCardProps) {
 }
 
 function ListModCard(props: ModCardProps) {
-	const { t } = useAppTranslation();
 	return (
 		<Card
+			flex={"auto"}
 			radius={"md"}
 			withBorder
 			onClick={props.onClick}
@@ -101,16 +92,6 @@ function ListModCard(props: ModCardProps) {
 							</Group>
 						</Group>
 					</Stack>
-					<Group>
-						{props.onSubscribeToggle && (
-							<Button
-								leftSection={<FaPlus />}
-								onClick={props.onSubscribeToggle}
-							>
-								{props.isSubscribed ? t("UNSUBSCRIBE") : t("SUBSCRIBE")}
-							</Button>
-						)}
-					</Group>
 				</Flex>
 			</Flex>
 		</Card>
@@ -125,7 +106,6 @@ export type ModCardProps = {
 	summary: string;
 	subscribers: number;
 	isSubscribed?: boolean;
-	onSubscribeToggle?: () => void;
 	actions?: {
 		label: string;
 		onClick: () => void;

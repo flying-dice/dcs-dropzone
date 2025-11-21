@@ -2,7 +2,6 @@ import {
 	AppShell,
 	Container,
 	Group,
-	noop,
 	Pagination,
 	Select,
 	Stack,
@@ -16,12 +15,14 @@ import { type ModDataCategory, useGetMods } from "../_autogen/api.ts";
 import { EmptyState } from "../components/EmptyState.tsx";
 import { ModCard } from "../components/ModCard.tsx";
 import { ModFilterForm } from "../components/ModFilterForm.tsx";
+import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import type { I18nKeys } from "../i18n/I18nKeys.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { AppIcons } from "../icons.ts";
 
 export function ModsPage() {
 	const { t } = useAppTranslation();
+	const breakpoint = useBreakpoint();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const colorScheme = useComputedColorScheme();
 	const [size, setSize] = useState<number>(10);
@@ -147,8 +148,7 @@ export function ModsPage() {
 									title={mod.name}
 									summary={mod.description || ""}
 									subscribers={mod.subscribersCount}
-									onSubscribeToggle={noop}
-									variant={"list"}
+									variant={breakpoint.isXs ? "grid" : "list"}
 								/>
 							))}
 

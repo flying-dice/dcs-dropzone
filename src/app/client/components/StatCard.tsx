@@ -16,7 +16,7 @@ export type StatCardProps = {
 };
 export function StatCard(props: StatCardProps) {
 	return (
-		<Card withBorder radius={"md"}>
+		<Card withBorder radius={"md"} flex={"auto"}>
 			<Group>
 				<ThemeIcon size="xl" variant={"light"} color={props.iconColor}>
 					<props.icon />

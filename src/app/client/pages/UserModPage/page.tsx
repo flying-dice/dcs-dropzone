@@ -11,6 +11,7 @@ import {
 	useGetUserModById,
 	useGetUserMods,
 } from "../../_autogen/api.ts";
+import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Dependencies } from "./_Dependencies.tsx";
 import { _Description } from "./_Description.tsx";
@@ -31,6 +32,7 @@ type UserModPageProps = {
 export function _UserModPage(props: UserModPageProps) {
 	const userMods = useGetUserMods();
 	const mod = useGetUserModById(props.mod.id);
+	const breakpoint = useBreakpoint();
 
 	const colorScheme = useComputedColorScheme();
 
@@ -49,7 +51,7 @@ export function _UserModPage(props: UserModPageProps) {
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
 			<Container size={"xl"} p={"md"}>
 				<form onSubmit={form.onSubmit(handleSubmit)}>
-					<Flex gap={"md"}>
+					<Flex gap={"md"} direction={breakpoint.isMd ? "column" : "row"}>
 						<Stack flex={"auto"} gap={"lg"}>
 							<_BasicInfo form={form} />
 							<_Description form={form} />
@@ -57,7 +59,7 @@ export function _UserModPage(props: UserModPageProps) {
 							<_Dependencies form={form} />
 							<_Releases form={form} mod={props.mod} />
 						</Stack>
-						<Stack w={300} miw={300}>
+						<Stack w={breakpoint.isMd ? "100%" : 300} miw={300}>
 							<_Thumbnail form={form} />
 							<_VisibilityAndPermissions form={form} />
 							<_UserModRating

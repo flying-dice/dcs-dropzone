@@ -1,26 +1,43 @@
 import {
 	ActionIcon,
 	AppShell,
+	Burger,
 	Group,
 	Image,
 	Menu,
 	Stack,
 	useMantineColorScheme,
 } from "@mantine/core";
+import type { UseDisclosureReturnValue } from "@mantine/hooks";
 import { BsLaptop, BsMoon, BsSun } from "react-icons/bs";
+import { useWindowSize } from "react-use";
+import icon from "./assets/icon.svg";
 import logo from "./assets/logo.svg";
 import { ProfileMenu } from "./components/ProfileMenu.tsx";
 import { useAppTranslation } from "./i18n/useAppTranslation.ts";
 
-export function AppHeader() {
+export type AppHeaderProps = {
+	navbar: UseDisclosureReturnValue;
+};
+
+export function AppHeader(props: AppHeaderProps) {
 	const { colorScheme, setColorScheme } = useMantineColorScheme();
 	const { t } = useAppTranslation();
+	const { width } = useWindowSize();
 
 	return (
 		<AppShell.Header>
 			<Stack pl="md" h="100%" justify="center">
 				<Group justify="space-between">
-					<Image w={"min-content"} h={44} src={logo} />
+					<Group gap={"xs"}>
+						<Burger
+							opened={props.navbar[0]}
+							onClick={props.navbar[1].toggle}
+							hiddenFrom="md"
+						/>
+
+						<Image w={"min-content"} h={44} src={width < 900 ? icon : logo} />
+					</Group>
 					<Stack gap={2} pr="md">
 						<Group>
 							<Menu>

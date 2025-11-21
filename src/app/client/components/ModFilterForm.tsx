@@ -11,6 +11,7 @@ import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
 import { ModDataCategory } from "../_autogen/api.ts";
+import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 
 const formValues = z.object({
@@ -32,6 +33,7 @@ export type ModFilterFormProps = {
 
 export function ModFilterForm(props: ModFilterFormProps) {
 	const { t } = useAppTranslation();
+	const breakpoint = useBreakpoint();
 	const form = useForm<ModFilterFormValues>({
 		initialValues: props.initialValues,
 		validate: zod4Resolver(formValues),
@@ -45,7 +47,7 @@ export function ModFilterForm(props: ModFilterFormProps) {
 					placeholder={t("SEARCH_PLACEHOLDER")}
 					{...form.getInputProps("term")}
 				/>
-				<SimpleGrid cols={3}>
+				<SimpleGrid cols={breakpoint.isXs ? 1 : 3}>
 					<Select
 						label={t("CATEGORY")}
 						data={props.categories}

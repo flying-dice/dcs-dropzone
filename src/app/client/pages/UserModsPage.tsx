@@ -3,7 +3,6 @@ import {
 	Button,
 	Container,
 	Group,
-	SimpleGrid,
 	Stack,
 	useComputedColorScheme,
 } from "@mantine/core";
@@ -19,6 +18,7 @@ import {
 import { ModCard } from "../components/ModCard.tsx";
 import { NewModForm } from "../components/NewModForm.tsx";
 import { StatCard } from "../components/StatCard.tsx";
+import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { AppIcons } from "../icons.ts";
 import { showErrorNotification } from "../utils/showErrorNotification.tsx";
@@ -32,6 +32,7 @@ export function UserModsPage(_: UserModsPageProps) {
 	const nav = useNavigate();
 	const colorScheme = useComputedColorScheme();
 	const mods = useGetUserMods();
+	const breakpoint = useBreakpoint();
 
 	const handleNewMod = () => {
 		openModal({
@@ -68,7 +69,7 @@ export function UserModsPage(_: UserModsPageProps) {
 						</Button>
 					</Group>
 
-					<SimpleGrid cols={3} spacing={"xl"}>
+					<Group flex={"auto"}>
 						<StatCard
 							icon={AppIcons.Mods}
 							label={t("PUBLISHED_MODS")}
@@ -98,9 +99,9 @@ export function UserModsPage(_: UserModsPageProps) {
 									: "-"
 							}
 						/>
-					</SimpleGrid>
+					</Group>
 
-					<Stack p={"md"}>
+					<Stack>
 						{mods.data?.status === StatusCodes.OK &&
 							mods.data?.data.data.map((mod) => (
 								<ModCard
@@ -111,7 +112,7 @@ export function UserModsPage(_: UserModsPageProps) {
 									title={mod.name}
 									summary={mod.description || ""}
 									subscribers={mod.subscribersCount}
-									variant={"list"}
+									variant={breakpoint.isXs ? "grid" : "list"}
 									onClick={() => nav(mod.id)}
 								/>
 							))}
