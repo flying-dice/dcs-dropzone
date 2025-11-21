@@ -10,59 +10,42 @@ import {
 } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { type ModDataCategory, useGetMods } from "../_autogen/api.ts";
+import { useGetMods } from "../_autogen/api.ts";
 import { EmptyState } from "../components/EmptyState.tsx";
 import { ModCard } from "../components/ModCard.tsx";
 import { ModFilterForm } from "../components/ModFilterForm.tsx";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
-import type { I18nKeys } from "../i18n/I18nKeys.ts";
+import { useModFilters } from "../hooks/useModFilters.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { AppIcons } from "../icons.ts";
+import { modFilterService } from "../services/modFilterService.ts";
 
 export function ModsPage() {
 	const { t } = useAppTranslation();
 	const breakpoint = useBreakpoint();
-	const [searchParams, setSearchParams] = useSearchParams();
 	const colorScheme = useComputedColorScheme();
 	const [size, setSize] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 
-	const category =
-		(searchParams.get("category") as ModDataCategory) || undefined;
-
-	const maintainers = searchParams.get("authors") || undefined;
-
-	const tags = searchParams.get("tags") || undefined;
-
-	const term = searchParams.get("term") || undefined;
+	const { filters, initialValues, updateFilters } = useModFilters();
 
 	const mods = useGetMods({
 		page,
 		size,
-		category,
-		maintainers,
-		tags,
-		term,
+		...filters,
 	});
 
-	const categoriesData =
-		mods.data?.data.filter.categories.map((category) => ({
-			value: category,
-			label: t(category as I18nKeys),
-		})) || [];
+	const categoriesData = mods.data?.data.filter.categories
+		? modFilterService.transformCategories(mods.data.data.filter.categories, t)
+		: [];
 
-	const usersData =
-		mods.data?.data.filter.maintainers.map((maintainer) => ({
-			value: maintainer.id,
-			label: maintainer.username,
-		})) || [];
+	const usersData = mods.data?.data.filter.maintainers
+		? modFilterService.transformMaintainers(mods.data.data.filter.maintainers)
+		: [];
 
-	const tagsData =
-		mods.data?.data.filter.tags.map((tag) => ({
-			value: tag,
-			label: tag,
-		})) || [];
+	const tagsData = mods.data?.data.filter.tags
+		? modFilterService.transformTags(mods.data.data.filter.tags)
+		: [];
 
 	const total = useMemo(
 		() =>
@@ -90,39 +73,8 @@ export function ModsPage() {
 						</Text>
 
 						<ModFilterForm
-							initialValues={{
-								category,
-								authors: maintainers?.split(","),
-								tags: tags?.split(","),
-								term: term,
-							}}
-							onSubmit={(values) => {
-								if (values.category && values.category.length > 0) {
-									searchParams.set("category", values.category);
-								} else {
-									searchParams.delete("category");
-								}
-
-								if (values.tags && values.tags.length > 0) {
-									searchParams.set("tags", values.tags.join(","));
-								} else {
-									searchParams.delete("tags");
-								}
-
-								if (values.authors && values.authors.length > 0) {
-									searchParams.set("authors", values.authors.join(","));
-								} else {
-									searchParams.delete("authors");
-								}
-
-								if (values.term && values.term.length > 0) {
-									searchParams.set("term", encodeURIComponent(values.term));
-								} else {
-									searchParams.delete("term");
-								}
-
-								setSearchParams(searchParams);
-							}}
+							initialValues={initialValues}
+							onSubmit={updateFilters}
 							categories={categoriesData}
 							users={usersData}
 							tags={tagsData}
