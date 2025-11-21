@@ -8,7 +8,7 @@ import Logger from "../Logger.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { PageData } from "../schemas/PageData.ts";
-import { describeJsonRoute } from "./describeJsonRoute.ts";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const router = new Hono();
 

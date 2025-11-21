@@ -12,7 +12,7 @@ import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import { ModUpdateData } from "../schemas/ModUpdateData.ts";
 import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
 import { UserModServiceError } from "../services/UserModService.ts";
-import { describeJsonRoute } from "./describeJsonRoute.ts";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const router = new Hono();
 

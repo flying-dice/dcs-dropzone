@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import Database from "../Database.ts";
 import Logger from "../Logger.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
-import { describeJsonRoute } from "./describeJsonRoute.ts";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const router = new Hono();
 const logger = Logger.getLogger("api/health");

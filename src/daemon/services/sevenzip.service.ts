@@ -4,7 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathExistsSync } from "fs-extra";
 import { extractPercentage } from "../functions/extract-percentage.ts";
-import { getLogger } from "../logger.ts";
+import { getLogger } from "../Logger.ts";
 
 export const SUPPORTED_ARCHIVE_EXTENSIONS = [
 	"7z",

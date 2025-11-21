@@ -9,7 +9,7 @@ import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { UserData } from "../schemas/UserData.ts";
 import { AuthServiceProvider } from "../services/AuthServiceProvider.ts";
-import { describeJsonRoute } from "./describeJsonRoute.ts";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const params = z.object({
 	provider: z.enum(AuthServiceProvider),

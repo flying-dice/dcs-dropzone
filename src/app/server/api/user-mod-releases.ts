@@ -9,7 +9,7 @@ import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
 import { ModReleaseServiceError } from "../services/ModReleaseService.ts";
-import { describeJsonRoute } from "./describeJsonRoute.ts";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const router = new Hono();
 

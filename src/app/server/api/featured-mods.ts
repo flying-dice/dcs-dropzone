@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import ApplicationContext from "../Application.ts";
 import Logger from "../Logger.ts";
 import { ModData } from "../schemas/ModData.ts";
-import { describeJsonRoute } from "./describeJsonRoute.ts";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const router = new Hono();
 

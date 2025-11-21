@@ -1,5 +1,5 @@
 import { Database, type Statement } from "bun:sqlite";
-import { getLogger } from "../logger";
+import { getLogger } from "../Logger";
 import type { AppDatabaseMigration } from "./app-database-migration";
 
 const MIGRATIONS_DDL = `

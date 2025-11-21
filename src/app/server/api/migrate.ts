@@ -6,7 +6,7 @@ import appConfig from "../ApplicationConfig.ts";
 import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
-import { describeJsonRoute } from "./describeJsonRoute.ts";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const router = new Hono();
 const logger = Logger.getLogger("api/migrate");

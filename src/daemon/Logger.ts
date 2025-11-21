@@ -20,3 +20,7 @@ const rootLogger = pino(
 export function getLogger(namespace: string) {
 	return rootLogger.child({ name: namespace });
 }
+
+export default {
+	root: rootLogger, getLogger
+}

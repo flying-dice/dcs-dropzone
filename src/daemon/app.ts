@@ -4,7 +4,7 @@ import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
 import health from "./api/health.ts";
-import { getLogger } from "./logger.ts";
+import { getLogger } from "./Logger.ts";
 import { loggerMiddleware } from "./middleware/logger.ts";
 
 export const app = new Hono();
