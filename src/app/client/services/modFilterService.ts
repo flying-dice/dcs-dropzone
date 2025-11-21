@@ -48,14 +48,16 @@ export const modFilterService = {
 	/**
 	 * Calculate display range text for pagination
 	 */
-	calculateDisplayRange: (page: {
-		number: number;
-		size: number;
-		totalElements: number;
-	}): { start: number; end: number; total: number } => {
+	calculateDisplayRange: (
+		page: {
+			number: number;
+			size: number;
+			totalElements: number;
+		},
+		itemsInCurrentPage: number,
+	): { start: number; end: number; total: number } => {
 		const start = (page.number - 1) * page.size + 1;
-		const itemsInPage = page.totalElements > 0 ? page.size : 0;
-		const end = (page.number - 1) * page.size + itemsInPage;
+		const end = (page.number - 1) * page.size + itemsInCurrentPage;
 
 		return {
 			start,

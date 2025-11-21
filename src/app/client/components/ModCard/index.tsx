@@ -10,6 +10,10 @@ export function ModCard(props: ModCardProps) {
 	if (props.variant === "grid") {
 		return <GridModCard {...props} />;
 	}
+	if (props.variant === "list") {
+		return <ListModCard {...props} />;
+	}
+	// Default to list if variant is not recognized
 	return <ListModCard {...props} />;
 }
 
