@@ -12,7 +12,7 @@ import { StatusCodes } from "http-status-codes";
 import { useEffect, useMemo, useState } from "react";
 import { useGetMods } from "../_autogen/api.ts";
 import { EmptyState } from "../components/EmptyState.tsx";
-import { ModCard } from "../components/ModCard.tsx";
+import { ModCard } from "../components/ModCard/index.tsx";
 import { ModFilterForm } from "../components/ModFilterForm.tsx";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { useModFilters } from "../hooks/useModFilters.ts";

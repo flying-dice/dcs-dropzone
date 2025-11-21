@@ -6,22 +6,19 @@ import {
 	Stack,
 	useComputedColorScheme,
 } from "@mantine/core";
-import { modals, openModal } from "@mantine/modals";
+import { modals } from "@mantine/modals";
 import { StatusCodes } from "http-status-codes";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import {
-	createUserMod,
-	type UserData,
-	useGetUserMods,
-} from "../_autogen/api.ts";
-import { ModCard } from "../components/ModCard.tsx";
+import type { UserData } from "../_autogen/api.ts";
+import { useGetUserMods } from "../_autogen/api.ts";
+import { ModCard } from "../components/ModCard/index.tsx";
 import { NewModForm } from "../components/NewModForm.tsx";
 import { StatCard } from "../components/StatCard.tsx";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
+import { useNewModModal } from "../hooks/useNewModModal.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { AppIcons } from "../icons.ts";
-import { showErrorNotification } from "../utils/showErrorNotification.tsx";
 
 export type UserModsPageProps = {
 	user: UserData;
@@ -34,29 +31,15 @@ export function UserModsPage(_: UserModsPageProps) {
 	const mods = useGetUserMods();
 	const breakpoint = useBreakpoint();
 
+	const { openNewModModal, handleNewModSubmit } = useNewModModal(async () => {
+		await mods.refetch();
+	});
+
 	const handleNewMod = () => {
-		openModal({
-			title: t("CREATE_NEW_MOD"),
-			size: "xl",
-			children: (
-				<NewModForm
-					onSubmit={async (v) => {
-						try {
-							const res = await createUserMod(v);
-							if (res.status !== StatusCodes.CREATED) {
-								throw new Error(`Failed to create mod: ${res.status}`);
-							}
-							await mods.refetch();
-							modals.closeAll();
-							nav(res.data.id);
-						} catch (e) {
-							showErrorNotification(e);
-						}
-					}}
-					onCancel={modals.closeAll}
-				/>
-			),
-		});
+		openNewModModal(
+			t("CREATE_NEW_MOD"),
+			<NewModForm onSubmit={handleNewModSubmit} onCancel={modals.closeAll} />,
+		);
 	};
 
 	return (

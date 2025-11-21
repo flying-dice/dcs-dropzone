@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useGetFeaturedMods, useGetMods } from "../_autogen/api.ts";
 import { EmptyState } from "../components/EmptyState.tsx";
-import { ModCard } from "../components/ModCard.tsx";
+import { ModCard } from "../components/ModCard/index.tsx";
 import { StatCard } from "../components/StatCard.tsx";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { AppIcons } from "../icons.ts";
