@@ -9,19 +9,34 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
+import { FaMagnifyingGlass, FaShapes, FaTag, FaUser } from "react-icons/fa6";
 import { z } from "zod";
 import { ModDataCategory } from "../_autogen/api.ts";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 
+const categorySchema = z.codec(
+	z
+		.enum(ModDataCategory)
+		.nullable()
+		.optional(), // Input Schema: Nullable String
+	z
+		.enum(ModDataCategory)
+		.optional(), // Output Schema: Optional String
+	{
+		decode: (i) => i ?? undefined, // Input → Optional String
+		encode: (i) => i, // Optional String → String
+	},
+);
+
 const formValues = z.object({
-	category: z.enum(ModDataCategory).nullable().optional(),
-	authors: z.string().array().nullable().optional(),
-	tags: z.string().array().nullable().optional(),
-	term: z.string().nullable().optional(),
+	category: categorySchema,
+	authors: z.string().array().optional(),
+	tags: z.string().array().optional(),
+	term: z.string().optional(),
 });
 
-export type ModFilterFormValues = z.infer<typeof formValues>;
+export type ModFilterFormValues = z.output<typeof formValues>;
 
 export type ModFilterFormProps = {
 	initialValues: ModFilterFormValues;
@@ -35,7 +50,7 @@ export function ModFilterForm(props: ModFilterFormProps) {
 	const { t } = useAppTranslation();
 	const breakpoint = useBreakpoint();
 	const form = useForm<ModFilterFormValues>({
-		initialValues: props.initialValues,
+		initialValues: formValues.parse(props.initialValues),
 		validate: zod4Resolver(formValues),
 	});
 
@@ -46,31 +61,35 @@ export function ModFilterForm(props: ModFilterFormProps) {
 					label={t("SEARCH_TERM")}
 					placeholder={t("SEARCH_PLACEHOLDER")}
 					{...form.getInputProps("term")}
+					leftSection={<FaMagnifyingGlass />}
 				/>
 				<SimpleGrid cols={breakpoint.isXs ? 1 : 3}>
 					<Select
 						label={t("CATEGORY")}
-						data={props.categories}
+						data={props.categories || []}
 						placeholder={form.values.category ? undefined : t("ALL")}
 						clearable
 						searchable
 						{...form.getInputProps("category")}
+						leftSection={<FaShapes />}
 					/>
 					<MultiSelect
 						label={t("AUTHOR")}
 						placeholder={form.values.authors?.length ? undefined : t("ALL")}
 						clearable
-						data={props.users}
+						data={props.users || []}
 						searchable
 						{...form.getInputProps("authors")}
+						leftSection={<FaUser />}
 					/>
 					<MultiSelect
 						label={t("TAGS")}
 						placeholder={form.values.tags?.length ? undefined : t("ALL")}
 						clearable
-						data={props.tags}
+						data={props.tags || []}
 						searchable
 						{...form.getInputProps("tags")}
+						leftSection={<FaTag />}
 					/>
 				</SimpleGrid>
 				<Group justify={"flex-end"}>

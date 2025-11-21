@@ -9,10 +9,10 @@ export type ModFilters = {
 };
 
 export type ModFilterValues = {
-	category?: ModDataCategory | null;
-	authors?: string[] | null;
-	tags?: string[] | null;
-	term?: string | null;
+	category?: ModDataCategory;
+	authors?: string[];
+	tags?: string[];
+	term?: string;
 };
 
 /**
@@ -29,10 +29,10 @@ export function useModFilters() {
 	};
 
 	const initialValues: ModFilterValues = {
-		category: filters.category || null,
-		authors: filters.maintainers?.split(",") || null,
-		tags: filters.tags?.split(",") || null,
-		term: filters.term || null,
+		category: filters.category || undefined,
+		authors: filters.maintainers?.split(",") || undefined,
+		tags: filters.tags?.split(",") || undefined,
+		term: filters.term || undefined,
 	};
 
 	const updateFilters = (values: ModFilterValues) => {
