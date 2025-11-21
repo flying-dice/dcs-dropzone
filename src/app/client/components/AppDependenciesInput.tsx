@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaLink } from "react-icons/fa6";
 import { useGetMods } from "../_autogen/api.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
-import { ModCard } from "./ModCard.tsx";
+import { ModCard } from "./ModCard/index.tsx";
 
 export type AppDependenciesInputProps = {
 	value: string[];

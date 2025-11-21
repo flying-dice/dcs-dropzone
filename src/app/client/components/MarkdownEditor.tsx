@@ -10,74 +10,7 @@ import type { editor } from "monaco-editor";
 import { useState } from "react";
 import type { IconType } from "react-icons";
 import { BiBold, BiImageAlt, BiItalic, BiLink } from "react-icons/bi";
-
-function makeSelectionBold(editor: editor.IStandaloneCodeEditor, _: Monaco) {
-	return () => {
-		const selection = editor.getSelection();
-		if (selection && !selection.isEmpty()) {
-			const selectedText = editor.getModel()?.getValueInRange(selection) || "";
-			const newText = `**${selectedText}**`;
-			editor.executeEdits("", [
-				{
-					range: selection,
-					text: newText,
-					forceMoveMarkers: true,
-				},
-			]);
-		}
-	};
-}
-
-function makeSelectionItalic(editor: editor.IStandaloneCodeEditor, _: Monaco) {
-	return () => {
-		const selection = editor.getSelection();
-		if (selection && !selection.isEmpty()) {
-			const selectedText = editor.getModel()?.getValueInRange(selection) || "";
-			const newText = `*${selectedText}*`;
-			editor.executeEdits("", [
-				{
-					range: selection,
-					text: newText,
-					forceMoveMarkers: true,
-				},
-			]);
-		}
-	};
-}
-
-function makeSelectionLink(editor: editor.IStandaloneCodeEditor, _: Monaco) {
-	return () => {
-		const selection = editor.getSelection();
-		if (selection && !selection.isEmpty()) {
-			const selectedText = editor.getModel()?.getValueInRange(selection) || "";
-			const newText = `[${selectedText}](url)`;
-			editor.executeEdits("", [
-				{
-					range: selection,
-					text: newText,
-					forceMoveMarkers: true,
-				},
-			]);
-		}
-	};
-}
-
-function makeSelectionImage(editor: editor.IStandaloneCodeEditor, _: Monaco) {
-	return () => {
-		const selection = editor.getSelection();
-		if (selection && !selection.isEmpty()) {
-			const selectedText = editor.getModel()?.getValueInRange(selection) || "";
-			const newText = `![${selectedText}](image_url)`;
-			editor.executeEdits("", [
-				{
-					range: selection,
-					text: newText,
-					forceMoveMarkers: true,
-				},
-			]);
-		}
-	};
-}
+import { monacoEditorService } from "../services/monacoEditorService.ts";
 
 type EditorButtonProps = {
 	icon: IconType;
@@ -113,30 +46,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 		editor: editor.IStandaloneCodeEditor,
 		monaco: Monaco,
 	) {
-		// Bold (Ctrl+B)
-		editor.addCommand(
-			monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB,
-			makeSelectionBold(editor, monaco),
-		);
-
-		// Italic (Ctrl+I)
-		editor.addCommand(
-			monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
-			makeSelectionItalic(editor, monaco),
-		);
-
-		// Link (Ctrl+K)
-		editor.addCommand(
-			monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-			makeSelectionLink(editor, monaco),
-		);
-
-		// Make Image (Ctrl+Shift+I)
-		editor.addCommand(
-			monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyI,
-			makeSelectionImage(editor, monaco),
-		);
-
+		monacoEditorService.registerMarkdownShortcuts(editor, monaco);
 		setEditorInstance(editor);
 		setMonacoInstance(monaco);
 	}
@@ -167,7 +77,10 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiBold}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								makeSelectionBold(editorInstance, monacoInstance)();
+								monacoEditorService.makeSelectionBold(
+									editorInstance,
+									monacoInstance,
+								)();
 							}
 						}}
 					/>
@@ -176,7 +89,10 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiItalic}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								makeSelectionItalic(editorInstance, monacoInstance)();
+								monacoEditorService.makeSelectionItalic(
+									editorInstance,
+									monacoInstance,
+								)();
 							}
 						}}
 					/>
@@ -185,7 +101,10 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiLink}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								makeSelectionLink(editorInstance, monacoInstance)();
+								monacoEditorService.makeSelectionLink(
+									editorInstance,
+									monacoInstance,
+								)();
 							}
 						}}
 					/>
@@ -194,7 +113,10 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiImageAlt}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								makeSelectionImage(editorInstance, monacoInstance)();
+								monacoEditorService.makeSelectionImage(
+									editorInstance,
+									monacoInstance,
+								)();
 							}
 						}}
 					/>
