@@ -1,6 +1,6 @@
 import { Database, type Statement } from "bun:sqlite";
 import { getLogger } from "../Logger";
-import type { AppDatabaseMigration } from "./app-database-migration";
+import { AppDatabaseMigration } from "./app-database-migration";
 
 const MIGRATIONS_DDL = `
     CREATE TABLE IF NOT EXISTS "__drizzle_migrations"
@@ -100,5 +100,27 @@ export class AppDatabase {
 				hash: migration.hash,
 			})?.count ?? 0) > 0
 		);
+	}
+
+	/**
+	 * Create an AppDatabase instance with migrations from a Record<string, string> object.
+	 *
+	 * The keys are the filenames and the values are the SQL statements.
+	 *
+	 * @param filename {string} - The database filename.
+	 * @param migrations {Record<string, string>} - The migrations as a record of filename to SQL.
+	 * @returns {AppDatabase} - The AppDatabase instance.
+	 */
+	static withMigrations(
+		filename: string,
+		migrations: Record<string, string>,
+	): AppDatabase {
+		const _migrations: AppDatabaseMigration[] = Object.entries(migrations).map(
+			([filename, sql]) => new AppDatabaseMigration(filename, sql),
+		);
+
+		const appDatabase = new AppDatabase(filename, _migrations);
+
+		return appDatabase;
 	}
 }

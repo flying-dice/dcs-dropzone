@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { z } from "zod";
 
 const file = Bun.file(`${process.cwd()}/config.toml`);

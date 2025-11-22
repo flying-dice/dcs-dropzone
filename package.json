@@ -15,7 +15,7 @@
 		"build:daemon": "bun scripts/build-daemon.ts",
 		"start": "docker compose up",
 		"drizzle": "drizzle-kit generate --config drizzle.config.ts --name=init",
-		"postdrizzle": "bun drizzle-migration.setup.ts"
+		"postdrizzle": "bun drizzle-migration.setup.ts",
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",

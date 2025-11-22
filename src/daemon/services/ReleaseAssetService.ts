@@ -1,10 +1,10 @@
 import { exists, mkdir, rm } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { and, eq } from "drizzle-orm";
+import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import type { Logger as PLogger } from "pino";
 import { AssetStatus } from "../../common/data.ts";
 import { err, match, ok, type Result } from "../../common/Result.ts";
-import { db } from "../database";
 import { T_MOD_RELEASE_ASSETS, T_MOD_RELEASES } from "../database/schema.ts";
 import Logger from "../Logger.ts";
 import type { SevenzipService } from "./SevenzipService.ts";
@@ -27,12 +27,13 @@ export class ReleaseAssetService {
 		private readonly releaseId: string,
 		private readonly wgetService: WgetService,
 		private readonly sevenzipService: SevenzipService,
+		private readonly db: BunSQLiteDatabase,
 	) {
 		logger.debug(
 			`ReleaseAssetService initialized for releaseId: ${this.releaseId}`,
 		);
 
-		const release = db
+		const release = this.db
 			.select({
 				releaseId: T_MOD_RELEASES.releaseId,
 				modId: T_MOD_RELEASES.modId,
@@ -53,9 +54,8 @@ export class ReleaseAssetService {
 
 	async removeReleaseAssetsAndFolder(): Promise<void> {
 		this.logger.info(`Removing release assets and folder`);
-		const releaseFolder = resolve(process.cwd(), this.releaseId);
 
-		this.removeReleaseFolder();
+		await this.removeReleaseFolder();
 
 		this.logger.info(`Successfully removed release assets from database`);
 	}
@@ -160,7 +160,7 @@ export class ReleaseAssetService {
 	}
 
 	private getAssetsForRelease() {
-		return db
+		return this.db
 			.select()
 			.from(T_MOD_RELEASE_ASSETS)
 			.where(eq(T_MOD_RELEASE_ASSETS.releaseId, this.releaseId))
@@ -168,7 +168,7 @@ export class ReleaseAssetService {
 	}
 
 	private getArchiveAssetsSuccessfullyDownloaded() {
-		return db
+		return this.db
 			.select()
 			.from(T_MOD_RELEASE_ASSETS)
 			.where(
@@ -228,7 +228,8 @@ export class ReleaseAssetService {
 	}
 
 	private updateAssetStatus(assetId: string, status: AssetStatus): void {
-		db.update(T_MOD_RELEASE_ASSETS)
+		this.db
+			.update(T_MOD_RELEASE_ASSETS)
 			.set({ status })
 			.where(eq(T_MOD_RELEASE_ASSETS.id, assetId))
 			.run();
