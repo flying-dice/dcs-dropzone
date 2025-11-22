@@ -17,7 +17,7 @@ export const T_MOD_RELEASE_ASSETS = sqliteTable("MOD_RELEASE_ASSETS", {
 	releaseId: text("release_id").notNull(),
 	name: text("name").notNull(),
 	isArchive: int("is_archive", { mode: "boolean" }).notNull(),
-	urls: text("dest_root", { mode: "json" }).$type<string[]>().notNull(),
+	urls: text("urls", { mode: "json" }).$type<string[]>().notNull(),
 	status: text("status")
 		.notNull()
 		.$type<AssetStatus>()

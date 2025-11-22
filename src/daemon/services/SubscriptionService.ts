@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import Application from "../Application.ts";
 import { db } from "../database";
 import {
 	T_MOD_RELEASE_ASSETS,
@@ -22,8 +23,13 @@ export class SubscriptionService {
 			.all();
 	}
 
-	removeSubscription(releaseId: string) {
+	async removeSubscription(releaseId: string) {
 		logger.info(`Removing subscription for releaseId: ${releaseId}`);
+
+		await Application.getReleaseAssetService(
+			releaseId,
+		).removeReleaseAssetsAndFolder();
+
 		db.transaction(
 			(db) => {
 				db.delete(T_MOD_RELEASE_ASSETS)
@@ -117,5 +123,11 @@ export class SubscriptionService {
 		logger.info(
 			`Successfully subscribed to mod: ${data.modName} (release: ${data.version})`,
 		);
+
+		setTimeout(() => {
+			Application.getReleaseAssetService(
+				data.releaseId,
+			).downloadAndExtractReleaseAssets();
+		});
 	}
 }

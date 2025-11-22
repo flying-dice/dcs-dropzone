@@ -38,13 +38,3 @@ export type ApplicationConfig = z.infer<typeof configSchema>;
 const appConfig = configSchema.parse(config);
 
 export default appConfig;
-
-export const WGET_EXECUTABLE_PATH = join(
-	appConfig.binaries.target_directory,
-	"wget.exe",
-);
-
-export const SEVENZIP_EXECUTABLE_PATH = join(
-	appConfig.binaries.target_directory,
-	appConfig.binaries.sevenzip,
-);

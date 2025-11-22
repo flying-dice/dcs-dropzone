@@ -10,7 +10,7 @@ CREATE TABLE `MOD_RELEASE_ASSETS` (
 	`release_id` text NOT NULL,
 	`name` text NOT NULL,
 	`is_archive` integer NOT NULL,
-	`dest_root` text NOT NULL,
+	`urls` text NOT NULL,
 	`status` text DEFAULT 'PENDING' NOT NULL
 );
 --> statement-breakpoint
