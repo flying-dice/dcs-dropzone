@@ -29,7 +29,7 @@ const configSchema = z.object({
 	binaries: z.object({
 		target_directory: z.string(),
 		wget: z.string().url(),
-		sevenzip: z.string(),
+		sevenzip: z.string().min(1, "7zip path is required"),
 	}),
 });
 

@@ -129,23 +129,23 @@ export class ReleaseDownloadService {
 					const archivePath = join(releaseFolder, filename);
 					const logFilePath = join(releaseFolder, `${filename}.log`);
 
+					let logStream: ReturnType<typeof createWriteStream> | undefined;
 					try {
 						// Create log file stream
-						const logStream = createWriteStream(logFilePath, { flags: "w" });
+						logStream = createWriteStream(logFilePath, { flags: "w" });
 
 						await this.sevenzipService.extract({
 							archivePath,
 							targetDir: releaseFolder,
 							onProgress: (progress) => {
 								const logMessage = `[${new Date().toISOString()}] Extraction progress: ${progress.progress}%${progress.summary ? ` - ${progress.summary}` : ""}\n`;
-								logStream.write(logMessage);
+								logStream?.write(logMessage);
 								this.logger.trace(
 									`Extract progress for ${filename}: ${progress.progress}%`,
 								);
 							},
 						});
 
-						logStream.end();
 						this.logger.info(`Extracted archive: ${archivePath}`);
 					} catch (error) {
 						this.logger.error(`Failed to extract ${archivePath}: ${error}`);
@@ -155,6 +155,9 @@ export class ReleaseDownloadService {
 							.where(eq(T_MOD_RELEASE_ASSETS.id, asset.id))
 							.run();
 						throw error;
+					} finally {
+						// Ensure log stream is always closed
+						logStream?.end();
 					}
 				}
 
