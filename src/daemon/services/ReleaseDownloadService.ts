@@ -110,64 +110,59 @@ export class ReleaseDownloadService {
 		);
 
 		for (const asset of archiveAssets) {
-			try {
-				// Update status to EXTRACTING
-				db.update(T_MOD_RELEASE_ASSETS)
-					.set({ status: AssetStatus.EXTRACTING })
-					.where(eq(T_MOD_RELEASE_ASSETS.id, asset.id))
-					.run();
+			// Update status to EXTRACTING
+			db.update(T_MOD_RELEASE_ASSETS)
+				.set({ status: AssetStatus.EXTRACTING })
+				.where(eq(T_MOD_RELEASE_ASSETS.id, asset.id))
+				.run();
 
-				this.logger.debug(`Extracting asset: ${asset.name}`);
+			this.logger.debug(`Extracting asset: ${asset.name}`);
 
-				// Extract all archives for this asset
-				for (const url of asset.urls) {
-					const filename = basename(url);
-					const archivePath = join(releaseFolder, filename);
-					const logFilePath = join(releaseFolder, `${filename}.log`);
+			// Extract all archives for this asset
+			for (const url of asset.urls) {
+				const filename = basename(url);
+				const archivePath = join(releaseFolder, filename);
+				const logFilePath = join(releaseFolder, `${filename}.log`);
 
-					let logStream: ReturnType<typeof createWriteStream> | undefined;
-					try {
-						// Create log file stream
-						logStream = createWriteStream(logFilePath, { flags: "w" });
+				let logStream: ReturnType<typeof createWriteStream> | undefined;
+				try {
+					// Create log file stream
+					logStream = createWriteStream(logFilePath, { flags: "w" });
 
-						await this.sevenzipService.extract({
-							archivePath,
-							targetDir: releaseFolder,
-							onProgress: (progress) => {
-								const logMessage = `[${new Date().toISOString()}] Extraction progress: ${progress.progress}%${progress.summary ? ` - ${progress.summary}` : ""}\n`;
-								logStream?.write(logMessage);
-								this.logger.trace(
-									`Extract progress for ${filename}: ${progress.progress}%`,
-								);
-							},
-						});
+					await this.sevenzipService.extract({
+						archivePath,
+						targetDir: releaseFolder,
+						onProgress: (progress) => {
+							const logMessage = `[${new Date().toISOString()}] Extraction progress: ${progress.progress}%${progress.summary ? ` - ${progress.summary}` : ""}\n`;
+							logStream?.write(logMessage);
+							this.logger.trace(
+								`Extract progress for ${filename}: ${progress.progress}%`,
+							);
+						},
+					});
 
-						this.logger.info(`Extracted archive: ${archivePath}`);
-					} catch (error) {
-						this.logger.error(`Failed to extract ${archivePath}: ${error}`);
-						// Update status to EXTRACTION_FAILED
-						db.update(T_MOD_RELEASE_ASSETS)
-							.set({ status: AssetStatus.EXTRACTION_FAILED })
-							.where(eq(T_MOD_RELEASE_ASSETS.id, asset.id))
-							.run();
-						throw error;
-					} finally {
-						// Ensure log stream is always closed
-						logStream?.end();
-					}
+					this.logger.info(`Extracted archive: ${archivePath}`);
+				} catch (error) {
+					this.logger.error(`Failed to extract ${archivePath}: ${error}`);
+					// Update status to EXTRACTION_FAILED
+					db.update(T_MOD_RELEASE_ASSETS)
+						.set({ status: AssetStatus.EXTRACTION_FAILED })
+						.where(eq(T_MOD_RELEASE_ASSETS.id, asset.id))
+						.run();
+					throw error;
+				} finally {
+					// Ensure log stream is always closed
+					logStream?.end();
 				}
-
-				// Update status to EXTRACTED
-				db.update(T_MOD_RELEASE_ASSETS)
-					.set({ status: AssetStatus.EXTRACTED })
-					.where(eq(T_MOD_RELEASE_ASSETS.id, asset.id))
-					.run();
-
-				this.logger.debug(`Asset extracted successfully: ${asset.name}`);
-			} catch (error) {
-				this.logger.error(`Failed to extract asset ${asset.name}: ${error}`);
-				throw error;
 			}
+
+			// Update status to EXTRACTED
+			db.update(T_MOD_RELEASE_ASSETS)
+				.set({ status: AssetStatus.EXTRACTED })
+				.where(eq(T_MOD_RELEASE_ASSETS.id, asset.id))
+				.run();
+
+			this.logger.debug(`Asset extracted successfully: ${asset.name}`);
 		}
 
 		this.logger.info(`All archives extracted for release: ${releaseId}`);
