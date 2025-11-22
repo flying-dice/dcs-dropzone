@@ -7,6 +7,7 @@ import {
 	type ModReleaseData,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
+import { useDaemonSubscriptions } from "../../hooks/useDaemonSubscriptions.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
@@ -51,6 +52,8 @@ export function _FormActions(props: {
 		});
 	};
 
+	const daemon = useDaemonSubscriptions(props.mod, props.release, props.form);
+
 	return (
 		<Card withBorder>
 			<Stack>
@@ -71,6 +74,24 @@ export function _FormActions(props: {
 				<Button color={"red"} variant={"outline"} onClick={handleDelete}>
 					{t("DELETE_RELEASE")}
 				</Button>
+				<Divider />
+				{daemon.isSubscribedTo(props.release.id) ? (
+					<Button
+						variant={"light"}
+						onClick={daemon.unsubscribe}
+						loading={daemon.unsubscribing.loading}
+					>
+						Unsubscribe
+					</Button>
+				) : (
+					<Button
+						variant={"light"}
+						onClick={daemon.subscribe}
+						loading={daemon.subscribing.loading}
+					>
+						Subscribe
+					</Button>
+				)}
 			</Stack>
 		</Card>
 	);

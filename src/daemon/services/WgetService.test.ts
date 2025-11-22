@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { WgetService } from "./wget.service.ts";
+import { WgetService } from "./WgetService.ts";
 
 describe("Wget Service", () => {
 	test("should download a file successfully", async () => {

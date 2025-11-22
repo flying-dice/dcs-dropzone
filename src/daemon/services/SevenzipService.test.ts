@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { SevenzipService } from "./sevenzip.service.ts";
+import { SevenzipService } from "./SevenzipService.ts";
 
 describe("Sevenzip Service", () => {
 	test("should throw error if 7z executable not found", () => {

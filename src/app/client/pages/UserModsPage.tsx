@@ -12,7 +12,7 @@ import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import type { UserData } from "../_autogen/api.ts";
 import { useGetUserMods } from "../_autogen/api.ts";
-import { ModCard } from "../components/ModCard/index.tsx";
+import { ModCard } from "../components/ModCard";
 import { NewModForm } from "../components/NewModForm.tsx";
 import { StatCard } from "../components/StatCard.tsx";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";

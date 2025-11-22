@@ -187,5 +187,12 @@ export default {
 		[ModCategory.TERRAIN]: "Terrain",
 		[ModCategory.UTILITY]: "Utility",
 		[ModCategory.OTHER]: "Other",
+
+		SUBSCRIBE_SUCCESS_TITLE: "Subscribed Successfully",
+		SUBSCRIBE_SUCCESS_DESC: "You have successfully subscribed to this mod.",
+
+		UNSUBSCRIBE_SUCCESS_TITLE: "Unsubscribed Successfully",
+		UNSUBSCRIBE_SUCCESS_DESC:
+			"You have successfully unsubscribed from this mod.",
 	},
 };

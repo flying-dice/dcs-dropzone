@@ -32,7 +32,7 @@ const configSchema = z.object({
 	}),
 });
 
-export type AppConfig = z.infer<typeof configSchema>;
+export type ApplicationConfig = z.infer<typeof configSchema>;
 
 const appConfig = configSchema.parse(config);
 

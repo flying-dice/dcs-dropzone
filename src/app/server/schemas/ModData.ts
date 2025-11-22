@@ -17,7 +17,6 @@ export const ModData = z
 		maintainers: z
 			.array(z.string())
 			.min(1, "A mod must have at least one maintainer."),
-		featuredAt: z.string().optional(),
 		subscribersCount: z.number(),
 		ratingsCount: z.number(),
 		averageRating: z.number(),

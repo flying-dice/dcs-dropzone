@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
+import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import ApplicationContext from "../Application.ts";
 import Logger from "../Logger.ts";
-import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 
 const router = new Hono();
 

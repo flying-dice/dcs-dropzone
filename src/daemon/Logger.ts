@@ -1,6 +1,6 @@
 import { pino } from "pino";
 import prettyTransport from "pino-pretty";
-import appConfig from "./app-config.ts";
+import appConfig from "./ApplicationConfig.ts";
 
 const transport = prettyTransport({
 	colorize: appConfig.logging.colorize,
@@ -22,5 +22,6 @@ export function getLogger(namespace: string) {
 }
 
 export default {
-	root: rootLogger, getLogger
-}
+	root: rootLogger,
+	getLogger,
+};

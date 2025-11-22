@@ -12,7 +12,7 @@ import { ModService } from "./services/ModService.ts";
 import { UserModService } from "./services/UserModService.ts";
 import { UserService } from "./services/UserService.ts";
 
-const logger = Logger.getLogger("ApplicationContext");
+const logger = Logger.getLogger("Application");
 
 logger.debug("Initializing services");
 const userService: UserService = new UserService();

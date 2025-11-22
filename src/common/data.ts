@@ -28,6 +28,18 @@ export enum MissionScriptRunOn {
 	MISSION_START_AFTER_SANITIZE = "MISSION_START_AFTER_SANITIZE",
 }
 
+export enum AssetStatus {
+	PENDING = "PENDING",
+
+	DOWNLOADING = "DOWNLOADING",
+	DOWNLOADED = "DOWNLOADED",
+	DOWNLOAD_FAILED = "DOWNLOAD_FAILED",
+
+	EXTRACTING = "EXTRACTING",
+	EXTRACTED = "EXTRACTED",
+	EXTRACTION_FAILED = "EXTRACTION_FAILED",
+}
+
 export const data = {
 	categories: Object.values(ModCategory),
 	visibilities: Object.values(ModVisibility),
