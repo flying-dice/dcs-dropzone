@@ -29,6 +29,7 @@ const configSchema = z.object({
 	binaries: z.object({
 		target_directory: z.string(),
 		wget: z.string().url(),
+		sevenzip: z.string(),
 	}),
 });
 
@@ -41,4 +42,9 @@ export default appConfig;
 export const WGET_EXECUTABLE_PATH = join(
 	appConfig.binaries.target_directory,
 	"wget.exe",
+);
+
+export const SEVENZIP_EXECUTABLE_PATH = join(
+	process.cwd(),
+	appConfig.binaries.sevenzip,
 );

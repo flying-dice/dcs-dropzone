@@ -25,3 +25,4 @@ url = "index.sqlite"      # Database URL
 [binaries]
 target_directory = ".bin"
 wget = "https://eternallybored.org/misc/wget/1.21.4/64/wget.exe"          # Path to download the winget binary
+sevenzip = "binaries/7za.exe"                                              # Path to 7zip executable
