@@ -45,6 +45,6 @@ export const WGET_EXECUTABLE_PATH = join(
 );
 
 export const SEVENZIP_EXECUTABLE_PATH = join(
-	process.cwd(),
+	appConfig.binaries.target_directory,
 	appConfig.binaries.sevenzip,
 );
