@@ -93,10 +93,6 @@ export class ReleaseDownloadService {
 					.run();
 
 				this.logger.debug(`Asset downloaded successfully: ${asset.name}`);
-			} catch (error) {
-				this.logger.error(`Failed to download asset ${asset.name}: ${error}`);
-				throw error;
-			}
 		}
 
 		this.logger.info(`All assets downloaded for release: ${releaseId}`);
