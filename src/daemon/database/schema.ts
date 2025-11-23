@@ -50,3 +50,6 @@ export const T_MOD_RELEASE_MISSION_SCRIPTS = sqliteTable(
 		installedPath: text("installed_path"),
 	},
 );
+
+// Re-export download queue schema
+export * from "./schema-download-queue.ts";
