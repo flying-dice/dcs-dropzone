@@ -89,6 +89,7 @@ export abstract class BaseProcess {
 	async cancel(): Promise<void> {
 		if (!this.process) {
 			this.logger.warn({ jobId: this.jobId }, "No process to cancel");
+			this.cleanup(); // Still cleanup the registry entry
 			return;
 		}
 
@@ -167,5 +168,13 @@ export abstract class BaseProcess {
 	 */
 	static getActiveProcessCount(): number {
 		return BaseProcess.activeProcesses.size;
+	}
+
+	/**
+	 * Clear all processes from registry (for testing only)
+	 * @internal
+	 */
+	static __clearRegistry(): void {
+		BaseProcess.activeProcesses.clear();
 	}
 }
