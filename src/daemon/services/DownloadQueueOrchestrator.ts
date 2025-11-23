@@ -21,6 +21,7 @@ export type DownloadQueueOrchestratorConfig = {
 	pollIntervalMs?: number;
 	maxRetries?: number;
 	initialRetryDelayMs?: number;
+	progressThrottleMs?: number;
 };
 
 /**
@@ -35,6 +36,7 @@ export class DownloadQueueOrchestrator {
 	private readonly pollIntervalMs: number;
 	private readonly maxRetries: number;
 	private readonly initialRetryDelayMs: number;
+	private readonly progressThrottleMs: number;
 
 	private pollTimer?: NodeJS.Timeout;
 	private isRunning = false;
@@ -47,6 +49,7 @@ export class DownloadQueueOrchestrator {
 		this.pollIntervalMs = config.pollIntervalMs ?? 1000;
 		this.maxRetries = config.maxRetries ?? 3;
 		this.initialRetryDelayMs = config.initialRetryDelayMs ?? 2000;
+		this.progressThrottleMs = config.progressThrottleMs ?? 500;
 
 		this.logger.info(
 			{
@@ -213,7 +216,13 @@ export class DownloadQueueOrchestrator {
 			.all();
 
 		for (const job of eligibleJobs) {
-			this.processJob(job);
+			// Fire and forget - don't await to allow parallel processing
+			this.processJob(job).catch((error) => {
+				this.logger.error(
+					{ jobId: job.id, error },
+					"Unhandled error in processJob",
+				);
+			});
 		}
 	}
 
@@ -261,11 +270,10 @@ export class DownloadQueueOrchestrator {
 
 			// Start the process with progress throttling
 			let lastProgressUpdate = 0;
-			const progressThrottleMs = 500; // Update DB at most every 500ms
 
 			const result = await wgetProcess.start((progress) => {
 				const now = Date.now();
-				if (now - lastProgressUpdate >= progressThrottleMs) {
+				if (now - lastProgressUpdate >= this.progressThrottleMs) {
 					this.updateJobProgress(job.id, progress.progress, progress.summary);
 					lastProgressUpdate = now;
 				}

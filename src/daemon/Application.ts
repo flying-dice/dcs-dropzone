@@ -36,6 +36,7 @@ const downloadQueueOrchestrator = new DownloadQueueOrchestrator({
 	pollIntervalMs: 1000,
 	maxRetries: 3,
 	initialRetryDelayMs: 2000,
+	progressThrottleMs: 500,
 });
 
 // Start the orchestrator
