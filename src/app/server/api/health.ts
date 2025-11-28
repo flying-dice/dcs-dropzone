@@ -1,12 +1,12 @@
 import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import Database from "../Database.ts";
-import Logger from "../Logger.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 
 const router = new Hono();
-const logger = Logger.getLogger("api/health");
+const logger = getLogger("api/health");
 
 router.get(
 	"/",

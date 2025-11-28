@@ -1,9 +1,119 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "0150cc9e-712f-4a65-b21e-8676e8f4ecf1",
+	"id": "5395cf20-8f44-4959-8545-8b0ade1e5282",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
+		"DOWNLOAD_QUEUE": {
+			"name": "DOWNLOAD_QUEUE",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_id": {
+					"name": "release_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_asset_id": {
+					"name": "release_asset_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"url": {
+					"name": "url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"target_directory": {
+					"name": "target_directory",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "'PENDING'"
+				},
+				"progress_percent": {
+					"name": "progress_percent",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": 0
+				},
+				"attempt": {
+					"name": "attempt",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": 0
+				},
+				"max_attempts": {
+					"name": "max_attempts",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": 3
+				},
+				"next_attempt_after": {
+					"name": "next_attempt_after",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"DOWNLOAD_QUEUE_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "DOWNLOAD_QUEUE_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "DOWNLOAD_QUEUE",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"DOWNLOAD_QUEUE_release_asset_id_MOD_RELEASE_ASSETS_id_fk": {
+					"name": "DOWNLOAD_QUEUE_release_asset_id_MOD_RELEASE_ASSETS_id_fk",
+					"tableFrom": "DOWNLOAD_QUEUE",
+					"tableTo": "MOD_RELEASE_ASSETS",
+					"columnsFrom": ["release_asset_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
 		"MOD_RELEASES": {
 			"name": "MOD_RELEASES",
 			"columns": {
@@ -79,18 +189,20 @@
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
-				},
-				"status": {
-					"name": "status",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false,
-					"default": "'PENDING'"
 				}
 			},
 			"indexes": {},
-			"foreignKeys": {},
+			"foreignKeys": {
+				"MOD_RELEASE_ASSETS_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "MOD_RELEASE_ASSETS_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "MOD_RELEASE_ASSETS",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"checkConstraints": {}
@@ -156,7 +268,17 @@
 				}
 			},
 			"indexes": {},
-			"foreignKeys": {},
+			"foreignKeys": {
+				"MOD_RELEASE_MISSION_SCRIPTS_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "MOD_RELEASE_MISSION_SCRIPTS_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "MOD_RELEASE_MISSION_SCRIPTS",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"checkConstraints": {}
@@ -215,7 +337,17 @@
 				}
 			},
 			"indexes": {},
-			"foreignKeys": {},
+			"foreignKeys": {
+				"MOD_RELEASE_SYMBOLIC_LINKS_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "MOD_RELEASE_SYMBOLIC_LINKS_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "MOD_RELEASE_SYMBOLIC_LINKS",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"checkConstraints": {}

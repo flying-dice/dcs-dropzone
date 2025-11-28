@@ -1,12 +1,16 @@
+import { getLogger } from "log4js";
 import Application from "../Application.ts";
-import Logger from "../Logger.ts";
+import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { SubscriptionRepository } from "../repositories/SubscriptionRepository.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
 
-const logger = Logger.getLogger("SubscriptionService");
+const logger = getLogger("SubscriptionService");
 
 export class SubscriptionService {
-  constructor(private readonly repo: SubscriptionRepository) {}
+	constructor(
+		private readonly repo: SubscriptionRepository,
+		private readonly downloadQueue: DownloadQueue,
+	) {}
 
 	getAllSubscriptions(): { modId: string; releaseId: string }[] {
 		return this.repo.getAll();
@@ -14,6 +18,8 @@ export class SubscriptionService {
 
 	async removeSubscription(releaseId: string) {
 		logger.info(`Removing subscription for releaseId: ${releaseId}`);
+
+		this.downloadQueue.cancelJobsForRelease(releaseId);
 
 		await Application.getReleaseAssetService(
 			releaseId,
@@ -37,10 +43,8 @@ export class SubscriptionService {
 			`Successfully subscribed to mod: ${data.modName} (release: ${data.version})`,
 		);
 
-		setTimeout(() => {
-			Application.getReleaseAssetService(
-				data.releaseId,
-			).downloadAndExtractReleaseAssets();
-		});
+		Application.getReleaseAssetService(
+			data.releaseId,
+		).downloadAndExtractReleaseAssets();
 	}
 }

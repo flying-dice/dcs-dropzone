@@ -1,10 +1,9 @@
 import { subSeconds } from "date-fns";
+import { getLogger } from "log4js";
 import type { RootFilterQuery } from "mongoose";
-import type { Logger as LoggerType } from "pino";
 import { Migration, MigrationStatus } from "../entities/Migration.ts";
-import Logger from "../Logger.ts";
 
-const logger: LoggerType = Logger.getLogger("MigrationService");
+const logger = getLogger("MigrationService");
 
 export class MigrationService {
 	private static readonly MAX_AGE_SECONDS = 30;

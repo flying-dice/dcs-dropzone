@@ -2,12 +2,12 @@ import { getSignedCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import ApplicationContext from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
-import Logger from "../Logger.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = Logger.getLogger("cookieAuth");
+const logger = getLogger("cookieAuth");
 
 type Env = {
 	Variables: {

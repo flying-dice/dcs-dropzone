@@ -2,10 +2,10 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import ApplicationContext from "../Application.ts";
-import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
@@ -13,7 +13,7 @@ import { ModReleaseServiceError } from "../services/ModReleaseService.ts";
 
 const router = new Hono();
 
-const logger = Logger.getLogger("api/user-mod-releases");
+const logger = getLogger("api/user-mod-releases");
 
 /**
  * GET /api/user-mods/:id/releases - List all releases for a user-owned mod

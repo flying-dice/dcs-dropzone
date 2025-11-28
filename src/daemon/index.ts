@@ -1,7 +1,8 @@
+import "../common/log4js.ts";
 import { serve } from "bun";
+import { getLogger } from "log4js";
 import Application from "./Application.ts";
 import appConfig from "./ApplicationConfig.ts";
-import { getLogger } from "./Logger.ts";
 
 console.info(`🌍 DCS Dropzone Daemon Starting...`);
 

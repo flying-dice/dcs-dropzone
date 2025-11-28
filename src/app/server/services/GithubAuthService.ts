@@ -1,9 +1,9 @@
+import { getLogger } from "log4js";
 import { OAuthApp, Octokit } from "octokit";
 import appConfig from "../ApplicationConfig.ts";
-import Logger from "../Logger.ts";
 import type { AuthResult, AuthService } from "./AuthService.ts";
 
-const logger = Logger.getLogger("GithubAuthService");
+const logger = getLogger("GithubAuthService");
 
 export class GithubAuthService implements AuthService {
 	private readonly app: OAuthApp;

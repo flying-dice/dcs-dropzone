@@ -1,11 +1,11 @@
+import { getLogger } from "log4js";
 import { ModVisibility } from "../../../common/data.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
-import Logger from "../Logger.ts";
 import type { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = Logger.getLogger("ModReleaseService");
+const logger = getLogger("ModReleaseService");
 
 export enum ModReleaseServiceError {
 	NOT_FOUND = "NOT_FOUND",

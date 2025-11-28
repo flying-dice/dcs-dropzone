@@ -2,11 +2,11 @@ import { Hono } from "hono";
 import { deleteCookie, setSignedCookie } from "hono/cookie";
 import { describeRoute, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import ApplicationContext from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
-import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { UserData } from "../schemas/UserData.ts";
 import { AuthServiceProvider } from "../services/AuthServiceProvider.ts";
@@ -16,7 +16,7 @@ const params = z.object({
 });
 
 const router = new Hono();
-const logger = Logger.getLogger("api/auth");
+const logger = getLogger("api/auth");
 
 router.get(
 	"/:provider/callback",

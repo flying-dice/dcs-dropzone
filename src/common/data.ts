@@ -40,6 +40,12 @@ export enum AssetStatus {
 	EXTRACTION_FAILED = "EXTRACTION_FAILED",
 }
 
+export enum DownloadJobStatus {
+	PENDING = "PENDING",
+	IN_PROGRESS = "IN_PROGRESS",
+	COMPLETED = "COMPLETED",
+}
+
 export const data = {
 	categories: Object.values(ModCategory),
 	visibilities: Object.values(ModVisibility),

@@ -1,5 +1,5 @@
 import { Database, type Statement } from "bun:sqlite";
-import { getLogger } from "../Logger";
+import { getLogger } from "log4js";
 import { AppDatabaseMigration } from "./app-database-migration";
 
 const MIGRATIONS_DDL = `
@@ -58,35 +58,23 @@ export class AppDatabase {
 
 		// Prepare the transaction for applying migrations
 		const applyMigration = this.db.transaction((it: AppDatabaseMigration) => {
-			this.logger.debug(it, "Applying migration %s", it.filename);
+			this.logger.debug(`Applying migration ${it.filename}`);
 			this.db.run(it.sql);
 			this.migrationsDml.run({ filename: it.filename, hash: it.hash });
 		});
 
-		this.logger.debug(
-			{ count: this.migrations.length },
-			"Applying %d migration files",
-			this.migrations.length,
-		);
 		for (const migration of this.migrations) {
-			this.logger.debug(migration, "Checking migration %s", migration.hash);
+			this.logger.debug(`Checking migration ${migration.filename}`);
 			if (this.isMigrationApplied(migration)) {
 				this.logger.debug(
-					migration,
-					"Migration %s already applied, skipping",
-					migration.hash,
+					`Migration ${migration.filename} already applied, skipping`,
 				);
 				continue;
 			}
-			this.logger.debug(migration, "Applying migration %s", migration.hash);
 			applyMigration(migration);
 		}
 
-		this.logger.debug(
-			{ count: this.migrations.length },
-			"Applied %d migration files",
-			this.migrations.length,
-		);
+		this.logger.debug(`Applied ${this.migrations.length} migration files`);
 	}
 
 	getDatabase(): Database {

@@ -1,3 +1,4 @@
+import "../common/log4js.ts";
 import { serve } from "bun";
 import index from "./client/index.html";
 import Application from "./server/Application.ts";

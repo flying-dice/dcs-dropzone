@@ -8,7 +8,7 @@ The download queue system provides a robust, database-backed solution for managi
 
 ### Components
 
-1. **DownloadQueueOrchestrator** - Main service that manages the queue
+1. **DownloadQueue** - Main service that manages the queue
    - Polls database for pending jobs
    - Manages concurrency (default: 3 concurrent downloads)
    - Handles retry logic with exponential backoff
@@ -131,10 +131,10 @@ Formula: `initialDelay * 2^retryCount`
 Configure the orchestrator in `Application.ts`:
 
 ```typescript
-const downloadQueueOrchestrator = new DownloadQueueOrchestrator({
+const downloadQueueOrchestrator = new DownloadQueue({
   db: _db,
   wgetExecutablePath: applicationConfig.binaries.wget,
-  logger: Logger.getLogger("DownloadQueueOrchestrator"),
+  logger: getLogger("DownloadQueue"),
   maxConcurrentDownloads: 3,    // Max parallel downloads
   pollIntervalMs: 1000,          // Poll frequency (ms)
   maxRetries: 3,                 // Default max retries per job

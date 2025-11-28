@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/bun-sqlite";
+import { getLogger } from "log4js";
 import type { ApplicationConfig } from "../ApplicationConfig.ts";
-import { getLogger } from "../Logger.ts";
 import { AppDatabase } from "./app-database.ts";
 import { ddlExports } from "./db-ddl.ts";
 

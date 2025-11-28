@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import { db } from "../database";
 
 const router = new Hono();
 
@@ -43,7 +42,6 @@ router.get(
 	}),
 	async (c) => {
 		try {
-			db.run("SELECT 1");
 			return c.json({ status: "UP" }, StatusCodes.OK);
 		} catch (error) {
 			return c.json(
