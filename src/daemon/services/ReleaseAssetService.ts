@@ -1,10 +1,11 @@
 import { exists, mkdir, rm } from "node:fs/promises";
-import { resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger, type Logger } from "log4js";
 import { T_MOD_RELEASE_ASSETS, T_MOD_RELEASES } from "../database/schema.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
+import type { ExtractQueue } from "../queues/ExtractQueue.ts";
 
 const logger = getLogger("ReleaseDownloadService");
 
@@ -23,6 +24,7 @@ export class ReleaseAssetService {
 		private readonly releaseId: string,
 		private readonly db: BunSQLiteDatabase,
 		private readonly downloadQueue: DownloadQueue,
+		private readonly extractQueue: ExtractQueue,
 	) {
 		logger.debug(
 			`ReleaseAssetService initialized for releaseId: ${this.releaseId}`,
@@ -50,6 +52,9 @@ export class ReleaseAssetService {
 	async removeReleaseAssetsAndFolder(): Promise<void> {
 		this.logger.info(`Removing release assets and folder`);
 
+		// Cancel any pending extract jobs for this release
+		this.extractQueue.cancelJobsForRelease(this.releaseId);
+
 		await this.removeReleaseFolder();
 
 		this.logger.info(`Successfully removed release assets from database`);
@@ -69,20 +74,43 @@ export class ReleaseAssetService {
 		for (const asset of assets) {
 			this.logger.debug(`Downloading asset: ${asset.name}`);
 
+			const downloadJobIds: string[] = [];
+
 			for (const [idx, url] of asset.urls.entries()) {
+				const downloadJobId = `${asset.id}:${idx}`;
 				this.logger.debug(`Pushing download job for URL: ${url}`);
 				this.downloadQueue.pushJob(
 					this.releaseId,
 					asset.id,
-					`${asset.id}:${idx}`,
+					downloadJobId,
 					url,
 					releaseFolder,
+				);
+				downloadJobIds.push(downloadJobId);
+			}
+
+			// If the asset is an archive, create an extract job that depends on all download jobs
+			if (asset.isArchive && asset.urls.length > 0) {
+				// For multipart archives, the first file is typically the main archive
+				const firstUrl = asset.urls[0] as string;
+				const archivePath = join(releaseFolder, basename(firstUrl));
+
+				this.logger.debug(
+					`Pushing extract job for archive: ${archivePath} with ${downloadJobIds.length} download dependencies`,
+				);
+				this.extractQueue.pushJob(
+					this.releaseId,
+					asset.id,
+					`extract:${asset.id}`,
+					archivePath,
+					releaseFolder,
+					downloadJobIds,
 				);
 			}
 		}
 
 		this.logger.info(
-			`All download jobs pushed to queue, waiting for completion`,
+			`All download and extract jobs pushed to queues, waiting for completion`,
 		);
 	}
 

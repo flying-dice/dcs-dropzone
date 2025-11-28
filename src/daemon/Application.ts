@@ -2,6 +2,7 @@ import { getLogger } from "log4js";
 import applicationConfig from "./ApplicationConfig.ts";
 import { db } from "./database";
 import { DownloadQueue } from "./queues/DownloadQueue.ts";
+import { ExtractQueue } from "./queues/ExtractQueue.ts";
 import { DrizzleSqliteSubscriptionRepository } from "./repositories/impl/DrizzleSqliteSubscriptionRepository.ts";
 import type { SubscriptionRepository } from "./repositories/SubscriptionRepository.ts";
 import Server from "./Server.ts";
@@ -20,6 +21,12 @@ const downloadQueue = new DownloadQueue({
 	maxRetries: 3,
 });
 
+const extractQueue = new ExtractQueue({
+	db: _db,
+	sevenzipExecutablePath: applicationConfig.binaries.sevenzip,
+	maxRetries: 3,
+});
+
 logger.debug("Initializing services");
 const subscriptionRepository: SubscriptionRepository =
 	new DrizzleSqliteSubscriptionRepository(_db);
@@ -32,7 +39,7 @@ logger.debug("Services initialized");
 
 function getReleaseAssetService(releaseId: string): ReleaseAssetService {
 	logger.debug("Creating ReleaseAssetService instance");
-	return new ReleaseAssetService(releaseId, _db, downloadQueue);
+	return new ReleaseAssetService(releaseId, _db, downloadQueue, extractQueue);
 }
 
 export default {
@@ -40,4 +47,5 @@ export default {
 	subscriptionService,
 	getReleaseAssetService,
 	downloadQueue,
+	extractQueue,
 };

@@ -46,6 +46,12 @@ export enum DownloadJobStatus {
 	COMPLETED = "COMPLETED",
 }
 
+export enum ExtractJobStatus {
+	PENDING = "PENDING",
+	IN_PROGRESS = "IN_PROGRESS",
+	COMPLETED = "COMPLETED",
+}
+
 export const data = {
 	categories: Object.values(ModCategory),
 	visibilities: Object.values(ModVisibility),
