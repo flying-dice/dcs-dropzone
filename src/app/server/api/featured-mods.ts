@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import ApplicationContext from "../Application.ts";
-import Logger from "../Logger.ts";
 import { ModData } from "../schemas/ModData.ts";
 
 const router = new Hono();
 
-const _logger = Logger.getLogger("api/featured-mods");
+const _logger = getLogger("api/featured-mods");
 
 /**
  * GET /api/featured-mods - List all featured mods (summary view)

@@ -1,7 +1,7 @@
+import { getLogger } from "log4js";
 import { ModVisibility } from "../../../common/data.ts";
 import { Mod } from "../entities/Mod.ts";
 import { ModSummary } from "../entities/ModSummary.ts";
-import Logger from "../Logger.ts";
 import type { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
@@ -9,7 +9,7 @@ import type { ModUpdateData } from "../schemas/ModUpdateData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
 
-const logger = Logger.getLogger("UserModService");
+const logger = getLogger("UserModService");
 
 export enum UserModServiceError {
 	NotFound = "NotFound",

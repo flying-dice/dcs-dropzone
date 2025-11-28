@@ -1,6 +1,6 @@
 import { Database, type Statement } from "bun:sqlite";
-import { getLogger } from "../Logger";
-import type { AppDatabaseMigration } from "./app-database-migration";
+import { getLogger } from "log4js";
+import { AppDatabaseMigration } from "./app-database-migration";
 
 const MIGRATIONS_DDL = `
     CREATE TABLE IF NOT EXISTS "__drizzle_migrations"
@@ -58,35 +58,23 @@ export class AppDatabase {
 
 		// Prepare the transaction for applying migrations
 		const applyMigration = this.db.transaction((it: AppDatabaseMigration) => {
-			this.logger.debug(it, "Applying migration %s", it.filename);
+			this.logger.debug(`Applying migration ${it.filename}`);
 			this.db.run(it.sql);
 			this.migrationsDml.run({ filename: it.filename, hash: it.hash });
 		});
 
-		this.logger.debug(
-			{ count: this.migrations.length },
-			"Applying %d migration files",
-			this.migrations.length,
-		);
 		for (const migration of this.migrations) {
-			this.logger.debug(migration, "Checking migration %s", migration.hash);
+			this.logger.debug(`Checking migration ${migration.filename}`);
 			if (this.isMigrationApplied(migration)) {
 				this.logger.debug(
-					migration,
-					"Migration %s already applied, skipping",
-					migration.hash,
+					`Migration ${migration.filename} already applied, skipping`,
 				);
 				continue;
 			}
-			this.logger.debug(migration, "Applying migration %s", migration.hash);
 			applyMigration(migration);
 		}
 
-		this.logger.debug(
-			{ count: this.migrations.length },
-			"Applied %d migration files",
-			this.migrations.length,
-		);
+		this.logger.debug(`Applied ${this.migrations.length} migration files`);
 	}
 
 	getDatabase(): Database {
@@ -100,5 +88,27 @@ export class AppDatabase {
 				hash: migration.hash,
 			})?.count ?? 0) > 0
 		);
+	}
+
+	/**
+	 * Create an AppDatabase instance with migrations from a Record<string, string> object.
+	 *
+	 * The keys are the filenames and the values are the SQL statements.
+	 *
+	 * @param filename {string} - The database filename.
+	 * @param migrations {Record<string, string>} - The migrations as a record of filename to SQL.
+	 * @returns {AppDatabase} - The AppDatabase instance.
+	 */
+	static withMigrations(
+		filename: string,
+		migrations: Record<string, string>,
+	): AppDatabase {
+		const _migrations: AppDatabaseMigration[] = Object.entries(migrations).map(
+			([filename, sql]) => new AppDatabaseMigration(filename, sql),
+		);
+
+		const appDatabase = new AppDatabase(filename, _migrations);
+
+		return appDatabase;
 	}
 }

@@ -3,8 +3,8 @@ import { statSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathExistsSync } from "fs-extra";
+import { getLogger } from "log4js";
 import { extractPercentage } from "../functions/extract-percentage.ts";
-import { getLogger } from "../Logger.ts";
 
 export const SUPPORTED_ARCHIVE_EXTENSIONS = [
 	"7z",

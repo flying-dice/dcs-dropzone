@@ -42,3 +42,4 @@ app.log
 # SQLite databases
 *.sqlite
 *.db
+.wget-hsts

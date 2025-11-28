@@ -1,15 +1,15 @@
 import { Hono } from "hono";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../common/describeJsonRoute";
 import Application from "../Application.ts";
-import Logger from "../Logger";
 import { ModAndReleaseData } from "../schemas/ModAndReleaseData";
 
 const router = new Hono();
 
-const logger = Logger.getLogger("api/subscribe");
+const logger = getLogger("api/subscribe");
 
 router.post(
 	"/",
@@ -49,11 +49,25 @@ router.get(
 			[StatusCodes.OK]: ModAndReleaseData.pick({
 				modId: true,
 				releaseId: true,
-			}).array(),
+			})
+				.extend({
+					progressPercent: z.number().optional(),
+				})
+				.array(),
 		},
 	}),
 	async (c) => {
-		const subscriptions = Application.subscriptionService.getAllSubscriptions();
+		const subscriptions: {
+			modId: string;
+			releaseId: string;
+			progressPercent?: number;
+		}[] = Application.subscriptionService.getAllSubscriptions();
+
+		for (const sub of subscriptions) {
+			sub.progressPercent =
+				Application.downloadQueue.getOverallProgressForRelease(sub.releaseId);
+		}
+
 		return c.json(subscriptions, StatusCodes.OK);
 	},
 );

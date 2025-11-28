@@ -1,4 +1,4 @@
-import Logger from "./Logger.ts";
+import { getLogger } from "log4js";
 import { server } from "./Server.ts";
 import type { UserData } from "./schemas/UserData.ts";
 import type { AuthService } from "./services/AuthService.ts";
@@ -12,7 +12,7 @@ import { ModService } from "./services/ModService.ts";
 import { UserModService } from "./services/UserModService.ts";
 import { UserService } from "./services/UserService.ts";
 
-const logger = Logger.getLogger("Application");
+const logger = getLogger("Application");
 
 logger.debug("Initializing services");
 const userService: UserService = new UserService();

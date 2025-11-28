@@ -2,10 +2,10 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import ApplicationContext from "../Application.ts";
-import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
@@ -16,7 +16,7 @@ import { UserModServiceError } from "../services/UserModService.ts";
 
 const router = new Hono();
 
-const logger = Logger.getLogger("api/user-mods");
+const logger = getLogger("api/user-mods");
 
 /**
  * GET /api/user-mods - List all user's mods (summary view)

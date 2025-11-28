@@ -1,10 +1,10 @@
+import { getLogger } from "log4js";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import * as mongoose from "mongoose";
 import { MongoUrl } from "../../common/MongoUrl.ts";
 import applicationConfig from "./ApplicationConfig.ts";
-import Logger from "./Logger.ts";
 
-const logger = Logger.getLogger("Database");
+const logger = getLogger("Database");
 
 const mongoUrl = new MongoUrl(applicationConfig.mongoUri);
 

@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from "hono";
-import Logger from "../Logger.ts";
+import { getLogger } from "log4js";
 
-const logger = Logger.getLogger("requestResponseLogger");
+const logger = getLogger("requestResponseLogger");
 
 export const requestResponseLogger =
 	(): MiddlewareHandler => async (c, next) => {

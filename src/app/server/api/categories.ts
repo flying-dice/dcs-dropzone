@@ -1,14 +1,14 @@
 import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { z } from "zod";
 import { ModCategory } from "../../../common/data.ts";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import ApplicationContext from "../Application.ts";
-import Logger from "../Logger.ts";
 
 const router = new Hono();
 
-const _logger = Logger.getLogger("api/categories");
+const _logger = getLogger("api/categories");
 
 /**
  * GET /api/categories - List all categories and their mod counts

@@ -1,6 +1,7 @@
 import { basename, extname } from "node:path";
 import { camelToKebabCase } from "@mantine/core";
 import { toCamelCase } from "drizzle-orm/casing";
+import { getLogger } from "log4js";
 import type { RootFilterQuery } from "mongoose";
 import {
 	MissionScriptRunOn,
@@ -16,7 +17,6 @@ import {
 import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import { ModSummary } from "../entities/ModSummary.ts";
-import Logger from "../Logger.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import {
@@ -27,7 +27,7 @@ import {
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import { PageData } from "../schemas/PageData.ts";
 
-const logger = Logger.getLogger("ModService");
+const logger = getLogger("ModService");
 
 export class ModService {
 	async findAllFeaturedMods(): Promise<ModSummaryData[]> {

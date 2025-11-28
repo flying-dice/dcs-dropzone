@@ -1,0 +1,18 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`applies migrations once and skips already-applied ones 1`] = `
+[
+  {
+    "created_at": Any<String>,
+    "filename": "_0000_init_sql",
+    "hash": "4427d6751820d8e114e94fe6b59772b5e7326909d0a1c6e3e6b994246f0781fb",
+    "ó": null,
+  },
+  {
+    "created_at": Any<String>,
+    "filename": "_0001_download_queue_sql",
+    "hash": "d8ad9a61e1072a2048830f52f263af0dd805e9b6d5e8b68fe6598f621b142c0a",
+    "ó": null,
+  },
+]
+`;

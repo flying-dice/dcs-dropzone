@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { z } from "zod";
 
 const file = Bun.file(`${process.cwd()}/config.toml`);
@@ -28,7 +27,8 @@ const configSchema = z.object({
 	}),
 	binaries: z.object({
 		target_directory: z.string(),
-		wget: z.string().url(),
+		wget: z.string().min(1, "wget path is required"),
+		sevenzip: z.string().min(1, "7zip path is required"),
 	}),
 });
 
@@ -37,8 +37,3 @@ export type ApplicationConfig = z.infer<typeof configSchema>;
 const appConfig = configSchema.parse(config);
 
 export default appConfig;
-
-export const WGET_EXECUTABLE_PATH = join(
-	appConfig.binaries.target_directory,
-	"wget.exe",
-);

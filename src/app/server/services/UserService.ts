@@ -1,9 +1,9 @@
+import { getLogger } from "log4js";
 import { User } from "../entities/User.ts";
-import Logger from "../Logger.ts";
 import { UserData } from "../schemas/UserData.ts";
 import type { AuthResult } from "./AuthService.ts";
 
-const logger = Logger.getLogger("UserService");
+const logger = getLogger("UserService");
 
 export class UserService {
 	async getUserById(userId: string): Promise<UserData> {

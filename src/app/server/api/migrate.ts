@@ -1,15 +1,15 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import Application from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
-import Logger from "../Logger.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 
 const router = new Hono();
-const logger = Logger.getLogger("api/migrate");
+const logger = getLogger("api/migrate");
 
 router.get(
 	"/",

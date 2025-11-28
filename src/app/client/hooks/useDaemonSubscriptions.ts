@@ -31,7 +31,9 @@ export function useDaemonSubscriptions(
 	form?: UserModReleaseForm,
 ) {
 	const { t } = useAppTranslation();
-	const subscriptions = useGetAllSubscriptions();
+	const subscriptions = useGetAllSubscriptions({
+		query: { refetchInterval: 1000 },
+	});
 
 	const [subscribing, subscribe] = useAsyncFn(async () => {
 		try {
@@ -69,6 +71,8 @@ export function useDaemonSubscriptions(
 	}, [form, mod, t, release]);
 
 	return {
+		isAvailable: subscriptions.isSuccess,
+		isUnavailable: !subscriptions.isSuccess,
 		subscribing,
 		subscribe,
 		unsubscribing,
@@ -80,6 +84,12 @@ export function useDaemonSubscriptions(
 				subscriptions.data?.data.some((sub) => sub.releaseId === releaseId) ??
 				false
 			);
+		},
+		getSubscriptionProgress(releaseId: string) {
+			const sub = subscriptions.data?.data.find(
+				(sub) => sub.releaseId === releaseId,
+			);
+			return sub?.progressPercent;
 		},
 	};
 }
