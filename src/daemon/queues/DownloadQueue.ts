@@ -1,6 +1,6 @@
 import { ok } from "node:assert";
 import { addSeconds } from "date-fns";
-import { and, asc, eq, gte, lt } from "drizzle-orm";
+import { and, asc, avg, eq, gte, lt } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus } from "../../common/data.ts";
@@ -51,9 +51,18 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 			maxRetries: this.maxRetries,
 		});
 
+		// Listen to events to trigger the next job without Delay
 		this.on(DownloadQueueEvents.PUSH, () => this.startNextDownloadJob());
 		this.on(DownloadQueueEvents.DOWNLOADED, () => this.startNextDownloadJob());
 		this.on(DownloadQueueEvents.FAILED, () => this.startNextDownloadJob());
+
+		// Periodically check for new jobs every 30 seconds
+		setInterval(() => {
+			this.startNextDownloadJob();
+		}, 30000);
+
+		// Resume any in-progress jobs on startup
+		this.startNextDownloadJob();
 	}
 
 	pushJob(
@@ -81,6 +90,18 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 			.get();
 
 		this.emit(DownloadQueueEvents.PUSH, job);
+	}
+
+	getOverallProgressForRelease(releaseId: string): number {
+		const average = this.db
+			.select({
+				progressPercent: avg(T_DOWNLOAD_QUEUE.progressPercent),
+			})
+			.from(T_DOWNLOAD_QUEUE)
+			.where(eq(T_DOWNLOAD_QUEUE.releaseId, releaseId))
+			.get();
+
+		return Math.floor(Number(average?.progressPercent ?? 0));
 	}
 
 	cancelJobsForRelease(releaseId: string): void {

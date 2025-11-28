@@ -133,13 +133,7 @@ export async function spawnWget(
 
 	const { exePath, target, url, onProgress } = parsedProps.data;
 
-	const args = [
-		"--progress=bar:force:giga",
-		"--show-progress",
-		"-c",
-		"--no-clobber",
-		url,
-	];
+	const args = ["--progress=bar:force:giga", "--show-progress", "-c", url];
 
 	return new Promise((resolve, reject) => {
 		const _wget = spawn(exePath, args, {

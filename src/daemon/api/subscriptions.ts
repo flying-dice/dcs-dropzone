@@ -49,11 +49,25 @@ router.get(
 			[StatusCodes.OK]: ModAndReleaseData.pick({
 				modId: true,
 				releaseId: true,
-			}).array(),
+			})
+				.extend({
+					progressPercent: z.number().optional(),
+				})
+				.array(),
 		},
 	}),
 	async (c) => {
-		const subscriptions = Application.subscriptionService.getAllSubscriptions();
+		const subscriptions: {
+			modId: string;
+			releaseId: string;
+			progressPercent?: number;
+		}[] = Application.subscriptionService.getAllSubscriptions();
+
+		for (const sub of subscriptions) {
+			sub.progressPercent =
+				Application.downloadQueue.getOverallProgressForRelease(sub.releaseId);
+		}
+
 		return c.json(subscriptions, StatusCodes.OK);
 	},
 );
