@@ -184,7 +184,7 @@ export async function spawnSevenzip(
 		_7zip.on("close", (code) => {
 			if (code === 0) {
 				_7zip.removeAllListeners();
-				props.onProgress({ progress: 100 });
+				onProgress({ progress: 100 });
 				resolve(code);
 			} else {
 				_7zip.removeAllListeners();

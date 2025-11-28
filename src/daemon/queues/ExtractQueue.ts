@@ -1,6 +1,6 @@
 import { ok } from "node:assert";
 import { addSeconds } from "date-fns";
-import { and, asc, avg, eq, gte, lt, notExists } from "drizzle-orm";
+import { and, asc, avg, eq, lt, lte, ne, notExists } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus, ExtractJobStatus } from "../../common/data.ts";
@@ -200,8 +200,9 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 				and(
 					eq(T_EXTRACT_QUEUE.status, ExtractJobStatus.PENDING),
 					lt(T_EXTRACT_QUEUE.attempt, T_EXTRACT_QUEUE.maxAttempts),
-					gte(T_EXTRACT_QUEUE.nextAttemptAfter, new Date()),
+					lte(T_EXTRACT_QUEUE.nextAttemptAfter, new Date()),
 					// Ensure all dependent download jobs are completed
+					// Uses notExists to check that no incomplete downloads exist
 					notExists(
 						this.db
 							.select({ id: T_EXTRACT_DOWNLOAD_JOIN.id })
@@ -213,23 +214,8 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 							.where(
 								and(
 									eq(T_EXTRACT_DOWNLOAD_JOIN.extractJobId, T_EXTRACT_QUEUE.id),
-									// Download is NOT completed
-									eq(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.PENDING),
-								),
-							),
-					),
-					notExists(
-						this.db
-							.select({ id: T_EXTRACT_DOWNLOAD_JOIN.id })
-							.from(T_EXTRACT_DOWNLOAD_JOIN)
-							.innerJoin(
-								T_DOWNLOAD_QUEUE,
-								eq(T_EXTRACT_DOWNLOAD_JOIN.downloadJobId, T_DOWNLOAD_QUEUE.id),
-							)
-							.where(
-								and(
-									eq(T_EXTRACT_DOWNLOAD_JOIN.extractJobId, T_EXTRACT_QUEUE.id),
-									eq(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.IN_PROGRESS),
+									// Download is NOT completed (PENDING or IN_PROGRESS)
+									ne(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.COMPLETED),
 								),
 							),
 					),
