@@ -6,6 +6,10 @@ appenders:
     type: file
     filename: logs/db.log
 
+  http:
+    type: file
+    filename: logs/http.log
+
   dq:
     type: file
     filename: logs/Download.log
@@ -35,6 +39,10 @@ categories:
 
   WgetChildProcess:
     appenders: [console, dq]
+    level: debug
+
+  requestResponseLogger:
+    appenders: [http]
     level: debug
 
   error:

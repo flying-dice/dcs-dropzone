@@ -113,6 +113,7 @@ export type GetApiHealth503 = {
 export type GetAllSubscriptions200Item = {
 	modId: string;
 	releaseId: string;
+	progressPercent?: number;
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;

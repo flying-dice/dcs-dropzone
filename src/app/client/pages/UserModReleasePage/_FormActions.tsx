@@ -1,5 +1,6 @@
-import { Button, Card, Divider, Stack, Text } from "@mantine/core";
+import { Button, Card, Divider, Progress, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
+import { isNumber } from "lodash";
 import { useNavigate } from "react-router-dom";
 import {
 	deleteUserModRelease,
@@ -54,6 +55,8 @@ export function _FormActions(props: {
 
 	const daemon = useDaemonSubscriptions(props.mod, props.release, props.form);
 
+	const progressIfSubscribed = daemon.getSubscriptionProgress(props.release.id);
+
 	return (
 		<Card withBorder>
 			<Stack>
@@ -75,23 +78,38 @@ export function _FormActions(props: {
 					{t("DELETE_RELEASE")}
 				</Button>
 				<Divider />
-				{daemon.isSubscribedTo(props.release.id) ? (
-					<Button
-						variant={"light"}
-						onClick={daemon.unsubscribe}
-						loading={daemon.unsubscribing.loading}
-					>
-						Unsubscribe
-					</Button>
-				) : (
-					<Button
-						variant={"light"}
-						onClick={daemon.subscribe}
-						loading={daemon.subscribing.loading}
-					>
-						Subscribe
-					</Button>
-				)}
+				<Stack gap={2}>
+					{daemon.isSubscribedTo(props.release.id) ? (
+						<Button
+							variant={"light"}
+							onClick={daemon.unsubscribe}
+							loading={daemon.unsubscribing.loading}
+							disabled={daemon.isUnavailable}
+						>
+							{progressIfSubscribed === undefined ||
+							progressIfSubscribed === 100
+								? "Unsubscribe"
+								: "Cancel"}
+						</Button>
+					) : (
+						<Button
+							variant={"light"}
+							onClick={daemon.subscribe}
+							loading={daemon.subscribing.loading}
+							disabled={daemon.isUnavailable}
+						>
+							Subscribe
+						</Button>
+					)}
+					{isNumber(progressIfSubscribed) && (
+						<Progress
+							radius={"xs"}
+							value={progressIfSubscribed}
+							animated={progressIfSubscribed < 100}
+							striped={progressIfSubscribed < 100}
+						/>
+					)}
+				</Stack>
 			</Stack>
 		</Card>
 	);
