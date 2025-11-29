@@ -4,10 +4,10 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../common/describeJsonRoute";
-import Application from "../Application.ts";
+import type { AppContext } from "../middleware/appContext.ts";
 import { ModAndReleaseData } from "../schemas/ModAndReleaseData";
 
-const router = new Hono();
+const router = new Hono<AppContext>();
 
 const logger = getLogger("api/subscribe");
 
@@ -32,7 +32,7 @@ router.post(
 			`Received subscription request for mod: ${modAndRelease.modName} (release: ${modAndRelease.version})`,
 		);
 
-		Application.subscriptionService.subscribeToRelease(modAndRelease);
+		c.var.subscriptionService.subscribeToRelease(modAndRelease);
 
 		return c.json(null, StatusCodes.OK);
 	},
@@ -61,11 +61,12 @@ router.get(
 			modId: string;
 			releaseId: string;
 			progressPercent?: number;
-		}[] = Application.subscriptionService.getAllSubscriptions();
+		}[] = c.var.subscriptionService.getAllSubscriptions();
 
 		for (const sub of subscriptions) {
-			sub.progressPercent =
-				Application.downloadQueue.getOverallProgressForRelease(sub.releaseId);
+			sub.progressPercent = c.var.downloadQueue.getOverallProgressForRelease(
+				sub.releaseId,
+			);
 		}
 
 		return c.json(subscriptions, StatusCodes.OK);
@@ -91,7 +92,7 @@ router.delete(
 	),
 	async (c) => {
 		const { releaseId } = c.req.valid("param");
-		Application.subscriptionService.removeSubscription(releaseId);
+		c.var.subscriptionService.removeSubscription(releaseId);
 		return c.json(null, StatusCodes.OK);
 	},
 );
