@@ -93,13 +93,15 @@ extractQueue.on(ExtractQueueEvents.CANCELLED, (jobs) => {
 
 ```
 PENDING → IN_PROGRESS → COMPLETED
-              ↓
+              ↓ (on failure)
            PENDING (retry after 30s, up to maxAttempts)
 ```
 
+When extraction fails (e.g., corrupt archive, 7zip process error), the job returns to `PENDING` status with an incremented `attempt` counter. The job will be retried after 30 seconds. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
+
 ### States
 
-- **PENDING**: Job is queued, waiting for dependent downloads to complete
+- **PENDING**: Job is queued, waiting for dependent downloads to complete or waiting for retry
 - **IN_PROGRESS**: Job is actively extracting
 - **COMPLETED**: Extraction finished successfully
 
@@ -216,7 +218,7 @@ const extractQueue = new ExtractQueue({
 
 ## Supported Archive Formats
 
-7zip supports extraction of:
+7zip supports extraction of many archive formats. The actual format support depends on your 7zip installation. Common formats include:
 - 7z
 - bzip2
 - gzip
@@ -226,6 +228,8 @@ const extractQueue = new ExtractQueue({
 - xz
 - zip
 - zstd
+
+For a complete list, see the [7zip documentation](https://documentation.help/7-Zip/formats.htm).
 
 ## Resilience Features
 
@@ -306,9 +310,12 @@ WHERE edj.extract_job_id = 'your-extract-job-id';
 
 ### High memory usage
 
-- 7zip extracts one archive at a time
-- Large archives may temporarily use significant memory
-- Consider splitting very large archives
+7zip processes archives one at a time to limit resource consumption. Memory usage depends on:
+- Archive size and compression method
+- Available system memory
+- 7zip's internal dictionary size
+
+For archives larger than available RAM, 7zip may use disk-based processing which is slower but functional. No specific file size limits are enforced by the queue system.
 
 ## Related Documentation
 
