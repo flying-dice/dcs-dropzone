@@ -7,6 +7,12 @@ import {
 	spawnSevenzip,
 } from "../child_process/sevenzip.ts";
 
+/**
+ * @deprecated Use the ExtractQueue with spawnSevenzip child process instead.
+ * This service is kept for backward compatibility but should not be used for new code.
+ * @see src/daemon/queues/ExtractQueue.ts
+ * @see src/daemon/child_process/sevenzip.ts
+ */
 export const SUPPORTED_ARCHIVE_EXTENSIONS = [
 	"7z",
 	"bzip2",
@@ -19,16 +25,34 @@ export const SUPPORTED_ARCHIVE_EXTENSIONS = [
 	"zstd",
 ];
 
+/**
+ * @deprecated Use the ExtractQueue with spawnSevenzip child process instead.
+ * This service is kept for backward compatibility but should not be used for new code.
+ * @see src/daemon/queues/ExtractQueue.ts
+ * @see src/daemon/child_process/sevenzip.ts
+ */
 export type SevenzipProps = {
 	exePath: string;
 };
 
+/**
+ * @deprecated Use the ExtractQueue with spawnSevenzip child process instead.
+ * This service is kept for backward compatibility but should not be used for new code.
+ * @see src/daemon/queues/ExtractQueue.ts
+ * @see src/daemon/child_process/sevenzip.ts
+ */
 export type SevenzipExtractOptions = {
 	archivePath: string;
 	targetDir: string;
 	onProgress: (progress: { progress: number; summary?: string }) => void;
 };
 
+/**
+ * @deprecated Use the ExtractQueue with spawnSevenzip child process instead.
+ * This service is kept for backward compatibility but should not be used for new code.
+ * @see src/daemon/queues/ExtractQueue.ts
+ * @see src/daemon/child_process/sevenzip.ts
+ */
 export class SevenzipService {
 	private readonly logger = getLogger(SevenzipService.name);
 	private readonly exePath: string;

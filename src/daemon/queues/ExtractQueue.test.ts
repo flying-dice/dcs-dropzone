@@ -1,7 +1,7 @@
-import { Database } from "bun:sqlite";
 import { describe, expect, it } from "bun:test";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { DownloadJobStatus, ExtractJobStatus } from "../../common/data.ts";
+import { AppDatabase } from "../database/app-database.ts";
 import { ddlExports } from "../database/db-ddl.ts";
 import {
 	T_DOWNLOAD_QUEUE,
@@ -14,11 +14,8 @@ import { ExtractQueue } from "./ExtractQueue.ts";
 
 describe("ExtractQueue", () => {
 	function setupTestDb() {
-		const sqlite = new Database(":memory:", { create: true, strict: true });
-		for (const sql of Object.values(ddlExports)) {
-			sqlite.run(sql);
-		}
-		const db = drizzle(sqlite);
+		const appDb = AppDatabase.withMigrations(":memory:", ddlExports);
+		const db = drizzle({ client: appDb.getDatabase() });
 
 		// Insert test release and asset
 		db.insert(T_MOD_RELEASES)
