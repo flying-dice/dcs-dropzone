@@ -1,9 +1,6 @@
-import { beforeEach, describe, expect, it, mock, type Mock } from "bun:test";
+import { beforeEach, describe, expect, it, type Mock, mock } from "bun:test";
 import { StatusCodes } from "http-status-codes";
-import {
-	MissionScriptRunOn,
-	SymbolicLinkDestRoot,
-} from "../../common/data.ts";
+import { MissionScriptRunOn, SymbolicLinkDestRoot } from "../../common/data.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { SubscriptionService } from "../services/SubscriptionService.ts";
@@ -69,7 +66,8 @@ describe("Subscriptions API Router", () => {
 		};
 
 		router = createSubscriptionsRouter({
-			subscriptionService: mockSubscriptionService as unknown as SubscriptionService,
+			subscriptionService:
+				mockSubscriptionService as unknown as SubscriptionService,
 			downloadQueue: mockDownloadQueue as unknown as DownloadQueue,
 		});
 	});
@@ -84,8 +82,12 @@ describe("Subscriptions API Router", () => {
 			{ modId: "mod-2", releaseId: "release-2", progressPercent: 100 },
 		]);
 
-		expect(mockSubscriptionService.getAllSubscriptions).toHaveBeenCalledTimes(1);
-		expect(mockDownloadQueue.getOverallProgressForRelease).toHaveBeenCalledTimes(2);
+		expect(mockSubscriptionService.getAllSubscriptions).toHaveBeenCalledTimes(
+			1,
+		);
+		expect(
+			mockDownloadQueue.getOverallProgressForRelease,
+		).toHaveBeenCalledTimes(2);
 	});
 
 	it("POST / should subscribe to a release", async () => {
