@@ -1,15 +1,23 @@
 import { getLogger } from "log4js";
-import Application from "../Application.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { SubscriptionRepository } from "../repositories/SubscriptionRepository.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
+import type { ReleaseAssetService } from "./ReleaseAssetService.ts";
 
 const logger = getLogger("SubscriptionService");
+
+/**
+ * Factory function type for creating ReleaseAssetService instances
+ */
+export type ReleaseAssetServiceFactory = (
+	releaseId: string,
+) => ReleaseAssetService;
 
 export class SubscriptionService {
 	constructor(
 		private readonly repo: SubscriptionRepository,
 		private readonly downloadQueue: DownloadQueue,
+		private readonly releaseAssetServiceFactory: ReleaseAssetServiceFactory,
 	) {}
 
 	getAllSubscriptions(): { modId: string; releaseId: string }[] {
@@ -21,7 +29,7 @@ export class SubscriptionService {
 
 		this.downloadQueue.cancelJobsForRelease(releaseId);
 
-		await Application.getReleaseAssetService(
+		await this.releaseAssetServiceFactory(
 			releaseId,
 		).removeReleaseAssetsAndFolder();
 
@@ -43,7 +51,7 @@ export class SubscriptionService {
 			`Successfully subscribed to mod: ${data.modName} (release: ${data.version})`,
 		);
 
-		Application.getReleaseAssetService(
+		this.releaseAssetServiceFactory(
 			data.releaseId,
 		).downloadAndExtractReleaseAssets();
 	}

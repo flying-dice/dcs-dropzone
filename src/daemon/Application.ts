@@ -3,7 +3,9 @@ import applicationConfig from "./ApplicationConfig.ts";
 import { db } from "./database";
 import { DownloadQueue } from "./queues/DownloadQueue.ts";
 import { ExtractQueue } from "./queues/ExtractQueue.ts";
+import { DrizzleSqliteReleaseAssetRepository } from "./repositories/impl/DrizzleSqliteReleaseAssetRepository.ts";
 import { DrizzleSqliteSubscriptionRepository } from "./repositories/impl/DrizzleSqliteSubscriptionRepository.ts";
+import type { ReleaseAssetRepository } from "./repositories/ReleaseAssetRepository.ts";
 import type { SubscriptionRepository } from "./repositories/SubscriptionRepository.ts";
 import Server from "./Server.ts";
 import { ReleaseAssetService } from "./services/ReleaseAssetService.ts";
@@ -27,20 +29,31 @@ const extractQueue = new ExtractQueue({
 	maxRetries: 3,
 });
 
-logger.debug("Initializing services");
+logger.debug("Initializing repositories");
 const subscriptionRepository: SubscriptionRepository =
 	new DrizzleSqliteSubscriptionRepository(_db);
-const subscriptionService = new SubscriptionService(
-	subscriptionRepository,
-	downloadQueue,
-);
+const releaseAssetRepository: ReleaseAssetRepository =
+	new DrizzleSqliteReleaseAssetRepository(_db);
 
-logger.debug("Services initialized");
+logger.debug("Initializing services");
 
 function getReleaseAssetService(releaseId: string): ReleaseAssetService {
 	logger.debug("Creating ReleaseAssetService instance");
-	return new ReleaseAssetService(releaseId, _db, downloadQueue, extractQueue);
+	return new ReleaseAssetService(
+		releaseId,
+		releaseAssetRepository,
+		downloadQueue,
+		extractQueue,
+	);
 }
+
+const subscriptionService = new SubscriptionService(
+	subscriptionRepository,
+	downloadQueue,
+	getReleaseAssetService,
+);
+
+logger.debug("Services initialized");
 
 export default {
 	server: Server,

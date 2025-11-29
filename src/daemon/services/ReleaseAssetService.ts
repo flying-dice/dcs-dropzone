@@ -1,20 +1,14 @@
 import { exists, mkdir, rm } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { eq } from "drizzle-orm";
-import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger, type Logger } from "log4js";
-import { T_MOD_RELEASE_ASSETS, T_MOD_RELEASES } from "../database/schema.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ExtractQueue } from "../queues/ExtractQueue.ts";
+import type {
+	ReleaseAssetRepository,
+	ReleaseData,
+} from "../repositories/ReleaseAssetRepository.ts";
 
 const logger = getLogger("ReleaseDownloadService");
-
-type ReleaseData = {
-	releaseId: string;
-	modId: string;
-	modName: string;
-	version: string;
-};
 
 export class ReleaseAssetService {
 	private readonly logger: Logger;
@@ -22,7 +16,7 @@ export class ReleaseAssetService {
 
 	constructor(
 		private readonly releaseId: string,
-		private readonly db: BunSQLiteDatabase,
+		private readonly repository: ReleaseAssetRepository,
 		private readonly downloadQueue: DownloadQueue,
 		private readonly extractQueue: ExtractQueue,
 	) {
@@ -30,16 +24,7 @@ export class ReleaseAssetService {
 			`ReleaseAssetService initialized for releaseId: ${this.releaseId}`,
 		);
 
-		const release = this.db
-			.select({
-				releaseId: T_MOD_RELEASES.releaseId,
-				modId: T_MOD_RELEASES.modId,
-				modName: T_MOD_RELEASES.modName,
-				version: T_MOD_RELEASES.version,
-			})
-			.from(T_MOD_RELEASES)
-			.where(eq(T_MOD_RELEASES.releaseId, this.releaseId))
-			.get();
+		const release = this.repository.getReleaseById(this.releaseId);
 
 		if (!release) {
 			throw new Error(`Release with ID ${releaseId} not found in database.`);
@@ -138,10 +123,6 @@ export class ReleaseAssetService {
 	}
 
 	private getAssetsForRelease() {
-		return this.db
-			.select()
-			.from(T_MOD_RELEASE_ASSETS)
-			.where(eq(T_MOD_RELEASE_ASSETS.releaseId, this.releaseId))
-			.all();
+		return this.repository.getAssetsForRelease(this.releaseId);
 	}
 }
