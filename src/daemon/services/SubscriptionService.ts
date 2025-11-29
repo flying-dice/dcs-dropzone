@@ -1,5 +1,4 @@
 import { getLogger } from "log4js";
-import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { SubscriptionRepository } from "../repositories/SubscriptionRepository.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { ReleaseAssetService } from "./ReleaseAssetService.ts";
@@ -16,7 +15,6 @@ export type ReleaseAssetServiceFactory = (
 export class SubscriptionService {
 	constructor(
 		private readonly repo: SubscriptionRepository,
-		private readonly downloadQueue: DownloadQueue,
 		private readonly releaseAssetServiceFactory: ReleaseAssetServiceFactory,
 	) {}
 
@@ -26,8 +24,6 @@ export class SubscriptionService {
 
 	async removeSubscription(releaseId: string) {
 		logger.info(`Removing subscription for releaseId: ${releaseId}`);
-
-		this.downloadQueue.cancelJobsForRelease(releaseId);
 
 		await this.releaseAssetServiceFactory(
 			releaseId,

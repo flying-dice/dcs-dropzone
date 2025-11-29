@@ -72,6 +72,12 @@ tests/
 - Use `bun:test` for all tests
 - Follow existing patterns for database setup using in-memory SQLite
 
+#### Conventions (read this before writing tests)
+- Prefer local TestClasses (simple test doubles) over framework mocks. Implement just the methods you need, record state, and assert on that state.
+- Favor plain objects/arrays over `Map` in tests unless key-ordering or non-string keys are required.
+- For services constructed via factories, create a closure-based factory that records `callCount` and `last*` args; return the test double (cast only at the boundary if the real type is a concrete class).
+- When testing release lifecycle operations (subscribe/remove), centralize assertions through `ReleaseAssetService` expectations; do not directly assert queue cancellations in unrelated tests.
+
 Example test structure:
 
 ```typescript

@@ -34,6 +34,8 @@ This system works in tandem with the [Download Queue System](./download-queue-sy
 
 ## Usage
 
+Ownership note: ReleaseAssetService owns enqueueing of extract jobs and is the single place that cancels extract jobs when a release is removed.
+
 ### Basic Usage
 
 ```typescript
@@ -59,9 +61,14 @@ console.log(`Extraction progress: ${progress}%`);
 
 ### Cancel Jobs
 
+Most callers should not cancel jobs directly. Use `ReleaseAssetService.removeReleaseAssetsAndFolder()` to cleanly remove a release; it will cancel both download and extract jobs for that release and remove the folder.
+
 ```typescript
-// Cancel all extract jobs for a release
-extractQueue.cancelJobsForRelease('release-123');
+// Preferred (service-level lifecycle)
+await releaseAssetService.removeReleaseAssetsAndFolder();
+
+// Low-level (queues) — use only from ReleaseAssetService or maintenance scripts
+// extractQueue.cancelJobsForRelease('release-123');
 ```
 
 ### Event Handling

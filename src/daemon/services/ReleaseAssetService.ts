@@ -37,7 +37,8 @@ export class ReleaseAssetService {
 	async removeReleaseAssetsAndFolder(): Promise<void> {
 		this.logger.info(`Removing release assets and folder`);
 
-		// Cancel any pending extract jobs for this release
+		// Cancel any pending download and extract jobs for this release
+		this.downloadQueue.cancelJobsForRelease(this.releaseId);
 		this.extractQueue.cancelJobsForRelease(this.releaseId);
 
 		await this.removeReleaseFolder();

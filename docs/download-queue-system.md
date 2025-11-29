@@ -53,9 +53,14 @@ console.log(`Download progress: ${progress}%`);
 
 ### Cancel Jobs
 
+Most callers should not cancel jobs directly. Use `ReleaseAssetService.removeReleaseAssetsAndFolder()` to cleanly remove a release; it will cancel both download and extract jobs for that release and remove the folder.
+
 ```typescript
-// Cancel all download jobs for a release
-downloadQueue.cancelJobsForRelease('release-123');
+// Preferred (service-level lifecycle)
+await releaseAssetService.removeReleaseAssetsAndFolder();
+
+// Low-level (queues) — use only from ReleaseAssetService or maintenance scripts
+// downloadQueue.cancelJobsForRelease('release-123');
 ```
 
 ### Event Handling
@@ -219,6 +224,8 @@ CREATE TABLE DOWNLOAD_QUEUE (
 ```
 
 ## Integration with ReleaseAssetService
+
+Ownership note: ReleaseAssetService owns enqueueing of download jobs and is the single place that cancels download jobs when a release is removed.
 
 The `ReleaseAssetService` automatically creates download jobs when subscribing to a mod release:
 

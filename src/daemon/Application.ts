@@ -49,7 +49,6 @@ function getReleaseAssetService(releaseId: string): ReleaseAssetService {
 
 const subscriptionService = new SubscriptionService(
 	subscriptionRepository,
-	downloadQueue,
 	getReleaseAssetService,
 );
 

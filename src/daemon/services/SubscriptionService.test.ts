@@ -1,6 +1,5 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "../../common/data.ts";
-import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { SubscriptionRepository } from "../repositories/SubscriptionRepository.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { ReleaseAssetService } from "./ReleaseAssetService.ts";
@@ -9,11 +8,67 @@ import {
 	SubscriptionService,
 } from "./SubscriptionService.ts";
 
+// Test doubles (local classes) using plain objects
+class TestSubscriptionRepository implements SubscriptionRepository {
+	private subscriptions: { modId: string; releaseId: string }[];
+	public lastSaved?: ModReleaseData;
+	public deleted: string[] = [];
+
+	constructor(initial: { modId: string; releaseId: string }[] = []) {
+		this.subscriptions = [...initial];
+	}
+
+	getAll(): { modId: string; releaseId: string }[] {
+		return [...this.subscriptions];
+	}
+
+	saveRelease(data: ModReleaseData): void {
+		this.lastSaved = data;
+		this.subscriptions.push({ modId: data.modId, releaseId: data.releaseId });
+	}
+
+	deleteByReleaseId(releaseId: string): void {
+		this.deleted.push(releaseId);
+		this.subscriptions = this.subscriptions.filter(
+			(s) => s.releaseId !== releaseId,
+		);
+	}
+
+	setAll(subs: { modId: string; releaseId: string }[]): void {
+		this.subscriptions = [...subs];
+	}
+}
+
+class TestReleaseAssetService {
+	public downloadCount = 0;
+	public removeCount = 0;
+	async downloadAndExtractReleaseAssets(): Promise<void> {
+		this.downloadCount++;
+	}
+	async removeReleaseAssetsAndFolder(): Promise<void> {
+		this.removeCount++;
+	}
+}
+
+type FactoryState = { callCount: number; lastReleaseId?: string };
+function makeFactory(service: TestReleaseAssetService): {
+	factory: ReleaseAssetServiceFactory;
+	state: FactoryState;
+} {
+	const state: FactoryState = { callCount: 0 };
+	const factory: ReleaseAssetServiceFactory = (releaseId: string) => {
+		state.callCount++;
+		state.lastReleaseId = releaseId;
+		return service as unknown as ReleaseAssetService;
+	};
+	return { factory, state };
+}
+
 describe("SubscriptionService", () => {
-	let mockRepo: SubscriptionRepository;
-	let mockDownloadQueue: Partial<DownloadQueue>;
-	let mockReleaseAssetService: Partial<ReleaseAssetService>;
-	let mockFactory: ReleaseAssetServiceFactory;
+	let repo: TestSubscriptionRepository;
+	let raService: TestReleaseAssetService;
+	let factory: ReleaseAssetServiceFactory;
+	let factoryState: FactoryState;
 	let service: SubscriptionService;
 
 	const testReleaseData: ModReleaseData = {
@@ -49,36 +104,13 @@ describe("SubscriptionService", () => {
 	};
 
 	beforeEach(() => {
-		// Create mock repository
-		mockRepo = {
-			getAll: mock(() => [
-				{ modId: "mod-1", releaseId: "release-1" },
-				{ modId: "mod-2", releaseId: "release-2" },
-			]),
-			saveRelease: mock(() => {}),
-			deleteByReleaseId: mock(() => {}),
-		};
-
-		// Create mock download queue
-		mockDownloadQueue = {
-			cancelJobsForRelease: mock(() => {}),
-		};
-
-		// Create mock ReleaseAssetService
-		mockReleaseAssetService = {
-			downloadAndExtractReleaseAssets: mock(() => Promise.resolve()),
-			removeReleaseAssetsAndFolder: mock(() => Promise.resolve()),
-		};
-
-		// Create mock factory
-		mockFactory = mock(() => mockReleaseAssetService as ReleaseAssetService);
-
-		// Create service instance
-		service = new SubscriptionService(
-			mockRepo,
-			mockDownloadQueue as DownloadQueue,
-			mockFactory,
-		);
+		repo = new TestSubscriptionRepository([
+			{ modId: "mod-1", releaseId: "release-1" },
+			{ modId: "mod-2", releaseId: "release-2" },
+		]);
+		raService = new TestReleaseAssetService();
+		({ factory, state: factoryState } = makeFactory(raService));
+		service = new SubscriptionService(repo, factory);
 	});
 
 	it("should return all subscriptions", () => {
@@ -88,24 +120,18 @@ describe("SubscriptionService", () => {
 			{ modId: "mod-1", releaseId: "release-1" },
 			{ modId: "mod-2", releaseId: "release-2" },
 		]);
-		expect(mockRepo.getAll).toHaveBeenCalledTimes(1);
 	});
 
 	it("should subscribe to a release", () => {
 		service.subscribeToRelease(testReleaseData);
 
-		// Verify repository was called to save the release
-		expect(mockRepo.saveRelease).toHaveBeenCalledTimes(1);
-		expect(mockRepo.saveRelease).toHaveBeenCalledWith(testReleaseData);
-
-		// Verify factory was called with the release ID
-		expect(mockFactory).toHaveBeenCalledTimes(1);
-		expect(mockFactory).toHaveBeenCalledWith(testReleaseData.releaseId);
-
+		// Verify repository saved the release
+		expect(repo.lastSaved).toEqual(testReleaseData);
+		// Verify factory usage
+		expect(factoryState.callCount).toBe(1);
+		expect(factoryState.lastReleaseId).toBe(testReleaseData.releaseId);
 		// Verify download and extract was initiated
-		expect(
-			mockReleaseAssetService.downloadAndExtractReleaseAssets,
-		).toHaveBeenCalledTimes(1);
+		expect(raService.downloadCount).toBe(1);
 	});
 
 	it("should remove subscription", async () => {
@@ -113,31 +139,18 @@ describe("SubscriptionService", () => {
 
 		await service.removeSubscription(releaseId);
 
-		// Verify download queue jobs were cancelled
-		expect(mockDownloadQueue.cancelJobsForRelease).toHaveBeenCalledTimes(1);
-		expect(mockDownloadQueue.cancelJobsForRelease).toHaveBeenCalledWith(
-			releaseId,
-		);
+		// Verify factory was called and remove executed
+		expect(factoryState.callCount).toBe(1);
+		expect(factoryState.lastReleaseId).toBe(releaseId);
+		expect(raService.removeCount).toBe(1);
 
-		// Verify factory was called to create ReleaseAssetService
-		expect(mockFactory).toHaveBeenCalledTimes(1);
-		expect(mockFactory).toHaveBeenCalledWith(releaseId);
-
-		// Verify release assets and folder were removed
-		expect(
-			mockReleaseAssetService.removeReleaseAssetsAndFolder,
-		).toHaveBeenCalledTimes(1);
-
-		// Verify repository was called to delete the subscription
-		expect(mockRepo.deleteByReleaseId).toHaveBeenCalledTimes(1);
-		expect(mockRepo.deleteByReleaseId).toHaveBeenCalledWith(releaseId);
+		// Verify repository delete
+		expect(repo.deleted).toEqual([releaseId]);
 	});
 
 	it("should return empty array when no subscriptions exist", () => {
-		mockRepo.getAll = mock(() => []);
-
+		repo.setAll([]);
 		const subscriptions = service.getAllSubscriptions();
-
 		expect(subscriptions).toEqual([]);
 	});
 });
