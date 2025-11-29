@@ -21,6 +21,8 @@ await Bun.build({
 		windows: {
 			title: "DCS Dropzone Daemon",
 		},
+		autoloadDotenv: false,
+		autoloadBunfig: false,
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
