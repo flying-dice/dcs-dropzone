@@ -107,6 +107,13 @@ export class ReleaseAssetService {
 					downloadJobIds,
 				);
 			}
+
+			// Log warning if asset is marked as archive but has no URLs
+			if (asset.isArchive && asset.urls.length === 0) {
+				this.logger.warn(
+					`Asset "${asset.name}" (id: ${asset.id}) is marked as archive but has no URLs. No extract job will be created.`,
+				);
+			}
 		}
 
 		this.logger.info(

@@ -100,8 +100,8 @@ export const T_EXTRACT_DOWNLOAD_JOIN = sqliteTable("EXTRACT_DOWNLOAD_JOIN", {
 	id: text("id").primaryKey(),
 	extractJobId: text("extract_job_id")
 		.notNull()
-		.references(() => T_EXTRACT_QUEUE.id),
+		.references(() => T_EXTRACT_QUEUE.id, { onDelete: "cascade" }),
 	downloadJobId: text("download_job_id")
 		.notNull()
-		.references(() => T_DOWNLOAD_QUEUE.id),
+		.references(() => T_DOWNLOAD_QUEUE.id, { onDelete: "cascade" }),
 });

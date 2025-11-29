@@ -98,8 +98,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 
 			// Insert join table entries for all related download jobs
 			for (const downloadJobId of downloadJobIds) {
-				tx
-					.insert(T_EXTRACT_DOWNLOAD_JOIN)
+				tx.insert(T_EXTRACT_DOWNLOAD_JOIN)
 					.values({
 						id: `${id}:${downloadJobId}`,
 						extractJobId: id,
@@ -204,8 +203,8 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 					eq(T_EXTRACT_QUEUE.status, ExtractJobStatus.PENDING),
 					lt(T_EXTRACT_QUEUE.attempt, T_EXTRACT_QUEUE.maxAttempts),
 					lte(T_EXTRACT_QUEUE.nextAttemptAfter, new Date()),
-					// Ensure all dependent download jobs are completed
-					// Uses notExists to check that no incomplete downloads exist
+					// Ensure all dependent download jobs are completed or have permanently failed
+					// Uses notExists to check that no incomplete downloads exist (that still have retries)
 					notExists(
 						this.db
 							.select({ id: T_EXTRACT_DOWNLOAD_JOIN.id })
@@ -217,8 +216,12 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 							.where(
 								and(
 									eq(T_EXTRACT_DOWNLOAD_JOIN.extractJobId, T_EXTRACT_QUEUE.id),
-									// Download is NOT completed (PENDING or IN_PROGRESS)
-									ne(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.COMPLETED),
+									// Download is NOT completed AND still has retries left
+									// (if download has exhausted retries, we shouldn't block on it)
+									and(
+										ne(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.COMPLETED),
+										lt(T_DOWNLOAD_QUEUE.attempt, T_DOWNLOAD_QUEUE.maxAttempts),
+									),
 								),
 							),
 					),
@@ -245,7 +248,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 				targetDir: job.targetDirectory,
 				onProgress: (p) => {
 					logger.info(
-						`[${job.id}] - Extract progress: ${p.progress.toFixed(2)}% ${p.summary}`,
+						`[${job.id}] - Extract progress: ${p.progress.toFixed(2)}%${p.summary ? ` ${p.summary}` : ""}`,
 					);
 					this.db
 						.update(T_EXTRACT_QUEUE)
