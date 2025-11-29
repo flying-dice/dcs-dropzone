@@ -1,4 +1,19 @@
 # =======================================
+# DCS World Configuration
+# =======================================
+[dcs]
+dcs_working_dir = "C:/Users/jonat/Saved Games/DCS.openbeta"                     # Path to DCS World working directory
+dcs_install_dir = "D:/Program Files/Eagle Dynamics/DCS World OpenBeta"          # Path to DCS World installation directory
+
+# =======================================
+# Third Party Binaries Configuration
+# =======================================
+[binaries]
+target_directory = ".bin"
+wget = "binaries/wget.exe"          # Path to download the winget binary
+sevenzip = "binaries/7za.exe"                                              # Path to 7zip executable
+
+# =======================================
 # Server Configuration
 # =======================================
 [server]
@@ -18,11 +33,3 @@ colorize = false                 # Should log be colorized, set to true for bett
 # =======================================
 [database]
 url = "index.sqlite"      # Database URL
-
-# =======================================
-# Third Party Binaries Configuration
-# =======================================
-[binaries]
-target_directory = ".bin"
-wget = "binaries/wget.exe"          # Path to download the winget binary
-sevenzip = "binaries/7za.exe"                                              # Path to 7zip executable

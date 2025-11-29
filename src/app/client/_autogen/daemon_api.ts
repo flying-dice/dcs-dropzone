@@ -114,6 +114,7 @@ export type GetAllSubscriptions200Item = {
 	modId: string;
 	releaseId: string;
 	progressPercent?: number;
+	enabled?: boolean;
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -658,6 +659,200 @@ export const useUnsubscribeFromModRelease = <
 	TContext
 > => {
 	const mutationOptions = getUnsubscribeFromModReleaseMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Enable a mod by creating its symbolic links
+ */
+export type enableModResponse200 = {
+	data: void;
+	status: 200;
+};
+
+export type enableModResponseSuccess = enableModResponse200 & {
+	headers: Headers;
+};
+
+export type enableModResponse = enableModResponseSuccess;
+
+export const getEnableModUrl = (releaseId: string) => {
+	return `/api/toggle/${releaseId}/enable`;
+};
+
+export const enableMod = async (
+	releaseId: string,
+	options?: RequestInit,
+): Promise<enableModResponse> => {
+	return daemonFetch<enableModResponse>(getEnableModUrl(releaseId), {
+		...options,
+		method: "POST",
+	});
+};
+
+export const getEnableModMutationOptions = <
+	TError = unknown,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof enableMod>>,
+		TError,
+		{ releaseId: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof daemonFetch>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof enableMod>>,
+	TError,
+	{ releaseId: string },
+	TContext
+> => {
+	const mutationKey = ["enableMod"];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof enableMod>>,
+		{ releaseId: string }
+	> = (props) => {
+		const { releaseId } = props ?? {};
+
+		return enableMod(releaseId, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type EnableModMutationResult = NonNullable<
+	Awaited<ReturnType<typeof enableMod>>
+>;
+
+export type EnableModMutationError = unknown;
+
+/**
+ * @summary Enable a mod by creating its symbolic links
+ */
+export const useEnableMod = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof enableMod>>,
+			TError,
+			{ releaseId: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof daemonFetch>;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<
+	Awaited<ReturnType<typeof enableMod>>,
+	TError,
+	{ releaseId: string },
+	TContext
+> => {
+	const mutationOptions = getEnableModMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Disable a mod by removing its symbolic links
+ */
+export type disableModResponse200 = {
+	data: void;
+	status: 200;
+};
+
+export type disableModResponseSuccess = disableModResponse200 & {
+	headers: Headers;
+};
+
+export type disableModResponse = disableModResponseSuccess;
+
+export const getDisableModUrl = (releaseId: string) => {
+	return `/api/toggle/${releaseId}/disable`;
+};
+
+export const disableMod = async (
+	releaseId: string,
+	options?: RequestInit,
+): Promise<disableModResponse> => {
+	return daemonFetch<disableModResponse>(getDisableModUrl(releaseId), {
+		...options,
+		method: "POST",
+	});
+};
+
+export const getDisableModMutationOptions = <
+	TError = unknown,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof disableMod>>,
+		TError,
+		{ releaseId: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof daemonFetch>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof disableMod>>,
+	TError,
+	{ releaseId: string },
+	TContext
+> => {
+	const mutationKey = ["disableMod"];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof disableMod>>,
+		{ releaseId: string }
+	> = (props) => {
+		const { releaseId } = props ?? {};
+
+		return disableMod(releaseId, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type DisableModMutationResult = NonNullable<
+	Awaited<ReturnType<typeof disableMod>>
+>;
+
+export type DisableModMutationError = unknown;
+
+/**
+ * @summary Disable a mod by removing its symbolic links
+ */
+export const useDisableMod = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof disableMod>>,
+			TError,
+			{ releaseId: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof daemonFetch>;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<
+	Awaited<ReturnType<typeof disableMod>>,
+	TError,
+	{ releaseId: string },
+	TContext
+> => {
+	const mutationOptions = getDisableModMutationOptions(options);
 
 	return useMutation(mutationOptions, queryClient);
 };

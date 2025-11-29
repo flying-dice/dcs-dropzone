@@ -8,6 +8,7 @@ import {
 	type ModReleaseData,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
+import { disableMod, enableMod } from "../../_autogen/daemon_api.ts";
 import { useDaemonSubscriptions } from "../../hooks/useDaemonSubscriptions.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
@@ -51,6 +52,22 @@ export function _FormActions(props: {
 				nav(`/user-mods/${props.mod.id}`);
 			},
 		});
+	};
+
+	const handleToggle = async () => {
+		if (daemon.isEnabled(props.release.id)) {
+			await disableMod(props.release.id);
+			showSuccessNotification(
+				"Success",
+				"Mod release has been disabled successfully.",
+			);
+		} else {
+			await enableMod(props.release.id);
+			showSuccessNotification(
+				"Success",
+				"Mod release has been enabled successfully.",
+			);
+		}
 	};
 
 	const daemon = useDaemonSubscriptions(props.mod, props.release, props.form);
@@ -108,6 +125,11 @@ export function _FormActions(props: {
 							animated={progressIfSubscribed < 100}
 							striped={progressIfSubscribed < 100}
 						/>
+					)}
+					{daemon.isSubscribedTo(props.release.id) && (
+						<Button variant={"light"} onClick={handleToggle}>
+							{daemon.isEnabled(props.release.id) ? "Disable" : "Enable"}
+						</Button>
 					)}
 				</Stack>
 			</Stack>

@@ -85,6 +85,17 @@ export function useDaemonSubscriptions(
 				false
 			);
 		},
+		isEnabled(releaseId: string): boolean | null {
+			const sub = subscriptions.data?.data.find(
+				(sub) => sub.releaseId === releaseId,
+			);
+
+			if (!sub) {
+				return null;
+			}
+
+			return sub.enabled || false;
+		},
 		getSubscriptionProgress(releaseId: string) {
 			const sub = subscriptions.data?.data.find(
 				(sub) => sub.releaseId === releaseId,

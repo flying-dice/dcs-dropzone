@@ -1,17 +1,31 @@
 import { getLogger } from "log4js";
+import { SymbolicLinkDestRoot } from "../common/data.ts";
 import applicationConfig from "./ApplicationConfig.ts";
 import { db } from "./database";
 import { DownloadQueue } from "./queues/DownloadQueue.ts";
 import { ExtractQueue } from "./queues/ExtractQueue.ts";
+import { DrizzleSqliteModReleaseSymbolicLinkRepository } from "./repositories/impl/DrizzleSqliteModReleaseSymbolicLinkRepository.ts";
 import { DrizzleSqliteReleaseAssetRepository } from "./repositories/impl/DrizzleSqliteReleaseAssetRepository.ts";
 import { DrizzleSqliteSubscriptionRepository } from "./repositories/impl/DrizzleSqliteSubscriptionRepository.ts";
 import type { ReleaseAssetRepository } from "./repositories/ReleaseAssetRepository.ts";
 import type { SubscriptionRepository } from "./repositories/SubscriptionRepository.ts";
 import { createServer } from "./Server.ts";
+import { PathService } from "./services/PathService.ts";
 import { ReleaseAssetService } from "./services/ReleaseAssetService.ts";
 import { SubscriptionService } from "./services/SubscriptionService.ts";
+import { ToggleService } from "./services/ToggleService.ts";
 
 const logger = getLogger("Application");
+
+const pathService = new PathService(
+	{
+		[SymbolicLinkDestRoot.DCS_INSTALL_DIR]:
+			applicationConfig.dcs.dcs_install_dir,
+		[SymbolicLinkDestRoot.DCS_WORKING_DIR]:
+			applicationConfig.dcs.dcs_working_dir,
+	},
+	process.cwd(),
+);
 
 logger.debug("Setting up database connection");
 const _db = db(applicationConfig.database);
@@ -54,9 +68,17 @@ const subscriptionService = new SubscriptionService(
 
 logger.debug("Services initialized");
 
+const linkRepo = new DrizzleSqliteModReleaseSymbolicLinkRepository(_db);
+const toggleService = new ToggleService({
+	linkRepo,
+	pathService,
+});
+
 const server = createServer({
 	subscriptionService,
 	downloadQueue,
+	extractQueue,
+	toggleService,
 });
 
 export default {
@@ -65,4 +87,5 @@ export default {
 	getReleaseAssetService,
 	downloadQueue,
 	extractQueue,
+	toggleService,
 };

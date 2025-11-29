@@ -52,6 +52,7 @@ router.get(
 			})
 				.extend({
 					progressPercent: z.number().optional(),
+					enabled: z.boolean().optional(),
 				})
 				.array(),
 		},
@@ -61,12 +62,19 @@ router.get(
 			modId: string;
 			releaseId: string;
 			progressPercent?: number;
+			enabled?: boolean;
 		}[] = c.var.subscriptionService.getAllSubscriptions();
 
 		for (const sub of subscriptions) {
-			sub.progressPercent = c.var.downloadQueue.getOverallProgressForRelease(
-				sub.releaseId,
-			);
+			const downloadProgressPercent =
+				c.var.downloadQueue.getOverallProgressForRelease(sub.releaseId);
+			const extractProgressPercent =
+				c.var.extractQueue.getOverallProgressForRelease(sub.releaseId);
+			sub.progressPercent = extractProgressPercent
+				? Math.floor((downloadProgressPercent + extractProgressPercent) / 2)
+				: downloadProgressPercent;
+
+			sub.enabled = c.var.toggleService.isReleaseEnabled(sub.releaseId);
 		}
 
 		return c.json(subscriptions, StatusCodes.OK);

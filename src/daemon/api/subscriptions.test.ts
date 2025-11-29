@@ -7,6 +7,7 @@ import {
 	appContextMiddleware,
 } from "../middleware/appContext.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
+import type { ExtractQueue } from "../queues/ExtractQueue.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { SubscriptionService } from "../services/SubscriptionService.ts";
 import subscriptions from "./subscriptions.ts";
@@ -18,6 +19,9 @@ describe("Subscriptions API Router", () => {
 		removeSubscription: Mock<(releaseId: string) => Promise<void>>;
 	};
 	let mockDownloadQueue: {
+		getOverallProgressForRelease: Mock<(releaseId: string) => number>;
+	};
+	let mockExtractQueue: {
 		getOverallProgressForRelease: Mock<(releaseId: string) => number>;
 	};
 	let app: Hono<AppContext>;
@@ -70,6 +74,12 @@ describe("Subscriptions API Router", () => {
 			),
 		};
 
+		mockExtractQueue = {
+			getOverallProgressForRelease: mock((releaseId: string) =>
+				releaseId === "release-1" ? 50 : 0,
+			),
+		};
+
 		// Create app with middleware context injection
 		app = new Hono<AppContext>();
 		app.use(
@@ -78,6 +88,11 @@ describe("Subscriptions API Router", () => {
 				subscriptionService:
 					mockSubscriptionService as unknown as SubscriptionService,
 				downloadQueue: mockDownloadQueue as unknown as DownloadQueue,
+				extractQueue: mockExtractQueue as unknown as ExtractQueue,
+				toggleService: {
+					enable: () => Promise.resolve(),
+					disable: () => Promise.resolve(),
+				} as any,
 			}),
 		);
 		app.route("/", subscriptions);

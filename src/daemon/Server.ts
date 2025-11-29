@@ -5,6 +5,7 @@ import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
 import health from "./api/health.ts";
 import subscriptions from "./api/subscriptions.ts";
+import toggle from "./api/toggle.ts";
 import {
 	type AppContext,
 	type AppContextDependencies,
@@ -41,6 +42,7 @@ export function createServer(deps: ServerDependencies): Hono<AppContext> {
 	server.get("/api", Scalar({ url: "/v3/api-docs" }));
 
 	server.route("/api/subscriptions", subscriptions);
+	server.route("/api/toggle", toggle);
 
 	return server;
 }

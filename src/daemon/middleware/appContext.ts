@@ -1,6 +1,8 @@
 import type { MiddlewareHandler } from "hono";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
+import type { ExtractQueue } from "../queues/ExtractQueue.ts";
 import type { SubscriptionService } from "../services/SubscriptionService.ts";
+import type { ToggleService } from "../services/ToggleService.ts";
 
 /**
  * Application context variables injected via middleware
@@ -8,6 +10,8 @@ import type { SubscriptionService } from "../services/SubscriptionService.ts";
 export type AppContextVariables = {
 	subscriptionService: SubscriptionService;
 	downloadQueue: DownloadQueue;
+	extractQueue: ExtractQueue;
+	toggleService: ToggleService;
 };
 
 /**
@@ -23,6 +27,8 @@ export type AppContext = {
 export type AppContextDependencies = {
 	subscriptionService: SubscriptionService;
 	downloadQueue: DownloadQueue;
+	extractQueue: ExtractQueue;
+	toggleService: ToggleService;
 };
 
 /**
@@ -33,5 +39,7 @@ export const appContextMiddleware =
 	async (c, next) => {
 		c.set("subscriptionService", deps.subscriptionService);
 		c.set("downloadQueue", deps.downloadQueue);
+		c.set("extractQueue", deps.extractQueue);
+		c.set("toggleService", deps.toggleService);
 		await next();
 	};

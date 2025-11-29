@@ -30,6 +30,10 @@ const configSchema = z.object({
 		wget: z.string().min(1, "wget path is required"),
 		sevenzip: z.string().min(1, "7zip path is required"),
 	}),
+	dcs: z.object({
+		dcs_working_dir: z.string().min(1, "DCS working path is required"),
+		dcs_install_dir: z.string().min(1, "DCS install path is required"),
+	}),
 });
 
 export type ApplicationConfig = z.infer<typeof configSchema>;

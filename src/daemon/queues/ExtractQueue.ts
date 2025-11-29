@@ -112,7 +112,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 		this.emit(ExtractQueueEvents.PUSH, job);
 	}
 
-	getOverallProgressForRelease(releaseId: string): number {
+	getOverallProgressForRelease(releaseId: string): number | null {
 		const average = this.db
 			.select({
 				progressPercent: avg(T_EXTRACT_QUEUE.progressPercent),
@@ -121,7 +121,9 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 			.where(eq(T_EXTRACT_QUEUE.releaseId, releaseId))
 			.get();
 
-		return Math.floor(Number(average?.progressPercent ?? 0));
+		return average?.progressPercent
+			? Math.floor(Number(average.progressPercent))
+			: null;
 	}
 
 	cancelJobsForRelease(releaseId: string): void {
