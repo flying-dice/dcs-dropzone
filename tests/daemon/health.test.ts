@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import Server from "../../src/daemon/Server.ts";
+import health from "../../src/daemon/api/health.ts";
 
 test("Health check", async () => {
-	const response = await Server.request("/api/health");
+	const response = await health.request("/");
 	expect(response.status).toBe(200);
 	expect(response.json()).resolves.toEqual({ status: "UP" });
 });

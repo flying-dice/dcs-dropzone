@@ -9,22 +9,21 @@ The download queue system provides a robust, database-backed solution for managi
 ### Components
 
 1. **DownloadQueue** - Main service that manages the queue
-   - Polls database for pending jobs
-   - Manages concurrency (default: 3 concurrent downloads)
-   - Handles retry logic with exponential backoff
-   - Performs crash recovery on startup
+   - Polls database for pending jobs every 30 seconds
+   - Processes one download at a time (single-job concurrency)
+   - Handles retry logic with fixed 30-second delay
+   - Resumes any in-progress jobs on startup
+   - Emits events for job lifecycle (PUSH, DOWNLOADED, FAILED, CANCELLED)
 
-2. **BaseProcess** - Abstract class for process management
-   - Enforces one-instance-per-job
-   - Automatic cleanup and deregistration
-   - Cancellation support
-
-3. **WgetProcess** - Concrete wget implementation
+2. **spawnWget** - Child process function for wget
+   - Validates inputs with Zod schema
    - Uses `-c` flag for resumable downloads
    - Parses progress from stderr
    - Handles wget exit codes
+   - Supports AbortSignal for cancellation
+   - Returns Result type (neverthrow) for error handling
 
-4. **DOWNLOAD_QUEUE** - Database table
+3. **DOWNLOAD_QUEUE** - Database table
    - Tracks job state, progress, retry metadata
    - Single source of truth for all download operations
 
@@ -35,38 +34,51 @@ The download queue system provides a robust, database-backed solution for managi
 ```typescript
 import Application from "./daemon/Application.ts";
 
-// The orchestrator is automatically started on application launch
-const { downloadQueueOrchestrator } = Application;
+// The download queue is automatically started on application launch
+const { downloadQueue } = Application;
 
-// Enqueue a new download
-const jobId = downloadQueueOrchestrator.enqueueDownload(
-  'https://example.com/large-file.zip',
-  './downloads'
+// Enqueue a new download (typically done by ReleaseAssetService)
+downloadQueue.pushJob(
+  'release-123',           // releaseId
+  'asset-456',             // releaseAssetId
+  'download-789',          // unique job id
+  'https://example.com/file.zip',  // url
+  '/downloads'             // targetDirectory
 );
 
-// Check job status
-const job = downloadQueueOrchestrator.getJobStatus(jobId);
-console.log(`Status: ${job?.status}, Progress: ${job?.progressPercent}%`);
+// Check overall progress for a release
+const progress = downloadQueue.getOverallProgressForRelease('release-123');
+console.log(`Download progress: ${progress}%`);
 ```
 
-### Advanced Usage
+### Cancel Jobs
 
 ```typescript
-// Enqueue with custom retry limit
-const jobId = downloadQueueOrchestrator.enqueueDownload(
-  'https://example.com/file.zip',
-  './downloads',
-  { maxRetries: 5 }
-);
+// Cancel all download jobs for a release
+downloadQueue.cancelJobsForRelease('release-123');
+```
 
-// Cancel a running download
-await downloadQueueOrchestrator.cancelJob(jobId);
+### Event Handling
 
-// Stop the orchestrator (e.g., on application shutdown)
-await downloadQueueOrchestrator.stop();
+```typescript
+import { DownloadQueueEvents } from "./daemon/queues/DownloadQueue.ts";
 
-// Restart the orchestrator
-await downloadQueueOrchestrator.start();
+// Listen for download events
+downloadQueue.on(DownloadQueueEvents.PUSH, (job) => {
+  console.log(`New download job queued: ${job.id}`);
+});
+
+downloadQueue.on(DownloadQueueEvents.DOWNLOADED, (job) => {
+  console.log(`Download completed: ${job.filePath}`);
+});
+
+downloadQueue.on(DownloadQueueEvents.FAILED, (job) => {
+  console.log(`Download failed: ${job.id}, attempt ${job.attempt}`);
+});
+
+downloadQueue.on(DownloadQueueEvents.CANCELLED, (jobs) => {
+  console.log(`Cancelled ${jobs.length} jobs`);
+});
 ```
 
 ## Job Lifecycle
@@ -74,29 +86,71 @@ await downloadQueueOrchestrator.start();
 ### Status Flow
 
 ```
-PENDING → PROCESSING → COMPLETED
-           ↓
-        RETRYING (with exponential backoff)
-           ↓
-        FAILED (after max retries)
+PENDING → IN_PROGRESS → COMPLETED
+              ↓ (on failure)
+           PENDING (retry after 30s, up to maxAttempts)
 ```
+
+When a download fails (e.g., network error, wget process error), the job returns to `PENDING` status with an incremented `attempt` counter. The job will be retried after 30 seconds. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
 
 ### States
 
-- **PENDING**: Job is queued, waiting to be processed
-- **PROCESSING**: Job is actively downloading
-- **RETRYING**: Job failed but will retry after backoff delay
+- **PENDING**: Job is queued, waiting to be processed or waiting for retry
+- **IN_PROGRESS**: Job is actively downloading
 - **COMPLETED**: Download finished successfully
-- **FAILED**: Download failed permanently after max retries
+
+## Child Process: spawnWget
+
+### Function Signature
+
+```typescript
+async function spawnWget(
+  props: SpawnWgetProps,
+  abortSignal?: AbortSignal
+): Promise<Result<string, WgetErrors>>
+```
+
+### Props Validation (Zod)
+
+```typescript
+const SpawnWgetProps = z.object({
+  exePath: z.string(),   // Path to wget executable
+  target: z.string(),    // Target directory for download
+  url: z.url(),          // URL to download
+  onProgress: z.function(),  // Progress callback
+});
+```
+
+### Error Types
+
+```typescript
+enum WgetErrors {
+  PropsError = "PropsError",     // Invalid input props
+  ProcessError = "ProcessError", // wget process failed
+}
+```
+
+### Wget Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | No problems occurred |
+| 1 | Generic error code |
+| 2 | Parse error — invalid command line options |
+| 3 | File I/O error |
+| 4 | Network failure |
+| 5 | SSL verification failure |
+| 6 | Authentication failure |
+| 7 | Protocol error |
+| 8 | Server issued an error response |
 
 ## Resilience Features
 
-### 1. Crash Recovery (Zombie Sweep)
+### 1. Crash Recovery
 
-On startup, the orchestrator automatically:
-- Finds all jobs stuck in PROCESSING state
-- Resets them to RETRYING or FAILED based on retry count
-- Allows downloads to resume from where they left off
+On startup, the download queue automatically:
+- Resumes any jobs stuck in `IN_PROGRESS` state
+- Respects retry count limits
 
 ### 2. Resumable Downloads
 
@@ -104,41 +158,28 @@ On startup, the orchestrator automatically:
 - Partial downloads are automatically resumed
 - No need to restart from byte zero
 
-### 3. Exponential Backoff
+### 3. Retry with Fixed Delay
 
-Failed downloads retry with increasing delays:
-- 1st retry: 2 seconds
-- 2nd retry: 4 seconds
-- 3rd retry: 8 seconds
-- etc.
+Failed downloads retry after 30 seconds:
+- Job status returns to `PENDING`
+- `attempt` counter increments
+- `nextAttemptAfter` set to 30 seconds in future
 
-Formula: `initialDelay * 2^retryCount`
+### 4. Cancellation Support
 
-### 4. Progress Throttling
-
-- Progress updates are throttled to 500ms intervals
-- Reduces database write load
-- Still provides real-time progress visibility
-
-### 5. Concurrent Download Limit
-
-- Default: 3 concurrent downloads
-- Prevents overwhelming network/disk
-- Configurable via orchestrator config
+- Active jobs can be cancelled via AbortController
+- All jobs for a release can be cancelled at once
+- Emits `CANCELLED` event with list of cancelled jobs
 
 ## Configuration
 
-Configure the orchestrator in `Application.ts`:
+Configure the download queue in `Application.ts`:
 
 ```typescript
-const downloadQueueOrchestrator = new DownloadQueue({
+const downloadQueue = new DownloadQueue({
   db: _db,
   wgetExecutablePath: applicationConfig.binaries.wget,
-  logger: getLogger("DownloadQueue"),
-  maxConcurrentDownloads: 3,    // Max parallel downloads
-  pollIntervalMs: 1000,          // Poll frequency (ms)
-  maxRetries: 3,                 // Default max retries per job
-  initialRetryDelayMs: 2000,     // Base retry delay (ms)
+  maxRetries: 3,  // Default max retries per job
 });
 ```
 
@@ -148,107 +189,67 @@ const downloadQueueOrchestrator = new DownloadQueue({
 
 ```sql
 CREATE TABLE DOWNLOAD_QUEUE (
-  -- Identity & Location
+  -- Identity
   id TEXT PRIMARY KEY,
+  release_id TEXT NOT NULL,
+  release_asset_id TEXT NOT NULL,
+  
+  -- Download Location
   url TEXT NOT NULL,
   target_directory TEXT NOT NULL,
-  filename TEXT,
   
   -- State Management
   status TEXT NOT NULL DEFAULT 'PENDING',
   
   -- Progress Tracking
-  progress_percent INTEGER DEFAULT 0,
-  progress_summary TEXT,
+  progress_percent INTEGER NOT NULL DEFAULT 0,
   
   -- Retry Metadata
-  retry_count INTEGER NOT NULL DEFAULT 0,
-  max_retries INTEGER NOT NULL DEFAULT 3,
-  next_retry_at INTEGER,
-  
-  -- Process Management
-  pid INTEGER,
+  attempt INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 3,
+  next_attempt_after INTEGER NOT NULL,
   
   -- Audit
   created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
+  
+  -- Foreign Keys
+  FOREIGN KEY (release_id) REFERENCES MOD_RELEASES(release_id),
+  FOREIGN KEY (release_asset_id) REFERENCES MOD_RELEASE_ASSETS(id)
 );
 ```
 
-## Monitoring
+## Integration with ReleaseAssetService
 
-### Check Active Downloads
-
-```typescript
-const activeCount = BaseProcess.getActiveProcessCount();
-const activeJobIds = BaseProcess.getActiveJobIds();
-console.log(`${activeCount} downloads in progress:`, activeJobIds);
-```
-
-### Query Job Status
+The `ReleaseAssetService` automatically creates download jobs when subscribing to a mod release:
 
 ```typescript
-const job = downloadQueueOrchestrator.getJobStatus(jobId);
-if (job) {
-  console.log(`
-    Status: ${job.status}
-    Progress: ${job.progressPercent}%
-    Retries: ${job.retryCount}/${job.maxRetries}
-    PID: ${job.pid || 'N/A'}
-  `);
+// In ReleaseAssetService.downloadAndExtractReleaseAssets()
+for (const [idx, url] of asset.urls.entries()) {
+  this.downloadQueue.pushJob(
+    releaseId,
+    asset.id,
+    `${asset.id}:${idx}`,
+    url,
+    targetDirectory
+  );
 }
 ```
-
-## Error Handling
-
-### Network Failures
-
-Network failures trigger automatic retry with exponential backoff. The job will retry up to `maxRetries` times before marking as FAILED.
-
-### Application Crashes
-
-On restart, the zombie sweep detects orphaned jobs and resets them for retry. Downloads resume from last checkpoint via wget's `-c` flag.
-
-### Process Cancellation
-
-```typescript
-// Cancel specific job
-const cancelled = await downloadQueueOrchestrator.cancelJob(jobId);
-
-// Cancel via BaseProcess (lower level)
-const cancelled = await BaseProcess.cancelJob(jobId);
-```
-
-## Best Practices
-
-1. **Always await orchestrator.start()** on application initialization
-2. **Call orchestrator.stop()** during graceful shutdown
-3. **Don't delete download queue records** - they're needed for crash recovery
-4. **Monitor failed jobs** - they may indicate persistent network issues
-5. **Use appropriate maxRetries** based on file importance and network reliability
 
 ## Testing
 
 Run the test suite:
 
 ```bash
-bun test src/daemon/processes/BaseProcess.test.ts
+bun test
 ```
-
-All tests should pass with >99% code coverage.
 
 ## Troubleshooting
 
 ### Downloads not starting
 
-- Check orchestrator is running: `orchestrator.isRunning`
-- Verify wget executable path in config
-- Check database for jobs stuck in PROCESSING
-
-### High database write load
-
-- Increase `progressThrottleMs` in orchestrator code
-- Reduce poll frequency (`pollIntervalMs`)
+1. Verify wget executable path in `config.toml`
+2. Check database for jobs stuck in `IN_PROGRESS`
+3. Verify job hasn't exceeded `maxAttempts`
 
 ### Jobs failing immediately
 
@@ -256,13 +257,6 @@ All tests should pass with >99% code coverage.
 - Check wget executable permissions
 - Review error logs for specific wget exit codes
 
-## Future Enhancements
+## Related Documentation
 
-Potential improvements for future iterations:
-
-- [ ] Priority queue support
-- [ ] Bandwidth throttling
-- [ ] Multiple source URLs (mirrors)
-- [ ] Hash verification after download
-- [ ] UI for monitoring active downloads
-- [ ] Metrics/statistics collection
+- [Extract Queue System](./extract-queue-system.md) - Companion extraction queue
