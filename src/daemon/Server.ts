@@ -4,21 +4,25 @@ import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
 import health from "./api/health.ts";
+import subscriptions from "./api/subscriptions.ts";
 import {
-	createSubscriptionsRouter,
-	type SubscriptionsRouterDependencies,
-} from "./api/subscriptions.ts";
+	type AppContext,
+	type AppContextDependencies,
+	appContextMiddleware,
+} from "./middleware/appContext.ts";
 import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
 
-export type ServerDependencies = SubscriptionsRouterDependencies;
+export type ServerDependencies = AppContextDependencies;
 
-export function createServer(deps: ServerDependencies): Hono {
-	const server = new Hono();
+export function createServer(deps: ServerDependencies): Hono<AppContext> {
+	const server = new Hono<AppContext>();
 	server.use("/*", cors());
 
 	server.use(requestId());
 
 	server.use("*", requestResponseLogger());
+	server.use("*", appContextMiddleware(deps));
+
 	server.route("/api/health", health);
 
 	server.get(
@@ -36,7 +40,6 @@ export function createServer(deps: ServerDependencies): Hono {
 
 	server.get("/api", Scalar({ url: "/v3/api-docs" }));
 
-	const subscriptions = createSubscriptionsRouter(deps);
 	server.route("/api/subscriptions", subscriptions);
 
 	return server;

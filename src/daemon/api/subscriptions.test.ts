@@ -1,10 +1,15 @@
 import { beforeEach, describe, expect, it, type Mock, mock } from "bun:test";
+import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "../../common/data.ts";
+import {
+	type AppContext,
+	appContextMiddleware,
+} from "../middleware/appContext.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { SubscriptionService } from "../services/SubscriptionService.ts";
-import { createSubscriptionsRouter } from "./subscriptions.ts";
+import subscriptions from "./subscriptions.ts";
 
 describe("Subscriptions API Router", () => {
 	let mockSubscriptionService: {
@@ -15,7 +20,7 @@ describe("Subscriptions API Router", () => {
 	let mockDownloadQueue: {
 		getOverallProgressForRelease: Mock<(releaseId: string) => number>;
 	};
-	let router: ReturnType<typeof createSubscriptionsRouter>;
+	let app: Hono<AppContext>;
 
 	const testReleaseData: ModReleaseData = {
 		modId: "test-mod",
@@ -65,15 +70,21 @@ describe("Subscriptions API Router", () => {
 			),
 		};
 
-		router = createSubscriptionsRouter({
-			subscriptionService:
-				mockSubscriptionService as unknown as SubscriptionService,
-			downloadQueue: mockDownloadQueue as unknown as DownloadQueue,
-		});
+		// Create app with middleware context injection
+		app = new Hono<AppContext>();
+		app.use(
+			"*",
+			appContextMiddleware({
+				subscriptionService:
+					mockSubscriptionService as unknown as SubscriptionService,
+				downloadQueue: mockDownloadQueue as unknown as DownloadQueue,
+			}),
+		);
+		app.route("/", subscriptions);
 	});
 
 	it("GET / should return all subscriptions with progress", async () => {
-		const response = await router.request("/");
+		const response = await app.request("/");
 
 		expect(response.status).toBe(StatusCodes.OK);
 		const body = await response.json();
@@ -91,7 +102,7 @@ describe("Subscriptions API Router", () => {
 	});
 
 	it("POST / should subscribe to a release", async () => {
-		const response = await router.request("/", {
+		const response = await app.request("/", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -107,7 +118,7 @@ describe("Subscriptions API Router", () => {
 	});
 
 	it("DELETE /:releaseId should remove subscription", async () => {
-		const response = await router.request("/test-release-1", {
+		const response = await app.request("/test-release-1", {
 			method: "DELETE",
 		});
 
@@ -121,7 +132,7 @@ describe("Subscriptions API Router", () => {
 	it("GET / should return empty array when no subscriptions exist", async () => {
 		mockSubscriptionService.getAllSubscriptions = mock(() => []);
 
-		const response = await router.request("/");
+		const response = await app.request("/");
 
 		expect(response.status).toBe(StatusCodes.OK);
 		const body = await response.json();
