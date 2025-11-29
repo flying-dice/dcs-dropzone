@@ -179,6 +179,7 @@ export async function spawnSevenzip(
 		_7zip.on("error", (err) => {
 			_7zip.removeAllListeners();
 			logger.error(`Error in sevenzip: ${err}`);
+			reject(err);
 		});
 
 		_7zip.on("close", (code) => {
