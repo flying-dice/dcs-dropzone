@@ -81,32 +81,35 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 		logger.debug(
 			`[${id}] - Pushing new extract job to queue: ${archivePath} -> ${targetDirectory}`,
 		);
-		const job = this.db
-			.insert(T_EXTRACT_QUEUE)
-			.values({
-				id,
-				archivePath,
-				targetDirectory,
-				createdAt: new Date(),
-				nextAttemptAfter: new Date(),
-				releaseAssetId,
-				releaseId,
-			})
-			.returning()
-			.get();
-
-		// Insert join table entries for all related download jobs
-		for (const downloadJobId of downloadJobIds) {
-			this.db
-				.insert(T_EXTRACT_DOWNLOAD_JOIN)
+		const job = this.db.transaction((tx) => {
+			const insertedJob = tx
+				.insert(T_EXTRACT_QUEUE)
 				.values({
-					id: `${id}:${downloadJobId}`,
-					extractJobId: id,
-					downloadJobId,
+					id,
+					archivePath,
+					targetDirectory,
+					createdAt: new Date(),
+					nextAttemptAfter: new Date(),
+					releaseAssetId,
+					releaseId,
 				})
-				.run();
-		}
+				.returning()
+				.get();
 
+			// Insert join table entries for all related download jobs
+			for (const downloadJobId of downloadJobIds) {
+				tx
+					.insert(T_EXTRACT_DOWNLOAD_JOIN)
+					.values({
+						id: `${id}:${downloadJobId}`,
+						extractJobId: id,
+						downloadJobId,
+					})
+					.run();
+			}
+
+			return insertedJob;
+		});
 		this.emit(ExtractQueueEvents.PUSH, job);
 	}
 
