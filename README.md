@@ -195,14 +195,24 @@ dcs-dropzone/
 │   │   │   ├── middleware/            # Auth & logging middleware
 │   │   │   ├── Database.ts            # Mongoose connection and ping()
 │   │   │   └── Application.ts         # Service wiring and context
-│   │   └── Application.ts             # Server entry point (Bun.serve)
+│   │   └── index.ts                   # Server entry point (Bun.serve)
 │   ├── daemon/                        # Daemon service
-│   │   ├── api/                       # Daemon API routes
+│   │   ├── api/                       # Daemon API routes (health, subscriptions)
+│   │   ├── child_process/             # External process spawning (wget, 7zip)
 │   │   ├── database/                  # SQLite database & migrations
-│   │   ├── middleware/                # Middleware
-│   │   └── Application.ts             # Daemon entry point
+│   │   ├── functions/                 # Utility functions
+│   │   ├── middleware/                # Request/response logging
+│   │   ├── queues/                    # Download and extract queue services
+│   │   ├── repositories/              # Data access layer
+│   │   ├── schemas/                   # Zod schemas for daemon
+│   │   ├── services/                  # Business logic services
+│   │   ├── Application.ts             # Service wiring and context
+│   │   ├── ApplicationConfig.ts       # TOML config loader
+│   │   ├── Server.ts                  # Hono server setup
+│   │   └── index.ts                   # Daemon entry point
 │   └── common/                        # Shared utilities
-├── tests/                             # Test files
+├── docs/                              # Additional documentation
+├── tests/                             # Integration/E2E test files
 ├── config.toml                        # Daemon configuration
 ├── docker-compose.yml                 # Docker orchestration
 ├── Dockerfile                         # Container image definition
@@ -226,10 +236,10 @@ Session management
 
 Both applications expose OpenAPI documentation:
 
-- **Web App**: http://localhost:3000/v3/api-docs
-- **Daemon**: http://localhost:3001/v3/api-docs (or configured port)
+- **Web App**: http://localhost:3000/v3/api-docs (JSON), http://localhost:3000/api (Scalar UI)
+- **Daemon**: http://localhost:3001/v3/api-docs (JSON), http://localhost:3001/api (Scalar UI)
 
-Interactive API documentation is available via Scalar UI at the same endpoints.
+Interactive API documentation is available via Scalar UI at the `/api` endpoint.
 
 ## 🤝 Contributing
 
@@ -251,7 +261,7 @@ Interactive API documentation is available via Scalar UI at the same endpoints.
 
 ## 📝 Additional Documentation
 
-For detailed technical documentation and agent-specific guidance, see [warp.md](./warp.md).
+For detailed technical documentation and agent-specific guidance, see [WARP.md](./WARP.md).
 
 ### LLM/Agent Guidance
 

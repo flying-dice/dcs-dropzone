@@ -175,7 +175,7 @@ CREATE TABLE EXTRACT_QUEUE (
   status TEXT NOT NULL DEFAULT 'PENDING',
   
   -- Progress Tracking
-  progress_percent INTEGER DEFAULT 0,
+  progress_percent INTEGER NOT NULL DEFAULT 0,
   
   -- Retry Metadata
   attempt INTEGER NOT NULL DEFAULT 0,

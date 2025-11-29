@@ -50,14 +50,18 @@ bun run clientgen
 ```
 
 - Drizzle SQL migrations (daemon)
-  - Generate SQL from I18nKeys.ts into src/daemon/database/ddl/ then bundle to index-ddl.ts used at runtime:
+  - Generate SQL from schema.ts into src/daemon/database/ddl/ then bundle to db-ddl.ts used at runtime:
 
 ```bash path=null start=null
 bun run drizzle       # runs: drizzle-kit generate --config drizzle.config.ts --name=init
-bun run postdrizzle   # builds src/daemon/database/index-ddl.ts
+bun run postdrizzle   # builds src/daemon/database/db-ddl.ts
 ```
 
-- Tests: none configured in package.json (no test runner present).
+- Tests: run the test suite with Bun's built-in test runner
+
+```bash path=null start=null
+bun test
+```
 
 ## Environment & config
 
@@ -90,11 +94,16 @@ port = 4000
 [logging]
 level = "info"
 colorize = true
-# destination can be a file path or 1 for stdout
-# destination = 1
+# destination can be a file path; leave unset for console output
+# destination = "application.log"
 
 [database]
 url = "/tmp/dcs-dropzone.sqlite"
+
+[binaries]
+target_directory = ".bin"
+wget = "binaries/wget.exe"
+sevenzip = "binaries/7za.exe"
 ```
 
 ## High-level architecture
@@ -122,13 +131,14 @@ url = "/tmp/dcs-dropzone.sqlite"
       - Generated API clients live in src/app/client/_autogen/ via orval; local target reads http://localhost:3000/v3/api-docs
 
   - Daemon (src/daemon)
-    - Entrypoint: src/daemon/Application.ts (Bun.serve) -> routes /api, /v3/api-docs
-    - API: src/daemon/Application.ts with similar middleware stack; health checks SQLite
+    - Entrypoint: src/daemon/index.ts (Bun.serve) -> routes /api, /v3/api-docs
+    - API: src/daemon/Server.ts (Hono) with similar middleware stack; health checks SQLite
     - Config: src/daemon/ApplicationConfig.ts loads TOML
+    - Services: src/daemon/Application.ts wires up services, queues, and repositories
     - Database: src/daemon/database
       - drizzle with bun:sqlite
       - SQL migrations stored in src/daemon/database/ddl (generated via drizzle-kit)
-      - At boot, src/daemon/database/Application.ts loads compiled SQL from index-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
+      - At boot, src/daemon/database/app-database.ts loads compiled SQL from db-ddl.ts and applies unapplied migrations (tracked in __drizzle_migrations)
 
 - Build & deploy
   - bun build compiles each runtime to a single native binary (dist/application, dist/appd)
