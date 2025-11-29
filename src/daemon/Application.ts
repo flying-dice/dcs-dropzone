@@ -7,7 +7,7 @@ import { DrizzleSqliteReleaseAssetRepository } from "./repositories/impl/Drizzle
 import { DrizzleSqliteSubscriptionRepository } from "./repositories/impl/DrizzleSqliteSubscriptionRepository.ts";
 import type { ReleaseAssetRepository } from "./repositories/ReleaseAssetRepository.ts";
 import type { SubscriptionRepository } from "./repositories/SubscriptionRepository.ts";
-import Server from "./Server.ts";
+import { createServer } from "./Server.ts";
 import { ReleaseAssetService } from "./services/ReleaseAssetService.ts";
 import { SubscriptionService } from "./services/SubscriptionService.ts";
 
@@ -55,8 +55,13 @@ const subscriptionService = new SubscriptionService(
 
 logger.debug("Services initialized");
 
+const server = createServer({
+	subscriptionService,
+	downloadQueue,
+});
+
 export default {
-	server: Server,
+	server,
 	subscriptionService,
 	getReleaseAssetService,
 	downloadQueue,

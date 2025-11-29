@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import {
-	MissionScriptRunOn,
-	SymbolicLinkDestRoot,
-} from "../../common/data.ts";
+import { MissionScriptRunOn, SymbolicLinkDestRoot } from "../../common/data.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { SubscriptionRepository } from "../repositories/SubscriptionRepository.ts";
 import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";

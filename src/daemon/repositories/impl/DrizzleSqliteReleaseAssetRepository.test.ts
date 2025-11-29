@@ -2,10 +2,7 @@ import { Database } from "bun:sqlite";
 import { describe, expect, it } from "bun:test";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { ddlExports } from "../../database/db-ddl.ts";
-import {
-	T_MOD_RELEASE_ASSETS,
-	T_MOD_RELEASES,
-} from "../../database/schema.ts";
+import { T_MOD_RELEASE_ASSETS, T_MOD_RELEASES } from "../../database/schema.ts";
 import type { ReleaseAssetRepository } from "../ReleaseAssetRepository.ts";
 import { DrizzleSqliteReleaseAssetRepository } from "./DrizzleSqliteReleaseAssetRepository.ts";
 

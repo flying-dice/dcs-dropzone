@@ -79,7 +79,9 @@ describe("ReleaseAssetService", () => {
 		);
 
 		expect(service).toBeDefined();
-		expect(mockRepository.getReleaseById).toHaveBeenCalledWith("test-release-1");
+		expect(mockRepository.getReleaseById).toHaveBeenCalledWith(
+			"test-release-1",
+		);
 	});
 
 	it("should push download jobs for each asset url", async () => {
