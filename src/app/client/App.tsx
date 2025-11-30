@@ -7,6 +7,7 @@ import { AppNavbar } from "./AppNavbar.tsx";
 import { useUserContext } from "./context/UserContext.ts";
 import { Homepage } from "./pages/HomePage.tsx";
 import { ModsPage } from "./pages/ModsPage.tsx";
+import { SubscribedPage } from "./pages/SubscribedPage.tsx";
 import { UserModPage } from "./pages/UserModPage";
 import { UserModReleasePage } from "./pages/UserModReleasePage";
 import { UserModsPage } from "./pages/UserModsPage.tsx";
@@ -30,6 +31,7 @@ export function App() {
 				<Routes>
 					<Route path="/" element={<Homepage />} />
 					<Route path={"/mods"} element={<ModsPage />} />
+					<Route path={"/subscribed"} element={<SubscribedPage />} />
 
 					{user && (
 						<>

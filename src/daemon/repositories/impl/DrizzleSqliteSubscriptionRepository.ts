@@ -1,9 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import {
-	type AssetStatus,
-	SubscribedReleaseStatus,
-} from "../../../common/data.ts";
+import type { AssetStatus } from "../../../common/data.ts";
 import { inferAssetStatusFromJobs } from "../../../common/inferAssetStatusFromJobs.ts";
 import { inferReleaseStatusFromAssets } from "../../../common/inferReleaseStatusFromAssets.ts";
 import { totalPercentProgress } from "../../../common/totalPercentProgress.ts";

@@ -15,12 +15,9 @@ import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 
 const colors: Record<ModReleaseAssetStatusDataStatus, MantineColor> = {
 	[ModReleaseAssetStatusDataStatus.PENDING]: "gray",
-	[ModReleaseAssetStatusDataStatus.DOWNLOADING]: "blue",
-	[ModReleaseAssetStatusDataStatus.DOWNLOADED]: "green",
-	[ModReleaseAssetStatusDataStatus.EXTRACTING]: "orange",
-	[ModReleaseAssetStatusDataStatus.EXTRACTED]: "green",
-	[ModReleaseAssetStatusDataStatus.DOWNLOAD_FAILED]: "red",
-	[ModReleaseAssetStatusDataStatus.EXTRACTION_FAILED]: "red",
+	[ModReleaseAssetStatusDataStatus.IN_PROGRESS]: "blue",
+	[ModReleaseAssetStatusDataStatus.COMPLETED]: "green",
+	[ModReleaseAssetStatusDataStatus.ERROR]: "red",
 };
 
 export type AssetListItemProps = {

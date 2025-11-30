@@ -6,7 +6,7 @@
  */
 export function totalPercentProgress(progresses: Array<number | null>): number {
 	const validProgresses = progresses.filter(
-		(p): p is number => p !== null && !isNaN(p),
+		(p): p is number => p !== null && !Number.isNaN(p),
 	);
 	if (validProgresses.length === 0) {
 		return 0;

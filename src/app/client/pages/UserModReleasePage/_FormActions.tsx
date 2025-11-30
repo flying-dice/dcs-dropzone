@@ -1,6 +1,5 @@
-import { Button, Card, Divider, Progress, Stack, Text } from "@mantine/core";
+import { Button, Card, Divider, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
-import { isNumber } from "lodash";
 import { useNavigate } from "react-router-dom";
 import {
 	deleteUserModRelease,
@@ -8,8 +7,7 @@ import {
 	type ModReleaseData,
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
-import { disableMod, enableMod } from "../../_autogen/daemon_api.ts";
-import { useDaemonSubscriber } from "../../hooks/useDaemonSubscriber.ts";
+import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
@@ -54,26 +52,6 @@ export function _FormActions(props: {
 		});
 	};
 
-	const handleToggle = async () => {
-		if (daemon.isEnabled(props.release.id)) {
-			await disableMod(props.release.id);
-			showSuccessNotification(
-				"Success",
-				"Mod release has been disabled successfully.",
-			);
-		} else {
-			await enableMod(props.release.id);
-			showSuccessNotification(
-				"Success",
-				"Mod release has been enabled successfully.",
-			);
-		}
-	};
-
-	const daemon = useDaemonSubscriber(props.mod, props.release, props.form);
-
-	const progressIfSubscribed = daemon.getSubscriptionProgress(props.release.id);
-
 	return (
 		<Card withBorder>
 			<Stack>
@@ -95,43 +73,11 @@ export function _FormActions(props: {
 					{t("DELETE_RELEASE")}
 				</Button>
 				<Divider />
-				<Stack gap={2}>
-					{daemon.isSubscribedTo(props.release.id) ? (
-						<Button
-							variant={"light"}
-							onClick={daemon.unsubscribe}
-							loading={daemon.unsubscribing.loading}
-							disabled={daemon.isUnavailable}
-						>
-							{progressIfSubscribed === undefined ||
-							progressIfSubscribed === 100
-								? "Unsubscribe"
-								: "Cancel"}
-						</Button>
-					) : (
-						<Button
-							variant={"light"}
-							onClick={daemon.subscribe}
-							loading={daemon.subscribing.loading}
-							disabled={daemon.isUnavailable}
-						>
-							Subscribe
-						</Button>
-					)}
-					{isNumber(progressIfSubscribed) && (
-						<Progress
-							radius={"xs"}
-							value={progressIfSubscribed}
-							animated={progressIfSubscribed < 100}
-							striped={progressIfSubscribed < 100}
-						/>
-					)}
-					{daemon.isSubscribedTo(props.release.id) && (
-						<Button variant={"light"} onClick={handleToggle}>
-							{daemon.isEnabled(props.release.id) ? "Disable" : "Enable"}
-						</Button>
-					)}
-				</Stack>
+				<ModReleaseDaemonControls
+					mod={props.mod}
+					release={props.release}
+					form={props.form}
+				/>
 			</Stack>
 		</Card>
 	);

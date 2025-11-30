@@ -1,7 +1,8 @@
 import { useAsyncFn } from "react-use";
-import { totalPercentProgress } from "../../../common/totalPercentProgress.ts";
 import type { ModData, ModReleaseData } from "../_autogen/api.ts";
 import {
+	disableMod,
+	enableMod,
 	ModAndReleaseDataStatus,
 	subscribeToModRelease,
 	unsubscribeFromModRelease,
@@ -18,7 +19,15 @@ export function useDaemonSubscriptions() {
 		query: { refetchInterval: 1000 },
 	});
 
+	const enabled = subscriptions.data?.data.filter(
+		(it) => it.status === ModAndReleaseDataStatus.ENABLED,
+	);
+
 	return {
+		count: subscriptions.data?.data.length || 0,
+		enabledCount: enabled?.length || 0,
+		enabled,
+		scubscriptions: subscriptions.data?.data,
 		active: subscriptions.data?.data.filter(
 			(it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS,
 		),
@@ -26,6 +35,7 @@ export function useDaemonSubscriptions() {
 			subscriptions.data?.data.some(
 				(it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS,
 			) ?? false,
+		configureDaemon,
 	};
 }
 
@@ -88,6 +98,32 @@ export function useDaemonSubscriber(
 		}
 	}, [form, mod, t, release]);
 
+	const [toggling, toggle] = useAsyncFn(async () => {
+		try {
+			const subscription = subscriptions.data?.data.find(
+				(it) => it.releaseId === release.id,
+			);
+
+			if (!subscription) return;
+
+			if (subscription.status === ModAndReleaseDataStatus.ENABLED) {
+				await disableMod(release.id);
+				showSuccessNotification(
+					"Success",
+					"Mod release has been disabled successfully.",
+				);
+			} else {
+				await enableMod(release.id);
+				showSuccessNotification(
+					"Success",
+					"Mod release has been enabled successfully.",
+				);
+			}
+		} catch (e) {
+			showErrorNotification(e);
+		}
+	}, [release, subscriptions]);
+
 	return {
 		isAvailable: subscriptions.isSuccess,
 		isUnavailable: !subscriptions.isSuccess,
@@ -95,37 +131,20 @@ export function useDaemonSubscriber(
 		subscribe,
 		unsubscribing,
 		unsubscribe,
-		subscriptions,
+		toggling,
+		toggle,
 		configureDaemon,
-		isSubscribedTo(releaseId: string) {
-			return (
-				subscriptions.data?.data.some((sub) => sub.releaseId === releaseId) ??
-				false
-			);
-		},
-		isEnabled(releaseId: string): boolean | null {
+		subscription: subscriptions.data?.data.find(
+			(it) => it.releaseId === release.id,
+		),
+		isReady() {
 			const sub = subscriptions.data?.data.find(
-				(sub) => sub.releaseId === releaseId,
+				(it) => it.releaseId === release.id,
 			);
-
-			if (!sub) {
-				return null;
-			}
-
-			return sub.status === ModAndReleaseDataStatus.ENABLED;
-		},
-		getSubscriptionProgress(releaseId: string) {
-			const sub = subscriptions.data?.data
-				.find((sub) => sub.releaseId === releaseId)
-				?.assets.map((it) => it.statusData)
-				.flatMap((it) => it?.overallPercentProgress)
-				.filter((it) => it !== undefined);
-
-			if (!sub || sub.length === 0) {
-				return 0;
-			}
-
-			return totalPercentProgress(sub as number[]);
+			return (
+				sub?.status === ModAndReleaseDataStatus.ENABLED ||
+				sub?.status === ModAndReleaseDataStatus.DISABLED
+			);
 		},
 	};
 }

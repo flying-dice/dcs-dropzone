@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { type ModDataCategory, useGetCategories } from "./_autogen/api.ts";
 import { CategoryShortcut } from "./components/CategoryShortcut.tsx";
 import { NavShortcut } from "./components/NavShortcut.tsx";
+import { useDaemonSubscriptions } from "./hooks/useDaemonSubscriber.ts";
 import type { I18nKeys } from "./i18n/I18nKeys.ts";
 import { useAppTranslation } from "./i18n/useAppTranslation.ts";
 import { AppIcons } from "./icons.ts";
@@ -14,6 +15,7 @@ export function AppNavbar(props: AppNavbarProps) {
 	const { t } = useAppTranslation();
 	const categories = useGetCategories();
 	const nav = useNavigate();
+	const subscribed = useDaemonSubscriptions();
 
 	const handleClick = (category: ModDataCategory) => {
 		const params = new URLSearchParams();
@@ -37,7 +39,8 @@ export function AppNavbar(props: AppNavbarProps) {
 					<NavShortcut
 						icon={AppIcons.Subscribed}
 						label={t("SUBSCRIBED")}
-						count={42}
+						to={"/subscribed"}
+						count={subscribed.count}
 					/>
 					<NavShortcut
 						icon={AppIcons.Enabled}
