@@ -30,26 +30,31 @@ export enum MissionScriptRunOn {
 
 export enum AssetStatus {
 	PENDING = "PENDING",
-
-	DOWNLOADING = "DOWNLOADING",
-	DOWNLOADED = "DOWNLOADED",
-	DOWNLOAD_FAILED = "DOWNLOAD_FAILED",
-
-	EXTRACTING = "EXTRACTING",
-	EXTRACTED = "EXTRACTED",
-	EXTRACTION_FAILED = "EXTRACTION_FAILED",
+	IN_PROGRESS = "IN_PROGRESS",
+	COMPLETED = "COMPLETED",
+	ERROR = "ERROR",
 }
 
 export enum DownloadJobStatus {
 	PENDING = "PENDING",
 	IN_PROGRESS = "IN_PROGRESS",
 	COMPLETED = "COMPLETED",
+	ERROR = "ERROR",
 }
 
 export enum ExtractJobStatus {
 	PENDING = "PENDING",
 	IN_PROGRESS = "IN_PROGRESS",
 	COMPLETED = "COMPLETED",
+	ERROR = "ERROR",
+}
+
+export enum SubscribedReleaseStatus {
+	PENDING = "PENDING",
+	IN_PROGRESS = "IN_PROGRESS",
+	DISABLED = "DISABLED",
+	ENABLED = "ENABLED",
+	ERROR = "ERROR",
 }
 
 export const data = {

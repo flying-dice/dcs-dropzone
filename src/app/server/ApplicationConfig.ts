@@ -4,22 +4,13 @@ import { z } from "zod";
 const configSchema = z.object({
 	port: z.number().int().min(1).max(65535),
 	mongoUri: z.string(),
-	logLevel: z.enum([
-		"fatal",
-		"error",
-		"warn",
-		"info",
-		"debug",
-		"trace",
-		"silent",
-	]),
 	userCookieSecret: z.string(),
 	userCookieName: z.string(),
 	userCookieMaxAge: z.number().int(),
 	ghClientId: z.string(),
 	ghClientSecret: z.string(),
 	ghAuthorizationCallbackUrl: z.string().url(),
-	ghHomepageUrl: z.string().url(),
+	ghHomepageUrl: z.url(),
 	admins: z.string().transform((it) => it.split(",").map((id) => id.trim())),
 });
 
@@ -28,7 +19,6 @@ export type ApplicationConfig = z.infer<typeof configSchema>;
 const appConfig = configSchema.parse({
 	port: int("PORT"),
 	mongoUri: string("MONGO_URI"),
-	logLevel: string("LOG_LEVEL"),
 	userCookieSecret: string("USER_COOKIE_SECRET"),
 	userCookieName: string("USER_COOKIE_NAME", "USERID"),
 	userCookieMaxAge: int("USER_COOKIE_MAX_AGE", 86400), // default to 1 day

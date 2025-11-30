@@ -67,12 +67,11 @@ bun test
 
 - Web application (src/app)
   - Required env vars (see src/app/server/ApplicationConfig.ts and src/app/server/Application.ts):
-    - PORT, LOG_LEVEL, USER_COOKIE_SECRET, USER_COOKIE_NAME (optional, default __Secure-USERID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, GH_HOMEPAGE_URL, MONGODB_URI
+    - PORT, USER_COOKIE_SECRET, USER_COOKIE_NAME (optional, default __Secure-USERID), GH_CLIENT_ID, GH_CLIENT_SECRET, GH_AUTHORIZATION_CALLBACK_URL, GH_HOMEPAGE_URL, MONGODB_URI
   - Example (replace placeholders):
 
 ```bash path=null start=null
 export PORT=3000
-export LOG_LEVEL=info
 export USER_COOKIE_SECRET={{USER_COOKIE_SECRET}}
 export USER_COOKIE_NAME=__Secure-USERID
 export GH_CLIENT_ID={{GH_CLIENT_ID}}

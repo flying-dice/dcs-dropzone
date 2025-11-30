@@ -1,24 +1,22 @@
 import {
 	ActionIcon,
 	Alert,
-	Badge,
 	Button,
 	Card,
 	Checkbox,
 	Divider,
 	Group,
-	Paper,
 	Stack,
 	Text,
 	TextInput,
-	ThemeIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { FaCloudDownloadAlt, FaFileArchive } from "react-icons/fa";
+import { FaCloudDownloadAlt } from "react-icons/fa";
 import { FaFile, FaTrash } from "react-icons/fa6";
 import { z } from "zod";
+import { AssetListItem } from "../../components/AssetListItem.tsx";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
@@ -26,11 +24,7 @@ import type { UserModReleaseForm } from "./form.ts";
 
 const assetFormSchema = z.object({
 	name: z.string().min(1, "Asset name is required"),
-	urls: z
-		.string()
-		.url("Invalid URL format")
-		.array()
-		.min(1, "At least one URL is required"),
+	urls: z.url().array().min(1, "At least one URL is required"),
 	isArchive: z.boolean(),
 });
 type AssetFormValues = z.infer<typeof assetFormSchema>;
@@ -199,43 +193,15 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 				</Group>
 				{props.form.values.assets.length === 0 && <_NoAssets />}
 				{props.form.values.assets.map((it) => (
-					<Paper
-						withBorder
+					<AssetListItem
 						key={it.name}
-						color="blue"
-						variant="light"
-						style={{ cursor: "pointer" }}
+						name={it.name}
+						urls={it.urls}
+						isArchive={it.isArchive}
 						onClick={() =>
 							handleEditAsset(props.form, props.form.values.assets.indexOf(it))
 						}
-						p={"md"}
-					>
-						<Stack>
-							<Group gap={"xs"}>
-								<ThemeIcon variant={"light"}>
-									{it.isArchive ? <FaFileArchive /> : <FaFile />}
-								</ThemeIcon>
-								<Text>{it.name}</Text>
-								{it.isArchive && (
-									<Badge variant={"light"} style={{ textTransform: "none" }}>
-										Archive
-									</Badge>
-								)}
-							</Group>
-							<Stack gap={"xs"}>
-								<Stack gap={2}>
-									<Text size={"xs"} fw={"bold"}>
-										{t("ASSET_URLS_LABEL")}:
-									</Text>
-									{it.urls.map((url) => (
-										<Text size={"xs"} key={url}>
-											- {url}
-										</Text>
-									))}
-								</Stack>
-							</Stack>
-						</Stack>
-					</Paper>
+					/>
 				))}
 			</Stack>
 		</Card>

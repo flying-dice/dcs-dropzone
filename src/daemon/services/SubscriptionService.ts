@@ -1,6 +1,6 @@
 import { getLogger } from "log4js";
 import type { SubscriptionRepository } from "../repositories/SubscriptionRepository.ts";
-import type { ModReleaseData } from "../schemas/ModAndReleaseData.ts";
+import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { ReleaseAssetService } from "./ReleaseAssetService.ts";
 
 const logger = getLogger("SubscriptionService");
@@ -18,7 +18,7 @@ export class SubscriptionService {
 		private readonly releaseAssetServiceFactory: ReleaseAssetServiceFactory,
 	) {}
 
-	getAllSubscriptions(): { modId: string; releaseId: string }[] {
+	getAllSubscriptions(): ModAndReleaseData[] {
 		return this.repo.getAll();
 	}
 
@@ -36,7 +36,7 @@ export class SubscriptionService {
 		);
 	}
 
-	subscribeToRelease(data: ModReleaseData) {
+	async subscribeToRelease(data: ModAndReleaseData) {
 		logger.info(
 			`Subscribing to mod: ${data.modName} (release: ${data.version})`,
 		);
@@ -47,7 +47,7 @@ export class SubscriptionService {
 			`Successfully subscribed to mod: ${data.modName} (release: ${data.version})`,
 		);
 
-		this.releaseAssetServiceFactory(
+		await this.releaseAssetServiceFactory(
 			data.releaseId,
 		).downloadAndExtractReleaseAssets();
 	}

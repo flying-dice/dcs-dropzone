@@ -11,6 +11,9 @@ export const T_MOD_RELEASES = sqliteTable("MOD_RELEASES", {
 	modId: text("mod_id").notNull(),
 	modName: text("mod_name").notNull(),
 	version: text("version").notNull(),
+	dependencies: text("dependencies", { mode: "json" })
+		.$type<string[]>()
+		.notNull(),
 });
 
 export const T_MOD_RELEASE_ASSETS = sqliteTable("MOD_RELEASE_ASSETS", {

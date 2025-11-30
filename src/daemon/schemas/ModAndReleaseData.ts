@@ -1,5 +1,28 @@
 import { z } from "zod";
-import { MissionScriptRunOn, SymbolicLinkDestRoot } from "../../common/data.ts";
+import {
+	AssetStatus,
+	MissionScriptRunOn,
+	SubscribedReleaseStatus,
+	SymbolicLinkDestRoot,
+} from "../../common/data.ts";
+
+export const ModReleaseAssetStatusData = z
+	.object({
+		downloadPercentProgress: z.number().optional(),
+		extractPercentProgress: z.number().optional(),
+		overallPercentProgress: z.number().optional(),
+		status: z.enum(AssetStatus),
+	})
+	.meta({
+		ref: "ModReleaseAssetStatusData",
+		title: "Mod Release Asset Status Data",
+		description:
+			"Status data representation of a mod release asset, including download and extraction progress.",
+	});
+
+export type ModReleaseAssetStatusData = z.infer<
+	typeof ModReleaseAssetStatusData
+>;
 
 // Asset schema
 export const ModReleaseAssetData = z
@@ -7,6 +30,7 @@ export const ModReleaseAssetData = z
 		name: z.string().min(1, "Asset name is required"),
 		urls: z.string().url().array(),
 		isArchive: z.boolean(),
+		statusData: ModReleaseAssetStatusData.optional(),
 	})
 	.meta({
 		ref: "ModReleaseAssetData",
@@ -64,6 +88,7 @@ export const ModAndReleaseData = z
 		assets: z.array(ModReleaseAssetData),
 		symbolicLinks: z.array(ModReleaseSymbolicLinkData),
 		missionScripts: z.array(ModReleaseMissionScriptData),
+		status: z.enum(SubscribedReleaseStatus).optional(),
 	})
 	.meta({
 		ref: "ModAndReleaseData",
@@ -72,4 +97,4 @@ export const ModAndReleaseData = z
 			"Data representation of a mod along with its release for downloading and enabling.",
 	});
 
-export type ModReleaseData = z.infer<typeof ModAndReleaseData>;
+export type ModAndReleaseData = z.infer<typeof ModAndReleaseData>;

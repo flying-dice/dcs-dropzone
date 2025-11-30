@@ -9,7 +9,7 @@ import {
 	useGetUserModReleases,
 } from "../../_autogen/api.ts";
 import { disableMod, enableMod } from "../../_autogen/daemon_api.ts";
-import { useDaemonSubscriptions } from "../../hooks/useDaemonSubscriptions.ts";
+import { useDaemonSubscriber } from "../../hooks/useDaemonSubscriber.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
@@ -70,7 +70,7 @@ export function _FormActions(props: {
 		}
 	};
 
-	const daemon = useDaemonSubscriptions(props.mod, props.release, props.form);
+	const daemon = useDaemonSubscriber(props.mod, props.release, props.form);
 
 	const progressIfSubscribed = daemon.getSubscriptionProgress(props.release.id);
 

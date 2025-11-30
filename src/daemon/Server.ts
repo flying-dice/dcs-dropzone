@@ -8,14 +8,11 @@ import subscriptions from "./api/subscriptions.ts";
 import toggle from "./api/toggle.ts";
 import {
 	type AppContext,
-	type AppContextDependencies,
 	appContextMiddleware,
 } from "./middleware/appContext.ts";
 import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
 
-export type ServerDependencies = AppContextDependencies;
-
-export function createServer(deps: ServerDependencies): Hono<AppContext> {
+export function createServer(deps: AppContext["Variables"]): Hono<AppContext> {
 	const server = new Hono<AppContext>();
 	server.use("/*", cors());
 

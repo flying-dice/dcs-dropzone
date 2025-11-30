@@ -32,7 +32,7 @@ router.post(
 			`Received subscription request for mod: ${modAndRelease.modName} (release: ${modAndRelease.version})`,
 		);
 
-		c.var.subscriptionService.subscribeToRelease(modAndRelease);
+		await c.var.subscriptionService.subscribeToRelease(modAndRelease);
 
 		return c.json(null, StatusCodes.OK);
 	},
@@ -46,36 +46,11 @@ router.get(
 		summary: "Get all mod subscriptions",
 		description: "Retrieves a list of all mod subscriptions.",
 		responses: {
-			[StatusCodes.OK]: ModAndReleaseData.pick({
-				modId: true,
-				releaseId: true,
-			})
-				.extend({
-					progressPercent: z.number().optional(),
-					enabled: z.boolean().optional(),
-				})
-				.array(),
+			[StatusCodes.OK]: ModAndReleaseData.array(),
 		},
 	}),
 	async (c) => {
-		const subscriptions: {
-			modId: string;
-			releaseId: string;
-			progressPercent?: number;
-			enabled?: boolean;
-		}[] = c.var.subscriptionService.getAllSubscriptions();
-
-		for (const sub of subscriptions) {
-			const downloadProgressPercent =
-				c.var.downloadQueue.getOverallProgressForRelease(sub.releaseId);
-			const extractProgressPercent =
-				c.var.extractQueue.getOverallProgressForRelease(sub.releaseId);
-			sub.progressPercent = extractProgressPercent
-				? Math.floor((downloadProgressPercent + extractProgressPercent) / 2)
-				: downloadProgressPercent;
-
-			sub.enabled = c.var.toggleService.isReleaseEnabled(sub.releaseId);
-		}
+		const subscriptions = c.var.subscriptionService.getAllSubscriptions();
 
 		return c.json(subscriptions, StatusCodes.OK);
 	},
@@ -100,7 +75,7 @@ router.delete(
 	),
 	async (c) => {
 		const { releaseId } = c.req.valid("param");
-		c.var.subscriptionService.removeSubscription(releaseId);
+		await c.var.subscriptionService.removeSubscription(releaseId);
 		return c.json(null, StatusCodes.OK);
 	},
 );

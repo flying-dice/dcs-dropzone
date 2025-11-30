@@ -9,24 +9,10 @@ const configSchema = z.object({
 		host: z.string().default("localhost"),
 		port: z.number().int().min(1).max(65535),
 	}),
-	logging: z.object({
-		level: z.enum([
-			"fatal",
-			"error",
-			"warn",
-			"info",
-			"debug",
-			"trace",
-			"silent",
-		]),
-		destination: z.string().optional(),
-		colorize: z.boolean(),
-	}),
 	database: z.object({
 		url: z.string(),
 	}),
 	binaries: z.object({
-		target_directory: z.string(),
 		wget: z.string().min(1, "wget path is required"),
 		sevenzip: z.string().min(1, "7zip path is required"),
 	}),

@@ -1,6 +1,8 @@
 import { useAsyncFn } from "react-use";
+import { totalPercentProgress } from "../../../common/totalPercentProgress.ts";
 import type { ModData, ModReleaseData } from "../_autogen/api.ts";
 import {
+	ModAndReleaseDataStatus,
 	subscribeToModRelease,
 	unsubscribeFromModRelease,
 	useGetAllSubscriptions,
@@ -10,6 +12,22 @@ import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
 import { showErrorNotification } from "../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
+
+export function useDaemonSubscriptions() {
+	const subscriptions = useGetAllSubscriptions({
+		query: { refetchInterval: 1000 },
+	});
+
+	return {
+		active: subscriptions.data?.data.filter(
+			(it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS,
+		),
+		isActive:
+			subscriptions.data?.data.some(
+				(it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS,
+			) ?? false,
+	};
+}
 
 /**
  * Hook to subscribe to a mod release using data from a form.
@@ -25,7 +43,7 @@ import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
  * @param release {ModReleaseData} - The mod release data.
  * @param form {UserModReleaseForm} - The form containing user input for the mod release.
  */
-export function useDaemonSubscriptions(
+export function useDaemonSubscriber(
 	mod: ModData,
 	release: ModReleaseData,
 	form?: UserModReleaseForm,
@@ -94,13 +112,20 @@ export function useDaemonSubscriptions(
 				return null;
 			}
 
-			return sub.enabled || false;
+			return sub.status === ModAndReleaseDataStatus.ENABLED;
 		},
 		getSubscriptionProgress(releaseId: string) {
-			const sub = subscriptions.data?.data.find(
-				(sub) => sub.releaseId === releaseId,
-			);
-			return sub?.progressPercent;
+			const sub = subscriptions.data?.data
+				.find((sub) => sub.releaseId === releaseId)
+				?.assets.map((it) => it.statusData)
+				.flatMap((it) => it?.overallPercentProgress)
+				.filter((it) => it !== undefined);
+
+			if (!sub || sub.length === 0) {
+				return 0;
+			}
+
+			return totalPercentProgress(sub as number[]);
 		},
 	};
 }

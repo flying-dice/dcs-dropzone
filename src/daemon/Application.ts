@@ -84,7 +84,6 @@ const server = createServer({
 export default {
 	server,
 	subscriptionService,
-	getReleaseAssetService,
 	downloadQueue,
 	extractQueue,
 	toggleService,

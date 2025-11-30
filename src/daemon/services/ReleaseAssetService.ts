@@ -79,7 +79,10 @@ export class ReleaseAssetService {
 			if (asset.isArchive && asset.urls.length > 0) {
 				// For multipart archives, the first file is typically the main archive
 				const firstUrl = asset.urls[0] as string;
-				const archivePath = join(releaseFolder, basename(firstUrl));
+				const archivePath = join(
+					releaseFolder,
+					decodeURIComponent(basename(firstUrl)),
+				);
 
 				this.logger.debug(
 					`Pushing extract job for archive: ${archivePath} with ${downloadJobIds.length} download dependencies`,

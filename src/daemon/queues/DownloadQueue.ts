@@ -1,6 +1,6 @@
 import { ok } from "node:assert";
 import { addSeconds } from "date-fns";
-import { and, asc, avg, eq, gte, lt } from "drizzle-orm";
+import { and, asc, avg, eq, lt, lte } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus } from "../../common/data.ts";
@@ -166,7 +166,7 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 				and(
 					eq(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.PENDING),
 					lt(T_DOWNLOAD_QUEUE.attempt, T_DOWNLOAD_QUEUE.maxAttempts),
-					gte(T_DOWNLOAD_QUEUE.nextAttemptAfter, new Date()),
+					lte(T_DOWNLOAD_QUEUE.nextAttemptAfter, new Date()),
 				),
 			)
 			.orderBy(asc(T_DOWNLOAD_QUEUE.createdAt))

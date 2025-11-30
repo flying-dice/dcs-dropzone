@@ -63,7 +63,6 @@ Create a `.env` file or set environment variables:
 
 ```bash
 PORT=3000
-LOG_LEVEL=info
 USER_COOKIE_SECRET=your-strong-secret
 USER_COOKIE_NAME=__Secure-USERID
 GH_CLIENT_ID=your-github-client-id
