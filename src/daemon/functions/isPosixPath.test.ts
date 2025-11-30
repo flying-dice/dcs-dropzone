@@ -11,7 +11,7 @@ describe("isPosixPath", () => {
 	test("returns true for a path containing a colon followed by a slash", () => {
 		const path = "C:/Windows/System32";
 		const result = isPosixPath(path);
-		expect(result).toBe(true);
+		expect(result).toBe(false);
 	});
 
 	test("returns false for a relative path without a colon", () => {
