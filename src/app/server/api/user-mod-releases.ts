@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import createRelease from "../commands/CreateRelease/index.ts";
+import createRelease from "../commands/CreateRelease.ts";
 import deleteRelease from "../commands/DeleteRelease.ts";
 import updateRelease from "../commands/UpdateRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
@@ -153,8 +153,8 @@ router.post(
 		});
 
 		return result.match(
-			(body: unknown) => c.json(body, StatusCodes.CREATED),
-			(error: unknown) =>
+			(body) => c.json(body, StatusCodes.CREATED),
+			(error) =>
 				c.json(
 					ErrorData.parse({
 						code: StatusCodes.NOT_FOUND,

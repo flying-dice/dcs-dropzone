@@ -9,7 +9,11 @@ export type DeleteModCommand = {
 	user: UserData;
 	id: string;
 };
-export default async function ({ user, id }: DeleteModCommand): Promise<Result<undefined, "NotFound">> {
+
+export type DeleteModResult = Result<undefined, "ModNotFound">;
+
+export default async function (command: DeleteModCommand): Promise<DeleteModResult> {
+	const { user, id } = command;
 	logger.debug({ userId: user.id, modId: id }, "deleteMod start");
 
 	const result = await Mod.findOneAndDelete({
@@ -19,7 +23,7 @@ export default async function ({ user, id }: DeleteModCommand): Promise<Result<u
 
 	if (!result) {
 		logger.warn({ modId: id }, "User attempted to delete mod but it was not found");
-		return err("NotFound");
+		return err("ModNotFound");
 	}
 
 	logger.debug({ modId: id }, "User successfully deleted mod");

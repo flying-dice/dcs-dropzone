@@ -9,7 +9,10 @@ export type FindUpdateInformationByIdsQuery = {
 	modIds: string[];
 };
 
-export default async function ({ modIds }: FindUpdateInformationByIdsQuery): Promise<ModLatestReleaseData[]> {
+export type FindUpdateInformationByIdsResult = ModLatestReleaseData[];
+
+export default async function (query: FindUpdateInformationByIdsQuery): Promise<FindUpdateInformationByIdsResult> {
+	const { modIds } = query;
 	logger.debug({ modIds }, "start");
 
 	const modsAndLatestReleases: Array<ModLatestReleaseData> = [];

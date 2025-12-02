@@ -1,17 +1,25 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { ModCategory } from "../../../../common/data.ts";
-import { handler } from "./handler.ts";
+import { ModCategory } from "../../../common/data.ts";
+import createMod from "./CreateMod.ts";
 
 describe("CreateMod", () => {
+	let mongod: MongoMemoryServer;
+
 	beforeEach(async () => {
-		const mongod = await MongoMemoryServer.create();
+		mongod = await MongoMemoryServer.create();
+		await mongoose.disconnect().catch(() => {});
 		await mongoose.connect(mongod.getUri());
 	});
 
+	afterEach(async () => {
+		await mongoose.disconnect().catch(() => {});
+		await mongod.stop();
+	});
+
 	it("should create the new mod and save to the database", async () => {
-		const result = await handler({
+		const result = await createMod({
 			user: {
 				id: "123456789",
 				name: "Test User",

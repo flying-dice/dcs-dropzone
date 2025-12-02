@@ -1,5 +1,5 @@
-import type { T_MOD_RELEASE_SYMBOLIC_LINKS } from "../daemon/database/schema.ts";
-import { AssetStatus, DownloadedReleaseStatus } from "./data.ts";
+import { AssetStatus, DownloadedReleaseStatus } from "../../common/data.ts";
+import type { T_MOD_RELEASE_SYMBOLIC_LINKS } from "../database/schema.ts";
 
 export function inferReleaseStatusFromAssets(
 	assetStatus: AssetStatus[],

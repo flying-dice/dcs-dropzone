@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { getAllTags } from "../queries/GetAllTags.ts";
+import getAllTags from "../queries/GetAllTags.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 
 const router = new Hono();

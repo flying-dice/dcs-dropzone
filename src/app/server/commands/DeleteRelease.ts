@@ -1,5 +1,6 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
+import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
@@ -10,12 +11,17 @@ export type DeleteReleaseCommand = {
 	releaseId: string;
 	user: UserData;
 };
-export default async function ({
-	modId,
-	releaseId,
-	user,
-}: DeleteReleaseCommand): Promise<Result<undefined, "NotFound">> {
+
+export type DeleteReleaseResult = Result<undefined, "ModNotFound" | "ReleaseNotFound">;
+
+export default async function (command: DeleteReleaseCommand): Promise<DeleteReleaseResult> {
+	const { modId, releaseId, user } = command;
 	logger.debug({ userId: user.id, modId, releaseId }, "deleteRelease start");
+
+	if (!(await Mod.exists({ id: modId, maintainers: user.id }))) {
+		logger.warn({ modId, userId: user.id }, "User attempted to delete release for a mod they do not maintain");
+		return err("ModNotFound");
+	}
 
 	const result = await ModRelease.findOneAndDelete({
 		id: releaseId,
@@ -24,7 +30,7 @@ export default async function ({
 
 	if (!result) {
 		logger.warn({ releaseId }, "User attempted to delete release but it was not found");
-		return err("NotFound");
+		return err("ReleaseNotFound");
 	}
 
 	logger.debug({ releaseId }, "User successfully deleted release");

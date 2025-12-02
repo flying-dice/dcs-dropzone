@@ -1,8 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import type { AssetStatus } from "../../../common/data.ts";
-import { inferAssetStatusFromJobs } from "../../../common/inferAssetStatusFromJobs.ts";
-import { inferReleaseStatusFromAssets } from "../../../common/inferReleaseStatusFromAssets.ts";
 import { totalPercentProgress } from "../../../common/totalPercentProgress.ts";
 import {
 	T_DOWNLOAD_QUEUE,
@@ -12,6 +10,8 @@ import {
 	T_MOD_RELEASE_SYMBOLIC_LINKS,
 	T_MOD_RELEASES,
 } from "../../database/schema.ts";
+import { inferAssetStatusFromJobs } from "../../functions/inferAssetStatusFromJobs.ts";
+import { inferReleaseStatusFromAssets } from "../../functions/inferReleaseStatusFromAssets.ts";
 import { ModAndReleaseData, type ModReleaseAssetStatusData } from "../../schemas/ModAndReleaseData.ts";
 import type { DownloadsRepository } from "../DownloadsRepository.ts";
 

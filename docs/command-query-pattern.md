@@ -6,7 +6,7 @@ This document explains how the server-side code under `src/app/server` uses the 
 - Commands perform state changes (create/update/delete). They must be explicit about side effects and validations.
 - Queries read data and return DTOs. They must be side‑effect-free and cache‑friendly.
 
-This separation avoids service classes that simply orchestrate between the HTTP handler and the ORM.
+This separation avoids service classes that simply orchestrate between the HTTP createMod and the ORM.
 
 ## Folder layout
 We adopt one-folder-per-operation.
@@ -14,23 +14,23 @@ We adopt one-folder-per-operation.
 src/app/server/
   commands/
     CreateMod/
-      handler.ts        # the command implementation (pure function)
+      CreateMod.ts        # the command implementation (pure function)
       types.ts          # Params/Result types (and error types if needed)
-      handler.test.ts   # tests for the command (optional)
+      createMod.test.ts   # tests for the command (optional)
       index.ts          # re-exports for concise imports (optional)
     UpdateRelease/
-      handler.ts
+      CreateMod.ts
       contract.ts
-      handler.test.ts
+      CreateMod.test.ts
     ...
   queries/
     FindUserModById/
-      handler.ts        # the query implementation (no side-effects)
+      CreateMod.ts        # the query implementation (no side-effects)
       types.ts          # Params/Result types
-      handler.test.ts
+      createMod.test.ts
       index.ts
     GetAllTags/
-      handler.ts
+      CreateMod.ts
       contract.ts
   entities/             # persistence models
   schemas/              # shared DTOs (domain-level) if needed
@@ -39,12 +39,12 @@ src/app/server/
 ```
 
 ## Design principles
-- Single operation per folder. The folder contains a `handler.ts` (logic) and `types.ts` (Params/Result). Optionally `index.ts` re-exports typed `execute`.
+- Single operation per folder. The folder contains a `CreateMod.ts` (logic) and `types.ts` (Params/Result). Optionally `index.ts` re-exports typed `execute`.
 - Pure inputs/outputs. Inputs and outputs are described using `types.ts`; validate at the edges (API) with Zod as needed.
 - No hidden state. Dependencies should be passed in via parameters where needed.
 - Logging at boundaries. Each command/query logs `start` and success/failure with enough context for tracing.
 - Errors as data. Prefer `neverthrow` `Result<T, E>` or thrown domain errors that are handled at the API layer.
-- Tests near code. Each command/query may have a sibling `handler.test.ts`.
+- Tests near code. Each command/query may have a sibling `createMod.test.ts`.
 
 ## Commands
 - Do: authorization checks, input validation, idempotency safeguards, write to DB, emit events/metrics.
@@ -52,7 +52,7 @@ src/app/server/
 
 Example: `commands/CreateMod/`
 - `types.ts` exports `Command/Params` and `Result` types.
-- `handler.ts` exports `execute(params: Params): Promise<Result>`; API layer should Zod-validate inbound requests before calling execute.
+- `createMod.ts` exports `execute(params: Params): Promise<Result>`; API layer should Zod-validate inbound requests before calling execute.
 - Keep side-effects inside the command and return the final DTO.
 
 ## Queries
@@ -61,7 +61,7 @@ Example: `commands/CreateMod/`
 
 Shape:
 - `queries/FindUserModById/types.ts` defines `Params` and `Result` (often `neverthrow`-wrapped for NotFound).
-- `queries/FindUserModById/handler.ts` implements the read and returns the typed `Result`.
+- `queries/FindUserModById/createMod.ts` implements the read and returns the typed `Result`.
 
 Example: `queries/FindUserModById/`
 - Authorizes by `maintainers: user.id` criterion.
@@ -87,13 +87,13 @@ Example: `queries/FindUserModById/`
 ## API layer integration
 - API handlers should:
   1) Validate/parse inputs using Zod DTOs in `schemas/` (or an operation-specific validator if present).
-  2) Call `execute` from the operation's `handler.ts` (or its `index.ts` re-export) with typed `types.ts` Params.
+  2) Call `execute` from the operation's `createMod.ts` (or its `index.ts` re-export) with typed `types.ts` Params.
   3) Map `Result` or DTO to HTTP.
 - Avoid putting business logic inside API handlers.
 
 ## Testing guidance
 - Prefer tests that exercise the operation end‑to‑end at the module boundary.
-- Place tests next to the operation: `commands/VerbNoun/handler.test.ts`, `queries/VerbNoun/handler.test.ts`.
+- Place tests next to the operation: `commands/VerbNoun/createMod.test.ts`, `queries/VerbNoun/createMod.test.ts`.
 - Assertions focus on:
   - Correct DTOs returned (or `Result` values)
   - Correct authorization/filtering
@@ -101,7 +101,7 @@ Example: `queries/FindUserModById/`
 
 ## Conventions summary
 - One operation per folder (VerbNoun/).
-- Files: `handler.ts`, `types.ts`, optional `index.ts`, and `handler.test.ts`.
+- Files: `createMod.ts`, `types.ts`, optional `index.ts`, and `createMod.test.ts`.
 - Clear naming: `commands/CreateMod`, `queries/FindUserModById`.
 - Zod at edges (API layer), `Result` for expected absence.
 - No shared mutable state; inject dependencies.

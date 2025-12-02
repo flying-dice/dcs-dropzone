@@ -4,7 +4,7 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import { ModCategory } from "../../../common/data.ts";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { getCategoryCounts } from "../queries/GetCategoryCounts.ts";
+import getCategoryCounts from "../queries/GetCategoryCounts.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 
 const router = new Hono();

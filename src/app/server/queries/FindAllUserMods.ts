@@ -11,12 +11,12 @@ export type FindAllUserModsQuery = {
 	user: UserData;
 };
 
-export type FindAllUserModsQueryResult = {
+export type FindAllUserModsResult = {
 	data: ModSummaryData[];
 	meta: UserModsMetaData;
 };
 
-export default async function (query: FindAllUserModsQuery): Promise<FindAllUserModsQueryResult> {
+export default async function (query: FindAllUserModsQuery): Promise<FindAllUserModsResult> {
 	const { user } = query;
 
 	logger.debug({ userId: user.id }, "findAllUserMods start");

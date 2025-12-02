@@ -1,17 +1,20 @@
 import { getLogger } from "log4js";
+import { err, ok, type Result } from "neverthrow";
 import { ModSummary } from "../entities/ModSummary.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 
 const logger = getLogger("GetById");
 
-export async function getModById(id: string): Promise<ModSummaryData | null> {
+export type GetModByIdResult = Result<ModSummaryData, "ModNotFound">;
+
+export default async function (id: string): Promise<GetModByIdResult> {
 	logger.debug({ id }, "Finding mod by id");
 
 	const doc = await ModSummary.findOne({ id }).lean().exec();
 
 	if (!doc) {
-		return null;
+		return err("ModNotFound");
 	}
 
-	return ModSummaryData.parse(doc);
+	return ok(ModSummaryData.parse(doc));
 }

@@ -5,8 +5,8 @@ import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import { fromCsv } from "../../../common/fromCsv.ts";
-import { getAllPublishedMods } from "../queries/GetAllPublishedMods.ts";
-import { getModById } from "../queries/GetModById.ts";
+import getAllPublishedMods from "../queries/GetAllPublishedMods.ts";
+import getModById from "../queries/GetModById.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
@@ -81,11 +81,15 @@ router.get(
 	async (c) => {
 		const { page, size, category, maintainers, tags, term } = c.req.valid("query");
 
-		const result = await getAllPublishedMods(page, size, {
-			category,
-			maintainers,
-			tags,
-			term,
+		const result = await getAllPublishedMods({
+			page,
+			size,
+			filter: {
+				category,
+				maintainers,
+				tags,
+				term,
+			},
 		});
 
 		return c.json(result, StatusCodes.OK);

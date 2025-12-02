@@ -1,5 +1,5 @@
-import type { T_DOWNLOAD_QUEUE, T_EXTRACT_QUEUE } from "../daemon/database/schema.ts";
-import { AssetStatus, DownloadJobStatus, ExtractJobStatus } from "./data.ts";
+import { AssetStatus, DownloadJobStatus, ExtractJobStatus } from "../../common/data.ts";
+import type { T_DOWNLOAD_QUEUE, T_EXTRACT_QUEUE } from "../database/schema.ts";
 
 export function inferAssetStatusFromJobs(
 	downloadJobs: (typeof T_DOWNLOAD_QUEUE.$inferSelect)[],

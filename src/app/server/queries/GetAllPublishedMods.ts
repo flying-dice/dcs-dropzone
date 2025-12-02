@@ -8,20 +8,25 @@ import { PageData } from "../schemas/PageData.ts";
 
 const logger = getLogger("GetAllPublishedMods");
 
-export async function getAllPublishedMods(
-	page: number,
-	size: number,
-	filter: {
+type GetAllPublishedModsQuery = {
+	page: number;
+	size: number;
+	filter?: {
 		category?: ModCategory;
 		maintainers?: string[];
 		tags?: string[];
 		term?: string;
-	} = {},
-): Promise<{
+	};
+};
+type GetAllPublishedModsResult = {
 	data: ModSummaryData[];
 	page: PageData;
 	filter: ModAvailableFilterData;
-}> {
+};
+
+export default async function (query: GetAllPublishedModsQuery): Promise<GetAllPublishedModsResult> {
+	const { page, size, filter = {} } = query;
+
 	const filterQ: RootFilterQuery<typeof ModSummary> = {
 		visibility: ModVisibility.PUBLIC,
 	};

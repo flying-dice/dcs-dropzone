@@ -1,7 +1,9 @@
 import { ModVisibility } from "../../../common/data.ts";
 import { Mod } from "../entities/Mod.ts";
 
-export async function getAllTags() {
+type GetAllTagsResult = string[];
+
+export default async function (): Promise<GetAllTagsResult> {
 	const tags = await Mod.distinct("tags", {
 		visibility: ModVisibility.PUBLIC,
 	}).exec();

@@ -1,7 +1,9 @@
 import { ModCategory, ModVisibility } from "../../../common/data.ts";
 import { Mod } from "../entities/Mod.ts";
 
-export async function getCategoryCounts(): Promise<Record<ModCategory, number>> {
+type GetCategoryCounts = Record<ModCategory, number>;
+
+export default async function (): Promise<GetCategoryCounts> {
 	const result = await Mod.aggregate([
 		{
 			$match: {

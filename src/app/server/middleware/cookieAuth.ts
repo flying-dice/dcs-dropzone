@@ -4,7 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import appConfig from "../ApplicationConfig.ts";
-import { getUserById } from "../queries/GetUserById.ts";
+import getUserById, { type GetUserByIdResult } from "../queries/GetUserById.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
 const logger = getLogger("cookieAuth");
@@ -28,18 +28,26 @@ export const cookieAuth = () =>
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
-		let user: UserData;
+		let result: GetUserByIdResult;
 
 		try {
 			logger.debug({ requestId, userId }, "Loading authenticated user");
-			user = await getUserById(userId);
-			logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
+			result = await getUserById(userId);
 		} catch (error) {
-			logger.warn({ requestId, error }, "User not found for token");
-			throw new HTTPException(StatusCodes.UNAUTHORIZED);
+			logger.warn({ requestId, error }, "Error loading user for token");
+			throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR);
 		}
 
-		c.set("getUser", () => user);
+		result.match(
+			(user) => {
+				logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
+				c.set("getUser", () => user);
+			},
+			(error) => {
+				logger.warn({ requestId, error }, "User not found for token");
+				throw new HTTPException(StatusCodes.UNAUTHORIZED);
+			},
+		);
 
 		await next();
 	});

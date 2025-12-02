@@ -2,7 +2,9 @@ import { ModVisibility } from "../../../common/data.ts";
 import { ModSummary } from "../entities/ModSummary.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 
-export async function getAllFeaturedMods(): Promise<ModSummaryData[]> {
+type GetAllFeaturedModsResult = ModSummaryData[];
+
+export default async function (): Promise<GetAllFeaturedModsResult> {
 	const docs = await ModSummary.find({
 		visibility: ModVisibility.PUBLIC,
 		featuredAt: { $ne: null },

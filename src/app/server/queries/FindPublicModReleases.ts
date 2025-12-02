@@ -11,9 +11,9 @@ export type FindPublicModReleasesQuery = {
 	modId: string;
 };
 
-export type FindPublicModReleasesQueryResult = Result<ModReleaseData[], "NotFound">;
+export type FindPublicModReleasesResult = Result<ModReleaseData[], "NotFound">;
 
-export default async function (query: FindPublicModReleasesQuery): Promise<FindPublicModReleasesQueryResult> {
+export default async function (query: FindPublicModReleasesQuery): Promise<FindPublicModReleasesResult> {
 	const { modId } = query;
 
 	logger.debug({ modId }, "findPublicModReleases start");

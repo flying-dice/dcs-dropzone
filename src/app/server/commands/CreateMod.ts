@@ -1,12 +1,20 @@
 import { getLogger } from "log4js";
-import { ModVisibility } from "../../../../common/data.ts";
-import { Mod } from "../../entities/Mod.ts";
-import { ModData } from "../../schemas/ModData.ts";
-import type { Command, CommandResult } from "./types.ts";
+import { ModVisibility } from "../../../common/data.ts";
+import { Mod } from "../entities/Mod.ts";
+import type { ModCreateData } from "../schemas/ModCreateData.ts";
+import { ModData } from "../schemas/ModData.ts";
+import type { UserData } from "../schemas/UserData.ts";
+
+export type CreateModCommand = {
+	user: UserData;
+	createData: ModCreateData;
+};
+
+export type CreateModResult = ModData;
 
 const logger = getLogger("CreateMod");
 
-export async function handler(command: Command): Promise<CommandResult> {
+export default async function (command: CreateModCommand): Promise<CreateModResult> {
 	const { user, createData } = command;
 	logger.debug({ userId: user.id, createData }, "start");
 	const id = crypto.randomUUID();

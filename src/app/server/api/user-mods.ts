@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import createMod from "../commands/CreateMod/index.ts";
+import createMod from "../commands/CreateMod.ts";
 import deleteMod from "../commands/DeleteMod.ts";
 import updateMod from "../commands/UpdateMod.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";

@@ -11,7 +11,10 @@ export type FindUserModByIdQuery = {
 	modId: string;
 };
 
-export default async function ({ user, modId }: FindUserModByIdQuery): Promise<Result<ModData, "NotFound">> {
+export type FindUserModByIdResult = Result<ModData, "NotFound">;
+
+export default async function (query: FindUserModByIdQuery): Promise<FindUserModByIdResult> {
+	const { user, modId } = query;
 	logger.debug({ userId: user.id, modId }, "findUserModById start");
 	const mod = await Mod.findOne({ id: modId, maintainers: user.id }).lean().exec();
 

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { getAllFeaturedMods } from "../queries/GetAllFeaturedMods.ts";
+import getAllFeaturedMods from "../queries/GetAllFeaturedMods.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModData } from "../schemas/ModData.ts";
 
