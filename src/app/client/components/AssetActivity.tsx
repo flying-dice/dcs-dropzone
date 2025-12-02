@@ -1,10 +1,10 @@
 import { ActionIcon, Indicator, Popover } from "@mantine/core";
 import { FaDownload } from "react-icons/fa6";
-import { useDaemonSubscriptions } from "../hooks/useDaemonSubscriber.ts";
+import { useDaemonDownloads } from "../hooks/useDaemon.ts";
 import { AssetListItem } from "./AssetListItem.tsx";
 
 export function AssetActivity() {
-	const daemon = useDaemonSubscriptions();
+	const daemon = useDaemonDownloads();
 
 	return (
 		<Popover>

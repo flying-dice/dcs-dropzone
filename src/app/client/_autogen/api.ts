@@ -62,10 +62,11 @@ export interface ModSummaryData {
 	category: ModSummaryDataCategory;
 	description: string;
 	thumbnail: string;
+	dependencies: string[];
 	/** @minItems 1 */
 	maintainers: string[];
 	tags: string[];
-	subscribersCount: number;
+	downloadsCount: number;
 	averageRating: number;
 	ratingsCount: number;
 }
@@ -75,7 +76,7 @@ export interface ModSummaryData {
  */
 export interface UserModsMetaData {
 	published: number;
-	totalSubscribers: number;
+	totalDownloads: number;
 	/**
 	 * @minimum 0
 	 * @maximum 5
@@ -125,7 +126,7 @@ export interface ModData {
 	visibility: ModDataVisibility;
 	/** @minItems 1 */
 	maintainers: string[];
-	subscribersCount: number;
+	downloadsCount: number;
 	ratingsCount: number;
 	averageRating: number;
 }
@@ -325,6 +326,16 @@ export interface ModAvailableFilterData {
 	tags: string[];
 }
 
+/**
+ * Data representation of the latest release of a mod.
+ */
+export interface ModLatestReleaseData {
+	id: string;
+	mod_id: string;
+	version: string;
+	createdAt?: string;
+}
+
 export type AuthProviderCallbackParams = {
 	code: string;
 	state: string;
@@ -358,6 +369,10 @@ export type UpdateUserModReleaseBody = {
 	visibility: UpdateUserModReleaseBodyVisibility;
 	createdAt?: string;
 	updatedAt?: string;
+};
+
+export type GetModById404 = {
+	message: string;
 };
 
 export type GetModsParams = {
@@ -410,6 +425,10 @@ export type GetMods200 = {
 
 export type GetModReleases200 = {
 	data: ModReleaseData[];
+};
+
+export type GetModUpdatesByIdsBody = {
+	ids: string;
 };
 
 export type GetCategories200 = { [key: string]: number };
@@ -2907,6 +2926,187 @@ export const useDeleteUserModRelease = <TError = void, TContext = unknown>(
 };
 
 /**
+ * Retrieves a specific published mod by its ID.
+ * @summary Get mod by ID
+ */
+export type getModByIdResponse200 = {
+	data: ModData;
+	status: 200;
+};
+
+export type getModByIdResponse404 = {
+	data: GetModById404;
+	status: 404;
+};
+
+export type getModByIdResponseSuccess = getModByIdResponse200 & {
+	headers: Headers;
+};
+export type getModByIdResponseError = getModByIdResponse404 & {
+	headers: Headers;
+};
+
+export type getModByIdResponse =
+	| getModByIdResponseSuccess
+	| getModByIdResponseError;
+
+export const getGetModByIdUrl = (id: string) => {
+	return `/api/mods/${id}`;
+};
+
+export const getModById = async (
+	id: string,
+	options?: RequestInit,
+): Promise<getModByIdResponse> => {
+	const res = await fetch(getGetModByIdUrl(id), {
+		...options,
+		method: "GET",
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getModByIdResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getModByIdResponse;
+};
+
+export const getGetModByIdQueryKey = (id?: string) => {
+	return [`/api/mods/${id}`] as const;
+};
+
+export const getGetModByIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof getModById>>,
+	TError = GetModById404,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetModByIdQueryKey(id);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getModById>>> = ({
+		signal,
+	}) => getModById(id, { signal, ...fetchOptions });
+
+	return {
+		queryKey,
+		queryFn,
+		enabled: !!id,
+		...queryOptions,
+	} as UseQueryOptions<
+		Awaited<ReturnType<typeof getModById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetModByIdQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getModById>>
+>;
+export type GetModByIdQueryError = GetModById404;
+
+export function useGetModById<
+	TData = Awaited<ReturnType<typeof getModById>>,
+	TError = GetModById404,
+>(
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getModById>>,
+					TError,
+					Awaited<ReturnType<typeof getModById>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetModById<
+	TData = Awaited<ReturnType<typeof getModById>>,
+	TError = GetModById404,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getModById>>,
+					TError,
+					Awaited<ReturnType<typeof getModById>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetModById<
+	TData = Awaited<ReturnType<typeof getModById>>,
+	TError = GetModById404,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get mod by ID
+ */
+
+export function useGetModById<
+	TData = Awaited<ReturnType<typeof getModById>>,
+	TError = GetModById404,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+	queryKey: DataTag<QueryKey, TData, TError>;
+} {
+	const queryOptions = getGetModByIdQueryOptions(id, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+		TData,
+		TError
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
  * Retrieves a paginated list of all published mods.
  * @summary Get mods
  */
@@ -3462,6 +3662,116 @@ export function useGetModReleaseById<
 
 	return query;
 }
+
+/**
+ * Retrieves public releases for a specific set of mods by IDs.
+ * @summary Gets Release Information for a set of Mods
+ */
+export type getModUpdatesByIdsResponse200 = {
+	data: ModLatestReleaseData[];
+	status: 200;
+};
+
+export type getModUpdatesByIdsResponseSuccess =
+	getModUpdatesByIdsResponse200 & {
+		headers: Headers;
+	};
+
+export type getModUpdatesByIdsResponse = getModUpdatesByIdsResponseSuccess;
+
+export const getGetModUpdatesByIdsUrl = () => {
+	return `/api/mod-updates`;
+};
+
+export const getModUpdatesByIds = async (
+	getModUpdatesByIdsBody: GetModUpdatesByIdsBody,
+	options?: RequestInit,
+): Promise<getModUpdatesByIdsResponse> => {
+	const res = await fetch(getGetModUpdatesByIdsUrl(), {
+		...options,
+		method: "POST",
+		headers: { "Content-Type": "application/json", ...options?.headers },
+		body: JSON.stringify(getModUpdatesByIdsBody),
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: getModUpdatesByIdsResponse["data"] = body ? JSON.parse(body) : {};
+	return {
+		data,
+		status: res.status,
+		headers: res.headers,
+	} as getModUpdatesByIdsResponse;
+};
+
+export const getGetModUpdatesByIdsMutationOptions = <
+	TError = unknown,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof getModUpdatesByIds>>,
+		TError,
+		{ data: GetModUpdatesByIdsBody },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof getModUpdatesByIds>>,
+	TError,
+	{ data: GetModUpdatesByIdsBody },
+	TContext
+> => {
+	const mutationKey = ["getModUpdatesByIds"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation &&
+			"mutationKey" in options.mutation &&
+			options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof getModUpdatesByIds>>,
+		{ data: GetModUpdatesByIdsBody }
+	> = (props) => {
+		const { data } = props ?? {};
+
+		return getModUpdatesByIds(data, fetchOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type GetModUpdatesByIdsMutationResult = NonNullable<
+	Awaited<ReturnType<typeof getModUpdatesByIds>>
+>;
+export type GetModUpdatesByIdsMutationBody = GetModUpdatesByIdsBody;
+export type GetModUpdatesByIdsMutationError = unknown;
+
+/**
+ * @summary Gets Release Information for a set of Mods
+ */
+export const useGetModUpdatesByIds = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof getModUpdatesByIds>>,
+			TError,
+			{ data: GetModUpdatesByIdsBody },
+			TContext
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<
+	Awaited<ReturnType<typeof getModUpdatesByIds>>,
+	TError,
+	{ data: GetModUpdatesByIdsBody },
+	TContext
+> => {
+	const mutationOptions = getGetModUpdatesByIdsMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
 
 /**
  * Retrieves a set of featured mods.

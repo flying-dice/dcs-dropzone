@@ -1,4 +1,5 @@
 import { Badge, type MantineColor, NavLink, Text } from "@mantine/core";
+import { isNumber } from "lodash";
 import type { IconType } from "react-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -21,7 +22,9 @@ export function NavShortcut(props: CategoryShortcutProps) {
 			styles={{ root: { borderRadius: "0.5rem" } }}
 			leftSection={<props.icon />}
 			rightSection={
-				props.count && <Badge color={props.countColor}>{props.count}</Badge>
+				isNumber(props.count) ? (
+					<Badge color={props.countColor}>{props.count}</Badge>
+				) : undefined
 			}
 			label={
 				<Text fz={14} fw={"normal"}>

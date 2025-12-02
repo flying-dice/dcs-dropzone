@@ -64,7 +64,7 @@ export function _UserModPage(props: UserModPageProps) {
 							<_VisibilityAndPermissions form={form} />
 							<_UserModRating
 								subscriptions={
-									mod.data?.status === 200 ? mod.data.data.subscribersCount : 0
+									mod.data?.status === 200 ? mod.data.data.downloadsCount : 0
 								}
 								rating={
 									mod.data?.status === 200 ? mod.data.data.averageRating : 0

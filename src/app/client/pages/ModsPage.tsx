@@ -99,7 +99,7 @@ export function ModsPage() {
 									averageRating={mod.averageRating}
 									title={mod.name}
 									summary={mod.description || ""}
-									subscribers={mod.subscribersCount}
+									downloads={mod.downloadsCount}
 									variant={breakpoint.isXs ? "grid" : "list"}
 								/>
 							))}

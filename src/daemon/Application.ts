@@ -4,15 +4,15 @@ import applicationConfig from "./ApplicationConfig.ts";
 import { db } from "./database";
 import { DownloadQueue } from "./queues/DownloadQueue.ts";
 import { ExtractQueue } from "./queues/ExtractQueue.ts";
+import type { DownloadsRepository } from "./repositories/DownloadsRepository.ts";
 import { DrizzleSqliteModReleaseSymbolicLinkRepository } from "./repositories/impl/DrizzleSqliteModReleaseSymbolicLinkRepository.ts";
 import { DrizzleSqliteReleaseAssetRepository } from "./repositories/impl/DrizzleSqliteReleaseAssetRepository.ts";
 import { DrizzleSqliteSubscriptionRepository } from "./repositories/impl/DrizzleSqliteSubscriptionRepository.ts";
 import type { ReleaseAssetRepository } from "./repositories/ReleaseAssetRepository.ts";
-import type { SubscriptionRepository } from "./repositories/SubscriptionRepository.ts";
 import { createServer } from "./Server.ts";
+import { DownloadsService } from "./services/DownloadsService.ts";
 import { PathService } from "./services/PathService.ts";
 import { ReleaseAssetService } from "./services/ReleaseAssetService.ts";
-import { SubscriptionService } from "./services/SubscriptionService.ts";
 import { ToggleService } from "./services/ToggleService.ts";
 
 const logger = getLogger("Application");
@@ -44,7 +44,7 @@ const extractQueue = new ExtractQueue({
 });
 
 logger.debug("Initializing repositories");
-const subscriptionRepository: SubscriptionRepository =
+const subscriptionRepository: DownloadsRepository =
 	new DrizzleSqliteSubscriptionRepository(_db);
 const releaseAssetRepository: ReleaseAssetRepository =
 	new DrizzleSqliteReleaseAssetRepository(_db);
@@ -61,21 +61,22 @@ function getReleaseAssetService(releaseId: string): ReleaseAssetService {
 	);
 }
 
-const subscriptionService = new SubscriptionService(
-	subscriptionRepository,
-	getReleaseAssetService,
-);
-
-logger.debug("Services initialized");
-
 const linkRepo = new DrizzleSqliteModReleaseSymbolicLinkRepository(_db);
 const toggleService = new ToggleService({
 	linkRepo,
 	pathService,
 });
 
+const downloadsService = new DownloadsService(
+	subscriptionRepository,
+	toggleService,
+	getReleaseAssetService,
+);
+
+logger.debug("Services initialized");
+
 const server = createServer({
-	subscriptionService,
+	downloadsService,
 	downloadQueue,
 	extractQueue,
 	toggleService,
@@ -83,7 +84,7 @@ const server = createServer({
 
 export default {
 	server,
-	subscriptionService,
+	downloadsService,
 	downloadQueue,
 	extractQueue,
 	toggleService,

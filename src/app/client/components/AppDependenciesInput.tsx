@@ -47,7 +47,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 									averageRating={3}
 									title={mod.name}
 									summary={mod.description}
-									subscribers={3}
+									downloads={3}
 									variant={"list"}
 									onClick={handleBadgeClick(id)}
 								/>
@@ -91,7 +91,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 								averageRating={3}
 								title={it.name}
 								summary={it.description}
-								subscribers={3}
+								downloads={3}
 								variant={"list"}
 							/>
 						</Stack>

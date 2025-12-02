@@ -49,7 +49,7 @@ export enum ExtractJobStatus {
 	ERROR = "ERROR",
 }
 
-export enum SubscribedReleaseStatus {
+export enum DownloadedReleaseStatus {
 	PENDING = "PENDING",
 	IN_PROGRESS = "IN_PROGRESS",
 	DISABLED = "DISABLED",

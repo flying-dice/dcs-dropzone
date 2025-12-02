@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from "hono";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ExtractQueue } from "../queues/ExtractQueue.ts";
-import type { SubscriptionService } from "../services/SubscriptionService.ts";
+import type { DownloadsService } from "../services/DownloadsService.ts";
 import type { ToggleService } from "../services/ToggleService.ts";
 
 /**
@@ -9,7 +9,7 @@ import type { ToggleService } from "../services/ToggleService.ts";
  */
 export type AppContext = {
 	Variables: {
-		subscriptionService: SubscriptionService;
+		downloadsService: DownloadsService;
 		downloadQueue: DownloadQueue;
 		extractQueue: ExtractQueue;
 		toggleService: ToggleService;

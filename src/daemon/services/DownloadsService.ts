@@ -1,7 +1,8 @@
 import { getLogger } from "log4js";
-import type { SubscriptionRepository } from "../repositories/SubscriptionRepository.ts";
+import type { DownloadsRepository } from "../repositories/DownloadsRepository.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { ReleaseAssetService } from "./ReleaseAssetService.ts";
+import type { ToggleService } from "./ToggleService.ts";
 
 const logger = getLogger("SubscriptionService");
 
@@ -12,18 +13,21 @@ export type ReleaseAssetServiceFactory = (
 	releaseId: string,
 ) => ReleaseAssetService;
 
-export class SubscriptionService {
+export class DownloadsService {
 	constructor(
-		private readonly repo: SubscriptionRepository,
+		private readonly repo: DownloadsRepository,
+		private readonly toggleService: ToggleService,
 		private readonly releaseAssetServiceFactory: ReleaseAssetServiceFactory,
 	) {}
 
-	getAllSubscriptions(): ModAndReleaseData[] {
+	getAll() {
 		return this.repo.getAll();
 	}
 
-	async removeSubscription(releaseId: string) {
-		logger.info(`Removing subscription for releaseId: ${releaseId}`);
+	async remove(releaseId: string) {
+		logger.info(`Removing releaseId: ${releaseId}`);
+
+		this.toggleService.disableRelease(releaseId);
 
 		await this.releaseAssetServiceFactory(
 			releaseId,
@@ -31,20 +35,16 @@ export class SubscriptionService {
 
 		this.repo.deleteByReleaseId(releaseId);
 
-		logger.info(
-			`Successfully removed subscription for releaseId: ${releaseId}`,
-		);
+		logger.info(`Successfully removed releaseId: ${releaseId}`);
 	}
 
-	async subscribeToRelease(data: ModAndReleaseData) {
-		logger.info(
-			`Subscribing to mod: ${data.modName} (release: ${data.version})`,
-		);
+	async add(data: ModAndReleaseData) {
+		logger.info(`Adding mod: ${data.modName} (release: ${data.version})`);
 
 		this.repo.saveRelease(data);
 
 		logger.info(
-			`Successfully subscribed to mod: ${data.modName} (release: ${data.version})`,
+			`Successfully added mod: ${data.modName} (release: ${data.version})`,
 		);
 
 		await this.releaseAssetServiceFactory(

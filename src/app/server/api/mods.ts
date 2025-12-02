@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
@@ -13,6 +14,39 @@ import { PageData } from "../schemas/PageData.ts";
 const router = new Hono();
 
 const _logger = getLogger("api/mods");
+
+router.get(
+	"/:id",
+	describeJsonRoute({
+		operationId: "getModById",
+		summary: "Get mod by ID",
+		description: "Retrieves a specific published mod by its ID.",
+		tags: ["Mods"],
+		responses: {
+			[StatusCodes.OK]: ModData,
+			[StatusCodes.NOT_FOUND]: z.object({
+				message: z.string(),
+			}),
+		},
+	}),
+	validator(
+		"param",
+		z.object({
+			id: z.string(),
+		}),
+	),
+	async (c) => {
+		const { id } = c.req.valid("param");
+
+		const mod = await ApplicationContext.modService.findById(id);
+
+		if (!mod) {
+			throw new HTTPException(StatusCodes.NOT_FOUND);
+		}
+
+		return c.json(mod, StatusCodes.OK);
+	},
+);
 
 /**
  * GET /api/mods - List all mods (summary view)

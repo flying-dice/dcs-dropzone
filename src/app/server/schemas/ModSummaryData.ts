@@ -7,9 +7,10 @@ export const ModSummaryData = ModData.pick({
 	category: true,
 	description: true,
 	thumbnail: true,
+	dependencies: true,
 	maintainers: true,
 	tags: true,
-	subscribersCount: true,
+	downloadsCount: true,
 	averageRating: true,
 	ratingsCount: true,
 }).meta({

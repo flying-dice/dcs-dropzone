@@ -7,8 +7,8 @@ export type ModCardProps = {
 	averageRating: number;
 	title: string;
 	summary: string;
-	subscribers: number;
-	isSubscribed?: boolean;
+	downloads: number;
+	isDownloaded?: boolean;
 	actions?: {
 		label: string;
 		onClick: () => void;

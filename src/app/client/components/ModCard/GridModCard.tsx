@@ -34,7 +34,7 @@ export function GridModCard(props: ModCardProps) {
 					<Group justify="space-between">
 						<Badge variant={"light"}>{props.category}</Badge>
 						<Group gap={"xs"}>
-							<Stat icon={FaDownload} stat={props.subscribers} />
+							<Stat icon={FaDownload} stat={props.downloads} />
 							<Stat
 								iconColor={"dcsyellow"}
 								icon={FaStar}

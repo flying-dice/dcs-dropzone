@@ -40,12 +40,12 @@ export class UserModService {
 			"Fetched all user mods",
 		);
 
-		const totalSubscribers = await ModSummary.aggregate([
+		const totalDownloads = await ModSummary.aggregate([
 			{ $match: { maintainers: this.user.id } },
 			{
 				$group: {
 					_id: null,
-					total: { $sum: "$subscribersCount" },
+					total: { $sum: "$downloadsCount" },
 				},
 			},
 		]).exec();
@@ -62,7 +62,7 @@ export class UserModService {
 
 		const meta: UserModsMetaData = {
 			published: countPublished,
-			totalSubscribers: totalSubscribers[0]?.total || 0,
+			totalDownloads: totalDownloads[0]?.total || 0,
 			averageRating: averageRating[0]?.average || 0,
 		};
 
@@ -111,7 +111,7 @@ export class UserModService {
 			maintainers: [this.user.id],
 			averageRating: 0,
 			ratingsCount: 0,
-			subscribersCount: 0,
+			downloadsCount: 0,
 		};
 
 		const result = await Mod.create(ModData.parse(modData));

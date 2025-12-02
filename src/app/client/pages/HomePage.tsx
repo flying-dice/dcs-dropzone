@@ -13,10 +13,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useGetFeaturedMods, useGetMods } from "../_autogen/api.ts";
 import { EmptyState } from "../components/EmptyState.tsx";
-import { ModCard } from "../components/ModCard/index.tsx";
+import { ModCard } from "../components/ModCard";
 import { StatCard } from "../components/StatCard.tsx";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
+import { useDaemonDownloads } from "../hooks/useDaemon.ts";
 import { AppIcons } from "../icons.ts";
+import { orDefaultValue } from "../utils/orDefaultValue.ts";
 
 export function Homepage() {
 	const nav = useNavigate();
@@ -24,6 +26,7 @@ export function Homepage() {
 	const colorScheme = useComputedColorScheme();
 	const breakpoint = useBreakpoint();
 
+	const { downloadCount, enabledCount } = useDaemonDownloads();
 	const featuredMods = useGetFeaturedMods();
 	const mods = useGetMods({ page: 1, size: 10 });
 
@@ -38,16 +41,16 @@ export function Homepage() {
 							value={mods.data?.data.page.totalElements || "-"}
 						/>
 						<StatCard
-							icon={AppIcons.Subscribed}
+							icon={AppIcons.Downloaded}
 							iconColor={"grape"}
-							label={t("SUBSCRIBED")}
-							value={"-"}
+							label={t("DOWNLOADS")}
+							value={orDefaultValue(downloadCount, "-")}
 						/>
 						<StatCard
 							icon={AppIcons.Enabled}
 							iconColor={"green"}
 							label={t("ENABLED")}
-							value={"-"}
+							value={orDefaultValue(enabledCount, "-")}
 						/>
 						<StatCard
 							icon={AppIcons.Updates}
@@ -78,8 +81,8 @@ export function Homepage() {
 										averageRating={mod.averageRating}
 										title={mod.name}
 										summary={mod.description || ""}
-										subscribers={mod.subscribersCount}
-										isSubscribed={false}
+										downloads={mod.downloadsCount}
+										isDownloaded={false}
 										variant={"grid"}
 									/>
 								</Flex>
@@ -108,8 +111,8 @@ export function Homepage() {
 									averageRating={mod.averageRating}
 									title={mod.name}
 									summary={mod.description || ""}
-									subscribers={mod.subscribersCount}
-									isSubscribed={false}
+									downloads={mod.downloadsCount}
+									isDownloaded={false}
 									variant={breakpoint.isXs ? "grid" : "list"}
 								/>
 							))}

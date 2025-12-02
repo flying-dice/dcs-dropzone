@@ -30,6 +30,30 @@ import { PageData } from "../schemas/PageData.ts";
 const logger = getLogger("ModService");
 
 export class ModService {
+	async findById(id: string): Promise<ModSummaryData | null> {
+		logger.debug({ id }, "Finding mod by id");
+
+		const doc = await ModSummary.findOne({ id }).lean().exec();
+
+		if (!doc) {
+			return null;
+		}
+
+		return ModSummaryData.parse(doc);
+	}
+
+	async findAllByIds(ids: string[]): Promise<ModSummaryData[]> {
+		const filterQ: RootFilterQuery<typeof ModSummary> = {
+			id: { $in: ids },
+		};
+
+		logger.debug("Finding all mods by ids");
+
+		const docs = await ModSummary.find(filterQ).lean().exec();
+
+		return ModSummaryData.array().parse(docs);
+	}
+
 	async findAllFeaturedMods(): Promise<ModSummaryData[]> {
 		const docs = await ModSummary.find({
 			visibility: ModVisibility.PUBLIC,
@@ -176,7 +200,7 @@ export class ModService {
 					: ModCategory.OTHER,
 				dependencies: registryEntry.data.dependencies || [],
 				maintainers: ["16135506"],
-				subscribersCount: 20,
+				downloadsCount: 20,
 				ratingsCount: 5,
 				averageRating: 3.2,
 			});

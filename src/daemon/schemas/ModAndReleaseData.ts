@@ -1,8 +1,8 @@
 import { z } from "zod";
 import {
 	AssetStatus,
+	DownloadedReleaseStatus,
 	MissionScriptRunOn,
-	SubscribedReleaseStatus,
 	SymbolicLinkDestRoot,
 } from "../../common/data.ts";
 
@@ -88,7 +88,8 @@ export const ModAndReleaseData = z
 		assets: z.array(ModReleaseAssetData),
 		symbolicLinks: z.array(ModReleaseSymbolicLinkData),
 		missionScripts: z.array(ModReleaseMissionScriptData),
-		status: z.enum(SubscribedReleaseStatus).optional(),
+		status: z.enum(DownloadedReleaseStatus).optional(),
+		overallPercentProgress: z.number().optional(),
 	})
 	.meta({
 		ref: "ModAndReleaseData",

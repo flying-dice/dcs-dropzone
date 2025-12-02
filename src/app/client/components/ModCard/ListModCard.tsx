@@ -36,7 +36,7 @@ export function ListModCard(props: ModCardProps) {
 						<Group wrap={"nowrap"}>
 							<Badge variant={"light"}>{props.category}</Badge>
 							<Group wrap={"nowrap"} gap={"xs"}>
-								<Stat icon={FaDownload} stat={props.subscribers} />
+								<Stat icon={FaDownload} stat={props.downloads} />
 								<Stat
 									iconColor={"dcsyellow"}
 									icon={FaStar}

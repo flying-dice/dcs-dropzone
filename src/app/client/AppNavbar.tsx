@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { type ModDataCategory, useGetCategories } from "./_autogen/api.ts";
 import { CategoryShortcut } from "./components/CategoryShortcut.tsx";
 import { NavShortcut } from "./components/NavShortcut.tsx";
-import { useDaemonSubscriptions } from "./hooks/useDaemonSubscriber.ts";
+import { useDaemonDownloads } from "./hooks/useDaemon.ts";
 import type { I18nKeys } from "./i18n/I18nKeys.ts";
 import { useAppTranslation } from "./i18n/useAppTranslation.ts";
 import { AppIcons } from "./icons.ts";
@@ -15,7 +15,7 @@ export function AppNavbar(props: AppNavbarProps) {
 	const { t } = useAppTranslation();
 	const categories = useGetCategories();
 	const nav = useNavigate();
-	const subscribed = useDaemonSubscriptions();
+	const downloads = useDaemonDownloads();
 
 	const handleClick = (category: ModDataCategory) => {
 		const params = new URLSearchParams();
@@ -37,23 +37,24 @@ export function AppNavbar(props: AppNavbarProps) {
 						to={"/mods"}
 					/>
 					<NavShortcut
-						icon={AppIcons.Subscribed}
-						label={t("SUBSCRIBED")}
-						to={"/subscribed"}
-						count={subscribed.count}
+						icon={AppIcons.Downloaded}
+						label={t("DOWNLOADED")}
+						to={"/downloaded"}
+						count={downloads.downloadCount}
 					/>
 					<NavShortcut
 						icon={AppIcons.Enabled}
 						label={t("ENABLED")}
-						count={12}
+						count={downloads.enabledCount}
 						countColor={"green"}
+						to={"/enabled"}
 					/>
-
 					<NavShortcut
 						icon={AppIcons.Updates}
 						label={t("UPDATES")}
 						count={3}
 						countColor={"red"}
+						to={"/updates"}
 					/>
 					{props.withMyMods && (
 						<NavShortcut

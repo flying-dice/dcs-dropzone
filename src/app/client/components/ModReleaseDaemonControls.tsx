@@ -1,7 +1,7 @@
 import { Button, Stack } from "@mantine/core";
 import type { ModData, ModReleaseData } from "../_autogen/api.ts";
 import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
-import { useDaemonSubscriber } from "../hooks/useDaemonSubscriber.ts";
+import { useDaemonDownloader } from "../hooks/useDaemon.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
 
 export type ModReleaseDaemonControlsProps = {
@@ -10,49 +10,50 @@ export type ModReleaseDaemonControlsProps = {
 	form?: UserModReleaseForm;
 };
 export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
-	const daemon = useDaemonSubscriber(props.mod, props.release, props.form);
+	const daemon = useDaemonDownloader(props.mod, props.release, props.form);
 
 	return (
 		<Stack gap={"xs"}>
-			{daemon.subscription?.status && (
+			{daemon.daemonRelease?.status && (
 				<Button
 					variant={"light"}
 					onClick={daemon.toggle}
 					loading={daemon.toggling.loading}
 					disabled={
 						!(
-							daemon.subscription.status === ModAndReleaseDataStatus.DISABLED ||
-							daemon.subscription.status === ModAndReleaseDataStatus.ENABLED
+							daemon.daemonRelease.status ===
+								ModAndReleaseDataStatus.DISABLED ||
+							daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED
 						)
 					}
 				>
-					{daemon.subscription.status === ModAndReleaseDataStatus.ENABLED
+					{daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED
 						? "Disable"
 						: "Enable"}
 				</Button>
 			)}
-			{daemon.subscription ? (
+			{daemon.daemonRelease ? (
 				<Button
 					variant={"light"}
-					onClick={daemon.unsubscribe}
-					loading={daemon.unsubscribing.loading}
+					onClick={daemon.remove}
+					loading={daemon.removing.loading}
 					disabled={
 						daemon.isUnavailable ||
-						daemon.subscription.status === ModAndReleaseDataStatus.ENABLED
+						daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED
 					}
 				>
-					{daemon.subscription.status === ModAndReleaseDataStatus.IN_PROGRESS
+					{daemon.daemonRelease.status === ModAndReleaseDataStatus.IN_PROGRESS
 						? "Cancel"
-						: "Unsubscribe"}
+						: "Remove"}
 				</Button>
 			) : (
 				<Button
 					variant={"light"}
-					onClick={daemon.subscribe}
-					loading={daemon.subscribing.loading}
+					onClick={daemon.add}
+					loading={daemon.adding.loading}
 					disabled={daemon.isUnavailable}
 				>
-					Subscribe
+					Download
 				</Button>
 			)}
 		</Stack>

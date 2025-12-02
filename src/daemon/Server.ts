@@ -3,8 +3,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
+import downloads from "./api/downloads.ts";
 import health from "./api/health.ts";
-import subscriptions from "./api/subscriptions.ts";
 import toggle from "./api/toggle.ts";
 import {
 	type AppContext,
@@ -28,9 +28,9 @@ export function createServer(deps: AppContext["Variables"]): Hono<AppContext> {
 		openAPIRouteHandler(server, {
 			documentation: {
 				info: {
-					title: "DCS Dropzone Registry API",
+					title: "DCS Dropzone Daemon API",
 					version: "1.0.0",
-					description: "API documentation for the DCS Dropzone Registry.",
+					description: "API documentation for the DCS Dropzone Daemon.",
 				},
 			},
 		}),
@@ -38,7 +38,7 @@ export function createServer(deps: AppContext["Variables"]): Hono<AppContext> {
 
 	server.get("/api", Scalar({ url: "/v3/api-docs" }));
 
-	server.route("/api/subscriptions", subscriptions);
+	server.route("/api/downloads", downloads);
 	server.route("/api/toggle", toggle);
 
 	return server;

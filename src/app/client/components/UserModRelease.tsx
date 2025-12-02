@@ -48,7 +48,7 @@ export function UserModRelease(props: UserModReleaseProps) {
 				/>
 				<Stat
 					icon={FaDownload}
-					stat={`${Math.floor(Math.random() * 1000)} Subscribers`}
+					stat={`${Math.floor(Math.random() * 1000)} Downloads`}
 				/>
 			</Group>
 		</Alert>

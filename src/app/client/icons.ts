@@ -15,7 +15,7 @@ export const AppIcons = {
 	Featured: FaStar,
 	Mods: FaBox,
 	Releases: FaTag,
-	Subscribed: FaDownload,
+	Downloaded: FaDownload,
 	Enabled: FaToggleOn,
 	Updates: FaSyncAlt,
 	UserMods: FaUser,

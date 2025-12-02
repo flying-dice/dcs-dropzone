@@ -1,4 +1,5 @@
 import { ModCategory } from "../../../common/data.ts";
+import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
 import assetHelpMd from "./en_AssetHelp.md" with { type: "text" };
 import missionScriptHelp from "./en_MissionScriptHelp.md" with { type: "text" };
 import symbolicLinkHelpMd from "./en_SymbolicLinkHelp.md" with { type: "text" };
@@ -37,6 +38,11 @@ export default {
 		NO_MODS_FOUND_TITLE: "No mods found",
 		NO_MODS_FOUND_SUBTITLE_DESC:
 			"Try adjusting your search or filter to find what you're looking for.",
+
+		NO_MODS_DOWNLOADED_TITLE: "No mods downloaded",
+		NO_MODS_DOWNLOADED_SUBTITLE_DESC:
+			"You haven't downloaded any mods yet. Browse the mods page to find and download to mods that interest you.",
+
 		CONFIRM_REMOVE_SCREENSHOT_DESC:
 			"Are you sure you want to remove this screenshot?",
 		CONFIRM_REMOVE_SCREENSHOT_TITLE: "Confirm Remove Screenshot",
@@ -71,7 +77,6 @@ export default {
 		EMPTY_RELEASES_SUBTITLE:
 			"Add download URLs for your mod files. These will be downloaded and extracted by the desktop manager.",
 		EMPTY_RELEASES_TITLE: "No Releases Added",
-		ENABLED: "Enabled",
 		ERROR_LOADING_MOD: "Error loading mod.",
 		ERROR_LOADING_RELEASE: "Error loading release.",
 		ERROR_STATUS: "Error: {{status}}",
@@ -109,6 +114,8 @@ export default {
 		MISSION_SCRIPT_HELP_MD: missionScriptHelp,
 
 		MOD_NAME: "Mod name",
+		STATUS: "Status",
+		VERSION: "Version",
 		MY_MODS: "My Mods",
 		NO: "No",
 		NO_MISSION_SCRIPTS_DESCRIPTION:
@@ -124,12 +131,14 @@ export default {
 		PUBLISH_NEW_MOD: "Publish New Mod",
 		PUBLISHED_MODS: "Published Mods",
 		REMOVE: "Remove",
+		ENABLE: "Enable",
+		DISABLE: "Disable",
 		SAVE: "Save",
 		SAVE_CHANGES: "Save Changes",
 		SEARCH_MODS_PLACEHOLDER: "Search mods...",
 		APPLY: "Apply",
-		SUBSCRIBE: "Subscribe",
-		SUBSCRIBED: "Subscribed",
+		DOWNLOAD: "Download",
+		DOWNLOADED: "Downloaded",
 		SYMBOLIC_LINK_DEST_DESCRIPTION:
 			"Path relative to the selected destination root",
 		SYMBOLIC_LINK_DEST_LABEL: "Destination Path",
@@ -151,10 +160,9 @@ export default {
 		SYMBOLIC_LINK_SRC_LABEL: "Source Path",
 		SYMBOLIC_LINK_SRC_PLACEHOLDER: "e.g., Mods/MyMod or Scripts/MyScript.lua",
 		SYMBOLIC_LINKS_TITLE: "Symbolic Links",
-		TOTAL_SUBSCRIPTIONS: "Total Subscriptions",
+		TOTAL_DOWNLOADS: "Total Downloads",
 		TOTAL_MODS: "Total Mods",
 		UNLISTED: "Unlisted",
-		UNSUBSCRIBE: "Unsubscribe",
 		UPDATES: "Updates",
 		USER_ID: "User ID",
 		USER_ID_DESCRIPTION:
@@ -188,11 +196,33 @@ export default {
 		[ModCategory.UTILITY]: "Utility",
 		[ModCategory.OTHER]: "Other",
 
-		SUBSCRIBE_SUCCESS_TITLE: "Subscribed Successfully",
-		SUBSCRIBE_SUCCESS_DESC: "You have successfully subscribed to this mod.",
+		[ModAndReleaseDataStatus.PENDING]: "Pending",
+		[ModAndReleaseDataStatus.ENABLED]: "Enabled",
+		[ModAndReleaseDataStatus.DISABLED]: "Disabled",
+		[ModAndReleaseDataStatus.ERROR]: "Error",
+		[ModAndReleaseDataStatus.IN_PROGRESS]: "Fetching...",
 
-		UNSUBSCRIBE_SUCCESS_TITLE: "Unsubscribed Successfully",
-		UNSUBSCRIBE_SUCCESS_DESC:
-			"You have successfully unsubscribed from this mod.",
+		ADDED_SUCCESS_TITLE: "Added Successfully",
+		ADDED_SUCCESS_DESC: "You have successfully added this mod.",
+
+		REMOVE_SUCCESS_TITLE: "Removed Successfully",
+		REMOVE_SUCCESS_DESC: "You have successfully removed this mod.",
+
+		MOD_DISABLED_SUCCESS_TITLE: "Mod Disabled Successfully",
+		MOD_DISABLED_SUCCESS_DESC:
+			"The mod release has been disabled successfully.",
+
+		MOD_ENABLED_SUCCESS_TITLE: "Mod Enabled Successfully",
+		MOD_ENABLED_SUCCESS_DESC: "The mod release has been enabled successfully.",
+
+		DISABLE_MOD: "Disable Mod",
+		ENABLE_MOD: "Enable Mod",
+
+		VIEW_ALL_MODS: "View All Mods",
+
+		LATEST: "Latest",
+		UPDATE: "Update",
+		LATEST_RELEASE_NOT_FOUND_ERROR: "Latest release not found.",
+		MOD_NOT_FOUND_ERROR: "Mod not found.",
 	},
 };

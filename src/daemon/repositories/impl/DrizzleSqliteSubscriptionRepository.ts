@@ -16,10 +16,10 @@ import {
 	ModAndReleaseData,
 	type ModReleaseAssetStatusData,
 } from "../../schemas/ModAndReleaseData.ts";
-import type { SubscriptionRepository } from "../SubscriptionRepository.ts";
+import type { DownloadsRepository } from "../DownloadsRepository.ts";
 
 export class DrizzleSqliteSubscriptionRepository
-	implements SubscriptionRepository
+	implements DownloadsRepository
 {
 	constructor(private readonly db: BunSQLiteDatabase) {}
 
@@ -61,6 +61,9 @@ export class DrizzleSqliteSubscriptionRepository
 				status: inferReleaseStatusFromAssets(
 					assets.map((it) => it.statusData.status),
 					symbolicLinks,
+				),
+				overallPercentProgress: totalPercentProgress(
+					assets.flatMap((it) => it.statusData.overallPercentProgress),
 				),
 			});
 		}

@@ -10,9 +10,9 @@ const router = new Hono<AppContext>();
 router.post(
 	"/:releaseId/enable",
 	describeJsonRoute({
-		operationId: "enableMod",
+		operationId: "enableRelease",
 		tags: ["Toggle"],
-		summary: "Enable a mod by creating its symbolic links",
+		summary: "Enable a release by creating its symbolic links",
 		responses: { [StatusCodes.OK]: null },
 	}),
 	validator("param", z.object({ releaseId: z.string() })),
@@ -26,9 +26,9 @@ router.post(
 router.post(
 	"/:releaseId/disable",
 	describeJsonRoute({
-		operationId: "disableMod",
+		operationId: "disableRelease",
 		tags: ["Toggle"],
-		summary: "Disable a mod by removing its symbolic links",
+		summary: "Disable a release by removing its symbolic links",
 		responses: { [StatusCodes.OK]: null },
 	}),
 	validator("param", z.object({ releaseId: z.string() })),
