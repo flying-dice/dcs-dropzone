@@ -8,8 +8,6 @@ import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import createMod from "../commands/create-mod.ts";
 import deleteMod from "../commands/delete-mod.ts";
 import updateMod from "../commands/update-mod.ts";
-import { Mod } from "../entities/Mod.ts";
-import { ModSummary } from "../entities/ModSummary.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import findAllUserMods from "../queries/find-all-user-mods.ts";
 import findUserModById from "../queries/find-user-mod-by-id.ts";
@@ -47,10 +45,7 @@ router.get(
 	async (c) => {
 		const user = c.var.getUser();
 
-		const mods = await findAllUserMods(
-			{ userId: user.id },
-			{ orm: ModSummary },
-		);
+		const mods = await findAllUserMods({ userId: user.id }, {});
 
 		return c.json(mods, StatusCodes.OK);
 	},
@@ -83,10 +78,7 @@ router.get(
 
 		logger.debug(`User '${user.id}' is requesting mod '${id}'`);
 
-		const result = await findUserModById(
-			{ userId: user.id, modId: id },
-			{ orm: Mod },
-		);
+		const result = await findUserModById({ userId: user.id, modId: id }, {});
 
 		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
@@ -125,7 +117,7 @@ router.post(
 		);
 		const result = await createMod(
 			{ userId: user.id, data: createRequest },
-			{ orm: Mod, generateId: crypto.randomUUID },
+			{ generateId: crypto.randomUUID },
 		);
 
 		return c.json(result, StatusCodes.CREATED);
@@ -160,7 +152,7 @@ router.put(
 
 		const result = await updateMod(
 			{ userId: user.id, modId: id, data: updates },
-			{ orm: Mod },
+			{},
 		);
 
 		if (!result) {
@@ -195,10 +187,7 @@ router.delete(
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
 
-		const result = await deleteMod(
-			{ userId: user.id, modId: id },
-			{ orm: Mod },
-		);
+		const result = await deleteMod({ userId: user.id, modId: id }, {});
 
 		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);

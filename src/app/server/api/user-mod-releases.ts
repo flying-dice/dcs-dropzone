@@ -8,7 +8,6 @@ import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import createRelease from "../commands/create-release.ts";
 import deleteRelease from "../commands/delete-release.ts";
 import updateRelease from "../commands/update-release.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import findUserModReleaseById from "../queries/find-user-mod-release-by-id.ts";
 import findUserModReleases from "../queries/find-user-mod-releases.ts";
@@ -48,7 +47,7 @@ router.get(
 
 		const result = await findUserModReleases(
 			{ userId: user.id, modId: id },
-			{ orm: ModRelease },
+			{},
 		);
 
 		return c.json({ data: result }, StatusCodes.OK);
@@ -90,7 +89,7 @@ router.get(
 
 		const result = await findUserModReleaseById(
 			{ userId: user.id, modId: id, releaseId },
-			{ orm: ModRelease },
+			{},
 		);
 
 		if (!result) {
@@ -131,7 +130,7 @@ router.post(
 
 		const result = await createRelease(
 			{ userId: user.id, modId: id, data: createRequest },
-			{ orm: ModRelease, generateId: crypto.randomUUID },
+			{ generateId: crypto.randomUUID },
 		);
 
 		return c.json(result, StatusCodes.CREATED);
@@ -183,7 +182,7 @@ router.put(
 					...updates,
 				},
 			},
-			{ orm: ModRelease },
+			{},
 		);
 
 		if (!result) {
@@ -230,7 +229,7 @@ router.delete(
 
 		const result = await deleteRelease(
 			{ userId: user.id, modId: id, releaseId },
-			{ orm: ModRelease },
+			{},
 		);
 
 		if (!result) {

@@ -10,9 +10,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof ModSummary;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -20,7 +18,7 @@ export default async function (
 ): Promise<ModSummaryData | null> {
 	logger.debug({ id: input.id }, "Finding mod by id");
 
-	const doc = await deps.orm.findOne({ id: input.id }).lean().exec();
+	const doc = await ModSummary.findOne({ id: input.id }).lean().exec();
 
 	if (!doc) {
 		return null;

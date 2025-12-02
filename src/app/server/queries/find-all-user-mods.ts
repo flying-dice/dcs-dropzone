@@ -12,9 +12,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof ModSummary;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -22,34 +20,31 @@ export default async function (
 ): Promise<{ data: ModSummaryData[]; meta: UserModsMetaData }> {
 	logger.debug({ userId: input.userId }, "findAllUserMods start");
 
-	const countPublished = await deps.orm.countDocuments({
+	const countPublished = await ModSummary.countDocuments({
 		maintainers: input.userId,
 		visibility: ModVisibility.PUBLIC,
 	});
 
 	logger.debug({ countPublished }, "Counted published mods");
 
-	const docs = await deps.orm
-		.find({ maintainers: input.userId })
+	const docs = await ModSummary.find({ maintainers: input.userId })
 		.sort({ createdAt: "desc" })
 		.lean()
 		.exec();
 
 	logger.debug({ docs: docs.length, countPublished }, "Fetched all user mods");
 
-	const totalDownloads = await deps.orm
-		.aggregate([
-			{ $match: { maintainers: input.userId } },
-			{
-				$group: {
-					_id: null,
-					total: { $sum: "$downloadsCount" },
-				},
+	const totalDownloads = await ModSummary.aggregate([
+		{ $match: { maintainers: input.userId } },
+		{
+			$group: {
+				_id: null,
+				total: { $sum: "$downloadsCount" },
 			},
-		])
-		.exec();
+		},
+	]).exec();
 
-	const averageRating = await deps.orm.aggregate([
+	const averageRating = await ModSummary.aggregate([
 		{ $match: { maintainers: input.userId } },
 		{
 			$group: {

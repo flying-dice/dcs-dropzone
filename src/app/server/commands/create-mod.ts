@@ -14,7 +14,6 @@ const InputSchema = z.object({
 export type Input = z.infer<typeof InputSchema>;
 
 export interface Deps {
-	orm: typeof Mod;
 	generateId: () => string;
 }
 
@@ -39,7 +38,7 @@ export default async function (input: Input, deps: Deps): Promise<ModData> {
 		downloadsCount: 0,
 	};
 
-	const result = await deps.orm.create(ModData.parse(modData));
+	const result = await Mod.create(ModData.parse(modData));
 	logger.debug({ modId: id }, "User successfully created mod");
 
 	return ModData.parse(result);

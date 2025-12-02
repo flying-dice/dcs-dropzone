@@ -6,7 +6,6 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import { fromCsv } from "../../../common/fromCsv.ts";
-import { ModSummary } from "../entities/ModSummary.ts";
 import findModById from "../queries/find-mod-by-id.ts";
 import findPublishedMods from "../queries/find-published-mods.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
@@ -40,7 +39,7 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const mod = await findModById({ id }, { orm: ModSummary });
+		const mod = await findModById({ id }, {});
 
 		if (!mod) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
@@ -89,7 +88,7 @@ router.get(
 				size,
 				filter: { category, maintainers, tags, term },
 			},
-			{ orm: ModSummary },
+			{},
 		);
 
 		return c.json(result, StatusCodes.OK);

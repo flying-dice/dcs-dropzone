@@ -15,7 +15,6 @@ const InputSchema = z.object({
 export type Input = z.infer<typeof InputSchema>;
 
 export interface Deps {
-	orm: typeof ModRelease;
 	generateId: () => string;
 }
 
@@ -41,7 +40,7 @@ export default async function (
 		visibility: ModVisibility.PUBLIC,
 	};
 
-	const result = await deps.orm.create(ModReleaseData.parse(releaseData));
+	const result = await ModRelease.create(ModReleaseData.parse(releaseData));
 	logger.debug({ releaseId: id }, "User successfully created release");
 
 	return ModReleaseData.parse(result);

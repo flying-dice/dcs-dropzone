@@ -8,7 +8,6 @@ import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import handleAuthCallback from "../commands/handle-auth-callback.ts";
 import handleAuthResult from "../commands/handle-auth-result.ts";
 import appConfig from "../ApplicationConfig.ts";
-import { User } from "../entities/User.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import getWebFlowAuthorizationUrl from "../queries/get-web-flow-authorization-url.ts";
 import { UserData } from "../schemas/UserData.ts";
@@ -58,7 +57,7 @@ router.get(
 			"Auth callback success",
 		);
 
-		const userData = await handleAuthResult(authResult, { orm: User });
+		const userData = await handleAuthResult(authResult, {});
 
 		logger.debug(
 			{ userId: authResult.id },

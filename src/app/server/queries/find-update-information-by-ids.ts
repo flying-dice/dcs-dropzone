@@ -11,9 +11,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof ModRelease;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -24,11 +22,10 @@ export default async function (
 	const modsAndLatestReleases: Array<ModLatestReleaseData> = [];
 
 	for (const modId of input.modIds) {
-		const latestRelease = await deps.orm
-			.findOne({
-				mod_id: modId,
-				visibility: ModVisibility.PUBLIC,
-			})
+		const latestRelease = await ModRelease.findOne({
+			mod_id: modId,
+			visibility: ModVisibility.PUBLIC,
+		})
 			.sort({ createdAt: -1 })
 			.lean()
 			.exec();

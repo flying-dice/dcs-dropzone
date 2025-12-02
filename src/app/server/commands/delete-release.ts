@@ -11,9 +11,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof ModRelease;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -24,12 +22,10 @@ export default async function (
 		"deleteRelease start",
 	);
 
-	const result = await deps.orm
-		.findOneAndDelete({
-			id: input.releaseId,
-			mod_id: input.modId,
-		})
-		.exec();
+	const result = await ModRelease.findOneAndDelete({
+		id: input.releaseId,
+		mod_id: input.modId,
+	}).exec();
 
 	if (!result) {
 		logger.warn(

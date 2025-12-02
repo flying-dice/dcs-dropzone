@@ -25,9 +25,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof ModSummary;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -69,44 +67,41 @@ export default async function (
 	}
 
 	logger.debug("Finding all published mods");
-	const count = await deps.orm.countDocuments(filterQ);
+	const count = await ModSummary.countDocuments(filterQ);
 
-	const docs = await deps.orm
-		.find(filterQ)
+	const docs = await ModSummary.find(filterQ)
 		.skip((input.page - 1) * input.size)
 		.sort({ createdAt: -1 })
 		.limit(input.size)
 		.lean()
 		.exec();
 
-	const categories = await deps.orm.distinct("category", filterQ).exec();
-	const tags = await deps.orm.distinct("tags", filterQ).exec();
-	const maintainers = await deps.orm
-		.aggregate([
-			{ $match: filterQ },
-			{ $unwind: "$maintainers" },
-			{
-				$group: {
-					_id: "$maintainers",
-				},
+	const categories = await ModSummary.distinct("category", filterQ).exec();
+	const tags = await ModSummary.distinct("tags", filterQ).exec();
+	const maintainers = await ModSummary.aggregate([
+		{ $match: filterQ },
+		{ $unwind: "$maintainers" },
+		{
+			$group: {
+				_id: "$maintainers",
 			},
-			{
-				$lookup: {
-					from: "users",
-					localField: "_id",
-					foreignField: "id",
-					as: "userDetails",
-				},
+		},
+		{
+			$lookup: {
+				from: "users",
+				localField: "_id",
+				foreignField: "id",
+				as: "userDetails",
 			},
-			{ $unwind: "$userDetails" },
-			{
-				$project: {
-					id: "$userDetails.id",
-					username: "$userDetails.username",
-				},
+		},
+		{ $unwind: "$userDetails" },
+		{
+			$project: {
+				id: "$userDetails.id",
+				username: "$userDetails.username",
 			},
-		])
-		.exec();
+		},
+	]).exec();
 
 	return {
 		data: ModSummaryData.array().parse(docs),

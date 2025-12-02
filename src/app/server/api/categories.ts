@@ -4,7 +4,6 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import { ModCategory } from "../../../common/data.ts";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { Mod } from "../entities/Mod.ts";
 import getCategoryCounts from "../queries/get-category-counts.ts";
 
 const router = new Hono();
@@ -27,7 +26,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const result = await getCategoryCounts({}, { orm: Mod });
+		const result = await getCategoryCounts({}, {});
 
 		return c.json(result, StatusCodes.OK);
 	},

@@ -5,7 +5,6 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
 import findPublicModReleaseById from "../queries/find-public-mod-release-by-id.ts";
 import findPublicModReleases from "../queries/find-public-mod-releases.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
@@ -36,7 +35,7 @@ router.get(
 
 		logger.debug(`Fetching public releases for mod '${id}'`);
 
-		const releases = await findPublicModReleases({ modId: id }, { orm: ModRelease });
+		const releases = await findPublicModReleases({ modId: id }, {});
 
 		return c.json({ data: releases }, StatusCodes.OK);
 	},
@@ -71,7 +70,7 @@ router.get(
 
 		const result = await findPublicModReleaseById(
 			{ modId: id, releaseId },
-			{ orm: ModRelease },
+			{},
 		);
 
 		if (!result) {

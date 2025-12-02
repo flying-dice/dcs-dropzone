@@ -3,7 +3,6 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { Mod } from "../entities/Mod.ts";
 import getAllTags from "../queries/get-all-tags.ts";
 
 const router = new Hono();
@@ -25,7 +24,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const result = await getAllTags({}, { orm: Mod });
+		const result = await getAllTags({}, {});
 
 		return c.json(z.string().array().parse(result), StatusCodes.OK);
 	},

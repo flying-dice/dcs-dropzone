@@ -14,9 +14,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof User;
-}
+export interface Deps {}
 
 export default async function (input: Input, deps: Deps): Promise<UserData> {
 	logger.debug(
@@ -32,7 +30,7 @@ export default async function (input: Input, deps: Deps): Promise<UserData> {
 		profileUrl: input.profileUrl,
 	});
 
-	await deps.orm.updateOne({ id: input.id }, user, { upsert: true }).exec();
+	await User.updateOne({ id: input.id }, user, { upsert: true }).exec();
 	logger.debug({ userId: user.id }, "User registered/persisted");
 
 	return user;

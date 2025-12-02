@@ -12,9 +12,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof Mod;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -25,12 +23,10 @@ export default async function (
 		"updateMod start",
 	);
 
-	const mod = await deps.orm
-		.findOneAndUpdate(
-			{ id: input.modId, maintainers: input.userId },
-			input.data,
-		)
-		.exec();
+	const mod = await Mod.findOneAndUpdate(
+		{ id: input.modId, maintainers: input.userId },
+		input.data,
+	).exec();
 
 	if (!mod) {
 		logger.warn(

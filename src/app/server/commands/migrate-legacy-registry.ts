@@ -29,8 +29,6 @@ const InputSchema = z.object({});
 export type Input = z.infer<typeof InputSchema>;
 
 export interface Deps {
-	modOrm: typeof Mod;
-	modReleaseOrm: typeof ModRelease;
 	generateId: () => string;
 }
 
@@ -59,11 +57,9 @@ export default async function (input: Input, deps: Deps): Promise<void> {
 			`Migrating Registry Entry ${id}`,
 		);
 
-		const existingMod = await deps.modOrm
-			.findOne({
-				name: registryEntry.data.name,
-			})
-			.lean();
+		const existingMod = await Mod.findOne({
+			name: registryEntry.data.name,
+		}).lean();
 
 		const modDocumentId = existingMod ? existingMod.id : deps.generateId();
 
@@ -90,13 +86,11 @@ export default async function (input: Input, deps: Deps): Promise<void> {
 			averageRating: 3.2,
 		});
 
-		await deps.modOrm
-			.findOneAndUpdate({ name: mod.name }, mod, {
-				upsert: true,
-			})
-			.exec();
+		await Mod.findOneAndUpdate({ name: mod.name }, mod, {
+			upsert: true,
+		}).exec();
 
-		const modDocument = await deps.modOrm.findOne({ name: mod.name }).exec();
+		const modDocument = await Mod.findOne({ name: mod.name }).exec();
 		if (!modDocument) {
 			throw new Error("Failed to retrieve or create mod document");
 		}
@@ -111,12 +105,10 @@ export default async function (input: Input, deps: Deps): Promise<void> {
 		);
 
 		for (const version of registryEntry.data.versions) {
-			const existingRelease = await deps.modReleaseOrm
-				.findOne({
-					mod_id: modDocument.id,
-					version: version.version,
-				})
-				.lean();
+			const existingRelease = await ModRelease.findOne({
+				mod_id: modDocument.id,
+				version: version.version,
+			}).lean();
 
 			const releaseId = existingRelease
 				? existingRelease.id
@@ -167,18 +159,16 @@ export default async function (input: Input, deps: Deps): Promise<void> {
 				),
 			});
 
-			await deps.modReleaseOrm.findOneAndUpdate(
+			await ModRelease.findOneAndUpdate(
 				{ mod_id: modDocument.id, version: release.version },
 				release,
 				{ upsert: true },
 			);
 
-			const releaseDocument = await deps.modReleaseOrm
-				.findOne({
-					mod_id: modDocument.id,
-					version: release.version,
-				})
-				.exec();
+			const releaseDocument = await ModRelease.findOne({
+				mod_id: modDocument.id,
+				version: release.version,
+			}).exec();
 			if (!releaseDocument) {
 				throw new Error("Failed to retrieve or create mod release document");
 			}

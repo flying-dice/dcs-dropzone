@@ -12,9 +12,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof ModRelease;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -25,11 +23,10 @@ export default async function (
 		"findUserModReleaseById start",
 	);
 
-	const release = await deps.orm
-		.findOne({
-			id: input.releaseId,
-			mod_id: input.modId,
-		})
+	const release = await ModRelease.findOne({
+		id: input.releaseId,
+		mod_id: input.modId,
+	})
 		.lean()
 		.exec();
 

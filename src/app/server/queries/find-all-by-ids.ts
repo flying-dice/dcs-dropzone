@@ -11,9 +11,7 @@ const InputSchema = z.object({
 });
 export type Input = z.infer<typeof InputSchema>;
 
-export interface Deps {
-	orm: typeof ModSummary;
-}
+export interface Deps {}
 
 export default async function (
 	input: Input,
@@ -25,7 +23,7 @@ export default async function (
 
 	logger.debug("Finding all mods by ids");
 
-	const docs = await deps.orm.find(filterQ).lean().exec();
+	const docs = await ModSummary.find(filterQ).lean().exec();
 
 	return ModSummaryData.array().parse(docs);
 }

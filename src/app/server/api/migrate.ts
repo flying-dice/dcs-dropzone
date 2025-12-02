@@ -5,8 +5,6 @@ import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import migrateLegacyRegistry from "../commands/migrate-legacy-registry.ts";
 import appConfig from "../ApplicationConfig.ts";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 
@@ -38,14 +36,7 @@ router.get(
 		}
 
 		try {
-			await migrateLegacyRegistry(
-				{},
-				{
-					modOrm: Mod,
-					modReleaseOrm: ModRelease,
-					generateId: crypto.randomUUID,
-				},
-			);
+			await migrateLegacyRegistry({}, { generateId: crypto.randomUUID });
 
 			return c.body(null, StatusCodes.OK);
 		} catch (error) {
