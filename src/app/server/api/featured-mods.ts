@@ -2,7 +2,8 @@ import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { ModSummary } from "../entities/ModSummary.ts";
+import findFeaturedMods from "../queries/find-featured-mods.ts";
 import { ModData } from "../schemas/ModData.ts";
 
 const router = new Hono();
@@ -24,7 +25,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const result = await ApplicationContext.modService.findAllFeaturedMods();
+		const result = await findFeaturedMods({}, { orm: ModSummary });
 
 		return c.json(result, StatusCodes.OK);
 	},

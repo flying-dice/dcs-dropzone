@@ -5,14 +5,19 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import createMod from "../commands/create-mod.ts";
+import deleteMod from "../commands/delete-mod.ts";
+import updateMod from "../commands/update-mod.ts";
+import { Mod } from "../entities/Mod.ts";
+import { ModSummary } from "../entities/ModSummary.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
+import findAllUserMods from "../queries/find-all-user-mods.ts";
+import findUserModById from "../queries/find-user-mod-by-id.ts";
 import { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import { ModUpdateData } from "../schemas/ModUpdateData.ts";
 import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
-import { UserModServiceError } from "../services/UserModService.ts";
 
 const router = new Hono();
 
@@ -41,9 +46,11 @@ router.get(
 	cookieAuth(),
 	async (c) => {
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
-		const mods = await service.findAllUserMods();
+		const mods = await findAllUserMods(
+			{ userId: user.id },
+			{ orm: ModSummary },
+		);
 
 		return c.json(mods, StatusCodes.OK);
 	},
@@ -73,13 +80,15 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
 		logger.debug(`User '${user.id}' is requesting mod '${id}'`);
 
-		const result = await service.findUserModById(id);
+		const result = await findUserModById(
+			{ userId: user.id, modId: id },
+			{ orm: Mod },
+		);
 
-		if (result === UserModServiceError.NotFound) {
+		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -110,12 +119,14 @@ router.post(
 	async (c) => {
 		const createRequest = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
 		logger.debug(
 			`User '${user.id}' is creating a new mod '${createRequest.name}'`,
 		);
-		const result = await service.createMod(createRequest);
+		const result = await createMod(
+			{ userId: user.id, data: createRequest },
+			{ orm: Mod, generateId: crypto.randomUUID },
+		);
 
 		return c.json(result, StatusCodes.CREATED);
 	},
@@ -146,11 +157,13 @@ router.put(
 		const { id } = c.req.valid("param");
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
-		const result = await service.updateMod(id, updates);
+		const result = await updateMod(
+			{ userId: user.id, modId: id, data: updates },
+			{ orm: Mod },
+		);
 
-		if (result === UserModServiceError.NotFound) {
+		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -181,11 +194,13 @@ router.delete(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
-		const result = await service.deleteMod(id);
+		const result = await deleteMod(
+			{ userId: user.id, modId: id },
+			{ orm: Mod },
+		);
 
-		if (result === UserModServiceError.NotFound) {
+		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 

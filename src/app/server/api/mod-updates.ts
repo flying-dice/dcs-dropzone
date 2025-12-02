@@ -4,7 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { ModRelease } from "../entities/ModRelease.ts";
+import findUpdateInformationByIds from "../queries/find-update-information-by-ids.ts";
 import { ModLatestReleaseData } from "../schemas/ModLatestReleaseData.ts";
 
 const router = new Hono();
@@ -28,10 +29,10 @@ router.post(
 
 		logger.debug(`Fetching public releases for mod '${ids}'`);
 
-		const releases =
-			await ApplicationContext.publicModReleaseService.findUpdateInformationByIds(
-				ids.split(","),
-			);
+		const releases = await findUpdateInformationByIds(
+			{ modIds: ids.split(",") },
+			{ orm: ModRelease },
+		);
 
 		return c.json(releases, StatusCodes.OK);
 	},

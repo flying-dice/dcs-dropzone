@@ -5,9 +5,10 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { ModRelease } from "../entities/ModRelease.ts";
+import findPublicModReleaseById from "../queries/find-public-mod-release-by-id.ts";
+import findPublicModReleases from "../queries/find-public-mod-releases.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import { ModReleaseServiceError } from "../services/ModReleaseService.ts";
 
 const router = new Hono();
 
@@ -35,10 +36,7 @@ router.get(
 
 		logger.debug(`Fetching public releases for mod '${id}'`);
 
-		const releases =
-			await ApplicationContext.publicModReleaseService.findPublicModReleases(
-				id,
-			);
+		const releases = await findPublicModReleases({ modId: id }, { orm: ModRelease });
 
 		return c.json({ data: releases }, StatusCodes.OK);
 	},
@@ -71,13 +69,12 @@ router.get(
 
 		logger.debug(`Fetching public release '${releaseId}' for mod '${id}'`);
 
-		const result =
-			await ApplicationContext.publicModReleaseService.findPublicModReleaseById(
-				id,
-				releaseId,
-			);
+		const result = await findPublicModReleaseById(
+			{ modId: id, releaseId },
+			{ orm: ModRelease },
+		);
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
+		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 

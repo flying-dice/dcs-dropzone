@@ -5,9 +5,12 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import handleAuthCallback from "../commands/handle-auth-callback.ts";
+import handleAuthResult from "../commands/handle-auth-result.ts";
 import appConfig from "../ApplicationConfig.ts";
+import { User } from "../entities/User.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
+import getWebFlowAuthorizationUrl from "../queries/get-web-flow-authorization-url.ts";
 import { UserData } from "../schemas/UserData.ts";
 import { AuthServiceProvider } from "../services/AuthServiceProvider.ts";
 
@@ -38,19 +41,24 @@ router.get(
 	async (c) => {
 		const provider = c.req.valid("param").provider;
 		logger.debug({ provider }, "Auth callback start");
-		const authService = ApplicationContext.getAuthService(provider);
 
 		const { code, state } = c.req.valid("query");
 
-		const authResult = await authService.handleCallback(code, state);
+		const authResult = await handleAuthCallback(
+			{ provider, code, state },
+			{
+				ghClientId: appConfig.ghClientId,
+				ghClientSecret: appConfig.ghClientSecret,
+				ghAuthorizationCallbackUrl: appConfig.ghAuthorizationCallbackUrl,
+			},
+		);
 
 		logger.debug(
 			{ provider, userId: authResult.id, username: authResult.username },
 			"Auth callback success",
 		);
 
-		const userData =
-			await ApplicationContext.userService.handleAuthResult(authResult);
+		const userData = await handleAuthResult(authResult, { orm: User });
 
 		logger.debug(
 			{ userId: authResult.id },
@@ -96,9 +104,16 @@ router.get(
 	validator("param", params),
 	(c) => {
 		const provider = c.req.valid("param").provider;
-		const authService = ApplicationContext.getAuthService(provider);
 		logger.debug({ provider }, "Auth login redirect");
-		return c.redirect(authService.getWebFlowAuthorizationUrl());
+		const url = await getWebFlowAuthorizationUrl(
+			{ provider },
+			{
+				ghClientId: appConfig.ghClientId,
+				ghClientSecret: appConfig.ghClientSecret,
+				ghAuthorizationCallbackUrl: appConfig.ghAuthorizationCallbackUrl,
+			},
+		);
+		return c.redirect(url);
 	},
 );
 

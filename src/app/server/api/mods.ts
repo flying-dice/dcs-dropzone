@@ -6,7 +6,9 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import { fromCsv } from "../../../common/fromCsv.ts";
-import ApplicationContext from "../Application.ts";
+import { ModSummary } from "../entities/ModSummary.ts";
+import findModById from "../queries/find-mod-by-id.ts";
+import findPublishedMods from "../queries/find-published-mods.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { PageData } from "../schemas/PageData.ts";
@@ -38,7 +40,7 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const mod = await ApplicationContext.modService.findById(id);
+		const mod = await findModById({ id }, { orm: ModSummary });
 
 		if (!mod) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
@@ -81,10 +83,13 @@ router.get(
 		const { page, size, category, maintainers, tags, term } =
 			c.req.valid("query");
 
-		const result = await ApplicationContext.modService.findAllPublishedMods(
-			page,
-			size,
-			{ category, maintainers, tags, term },
+		const result = await findPublishedMods(
+			{
+				page,
+				size,
+				filter: { category, maintainers, tags, term },
+			},
+			{ orm: ModSummary },
 		);
 
 		return c.json(result, StatusCodes.OK);

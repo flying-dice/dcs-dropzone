@@ -5,11 +5,15 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import createRelease from "../commands/create-release.ts";
+import deleteRelease from "../commands/delete-release.ts";
+import updateRelease from "../commands/update-release.ts";
+import { ModRelease } from "../entities/ModRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
+import findUserModReleaseById from "../queries/find-user-mod-release-by-id.ts";
+import findUserModReleases from "../queries/find-user-mod-releases.ts";
 import { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import { ModReleaseServiceError } from "../services/ModReleaseService.ts";
 
 const router = new Hono();
 
@@ -39,15 +43,13 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(`User '${user.id}' is requesting releases for mod '${id}'`);
 
-		const result = await service.findUserModReleases(id);
-
-		if (result === ModReleaseServiceError.MOD_NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
+		const result = await findUserModReleases(
+			{ userId: user.id, modId: id },
+			{ orm: ModRelease },
+		);
 
 		return c.json({ data: result }, StatusCodes.OK);
 	},
@@ -81,15 +83,17 @@ router.get(
 	async (c) => {
 		const { id, releaseId } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(
 			`User '${user.id}' is requesting release '${releaseId}' for mod '${id}'`,
 		);
 
-		const result = await service.findUserModReleaseById(id, releaseId);
+		const result = await findUserModReleaseById(
+			{ userId: user.id, modId: id, releaseId },
+			{ orm: ModRelease },
+		);
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
+		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -122,15 +126,13 @@ router.post(
 		const { id } = c.req.valid("param");
 		const createRequest = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(`User '${user.id}' is creating a new release for mod '${id}'`);
 
-		const result = await service.createRelease(id, createRequest);
-
-		if (result === ModReleaseServiceError.MOD_NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
+		const result = await createRelease(
+			{ userId: user.id, modId: id, data: createRequest },
+			{ orm: ModRelease, generateId: crypto.randomUUID },
+		);
 
 		return c.json(result, StatusCodes.CREATED);
 	},
@@ -167,19 +169,24 @@ router.put(
 		const { id, releaseId } = c.req.valid("param");
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(
 			`User '${user.id}' is updating release '${releaseId}' for mod '${id}'`,
 		);
 
-		const result = await service.updateRelease({
-			id: releaseId,
-			mod_id: id,
-			...updates,
-		});
+		const result = await updateRelease(
+			{
+				userId: user.id,
+				data: {
+					id: releaseId,
+					mod_id: id,
+					...updates,
+				},
+			},
+			{ orm: ModRelease },
+		);
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
+		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 
@@ -216,15 +223,17 @@ router.delete(
 	async (c) => {
 		const { id, releaseId } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(
 			`User '${user.id}' is deleting release '${releaseId}' for mod '${id}'`,
 		);
 
-		const result = await service.deleteRelease(id, releaseId);
+		const result = await deleteRelease(
+			{ userId: user.id, modId: id, releaseId },
+			{ orm: ModRelease },
+		);
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
+		if (!result) {
 			throw new HTTPException(StatusCodes.NOT_FOUND);
 		}
 

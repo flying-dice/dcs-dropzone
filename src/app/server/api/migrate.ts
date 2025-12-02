@@ -3,8 +3,10 @@ import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import Application from "../Application.ts";
+import migrateLegacyRegistry from "../commands/migrate-legacy-registry.ts";
 import appConfig from "../ApplicationConfig.ts";
+import { Mod } from "../entities/Mod.ts";
+import { ModRelease } from "../entities/ModRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 
@@ -36,7 +38,14 @@ router.get(
 		}
 
 		try {
-			await Application.modService.migrateLegacyRegistry();
+			await migrateLegacyRegistry(
+				{},
+				{
+					modOrm: Mod,
+					modReleaseOrm: ModRelease,
+					generateId: crypto.randomUUID,
+				},
+			);
 
 			return c.body(null, StatusCodes.OK);
 		} catch (error) {
