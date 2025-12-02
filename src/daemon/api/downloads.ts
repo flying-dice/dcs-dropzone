@@ -3,7 +3,11 @@ import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import { describeJsonRoute } from "../../common/describeJsonRoute";
+import addRelease from "../commands/AddRelease.ts";
+import disableRelease from "../commands/DisableRelease.ts";
+import removeRelease from "../commands/RemoveRelease.ts";
 import type { AppContext } from "../middleware/appContext.ts";
+import getAllDaemonReleases from "../queries/GetAllDaemonReleases.ts";
 import { ModAndReleaseData } from "../schemas/ModAndReleaseData";
 
 const router = new Hono<AppContext>();
@@ -22,7 +26,13 @@ router.post(
 	async (c) => {
 		const modAndRelease = c.req.valid("json");
 
-		await c.var.downloadsService.add(modAndRelease);
+		await addRelease({
+			data: modAndRelease,
+			downloadQueue: c.var.downloadQueue,
+			extractQueue: c.var.extractQueue,
+			pathService: c.var.pathService,
+			db: c.var.db,
+		});
 
 		return c.json(null, StatusCodes.OK);
 	},
@@ -38,7 +48,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const subscriptions = c.var.downloadsService.getAll();
+		const subscriptions = getAllDaemonReleases({ db: c.var.db });
 
 		return c.json(subscriptions, StatusCodes.OK);
 	},
@@ -61,7 +71,14 @@ router.delete(
 	),
 	async (c) => {
 		const { releaseId } = c.req.valid("param");
-		await c.var.downloadsService.remove(releaseId);
+		await removeRelease({
+			db: c.var.db,
+			downloadQueue: c.var.downloadQueue,
+			extractQueue: c.var.extractQueue,
+			pathService: c.var.pathService,
+			releaseId,
+			disableReleaseHandler: disableRelease,
+		});
 		return c.json(null, StatusCodes.OK);
 	},
 );

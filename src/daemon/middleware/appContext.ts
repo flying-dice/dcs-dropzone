@@ -1,18 +1,18 @@
+import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import type { MiddlewareHandler } from "hono";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ExtractQueue } from "../queues/ExtractQueue.ts";
-import type { DownloadsService } from "../services/DownloadsService.ts";
-import type { ToggleService } from "../services/ToggleService.ts";
+import type { PathService } from "../services/PathService.ts";
 
 /**
  * Hono app context type with injected variables
  */
 export type AppContext = {
 	Variables: {
-		downloadsService: DownloadsService;
 		downloadQueue: DownloadQueue;
 		extractQueue: ExtractQueue;
-		toggleService: ToggleService;
+		pathService: PathService;
+		db: BunSQLiteDatabase;
 	};
 };
 

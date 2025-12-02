@@ -7,6 +7,7 @@ import { DownloadJobStatus, ExtractJobStatus } from "../../common/data.ts";
 import { TypedEventEmitter } from "../../common/TypedEventEmitter.ts";
 import { spawnSevenzip } from "../child_process/sevenzip.ts";
 import { T_DOWNLOAD_QUEUE, T_EXTRACT_DOWNLOAD_JOIN, T_EXTRACT_QUEUE } from "../database/schema.ts";
+import { type DownloadQueue, DownloadQueueEvents } from "./DownloadQueue.ts";
 
 const logger = getLogger("ExtractQueue");
 
@@ -16,6 +17,7 @@ export type ExtractQueueOrchestratorConfig = {
 	db: BunSQLiteDatabase;
 	sevenzipExecutablePath: string;
 	maxRetries?: number;
+	downloadQueue: DownloadQueue;
 };
 
 export enum ExtractQueueEvents {
@@ -51,6 +53,8 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 		logger.info("ExtractQueueOrchestrator initialized", {
 			maxRetries: this.maxRetries,
 		});
+
+		config.downloadQueue.on(DownloadQueueEvents.DOWNLOADED, () => this.startNextExtractJob());
 
 		// Listen to events to trigger the next job without Delay
 		this.on(ExtractQueueEvents.PUSH, () => this.startNextExtractJob());
