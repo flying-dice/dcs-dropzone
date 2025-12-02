@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import appConfig from "../ApplicationConfig.ts";
-import { migrateLegacyRegistry } from "../commands/MigrateLegacyRegistry.ts";
+import migrateLegacyRegistry from "../commands/MigrateLegacyRegistry.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { OkData } from "../schemas/OkData.ts";

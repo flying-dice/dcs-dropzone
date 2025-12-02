@@ -7,7 +7,7 @@ import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
 import ApplicationContext from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
-import { handleAuthResult } from "../commands/HandleAuthResult.ts";
+import handleAuthResult from "../commands/HandleAuthResult.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { UserData } from "../schemas/UserData.ts";

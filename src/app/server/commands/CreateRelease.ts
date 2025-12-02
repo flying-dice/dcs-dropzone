@@ -7,19 +7,19 @@ import type { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = getLogger("CreateRelease");
+const logger = getLogger("CreateReleaseCommand");
 
 export type CreateReleaseCommand = {
 	user: UserData;
 	modId: string;
 	createData: ModReleaseCreateData;
 };
-export async function createRelease({
+export default async function ({
 	user,
 	modId,
 	createData,
 }: CreateReleaseCommand): Promise<Result<ModReleaseData, "NotFound">> {
-	logger.debug({ userId: user.id, modId, createData }, "createRelease start");
+	logger.debug({ userId: user.id, modId, createData }, "start");
 
 	const id = crypto.randomUUID();
 

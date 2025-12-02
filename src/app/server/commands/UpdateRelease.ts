@@ -4,13 +4,13 @@ import { ModRelease } from "../entities/ModRelease.ts";
 import type { ModReleaseData } from "../schemas/ModReleaseData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = getLogger("UpdateRelease");
+const logger = getLogger("UpdateReleaseCommand");
 
 export type UpdateReleaseCommand = {
 	updateData: ModReleaseData;
 	user: UserData;
 };
-export async function updateRelease({
+export default async function ({
 	updateData,
 	user,
 }: UpdateReleaseCommand): Promise<Result<undefined, "NotFound">> {

@@ -3,13 +3,13 @@ import { err, ok, type Result } from "neverthrow";
 import { Mod } from "../entities/Mod.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = getLogger("DeleteMod");
+const logger = getLogger("DeleteModCommand");
 
 export type DeleteModCommand = {
 	user: UserData;
 	id: string;
 };
-export async function deleteMod({
+export default async function ({
 	user,
 	id,
 }: DeleteModCommand): Promise<Result<undefined, "NotFound">> {

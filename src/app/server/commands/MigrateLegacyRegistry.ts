@@ -22,7 +22,7 @@ import {
 	type ModReleaseSymbolicLinkData,
 } from "../schemas/ModReleaseData.ts";
 
-const logger = getLogger("MigrateLegacyRegistry");
+const logger = getLogger("MigrateLegacyRegistryCommand");
 
 function convertLegacyPath(path: string): {
 	path: string;
@@ -37,7 +37,7 @@ function convertLegacyPath(path: string): {
 	throw new Error("Unsupported path root");
 }
 
-export async function migrateLegacyRegistry() {
+export default async function () {
 	logger.debug("Performing database migration");
 	const legacyIndex = await getRegistryIndex();
 

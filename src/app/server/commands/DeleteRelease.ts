@@ -3,14 +3,14 @@ import { err, ok, type Result } from "neverthrow";
 import { ModRelease } from "../entities/ModRelease.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = getLogger("DeleteRelease");
+const logger = getLogger("DeleteReleaseCommand");
 
 export type DeleteReleaseCommand = {
 	modId: string;
 	releaseId: string;
 	user: UserData;
 };
-export async function deleteRelease({
+export default async function ({
 	modId,
 	releaseId,
 	user,

@@ -16,7 +16,7 @@ export default async function ({
 	user,
 	createData,
 }: CreateModCommand): Promise<ModData> {
-	logger.debug({ userId: user.id, createData }, "createMod start");
+	logger.debug({ userId: user.id, createData }, "start");
 	const id = crypto.randomUUID();
 
 	const modData: ModData = {

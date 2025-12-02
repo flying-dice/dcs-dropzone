@@ -3,12 +3,12 @@ import { User } from "../entities/User.ts";
 import { UserData } from "../schemas/UserData.ts";
 import type { AuthResult } from "../services/AuthService.ts";
 
-const logger = getLogger("HandleAuthResult");
+const logger = getLogger("HandleAuthResultCommand");
 
 export type HandleAuthResultCommand = {
 	authResult: AuthResult;
 };
-export async function handleAuthResult({
+export default async function ({
 	authResult,
 }: HandleAuthResultCommand): Promise<UserData> {
 	logger.debug(

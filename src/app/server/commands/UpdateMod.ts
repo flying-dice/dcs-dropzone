@@ -4,14 +4,14 @@ import { Mod } from "../entities/Mod.ts";
 import type { ModUpdateData } from "../schemas/ModUpdateData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = getLogger("UpdateMod");
+const logger = getLogger("UpdateModCommand");
 
 export type UpdateModCommand = {
 	user: UserData;
 	updateData: ModUpdateData;
 	modId: string;
 };
-export async function updateMod({
+export default async function ({
 	user,
 	updateData,
 	modId,
