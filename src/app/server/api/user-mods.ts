@@ -1,18 +1,22 @@
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import createMod from "../commands/CreateMod.ts";
+import { deleteMod } from "../commands/DeleteMod.ts";
+import { updateMod } from "../commands/UpdateMod.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { findAllUserMods } from "../queries/FindAllUserMods.ts";
+import { findUserModById } from "../queries/FindUserModById.ts";
+import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import { ModUpdateData } from "../schemas/ModUpdateData.ts";
+import { OkData } from "../schemas/OkData.ts";
 import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
-import { UserModServiceError } from "../services/UserModService.ts";
 
 const router = new Hono();
 
@@ -35,15 +39,17 @@ router.get(
 				data: ModSummaryData.array(),
 				meta: UserModsMetaData,
 			}),
-			[StatusCodes.UNAUTHORIZED]: null,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
 	async (c) => {
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
-		const mods = await service.findAllUserMods();
+		const mods = await findAllUserMods({
+			user,
+		});
 
 		return c.json(mods, StatusCodes.OK);
 	},
@@ -62,10 +68,10 @@ router.get(
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.UNAUTHORIZED]: null,
-
 			[StatusCodes.OK]: ModData,
-			[StatusCodes.NOT_FOUND]: null,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -73,17 +79,28 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
 		logger.debug(`User '${user.id}' is requesting mod '${id}'`);
 
-		const result = await service.findUserModById(id);
+		const result = await findUserModById({
+			modId: id,
+			user,
+		});
 
-		if (result === UserModServiceError.NotFound) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.json(result, StatusCodes.OK);
+		return result.match(
+			(body) => {
+				return c.json(body, StatusCodes.OK);
+			},
+			(error) => {
+				return c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				);
+			},
+		);
 	},
 );
 
@@ -99,23 +116,24 @@ router.post(
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.UNAUTHORIZED]: null,
-
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
 			[StatusCodes.CREATED]: ModData,
-			[StatusCodes.INTERNAL_SERVER_ERROR]: null,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
 	validator("json", ModCreateData),
 	async (c) => {
-		const createRequest = c.req.valid("json");
+		const createData = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
 		logger.debug(
-			`User '${user.id}' is creating a new mod '${createRequest.name}'`,
+			`User '${user.id}' is creating a new mod '${createData.name}'`,
 		);
-		const result = await service.createMod(createRequest);
+		const result = await createMod({
+			user,
+			createData,
+		});
 
 		return c.json(result, StatusCodes.CREATED);
 	},
@@ -133,10 +151,10 @@ router.put(
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.UNAUTHORIZED]: null,
-
-			[StatusCodes.OK]: null,
-			[StatusCodes.NOT_FOUND]: null,
+			[StatusCodes.OK]: OkData,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -144,17 +162,29 @@ router.put(
 	validator("json", ModUpdateData),
 	async (c) => {
 		const { id } = c.req.valid("param");
-		const updates = c.req.valid("json");
+		const updateData = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
-		const result = await service.updateMod(id, updates);
+		const result = await updateMod({
+			user,
+			modId: id,
+			updateData,
+		});
 
-		if (result === UserModServiceError.NotFound) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.body(null, StatusCodes.OK);
+		return result.match(
+			() => {
+				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
+			},
+			(error) => {
+				return c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				);
+			},
+		);
 	},
 );
 
@@ -170,10 +200,10 @@ router.delete(
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.UNAUTHORIZED]: null,
-
-			[StatusCodes.OK]: null,
-			[StatusCodes.NOT_FOUND]: null,
+			[StatusCodes.OK]: OkData,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -181,15 +211,23 @@ router.delete(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getUserModService(user);
 
-		const result = await service.deleteMod(id);
+		const result = await deleteMod({ user, id });
 
-		if (result === UserModServiceError.NotFound) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.body(null, StatusCodes.OK);
+		return result.match(
+			() => {
+				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
+			},
+			(error) => {
+				return c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				);
+			},
+		);
 	},
 );
 

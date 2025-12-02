@@ -1,15 +1,19 @@
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { createRelease } from "../commands/CreateRelease.ts";
+import { deleteRelease } from "../commands/DeleteRelease.ts";
+import { updateRelease } from "../commands/UpdateRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { findUserModReleaseById } from "../queries/FindUserModReleaseById.ts";
+import { findUserModReleases } from "../queries/FindUserModReleases.ts";
+import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import { ModReleaseServiceError } from "../services/ModReleaseService.ts";
+import { OkData } from "../schemas/OkData.ts";
 
 const router = new Hono();
 
@@ -31,7 +35,9 @@ router.get(
 			[StatusCodes.OK]: z.object({
 				data: ModReleaseData.array(),
 			}),
-			[StatusCodes.UNAUTHORIZED]: null,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -39,17 +45,25 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(`User '${user.id}' is requesting releases for mod '${id}'`);
 
-		const result = await service.findUserModReleases(id);
+		const result = await findUserModReleases({
+			user,
+			modId: id,
+		});
 
-		if (result === ModReleaseServiceError.MOD_NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.json({ data: result }, StatusCodes.OK);
+		return result.match(
+			(data) => c.json({ data }, StatusCodes.OK),
+			(error) =>
+				c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
 	},
 );
 
@@ -66,8 +80,9 @@ router.get(
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.OK]: ModReleaseData,
-			[StatusCodes.NOT_FOUND]: null,
-			[StatusCodes.UNAUTHORIZED]: null,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -81,19 +96,28 @@ router.get(
 	async (c) => {
 		const { id, releaseId } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(
 			`User '${user.id}' is requesting release '${releaseId}' for mod '${id}'`,
 		);
 
-		const result = await service.findUserModReleaseById(id, releaseId);
+		const result = await findUserModReleaseById({
+			user,
+			modId: id,
+			releaseId,
+		});
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.json(result, StatusCodes.OK);
+		return result.match(
+			(body) => c.json(body, StatusCodes.OK),
+			(error) =>
+				c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
 	},
 );
 
@@ -111,8 +135,9 @@ router.post(
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.CREATED]: ModReleaseData,
-			[StatusCodes.UNAUTHORIZED]: null,
-			[StatusCodes.NOT_FOUND]: null,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -120,19 +145,28 @@ router.post(
 	validator("json", ModReleaseCreateData),
 	async (c) => {
 		const { id } = c.req.valid("param");
-		const createRequest = c.req.valid("json");
+		const createData = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(`User '${user.id}' is creating a new release for mod '${id}'`);
 
-		const result = await service.createRelease(id, createRequest);
+		const result = await createRelease({
+			modId: id,
+			createData,
+			user,
+		});
 
-		if (result === ModReleaseServiceError.MOD_NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.json(result, StatusCodes.CREATED);
+		return result.match(
+			(body) => c.json(body, StatusCodes.CREATED),
+			(error) =>
+				c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
 	},
 );
 
@@ -149,9 +183,10 @@ router.put(
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.OK]: null,
-			[StatusCodes.NOT_FOUND]: null,
-			[StatusCodes.UNAUTHORIZED]: null,
+			[StatusCodes.OK]: OkData,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -167,23 +202,37 @@ router.put(
 		const { id, releaseId } = c.req.valid("param");
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(
 			`User '${user.id}' is updating release '${releaseId}' for mod '${id}'`,
 		);
 
-		const result = await service.updateRelease({
-			id: releaseId,
-			mod_id: id,
-			...updates,
+		const result = await updateRelease({
+			user,
+			updateData: {
+				id: releaseId,
+				mod_id: id,
+				...updates,
+			},
 		});
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.body(null, StatusCodes.OK);
+		return result.match(
+			() =>
+				c.json(
+					OkData.parse({
+						ok: true,
+					}),
+					StatusCodes.OK,
+				),
+			(error) =>
+				c.json(
+					{
+						code: StatusCodes.NOT_FOUND,
+						error,
+					},
+					StatusCodes.NOT_FOUND,
+				),
+		);
 	},
 );
 
@@ -200,9 +249,10 @@ router.delete(
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {
-			[StatusCodes.OK]: null,
-			[StatusCodes.NOT_FOUND]: null,
-			[StatusCodes.UNAUTHORIZED]: null,
+			[StatusCodes.OK]: OkData,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -216,19 +266,34 @@ router.delete(
 	async (c) => {
 		const { id, releaseId } = c.req.valid("param");
 		const user = c.var.getUser();
-		const service = ApplicationContext.getModReleaseService(user);
 
 		logger.debug(
 			`User '${user.id}' is deleting release '${releaseId}' for mod '${id}'`,
 		);
 
-		const result = await service.deleteRelease(id, releaseId);
+		const result = await deleteRelease({
+			user,
+			modId: id,
+			releaseId,
+		});
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.body(null, StatusCodes.OK);
+		return result.match(
+			() =>
+				c.json(
+					OkData.parse({
+						ok: true,
+					}),
+					StatusCodes.OK,
+				),
+			(error) =>
+				c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
 	},
 );
 

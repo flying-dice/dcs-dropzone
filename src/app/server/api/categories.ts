@@ -4,7 +4,8 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import { ModCategory } from "../../../common/data.ts";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { getCategoryCounts } from "../queries/GetCategoryCounts.ts";
+import { ErrorData } from "../schemas/ErrorData.ts";
 
 const router = new Hono();
 
@@ -23,10 +24,11 @@ router.get(
 		tags: ["Categories"],
 		responses: {
 			[StatusCodes.OK]: z.record(z.enum(ModCategory), z.number()),
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	async (c) => {
-		const result = await ApplicationContext.modService.getCategoryCounts();
+		const result = await getCategoryCounts();
 
 		return c.json(result, StatusCodes.OK);
 	},

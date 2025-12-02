@@ -3,8 +3,8 @@ import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
-import ApplicationContext from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
+import { getUserById } from "../queries/GetUserById.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
 const logger = getLogger("cookieAuth");
@@ -36,7 +36,7 @@ export const cookieAuth = () =>
 
 		try {
 			logger.debug({ requestId, userId }, "Loading authenticated user");
-			user = await ApplicationContext.userService.getUserById(userId);
+			user = await getUserById(userId);
 			logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
 		} catch (error) {
 			logger.warn({ requestId, error }, "User not found for token");

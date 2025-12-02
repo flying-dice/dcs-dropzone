@@ -3,10 +3,11 @@ import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import Application from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
+import { migrateLegacyRegistry } from "../commands/MigrateLegacyRegistry.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
+import { OkData } from "../schemas/OkData.ts";
 
 const router = new Hono();
 const logger = getLogger("api/migrate");
@@ -20,8 +21,8 @@ router.get(
 			"Migrates data from the legacy registry to the new system. Only accessible by the admin users.",
 		tags: ["Migration"],
 		responses: {
-			[StatusCodes.OK]: null,
-			[StatusCodes.UNAUTHORIZED]: null,
+			[StatusCodes.OK]: OkData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	cookieAuth(),
@@ -35,17 +36,9 @@ router.get(
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
-		try {
-			await Application.modService.migrateLegacyRegistry();
+		await migrateLegacyRegistry();
 
-			return c.body(null, StatusCodes.OK);
-		} catch (error) {
-			logger.warn({ error: String(error) }, "Migration failure");
-			return c.json(
-				ErrorData.parse({ error: String(error) }),
-				StatusCodes.SERVICE_UNAVAILABLE,
-			);
-		}
+		return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 	},
 );
 

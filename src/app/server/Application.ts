@@ -1,25 +1,10 @@
 import { getLogger } from "log4js";
 import { server } from "./Server.ts";
-import type { UserData } from "./schemas/UserData.ts";
 import type { AuthService } from "./services/AuthService.ts";
 import { AuthServiceProvider } from "./services/AuthServiceProvider.ts";
 import { GithubAuthService } from "./services/GithubAuthService.ts";
-import {
-	ModReleaseService,
-	PublicModReleaseService,
-} from "./services/ModReleaseService.ts";
-import { ModService } from "./services/ModService.ts";
-import { UserModService } from "./services/UserModService.ts";
-import { UserService } from "./services/UserService.ts";
 
 const logger = getLogger("Application");
-
-logger.debug("Initializing services");
-const userService: UserService = new UserService();
-const modService: ModService = new ModService();
-const publicModReleaseService: PublicModReleaseService =
-	new PublicModReleaseService();
-logger.debug("Services initialized");
 
 export function getAuthService(provider: AuthServiceProvider): AuthService {
 	logger.debug({ provider }, "Selecting AuthService provider");
@@ -31,22 +16,7 @@ export function getAuthService(provider: AuthServiceProvider): AuthService {
 	}
 }
 
-export function getUserModService(user: UserData): UserModService {
-	logger.debug({ userId: user.id }, "Creating UserModService for user");
-	return new UserModService(user);
-}
-
-export function getModReleaseService(user: UserData): ModReleaseService {
-	logger.debug({ userId: user.id }, "Creating ModReleaseService for user");
-	return new ModReleaseService(user);
-}
-
 export default {
 	server,
-	userService,
-	modService,
-	publicModReleaseService,
 	getAuthService,
-	getUserModService,
-	getModReleaseService,
 };

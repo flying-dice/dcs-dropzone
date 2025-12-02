@@ -1,0 +1,44 @@
+import { getLogger } from "log4js";
+import { err, ok, type Result } from "neverthrow";
+import { ModVisibility } from "../../../common/data.ts";
+import { Mod } from "../entities/Mod.ts";
+import { ModRelease } from "../entities/ModRelease.ts";
+import { ModReleaseData } from "../schemas/ModReleaseData.ts";
+
+const logger = getLogger("FindPublicModReleaseByIdQuery");
+
+export type FindPublicModReleaseByIdQuery = {
+	modId: string;
+	releaseId: string;
+};
+
+export async function findPublicModReleaseById({
+	modId,
+	releaseId,
+}: FindPublicModReleaseByIdQuery): Promise<
+	Result<ModReleaseData, "ModNotFound" | "ReleaseNotFound">
+> {
+	logger.debug({ modId, releaseId }, "start");
+
+	const mod = await Mod.findOne({ id: releaseId }).exec();
+
+	if (!mod) {
+		logger.debug({ modId }, "Mod not found");
+		return err("ModNotFound");
+	}
+
+	const release = await ModRelease.findOne({
+		id: releaseId,
+		mod_id: modId,
+		visibility: ModVisibility.PUBLIC,
+	})
+		.lean()
+		.exec();
+
+	if (!release) {
+		logger.debug({ releaseId }, "Public release not found");
+		return err("ReleaseNotFound");
+	}
+
+	return ok(ModReleaseData.parse(release));
+}

@@ -4,7 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { findUpdateInformationByIds } from "../queries/FindUpdateInformationByIds.ts";
+import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModLatestReleaseData } from "../schemas/ModLatestReleaseData.ts";
 
 const router = new Hono();
@@ -20,6 +21,7 @@ router.post(
 		tags: ["Mod Updates"],
 		responses: {
 			[StatusCodes.OK]: ModLatestReleaseData.array(),
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	validator("json", z.object({ ids: z.string() })),
@@ -28,10 +30,9 @@ router.post(
 
 		logger.debug(`Fetching public releases for mod '${ids}'`);
 
-		const releases =
-			await ApplicationContext.publicModReleaseService.findUpdateInformationByIds(
-				ids.split(","),
-			);
+		const releases = await findUpdateInformationByIds({
+			modIds: ids.split(","),
+		});
 
 		return c.json(releases, StatusCodes.OK);
 	},

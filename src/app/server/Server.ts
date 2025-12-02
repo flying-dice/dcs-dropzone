@@ -2,8 +2,10 @@ import "./Database.ts";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
+import { StatusCodes } from "http-status-codes";
 import appConfig from "./ApplicationConfig.ts";
 import auth from "./api/auth.ts";
 import categories from "./api/categories.ts";
@@ -17,6 +19,7 @@ import tags from "./api/tags.ts";
 import userModReleases from "./api/user-mod-releases.ts";
 import userMods from "./api/user-mods.ts";
 import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
+import { ErrorData } from "./schemas/ErrorData.ts";
 
 export const server = new Hono();
 server.use("/*", cors());
@@ -79,3 +82,23 @@ server.get(
 );
 
 server.get("/api", Scalar({ url: "/v3/api-docs" }));
+
+server.onError((error, c) => {
+	if (error instanceof HTTPException) {
+		return c.json(
+			ErrorData.parse(<ErrorData>{
+				code: error.status,
+				error: error.message,
+			}),
+			error.status,
+		);
+	}
+
+	return c.json(
+		ErrorData.parse(<ErrorData>{
+			code: StatusCodes.INTERNAL_SERVER_ERROR,
+			error: error.message,
+		}),
+		StatusCodes.INTERNAL_SERVER_ERROR,
+	);
+});

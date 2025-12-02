@@ -3,7 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { getAllTags } from "../queries/GetAllTags.ts";
+import { ErrorData } from "../schemas/ErrorData.ts";
 
 const router = new Hono();
 
@@ -21,10 +22,11 @@ router.get(
 		tags: ["Tags"],
 		responses: {
 			[StatusCodes.OK]: z.string().array(),
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	async (c) => {
-		const result = await ApplicationContext.modService.getAllTags();
+		const result = await getAllTags();
 
 		return c.json(z.string().array().parse(result), StatusCodes.OK);
 	},

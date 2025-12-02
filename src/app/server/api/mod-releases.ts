@@ -1,13 +1,13 @@
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import ApplicationContext from "../Application.ts";
+import { findPublicModReleaseById } from "../queries/FindPublicModReleaseById.ts";
+import { findPublicModReleases } from "../queries/FindPublicModReleases.ts";
+import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import { ModReleaseServiceError } from "../services/ModReleaseService.ts";
 
 const router = new Hono();
 
@@ -27,6 +27,8 @@ router.get(
 			[StatusCodes.OK]: z.object({
 				data: z.array(ModReleaseData),
 			}),
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	validator("param", z.object({ id: z.string() })),
@@ -35,12 +37,19 @@ router.get(
 
 		logger.debug(`Fetching public releases for mod '${id}'`);
 
-		const releases =
-			await ApplicationContext.publicModReleaseService.findPublicModReleases(
-				id,
-			);
+		const result = await findPublicModReleases({ modId: id });
 
-		return c.json({ data: releases }, StatusCodes.OK);
+		return result.match(
+			(data) => c.json({ data }, StatusCodes.OK),
+			(error) =>
+				c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
 	},
 );
 
@@ -56,7 +65,8 @@ router.get(
 		tags: ["Mod Releases"],
 		responses: {
 			[StatusCodes.OK]: ModReleaseData,
-			[StatusCodes.NOT_FOUND]: null,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	validator(
@@ -71,17 +81,19 @@ router.get(
 
 		logger.debug(`Fetching public release '${releaseId}' for mod '${id}'`);
 
-		const result =
-			await ApplicationContext.publicModReleaseService.findPublicModReleaseById(
-				id,
-				releaseId,
-			);
+		const result = await findPublicModReleaseById({ modId: id, releaseId });
 
-		if (result === ModReleaseServiceError.NOT_FOUND) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.json(result, StatusCodes.OK);
+		return result.match(
+			(data) => c.json(data, StatusCodes.OK),
+			(error) =>
+				c.json(
+					ErrorData.parse(<ErrorData>{
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
 	},
 );
 
