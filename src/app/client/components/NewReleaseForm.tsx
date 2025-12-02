@@ -26,10 +26,7 @@ export function NewReleaseForm(props: NewReleaseFormProps) {
 		<Stack>
 			<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 				<Stack>
-					<TextInput
-						{...form.getInputProps("version")}
-						label="Release Version"
-					/>
+					<TextInput {...form.getInputProps("version")} label="Release Version" />
 					<Group>
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel

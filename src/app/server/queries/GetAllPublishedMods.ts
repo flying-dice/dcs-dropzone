@@ -27,18 +27,12 @@ export async function getAllPublishedMods(
 	};
 
 	if (filter.category) {
-		logger.debug(
-			{ filterCategory: filter.category },
-			"Applying category filter",
-		);
+		logger.debug({ filterCategory: filter.category }, "Applying category filter");
 		filterQ.category = filter.category;
 	}
 
 	if (filter.maintainers && filter.maintainers.length > 0) {
-		logger.debug(
-			{ filterMaintainers: filter.maintainers },
-			"Applying maintainers filter",
-		);
+		logger.debug({ filterMaintainers: filter.maintainers }, "Applying maintainers filter");
 		filterQ.maintainers = { $in: filter.maintainers };
 	}
 

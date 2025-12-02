@@ -4,21 +4,16 @@ import { Mod } from "../entities/Mod.ts";
 import { ModData } from "../schemas/ModData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
-const logger = getLogger("FindUserModById");
+const logger = getLogger("FindUserModByIdQuery");
 
-export type FindUserModByIdProps = {
+export type FindUserModByIdQuery = {
 	user: UserData;
 	modId: string;
 };
 
-export async function findUserModById(
-	props: FindUserModByIdProps,
-): Promise<Result<ModData, "NotFound">> {
-	const { modId } = props;
-	logger.debug({ userId: props.user.id, modId }, "findUserModById start");
-	const mod = await Mod.findOne({ id: modId, maintainers: props.user.id })
-		.lean()
-		.exec();
+export default async function ({ user, modId }: FindUserModByIdQuery): Promise<Result<ModData, "NotFound">> {
+	logger.debug({ userId: user.id, modId }, "findUserModById start");
+	const mod = await Mod.findOne({ id: modId, maintainers: user.id }).lean().exec();
 
 	if (!mod) {
 		logger.debug({ modId }, "User attempted to fetch mod but it was not found");

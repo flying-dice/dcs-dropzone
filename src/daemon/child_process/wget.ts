@@ -120,10 +120,7 @@ export enum WgetErrors {
  * @param abortSignal - Optional AbortSignal to cancel the wget process.
  * @returns A promise resolving to a `WgetResult` containing either the path to the downloaded file or an error.
  */
-export async function spawnWget(
-	props: SpawnWgetProps,
-	abortSignal?: AbortSignal,
-): Promise<WgetResult> {
+export async function spawnWget(props: SpawnWgetProps, abortSignal?: AbortSignal): Promise<WgetResult> {
 	const parsedProps = SpawnWgetProps.safeParse(props);
 
 	if (!parsedProps.success) {
@@ -173,11 +170,7 @@ export async function spawnWget(
 				resolve(code);
 			} else {
 				_wget.removeAllListeners();
-				reject(
-					new Error(
-						`Failed to download file, code: ${code} - ${getWgetErrorMessage(code)}`,
-					),
-				);
+				reject(new Error(`Failed to download file, code: ${code} - ${getWgetErrorMessage(code)}`));
 			}
 		});
 	}).then(

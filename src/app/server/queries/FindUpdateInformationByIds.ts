@@ -3,15 +3,13 @@ import { ModVisibility } from "../../../common/data.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import type { ModLatestReleaseData } from "../schemas/ModLatestReleaseData.ts";
 
-const logger = getLogger("FindUpdateInformationByIds");
+const logger = getLogger("FindUpdateInformationByIdsQuery");
 
-export type FindUpdateInformationByIds = {
+export type FindUpdateInformationByIdsQuery = {
 	modIds: string[];
 };
 
-export async function findUpdateInformationByIds({
-	modIds,
-}: FindUpdateInformationByIds): Promise<ModLatestReleaseData[]> {
+export default async function ({ modIds }: FindUpdateInformationByIdsQuery): Promise<ModLatestReleaseData[]> {
 	logger.debug({ modIds }, "start");
 
 	const modsAndLatestReleases: Array<ModLatestReleaseData> = [];

@@ -1,8 +1,4 @@
-import {
-	type DescribeRouteOptions,
-	describeRoute,
-	resolver,
-} from "hono-openapi";
+import { type DescribeRouteOptions, describeRoute, resolver } from "hono-openapi";
 import { getReasonPhrase, type StatusCodes } from "http-status-codes";
 import type { z } from "zod";
 

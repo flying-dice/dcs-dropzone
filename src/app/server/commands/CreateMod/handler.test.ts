@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { ModCategory } from "../../../common/data.ts";
-import createMod from "./CreateMod.ts";
+import { ModCategory } from "../../../../common/data.ts";
+import { handler } from "./handler.ts";
 
 describe("CreateMod", () => {
 	beforeEach(async () => {
@@ -11,7 +11,7 @@ describe("CreateMod", () => {
 	});
 
 	it("should create the new mod and save to the database", async () => {
-		const result = await createMod({
+		const result = await handler({
 			user: {
 				id: "123456789",
 				name: "Test User",

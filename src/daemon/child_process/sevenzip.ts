@@ -128,10 +128,7 @@ export enum SevenzipErrors {
  * @param abortSignal - Optional AbortSignal to cancel the 7zip process.
  * @returns A promise resolving to a `SevenzipResult` containing either the path to the extracted directory or an error.
  */
-export async function spawnSevenzip(
-	props: SpawnSevenzipProps,
-	abortSignal?: AbortSignal,
-): Promise<SevenzipResult> {
+export async function spawnSevenzip(props: SpawnSevenzipProps, abortSignal?: AbortSignal): Promise<SevenzipResult> {
 	const parsedProps = SpawnSevenzipProps.safeParse(props);
 
 	if (!parsedProps.success) {
@@ -189,18 +186,12 @@ export async function spawnSevenzip(
 				resolve(code);
 			} else {
 				_7zip.removeAllListeners();
-				reject(
-					new Error(
-						`Failed to extract archive, code: ${code} - ${getSevenzipErrorMessage(code)}`,
-					),
-				);
+				reject(new Error(`Failed to extract archive, code: ${code} - ${getSevenzipErrorMessage(code)}`));
 			}
 		});
 	}).then(
 		() => {
-			logger.info(
-				`Sevenzip process completed successfully for archive: ${archivePath}`,
-			);
+			logger.info(`Sevenzip process completed successfully for archive: ${archivePath}`);
 			return ok(targetDir);
 		},
 		(error) => {

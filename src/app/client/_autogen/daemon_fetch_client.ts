@@ -15,10 +15,7 @@ export function configureDaemon(settings: DaemonSettings) {
 	Object.assign(daemonSettings, parsedSettings);
 }
 
-export const daemonFetch = async <T>(
-	url: string,
-	options: RequestInit,
-): Promise<T> => {
+export const daemonFetch = async <T>(url: string, options: RequestInit): Promise<T> => {
 	const _url = new URL(url, daemonSettings.baseUrl);
 	const request = new Request(_url, options);
 	const response = await fetch(request);
@@ -56,20 +53,12 @@ async function autoParseByContentType(res: Response): Promise<any> {
 			return await res.formData();
 		}
 
-		if (
-			ct.startsWith("image/") ||
-			ct.startsWith("video/") ||
-			ct.startsWith("audio/")
-		) {
+		if (ct.startsWith("image/") || ct.startsWith("video/") || ct.startsWith("audio/")) {
 			// Media -> blob
 			return await res.blob();
 		}
 
-		if (
-			ct.includes("application/octet-stream") ||
-			ct.includes("application/pdf") ||
-			ct.includes("application/zip")
-		) {
+		if (ct.includes("application/octet-stream") || ct.includes("application/pdf") || ct.includes("application/zip")) {
 			// Binary formats -> arrayBuffer
 			return await res.arrayBuffer();
 		}

@@ -14,10 +14,7 @@ export function _Summary(props: { form: UserModReleaseForm }) {
 				</Text>
 				<Stat icon={FaTag} stat={props.form.values.version} />
 				<Stat icon={FaFileDownload} stat={props.form.values.assets.length} />
-				<Stat
-					icon={VisibilityIcons[props.form.values.visibility]}
-					stat={props.form.values.visibility}
-				/>
+				<Stat icon={VisibilityIcons[props.form.values.visibility]} stat={props.form.values.visibility} />
 			</Stack>
 		</Card>
 	);

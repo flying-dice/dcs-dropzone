@@ -5,12 +5,7 @@ import { ddlExports } from "./db-ddl.ts";
 it("applies migrations once and skips already-applied ones", () => {
 	const appDb = AppDatabase.withMigrations(":memory:", ddlExports);
 
-	expect(
-		appDb
-			.getDatabase()
-			.query("SELECT filename, hash FROM '__drizzle_migrations'")
-			.all(),
-	).toMatchInlineSnapshot(`
+	expect(appDb.getDatabase().query("SELECT filename, hash FROM '__drizzle_migrations'").all()).toMatchInlineSnapshot(`
 	  [
 	    {
 	      "filename": "_0000_init_sql",

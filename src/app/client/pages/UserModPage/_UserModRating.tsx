@@ -1,9 +1,6 @@
 import { Card, Group, Rating, Stack, Text } from "@mantine/core";
 
-export function _UserModRating(props: {
-	subscriptions: number;
-	rating: number;
-}) {
+export function _UserModRating(props: { subscriptions: number; rating: number }) {
 	return (
 		<Card withBorder>
 			<Stack>

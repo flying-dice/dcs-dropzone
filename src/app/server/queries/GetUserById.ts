@@ -11,9 +11,6 @@ export async function getUserById(userId: string): Promise<UserData> {
 		logger.warn({ userId }, "getUserById user not found");
 		throw new Error("User not found");
 	}
-	logger.debug(
-		{ userId: user.id, username: user.username },
-		"getUserById success",
-	);
+	logger.debug({ userId: user.id, username: user.username }, "getUserById success");
 	return UserData.parse(user);
 }

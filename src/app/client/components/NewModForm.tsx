@@ -1,11 +1,4 @@
-import {
-	Button,
-	Group,
-	Select,
-	Stack,
-	Textarea,
-	TextInput,
-} from "@mantine/core";
+import { Button, Group, Select, Stack, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
@@ -13,9 +6,7 @@ import { data, ModCategory } from "../../../common/data.ts";
 
 export const NewModFormSchema = z.object({
 	name: z.string().min(2, { message: "Name should have at least 2 letters" }),
-	description: z
-		.string()
-		.min(10, { message: "Short Description should have at least 10 letters" }),
+	description: z.string().min(10, { message: "Short Description should have at least 10 letters" }),
 	category: z.enum(ModCategory),
 });
 
@@ -41,17 +32,8 @@ export function NewModForm(props: NewModFormProps) {
 			<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 				<Stack>
 					<TextInput {...form.getInputProps("name")} label="Mod Name" />
-					<Textarea
-						autosize
-						minRows={3}
-						{...form.getInputProps("description")}
-						label="Short Description"
-					/>
-					<Select
-						{...form.getInputProps("category")}
-						label="Category"
-						data={data.categories}
-					/>
+					<Textarea autosize minRows={3} {...form.getInputProps("description")} label="Short Description" />
+					<Select {...form.getInputProps("category")} label="Category" data={data.categories} />
 					<Group>
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel

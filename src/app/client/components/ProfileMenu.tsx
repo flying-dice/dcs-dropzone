@@ -1,12 +1,4 @@
-import {
-	Avatar,
-	Button,
-	Group,
-	Menu,
-	Stack,
-	Text,
-	TextInput,
-} from "@mantine/core";
+import { Avatar, Button, Group, Menu, Stack, Text, TextInput } from "@mantine/core";
 import { openModal } from "@mantine/modals";
 import { useTranslation } from "react-i18next";
 import { BiDetail, BiLogOut, BiLogoGithub, BiPackage } from "react-icons/bi";
@@ -30,24 +22,9 @@ export function ProfileMenu() {
 			),
 			children: (
 				<Stack>
-					<TextInput
-						readOnly
-						label={t("USER_ID")}
-						value={user.id}
-						description={t("USER_ID_DESCRIPTION")}
-					/>
-					<TextInput
-						readOnly
-						label={t("USER_LOGIN")}
-						value={user.username}
-						description={t("USER_LOGIN_DESCRIPTION")}
-					/>
-					<TextInput
-						readOnly
-						label={t("USER_NAME")}
-						value={user.name}
-						description={t("USER_NAME_DESCRIPTION")}
-					/>
+					<TextInput readOnly label={t("USER_ID")} value={user.id} description={t("USER_ID_DESCRIPTION")} />
+					<TextInput readOnly label={t("USER_LOGIN")} value={user.username} description={t("USER_LOGIN_DESCRIPTION")} />
+					<TextInput readOnly label={t("USER_NAME")} value={user.name} description={t("USER_NAME_DESCRIPTION")} />
 					<TextInput
 						readOnly
 						label={t("USER_PROFILE_URL")}
@@ -82,10 +59,7 @@ export function ProfileMenu() {
 						</Stack>
 
 						{user && (
-							<Menu.Item
-								onClick={() => nav("/user-mods")}
-								leftSection={<BiPackage />}
-							>
+							<Menu.Item onClick={() => nav("/user-mods")} leftSection={<BiPackage />}>
 								{t("USER_MODS")}
 							</Menu.Item>
 						)}
@@ -95,10 +69,7 @@ export function ProfileMenu() {
 						<Menu.Item onClick={viewUserDetails} leftSection={<BiDetail />}>
 							{t("VIEW_USER_DETAILS")}
 						</Menu.Item>
-						<Menu.Item
-							onClick={() => globalThis.open(user.profileUrl, "_blank")}
-							leftSection={<BiLogoGithub />}
-						>
+						<Menu.Item onClick={() => globalThis.open(user.profileUrl, "_blank")} leftSection={<BiLogoGithub />}>
 							{t("VIEW_PROFILE")}
 						</Menu.Item>
 						<Menu.Item onClick={logout} leftSection={<BiLogOut />}>

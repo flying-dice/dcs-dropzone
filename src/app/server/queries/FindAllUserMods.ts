@@ -5,33 +5,35 @@ import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
 
-const logger = getLogger("UserModService");
+const logger = getLogger("FindAllUserModsQuery");
 
-export type FindAllUserModsProps = {
+export type FindAllUserModsQuery = {
 	user: UserData;
 };
 
-export async function findAllUserMods(
-	props: FindAllUserModsProps,
-): Promise<{ data: ModSummaryData[]; meta: UserModsMetaData }> {
-	logger.debug({ userId: props.user.id }, "findAllUserMods start");
+export type FindAllUserModsQueryResult = {
+	data: ModSummaryData[];
+	meta: UserModsMetaData;
+};
+
+export default async function (query: FindAllUserModsQuery): Promise<FindAllUserModsQueryResult> {
+	const { user } = query;
+
+	logger.debug({ userId: user.id }, "findAllUserMods start");
 
 	const countPublished = await ModSummary.countDocuments({
-		maintainers: props.user.id,
+		maintainers: user.id,
 		visibility: ModVisibility.PUBLIC,
 	});
 
 	logger.debug({ countPublished }, "Counted published mods");
 
-	const docs = await ModSummary.find({ maintainers: props.user.id })
-		.sort({ createdAt: "desc" })
-		.lean()
-		.exec();
+	const docs = await ModSummary.find({ maintainers: user.id }).sort({ createdAt: "desc" }).lean().exec();
 
 	logger.debug({ docs: docs.length, countPublished }, "Fetched all user mods");
 
 	const totalDownloads = await ModSummary.aggregate([
-		{ $match: { maintainers: props.user.id } },
+		{ $match: { maintainers: user.id } },
 		{
 			$group: {
 				_id: null,
@@ -41,7 +43,7 @@ export async function findAllUserMods(
 	]).exec();
 
 	const averageRating = await ModSummary.aggregate([
-		{ $match: { maintainers: props.user.id } },
+		{ $match: { maintainers: user.id } },
 		{
 			$group: {
 				_id: null,

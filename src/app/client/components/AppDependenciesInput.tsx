@@ -25,11 +25,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 
 	return (
 		<Stack gap={"xs"}>
-			<Button
-				variant={"default"}
-				onClick={setSearchModalOpen.open}
-				leftSection={<FaLink />}
-			>
+			<Button variant={"default"} onClick={setSearchModalOpen.open} leftSection={<FaLink />}>
 				{t("ADD_DEPENDENCY")}
 			</Button>
 
@@ -52,11 +48,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 									onClick={handleBadgeClick(id)}
 								/>
 							) : (
-								<Alert
-									key={id}
-									variant={"warning"}
-									onClick={handleBadgeClick(id)}
-								>
+								<Alert key={id} variant={"warning"} onClick={handleBadgeClick(id)}>
 									Unknown Mod ID: <Badge>{id}</Badge>
 								</Alert>
 							)}
@@ -65,11 +57,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 				})}
 			</Stack>
 
-			<Modal
-				opened={searchModalOpen}
-				onClose={setSearchModalOpen.close}
-				size={"xl"}
-			>
+			<Modal opened={searchModalOpen} onClose={setSearchModalOpen.close} size={"xl"}>
 				<Stack>
 					<TextInput label={"Search"} defaultValue={"one"} />
 					{mods.data?.data.data.map((it) => (

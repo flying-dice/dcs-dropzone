@@ -17,8 +17,7 @@ router.get(
 	describeJsonRoute({
 		operationId: "migrateLegacyRegistry",
 		summary: "Migrate Legacy Registry",
-		description:
-			"Migrates data from the legacy registry to the new system. Only accessible by the admin users.",
+		description: "Migrates data from the legacy registry to the new system. Only accessible by the admin users.",
 		tags: ["Migration"],
 		responses: {
 			[StatusCodes.OK]: OkData,
@@ -28,10 +27,7 @@ router.get(
 	cookieAuth(),
 	async (c) => {
 		const user = c.var.getUser();
-		logger.debug(
-			{ userId: user.id, admins: appConfig.admins },
-			"Migration requested by user",
-		);
+		logger.debug({ userId: user.id, admins: appConfig.admins }, "Migration requested by user");
 		if (!appConfig.admins.includes(user.id)) {
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}

@@ -1,11 +1,7 @@
 import { Button, Card, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
 import { useNavigate } from "react-router-dom";
-import {
-	deleteUserMod,
-	type ModData,
-	useGetUserMods,
-} from "../../_autogen/api.ts";
+import { deleteUserMod, type ModData, useGetUserMods } from "../../_autogen/api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModForm } from "./form.ts";
@@ -37,10 +33,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 			onConfirm: async () => {
 				await deleteUserMod(props.mod.id);
 				await userMods.refetch();
-				showSuccessNotification(
-					t("DELETE_MOD_SUCCESS_TITLE"),
-					t("DELETE_MOD_SUCCESS_DESC"),
-				);
+				showSuccessNotification(t("DELETE_MOD_SUCCESS_TITLE"), t("DELETE_MOD_SUCCESS_DESC"));
 				nav("/user-mods");
 			},
 		});
@@ -55,10 +48,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 						{t("DISCARD_CHANGES")}
 					</Button>
 				) : (
-					<Button
-						variant={"default"}
-						onClick={() => nav(`/user-mods/${props.mod.id}`)}
-					>
+					<Button variant={"default"} onClick={() => nav(`/user-mods/${props.mod.id}`)}>
 						{t("BACK_TO_MODS_PAGE")}
 					</Button>
 				)}

@@ -89,14 +89,9 @@ export const useUserModReleaseFormSubmit = (
 				});
 				if (res.status === StatusCodes.OK) {
 					await onSuccess();
-					showSuccessNotification(
-						"Release updated successfully!",
-						"Your release has been updated.",
-					);
+					showSuccessNotification("Release updated successfully!", "Your release has been updated.");
 				} else {
-					showErrorNotification(
-						new Error(`Error updating release with status code ${res.status}`),
-					);
+					showErrorNotification(new Error(`Error updating release with status code ${res.status}`));
 				}
 			} catch (e) {
 				showErrorNotification(e);

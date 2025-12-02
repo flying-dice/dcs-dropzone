@@ -26,11 +26,7 @@ export function UserModRelease(props: UserModReleaseProps) {
 					<Text size={"sm"} fw={"bold"}>
 						{props.release.version}
 					</Text>
-					<Badge
-						variant={"light"}
-						color={colors[props.release.visibility]}
-						style={{ textTransform: "none" }}
-					>
+					<Badge variant={"light"} color={colors[props.release.visibility]} style={{ textTransform: "none" }}>
 						{props.release.visibility}
 					</Badge>
 				</Group>
@@ -39,17 +35,11 @@ export function UserModRelease(props: UserModReleaseProps) {
 			<Group>
 				<Stat
 					icon={FaCalendar}
-					stat={`Created ${formatDistanceToNow(
-						new Date(Date.now() - 100000000),
-						{
-							addSuffix: true,
-						},
-					)}`}
+					stat={`Created ${formatDistanceToNow(new Date(Date.now() - 100000000), {
+						addSuffix: true,
+					})}`}
 				/>
-				<Stat
-					icon={FaDownload}
-					stat={`${Math.floor(Math.random() * 1000)} Downloads`}
-				/>
+				<Stat icon={FaDownload} stat={`${Math.floor(Math.random() * 1000)} Downloads`} />
 			</Group>
 		</Alert>
 	);

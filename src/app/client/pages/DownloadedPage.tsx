@@ -38,10 +38,7 @@ import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
  * @returns True if the status can be toggled, false otherwise
  */
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
-	return (
-		status === ModAndReleaseDataStatus.ENABLED ||
-		status === ModAndReleaseDataStatus.DISABLED
-	);
+	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
 }
 
 export type DownloadedPageProps = {
@@ -51,8 +48,7 @@ export function DownloadedPage(props: DownloadedPageProps) {
 	const { t } = useAppTranslation();
 	const colorScheme = useComputedColorScheme();
 
-	const { enabledCount, downloadCount, downloads, refetch, latestVersions } =
-		useDaemonDownloads();
+	const { enabledCount, downloadCount, downloads, refetch, latestVersions } = useDaemonDownloads();
 
 	const [, toggle] = useAsyncFn(
 		async (releaseId: string) => {
@@ -63,17 +59,11 @@ export function DownloadedPage(props: DownloadedPageProps) {
 				if (sxn.status === ModAndReleaseDataStatus.ENABLED) {
 					await disableRelease(sxn.releaseId);
 					await refetch();
-					showSuccessNotification(
-						t("MOD_DISABLED_SUCCESS_TITLE"),
-						t("MOD_DISABLED_SUCCESS_DESC"),
-					);
+					showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
 				} else if (sxn.status === ModAndReleaseDataStatus.DISABLED) {
 					await enableRelease(sxn.releaseId);
 					await refetch();
-					showSuccessNotification(
-						t("MOD_ENABLED_SUCCESS_TITLE"),
-						t("MOD_ENABLED_SUCCESS_DESC"),
-					);
+					showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
 				}
 			} catch (e) {
 				showErrorNotification(e);
@@ -87,10 +77,7 @@ export function DownloadedPage(props: DownloadedPageProps) {
 			try {
 				await removeReleaseFromDaemon(releaseId);
 				await refetch();
-				showSuccessNotification(
-					t("REMOVE_SUCCESS_TITLE"),
-					t("REMOVE_SUCCESS_DESC"),
-				);
+				showSuccessNotification(t("REMOVE_SUCCESS_TITLE"), t("REMOVE_SUCCESS_DESC"));
 			} catch (e) {
 				showErrorNotification(e);
 			}
@@ -99,11 +86,7 @@ export function DownloadedPage(props: DownloadedPageProps) {
 	);
 
 	const [, update] = useAsyncFn(
-		async (
-			modId: string,
-			currentReleaseId: string,
-			latestReleaseId: string,
-		) => {
+		async (modId: string, currentReleaseId: string, latestReleaseId: string) => {
 			const mod = await getModById(modId);
 
 			if (!mod.data || mod.status !== 200) {
@@ -141,24 +124,18 @@ export function DownloadedPage(props: DownloadedPageProps) {
 	let _subscriptions = sortBy(downloads, "modName");
 
 	if (props.variant === "enabled") {
-		_subscriptions = _subscriptions?.filter(
-			(sxn) => sxn.status === ModAndReleaseDataStatus.ENABLED,
-		);
+		_subscriptions = _subscriptions?.filter((sxn) => sxn.status === ModAndReleaseDataStatus.ENABLED);
 	}
 
 	if (props.variant === "updates") {
 		_subscriptions = _subscriptions.filter((sxn) => {
-			const latest = latestVersions.value?.data.find(
-				(lv) => lv.mod_id === sxn.modId,
-			);
+			const latest = latestVersions.value?.data.find((lv) => lv.mod_id === sxn.modId);
 			return latest ? latest.version !== sxn.version : false;
 		});
 	}
 
 	const rows = _subscriptions?.map((sxn) => {
-		const latest = latestVersions.value?.data.find(
-			(lv) => lv.mod_id === sxn.modId,
-		);
+		const latest = latestVersions.value?.data.find((lv) => lv.mod_id === sxn.modId);
 
 		const isLatest = latest ? latest.version === sxn.version : true;
 
@@ -174,11 +151,7 @@ export function DownloadedPage(props: DownloadedPageProps) {
 				<Table.Td>{sxn.modName}</Table.Td>
 				<Table.Td>
 					{
-						<Text
-							size={"sm"}
-							c={isLatest ? "green" : "orange"}
-							fw={isLatest ? "normal" : "bold"}
-						>
+						<Text size={"sm"} c={isLatest ? "green" : "orange"} fw={isLatest ? "normal" : "bold"}>
 							{sxn?.version}
 						</Text>
 					}
@@ -186,11 +159,7 @@ export function DownloadedPage(props: DownloadedPageProps) {
 				<Table.Td>{latest?.version}</Table.Td>
 				<Table.Td>
 					{sxn.status === ModAndReleaseDataStatus.IN_PROGRESS ? (
-						<Progress
-							value={sxn.overallPercentProgress || 0}
-							striped={true}
-							animated={true}
-						/>
+						<Progress value={sxn.overallPercentProgress || 0} striped={true} animated={true} />
 					) : (
 						t(sxn.status || "PENDING")
 					)}
@@ -204,23 +173,12 @@ export function DownloadedPage(props: DownloadedPageProps) {
 						</Menu.Target>
 						<Menu.Dropdown>
 							{!isLatest && latest && (
-								<Menu.Item
-									onClick={() => update(sxn.modId, sxn.releaseId, latest.id)}
-								>
-									{t("UPDATE")}
-								</Menu.Item>
+								<Menu.Item onClick={() => update(sxn.modId, sxn.releaseId, latest.id)}>{t("UPDATE")}</Menu.Item>
 							)}
-							<Menu.Item
-								disabled={!canBeToggled(sxn.status)}
-								onClick={() => toggle(sxn.releaseId)}
-							>
-								{sxn.status === ModAndReleaseDataStatus.ENABLED
-									? t("DISABLE")
-									: t("ENABLE")}
+							<Menu.Item disabled={!canBeToggled(sxn.status)} onClick={() => toggle(sxn.releaseId)}>
+								{sxn.status === ModAndReleaseDataStatus.ENABLED ? t("DISABLE") : t("ENABLE")}
 							</Menu.Item>
-							<Menu.Item onClick={() => remove(sxn.releaseId)}>
-								{t("REMOVE")}
-							</Menu.Item>
+							<Menu.Item onClick={() => remove(sxn.releaseId)}>{t("REMOVE")}</Menu.Item>
 						</Menu.Dropdown>
 					</Menu>
 				</Table.Td>
@@ -245,12 +203,7 @@ export function DownloadedPage(props: DownloadedPageProps) {
 							label={t("ENABLED")}
 							value={orDefaultValue(enabledCount, "-")}
 						/>
-						<StatCard
-							icon={AppIcons.Updates}
-							iconColor={"orange"}
-							label={t("UPDATES")}
-							value={"-"}
-						/>
+						<StatCard icon={AppIcons.Updates} iconColor={"orange"} label={t("UPDATES")} value={"-"} />
 					</Group>
 					<Stack>
 						<Text fz={"lg"} fw={"bold"}>

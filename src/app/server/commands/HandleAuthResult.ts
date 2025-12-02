@@ -8,13 +8,8 @@ const logger = getLogger("HandleAuthResultCommand");
 export type HandleAuthResultCommand = {
 	authResult: AuthResult;
 };
-export default async function ({
-	authResult,
-}: HandleAuthResultCommand): Promise<UserData> {
-	logger.debug(
-		{ id: authResult.id, username: authResult.username },
-		"registerUserDetails start",
-	);
+export default async function ({ authResult }: HandleAuthResultCommand): Promise<UserData> {
+	logger.debug({ id: authResult.id, username: authResult.username }, "registerUserDetails start");
 
 	const user = UserData.parse({
 		id: authResult.id,

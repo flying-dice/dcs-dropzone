@@ -1,16 +1,5 @@
-import {
-	AppShell,
-	Container,
-	Flex,
-	Stack,
-	useComputedColorScheme,
-} from "@mantine/core";
-import {
-	type ModData,
-	type UserData,
-	useGetUserModById,
-	useGetUserMods,
-} from "../../_autogen/api.ts";
+import { AppShell, Container, Flex, Stack, useComputedColorScheme } from "@mantine/core";
+import { type ModData, type UserData, useGetUserModById, useGetUserMods } from "../../_autogen/api.ts";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Dependencies } from "./_Dependencies.tsx";
@@ -37,15 +26,11 @@ export function _UserModPage(props: UserModPageProps) {
 	const colorScheme = useComputedColorScheme();
 
 	const form = useUserModForm(props.mod);
-	const [_, handleSubmit] = useUserModFormSubmit(
-		props.mod,
-		props.user,
-		async () => {
-			await mod.refetch();
-			await userMods.refetch();
-			form.resetTouched();
-		},
-	);
+	const [_, handleSubmit] = useUserModFormSubmit(props.mod, props.user, async () => {
+		await mod.refetch();
+		await userMods.refetch();
+		form.resetTouched();
+	});
 
 	return (
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
@@ -63,12 +48,8 @@ export function _UserModPage(props: UserModPageProps) {
 							<_Thumbnail form={form} />
 							<_VisibilityAndPermissions form={form} />
 							<_UserModRating
-								subscriptions={
-									mod.data?.status === 200 ? mod.data.data.downloadsCount : 0
-								}
-								rating={
-									mod.data?.status === 200 ? mod.data.data.averageRating : 0
-								}
+								subscriptions={mod.data?.status === 200 ? mod.data.data.downloadsCount : 0}
+								rating={mod.data?.status === 200 ? mod.data.data.averageRating : 0}
 							/>
 							<_Screenshots form={form} />
 							<_FormActions form={form} mod={props.mod} />

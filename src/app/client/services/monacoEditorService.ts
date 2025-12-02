@@ -8,15 +8,11 @@ export const monacoEditorService = {
 	/**
 	 * Wrap selected text with markdown bold syntax
 	 */
-	makeSelectionBold: (
-		editor: editor.IStandaloneCodeEditor,
-		_monaco: Monaco,
-	) => {
+	makeSelectionBold: (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		return () => {
 			const selection = editor.getSelection();
 			if (selection && !selection.isEmpty()) {
-				const selectedText =
-					editor.getModel()?.getValueInRange(selection) || "";
+				const selectedText = editor.getModel()?.getValueInRange(selection) || "";
 				const newText = `**${selectedText}**`;
 				editor.executeEdits("", [
 					{
@@ -32,15 +28,11 @@ export const monacoEditorService = {
 	/**
 	 * Wrap selected text with markdown italic syntax
 	 */
-	makeSelectionItalic: (
-		editor: editor.IStandaloneCodeEditor,
-		_monaco: Monaco,
-	) => {
+	makeSelectionItalic: (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		return () => {
 			const selection = editor.getSelection();
 			if (selection && !selection.isEmpty()) {
-				const selectedText =
-					editor.getModel()?.getValueInRange(selection) || "";
+				const selectedText = editor.getModel()?.getValueInRange(selection) || "";
 				const newText = `*${selectedText}*`;
 				editor.executeEdits("", [
 					{
@@ -56,15 +48,11 @@ export const monacoEditorService = {
 	/**
 	 * Wrap selected text with markdown link syntax
 	 */
-	makeSelectionLink: (
-		editor: editor.IStandaloneCodeEditor,
-		_monaco: Monaco,
-	) => {
+	makeSelectionLink: (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		return () => {
 			const selection = editor.getSelection();
 			if (selection && !selection.isEmpty()) {
-				const selectedText =
-					editor.getModel()?.getValueInRange(selection) || "";
+				const selectedText = editor.getModel()?.getValueInRange(selection) || "";
 				const newText = `[${selectedText}](url)`;
 				editor.executeEdits("", [
 					{
@@ -80,15 +68,11 @@ export const monacoEditorService = {
 	/**
 	 * Wrap selected text with markdown image syntax
 	 */
-	makeSelectionImage: (
-		editor: editor.IStandaloneCodeEditor,
-		_monaco: Monaco,
-	) => {
+	makeSelectionImage: (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		return () => {
 			const selection = editor.getSelection();
 			if (selection && !selection.isEmpty()) {
-				const selectedText =
-					editor.getModel()?.getValueInRange(selection) || "";
+				const selectedText = editor.getModel()?.getValueInRange(selection) || "";
 				const newText = `![${selectedText}](image_url)`;
 				editor.executeEdits("", [
 					{
@@ -104,10 +88,7 @@ export const monacoEditorService = {
 	/**
 	 * Register keyboard shortcuts for common markdown operations
 	 */
-	registerMarkdownShortcuts: (
-		editor: editor.IStandaloneCodeEditor,
-		monaco: Monaco,
-	) => {
+	registerMarkdownShortcuts: (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
 		// Bold (Ctrl+B)
 		editor.addCommand(
 			monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB,

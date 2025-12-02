@@ -51,9 +51,7 @@ const app = (
  * @param elem {HTMLElement} The root element to render the app into.
  * @returns {ReturnType<typeof createRoot>} The root instance.
  */
-function getCachedRootOrCreate(
-	elem: HTMLElement,
-): ReturnType<typeof createRoot> {
+function getCachedRootOrCreate(elem: HTMLElement): ReturnType<typeof createRoot> {
 	if (!import.meta.hot) return createRoot(elem);
 
 	if (import.meta.hot && !import.meta.hot.data.root) {

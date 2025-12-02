@@ -6,9 +6,7 @@ import type {
 	ModReleaseSymbolicLinkRow,
 } from "../ModReleaseSymbolicLinkRepository.ts";
 
-export class DrizzleSqliteModReleaseSymbolicLinkRepository
-	implements ModReleaseSymbolicLinkRepository
-{
+export class DrizzleSqliteModReleaseSymbolicLinkRepository implements ModReleaseSymbolicLinkRepository {
 	constructor(private readonly db: BunSQLiteDatabase) {}
 
 	getByReleaseId(releaseId: string): ModReleaseSymbolicLinkRow[] {

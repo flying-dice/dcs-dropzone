@@ -11,19 +11,9 @@ export function _BasicInfo(props: { form: UserModForm }) {
 				<Text size={"lg"} fw={"bold"}>
 					{t("BASIC_INFORMATION")}
 				</Text>
-				<TextInput
-					label={t("MOD_NAME")}
-					{...props.form.getInputProps("name")}
-				/>
-				<Select
-					label={t("CATEGORY")}
-					data={data.categories}
-					{...props.form.getInputProps("category")}
-				/>
-				<TextInput
-					label={t("DESCRIPTION")}
-					{...props.form.getInputProps("description")}
-				/>
+				<TextInput label={t("MOD_NAME")} {...props.form.getInputProps("name")} />
+				<Select label={t("CATEGORY")} data={data.categories} {...props.form.getInputProps("category")} />
+				<TextInput label={t("DESCRIPTION")} {...props.form.getInputProps("description")} />
 			</Stack>
 		</Card>
 	);

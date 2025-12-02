@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ExtractQueue } from "../queues/ExtractQueue.ts";
-import type {
-	ReleaseAsset,
-	ReleaseAssetRepository,
-	ReleaseData,
-} from "../repositories/ReleaseAssetRepository.ts";
+import type { ReleaseAsset, ReleaseAssetRepository, ReleaseData } from "../repositories/ReleaseAssetRepository.ts";
 import { ReleaseAssetService } from "./ReleaseAssetService.ts";
 
 // Test doubles (local classes)
@@ -33,13 +29,7 @@ class TestDownloadQueue {
 		targetDirectory: string;
 	}> = [];
 	public cancelledFor: string[] = [];
-	pushJob(
-		releaseId: string,
-		releaseAssetId: string,
-		id: string,
-		url: string,
-		targetDirectory: string,
-	): void {
+	pushJob(releaseId: string, releaseAssetId: string, id: string, url: string, targetDirectory: string): void {
 		this.pushedJobs.push({
 			releaseId,
 			releaseAssetId,

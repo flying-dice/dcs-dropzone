@@ -17,11 +17,7 @@ export function ListModCard(props: ModCardProps) {
 			style={props.onClick ? { cursor: "pointer" } : {}}
 		>
 			<Flex wrap={"nowrap"} gap={"md"}>
-				<ModImage
-					radius={"sm"}
-					src={props.imageUrl}
-					props={{ aspectRatio: { maw: 150, miw: 150 } }}
-				/>
+				<ModImage radius={"sm"} src={props.imageUrl} props={{ aspectRatio: { maw: 150, miw: 150 } }} />
 
 				<Flex wrap={"nowrap"} flex={"auto"} gap={"md"}>
 					<Stack flex={"auto"} justify={"space-between"} gap={0}>
@@ -37,11 +33,7 @@ export function ListModCard(props: ModCardProps) {
 							<Badge variant={"light"}>{props.category}</Badge>
 							<Group wrap={"nowrap"} gap={"xs"}>
 								<Stat icon={FaDownload} stat={props.downloads} />
-								<Stat
-									iconColor={"dcsyellow"}
-									icon={FaStar}
-									stat={props.averageRating.toFixed(1)}
-								/>
+								<Stat iconColor={"dcsyellow"} icon={FaStar} stat={props.averageRating.toFixed(1)} />
 							</Group>
 						</Group>
 					</Stack>

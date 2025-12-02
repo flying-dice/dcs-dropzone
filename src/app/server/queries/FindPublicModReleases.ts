@@ -11,9 +11,11 @@ export type FindPublicModReleasesQuery = {
 	modId: string;
 };
 
-export async function findPublicModReleases({
-	modId,
-}: FindPublicModReleasesQuery): Promise<Result<ModReleaseData[], "NotFound">> {
+export type FindPublicModReleasesQueryResult = Result<ModReleaseData[], "NotFound">;
+
+export default async function (query: FindPublicModReleasesQuery): Promise<FindPublicModReleasesQueryResult> {
+	const { modId } = query;
+
 	logger.debug({ modId }, "findPublicModReleases start");
 
 	const mod = await Mod.findOne({ id: modId }).lean().exec();

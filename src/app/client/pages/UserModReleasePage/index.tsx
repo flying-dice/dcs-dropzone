@@ -1,10 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { useParams } from "react-router-dom";
-import {
-	type UserData,
-	useGetUserModById,
-	useGetUserModReleaseById,
-} from "../../_autogen/api.ts";
+import { type UserData, useGetUserModById, useGetUserModReleaseById } from "../../_autogen/api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _UserModReleasePage } from "./page.tsx";
 
@@ -26,11 +22,5 @@ export function UserModReleasePage(props: { user: UserData }) {
 		return <div>{t("ERROR_LOADING_RELEASE")}</div>;
 	}
 
-	return (
-		<_UserModReleasePage
-			user={props.user}
-			release={release.data.data}
-			mod={mod.data.data}
-		/>
-	);
+	return <_UserModReleasePage user={props.user} release={release.data.data} mod={mod.data.data} />;
 }

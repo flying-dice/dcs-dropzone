@@ -9,11 +9,7 @@ export function _VisibilityAndPermissions(props: { form: UserModForm }) {
 				<Text size={"lg"} fw={"bold"}>
 					Visibility & Permissions
 				</Text>
-				<Select
-					label={"Visibility"}
-					{...props.form.getInputProps("visibility")}
-					data={data.visibilities}
-				/>
+				<Select label={"Visibility"} {...props.form.getInputProps("visibility")} data={data.visibilities} />
 			</Stack>
 		</Card>
 	);

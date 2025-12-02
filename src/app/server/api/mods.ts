@@ -79,8 +79,7 @@ router.get(
 		}),
 	),
 	async (c) => {
-		const { page, size, category, maintainers, tags, term } =
-			c.req.valid("query");
+		const { page, size, category, maintainers, tags, term } = c.req.valid("query");
 
 		const result = await getAllPublishedMods(page, size, {
 			category,

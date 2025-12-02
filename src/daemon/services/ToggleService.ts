@@ -40,25 +40,15 @@ export class ToggleService {
 	createLinksForRelease(releaseId: string): void {
 		const links = this.linkRepo.getByReleaseId(releaseId);
 
-		logger.info(
-			`Creating Links for release ${releaseId} with ${links.length} link(s)`,
-		);
+		logger.info(`Creating Links for release ${releaseId} with ${links.length} link(s)`);
 
 		for (const link of links) {
-			const srcAbs = this.pathService.getAbsoluteReleasePath(
-				releaseId,
-				link.src,
-			);
+			const srcAbs = this.pathService.getAbsoluteReleasePath(releaseId, link.src);
 
-			const destAbs = this.pathService.getAbsoluteSymbolicLinkDestPath(
-				link.destRoot,
-				link.dest,
-			);
+			const destAbs = this.pathService.getAbsoluteSymbolicLinkDestPath(link.destRoot, link.dest);
 
 			const type = getSymlinkType(srcAbs);
-			logger.debug(
-				`Creating symlink from ${srcAbs} to ${destAbs} with type ${type}`,
-			);
+			logger.debug(`Creating symlink from ${srcAbs} to ${destAbs} with type ${type}`);
 			ensureSymlinkSync(srcAbs, destAbs, type);
 			this.linkRepo.setInstalledPath(link.id, destAbs);
 		}
@@ -67,9 +57,7 @@ export class ToggleService {
 	removeLinksForRelease(releaseId: string) {
 		const links = this.linkRepo.getByReleaseId(releaseId);
 
-		logger.info(
-			`Removing Links for release ${releaseId} with ${links.length} link(s)`,
-		);
+		logger.info(`Removing Links for release ${releaseId} with ${links.length} link(s)`);
 
 		for (const link of links) {
 			if (link.installedPath) {
@@ -77,9 +65,7 @@ export class ToggleService {
 					rmSync(link.installedPath, { force: true, recursive: true });
 					this.linkRepo.setInstalledPath(link.id, null);
 				} catch (err) {
-					logger.error(
-						`Failed to remove symbolic link at ${link.installedPath}: ${err}`,
-					);
+					logger.error(`Failed to remove symbolic link at ${link.installedPath}: ${err}`);
 				}
 			}
 		}

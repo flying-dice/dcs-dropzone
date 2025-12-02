@@ -72,8 +72,7 @@ server.get(
 						type: "apiKey",
 						in: "cookie",
 						name: appConfig.userCookieName,
-						description:
-							"Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
+						description: "Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
 					},
 				},
 			},

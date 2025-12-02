@@ -21,15 +21,12 @@ export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
 					loading={daemon.toggling.loading}
 					disabled={
 						!(
-							daemon.daemonRelease.status ===
-								ModAndReleaseDataStatus.DISABLED ||
+							daemon.daemonRelease.status === ModAndReleaseDataStatus.DISABLED ||
 							daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED
 						)
 					}
 				>
-					{daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED
-						? "Disable"
-						: "Enable"}
+					{daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED ? "Disable" : "Enable"}
 				</Button>
 			)}
 			{daemon.daemonRelease ? (
@@ -37,22 +34,12 @@ export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
 					variant={"light"}
 					onClick={daemon.remove}
 					loading={daemon.removing.loading}
-					disabled={
-						daemon.isUnavailable ||
-						daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED
-					}
+					disabled={daemon.isUnavailable || daemon.daemonRelease.status === ModAndReleaseDataStatus.ENABLED}
 				>
-					{daemon.daemonRelease.status === ModAndReleaseDataStatus.IN_PROGRESS
-						? "Cancel"
-						: "Remove"}
+					{daemon.daemonRelease.status === ModAndReleaseDataStatus.IN_PROGRESS ? "Cancel" : "Remove"}
 				</Button>
 			) : (
-				<Button
-					variant={"light"}
-					onClick={daemon.add}
-					loading={daemon.adding.loading}
-					disabled={daemon.isUnavailable}
-				>
+				<Button variant={"light"} onClick={daemon.add} loading={daemon.adding.loading} disabled={daemon.isUnavailable}>
 					Download
 				</Button>
 			)}

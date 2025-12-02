@@ -19,10 +19,8 @@ const logger = getLogger("Application");
 
 const pathService = new PathService(
 	{
-		[SymbolicLinkDestRoot.DCS_INSTALL_DIR]:
-			applicationConfig.dcs.dcs_install_dir,
-		[SymbolicLinkDestRoot.DCS_WORKING_DIR]:
-			applicationConfig.dcs.dcs_working_dir,
+		[SymbolicLinkDestRoot.DCS_INSTALL_DIR]: applicationConfig.dcs.dcs_install_dir,
+		[SymbolicLinkDestRoot.DCS_WORKING_DIR]: applicationConfig.dcs.dcs_working_dir,
 	},
 	process.cwd(),
 );
@@ -44,21 +42,14 @@ const extractQueue = new ExtractQueue({
 });
 
 logger.debug("Initializing repositories");
-const subscriptionRepository: DownloadsRepository =
-	new DrizzleSqliteSubscriptionRepository(_db);
-const releaseAssetRepository: ReleaseAssetRepository =
-	new DrizzleSqliteReleaseAssetRepository(_db);
+const subscriptionRepository: DownloadsRepository = new DrizzleSqliteSubscriptionRepository(_db);
+const releaseAssetRepository: ReleaseAssetRepository = new DrizzleSqliteReleaseAssetRepository(_db);
 
 logger.debug("Initializing services");
 
 function getReleaseAssetService(releaseId: string): ReleaseAssetService {
 	logger.debug("Creating ReleaseAssetService instance");
-	return new ReleaseAssetService(
-		releaseId,
-		releaseAssetRepository,
-		downloadQueue,
-		extractQueue,
-	);
+	return new ReleaseAssetService(releaseId, releaseAssetRepository, downloadQueue, extractQueue);
 }
 
 const linkRepo = new DrizzleSqliteModReleaseSymbolicLinkRepository(_db);
@@ -67,11 +58,7 @@ const toggleService = new ToggleService({
 	pathService,
 });
 
-const downloadsService = new DownloadsService(
-	subscriptionRepository,
-	toggleService,
-	getReleaseAssetService,
-);
+const downloadsService = new DownloadsService(subscriptionRepository, toggleService, getReleaseAssetService);
 
 logger.debug("Services initialized");
 

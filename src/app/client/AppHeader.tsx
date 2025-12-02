@@ -19,11 +19,7 @@ export function AppHeader(props: AppHeaderProps) {
 			<Stack pl="md" h="100%" justify="center">
 				<Group justify="space-between">
 					<Group gap={"xs"}>
-						<Burger
-							opened={props.navbar[0]}
-							onClick={props.navbar[1].toggle}
-							hiddenFrom="md"
-						/>
+						<Burger opened={props.navbar[0]} onClick={props.navbar[1].toggle} hiddenFrom="md" />
 
 						<Image w={"min-content"} h={44} src={width < 900 ? icon : logo} />
 					</Group>

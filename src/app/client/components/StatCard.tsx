@@ -1,11 +1,4 @@
-import {
-	Card,
-	Group,
-	type MantineColor,
-	Stack,
-	Text,
-	ThemeIcon,
-} from "@mantine/core";
+import { Card, Group, type MantineColor, Stack, Text, ThemeIcon } from "@mantine/core";
 import type { IconType } from "react-icons";
 
 export type StatCardProps = {

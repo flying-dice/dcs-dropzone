@@ -1,29 +1,7 @@
-import {
-	closestCenter,
-	DndContext,
-	type DragEndEvent,
-	PointerSensor,
-	useSensor,
-	useSensors,
-} from "@dnd-kit/core";
-import {
-	arrayMove,
-	rectSortingStrategy,
-	SortableContext,
-	useSortable,
-} from "@dnd-kit/sortable";
+import { closestCenter, DndContext, type DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-	AspectRatio,
-	Button,
-	Card,
-	Group,
-	Image,
-	SimpleGrid,
-	Stack,
-	Text,
-	Textarea,
-} from "@mantine/core";
+import { AspectRatio, Button, Card, Group, Image, SimpleGrid, Stack, Text, Textarea } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useListState } from "@mantine/hooks";
 import { modals, openConfirmModal, openModal } from "@mantine/modals";
@@ -31,10 +9,7 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useEffect } from "react";
 import { FaCamera } from "react-icons/fa6";
 import { z } from "zod";
-import {
-	type TranslateFunction,
-	useAppTranslation,
-} from "../../i18n/useAppTranslation.ts";
+import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModForm } from "./form.ts";
 
 const formSchema = z.object({
@@ -126,21 +101,8 @@ function openImageModal(
 	});
 }
 
-function SortableItem({
-	item,
-	onClick,
-}: {
-	item: { uuid: string; url: string };
-	onClick: () => void;
-}) {
-	const {
-		attributes,
-		listeners,
-		setNodeRef,
-		transform,
-		transition,
-		isDragging,
-	} = useSortable({
+function SortableItem({ item, onClick }: { item: { uuid: string; url: string }; onClick: () => void }) {
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
 		id: item.uuid,
 	});
 
@@ -174,9 +136,7 @@ export function _Screenshots(props: { form: UserModForm }) {
 		})),
 	);
 
-	const sensors = useSensors(
-		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-	);
+	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
@@ -208,15 +168,8 @@ export function _Screenshots(props: { form: UserModForm }) {
 				<Text size={"lg"} fw={"bold"}>
 					Screenshots
 				</Text>
-				<DndContext
-					sensors={sensors}
-					collisionDetection={closestCenter}
-					onDragEnd={handleDragEnd}
-				>
-					<SortableContext
-						items={state.map((i) => i.uuid)}
-						strategy={rectSortingStrategy}
-					>
+				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+					<SortableContext items={state.map((i) => i.uuid)} strategy={rectSortingStrategy}>
 						<SimpleGrid cols={2}>
 							{state.map((item, index) => (
 								<SortableItem
@@ -225,11 +178,7 @@ export function _Screenshots(props: { form: UserModForm }) {
 									onClick={() =>
 										openImageModal(t, item.url, {
 											onChange: (newUrl) => {
-												props.form.replaceListItem(
-													"screenshots",
-													index,
-													newUrl,
-												);
+												props.form.replaceListItem("screenshots", index, newUrl);
 												modals.closeAll();
 											},
 											onRemove: () => {
@@ -249,18 +198,14 @@ export function _Screenshots(props: { form: UserModForm }) {
 					variant={"default"}
 					leftSection={<FaCamera />}
 					onClick={() =>
-						openImageModal(
-							t,
-							"https://cdn-icons-png.flaticon.com/512/10446/10446694.png",
-							{
-								onChange: (newUrl) => {
-									props.form.insertListItem("screenshots", newUrl);
+						openImageModal(t, "https://cdn-icons-png.flaticon.com/512/10446/10446694.png", {
+							onChange: (newUrl) => {
+								props.form.insertListItem("screenshots", newUrl);
 
-									modals.closeAll();
-								},
-								onCancel: modals.closeAll,
+								modals.closeAll();
 							},
-						)
+							onCancel: modals.closeAll,
+						})
 					}
 				>
 					Add Screenshot

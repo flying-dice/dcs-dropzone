@@ -30,10 +30,7 @@ export function useNewModModal(onSuccess?: () => void | Promise<void>): {
 		}
 	};
 
-	const openNewModModal = (
-		modalTitle: string,
-		formComponent: React.ReactNode,
-	) => {
+	const openNewModModal = (modalTitle: string, formComponent: React.ReactNode) => {
 		openModal({
 			title: modalTitle,
 			size: "xl",

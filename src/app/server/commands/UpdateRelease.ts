@@ -10,10 +10,7 @@ export type UpdateReleaseCommand = {
 	updateData: ModReleaseData;
 	user: UserData;
 };
-export default async function ({
-	updateData,
-	user,
-}: UpdateReleaseCommand): Promise<Result<undefined, "NotFound">> {
+export default async function ({ updateData, user }: UpdateReleaseCommand): Promise<Result<undefined, "NotFound">> {
 	logger.debug({ userId: user.id, updateData }, "updateRelease start");
 
 	const release = await ModRelease.findOneAndUpdate(
@@ -28,16 +25,10 @@ export default async function ({
 	).exec();
 
 	if (!release) {
-		logger.warn(
-			{ releaseId: updateData.id },
-			"User attempted to update release but it was not found",
-		);
+		logger.warn({ releaseId: updateData.id }, "User attempted to update release but it was not found");
 		return err("NotFound");
 	}
 
-	logger.debug(
-		{ releaseId: updateData.id },
-		"User successfully updated release",
-	);
+	logger.debug({ releaseId: updateData.id }, "User successfully updated release");
 	return ok(undefined);
 }

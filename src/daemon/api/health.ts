@@ -10,8 +10,7 @@ router.get(
 	describeRoute({
 		tags: ["Health"],
 		summary: "Daemon health check",
-		description:
-			"Checks the daemon service health by performing a lightweight database operation.",
+		description: "Checks the daemon service health by performing a lightweight database operation.",
 		responses: {
 			[StatusCodes.OK]: {
 				description: "Service is healthy",
@@ -44,10 +43,7 @@ router.get(
 		try {
 			return c.json({ status: "UP" }, StatusCodes.OK);
 		} catch (error) {
-			return c.json(
-				{ status: "DOWN", error: String(error) },
-				StatusCodes.SERVICE_UNAVAILABLE,
-			);
+			return c.json({ status: "DOWN", error: String(error) }, StatusCodes.SERVICE_UNAVAILABLE);
 		}
 	},
 );

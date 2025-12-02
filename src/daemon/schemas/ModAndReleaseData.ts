@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-	AssetStatus,
-	DownloadedReleaseStatus,
-	MissionScriptRunOn,
-	SymbolicLinkDestRoot,
-} from "../../common/data.ts";
+import { AssetStatus, DownloadedReleaseStatus, MissionScriptRunOn, SymbolicLinkDestRoot } from "../../common/data.ts";
 
 export const ModReleaseAssetStatusData = z
 	.object({
@@ -16,13 +11,10 @@ export const ModReleaseAssetStatusData = z
 	.meta({
 		ref: "ModReleaseAssetStatusData",
 		title: "Mod Release Asset Status Data",
-		description:
-			"Status data representation of a mod release asset, including download and extraction progress.",
+		description: "Status data representation of a mod release asset, including download and extraction progress.",
 	});
 
-export type ModReleaseAssetStatusData = z.infer<
-	typeof ModReleaseAssetStatusData
->;
+export type ModReleaseAssetStatusData = z.infer<typeof ModReleaseAssetStatusData>;
 
 // Asset schema
 export const ModReleaseAssetData = z
@@ -54,9 +46,7 @@ export const ModReleaseSymbolicLinkData = z
 		description: "Data representation of a symbolic link configuration.",
 	});
 
-export type ModReleaseSymbolicLinkData = z.infer<
-	typeof ModReleaseSymbolicLinkData
->;
+export type ModReleaseSymbolicLinkData = z.infer<typeof ModReleaseSymbolicLinkData>;
 
 // Mission script schema
 export const ModReleaseMissionScriptData = z
@@ -73,9 +63,7 @@ export const ModReleaseMissionScriptData = z
 		description: "Data representation of a mission script configuration.",
 	});
 
-export type ModReleaseMissionScriptData = z.infer<
-	typeof ModReleaseMissionScriptData
->;
+export type ModReleaseMissionScriptData = z.infer<typeof ModReleaseMissionScriptData>;
 
 // ModRelease schema
 export const ModAndReleaseData = z
@@ -94,8 +82,7 @@ export const ModAndReleaseData = z
 	.meta({
 		ref: "ModAndReleaseData",
 		title: "Mod and Release Data",
-		description:
-			"Data representation of a mod along with its release for downloading and enabling.",
+		description: "Data representation of a mod along with its release for downloading and enabling.",
 	});
 
 export type ModAndReleaseData = z.infer<typeof ModAndReleaseData>;

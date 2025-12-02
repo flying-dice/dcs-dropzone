@@ -65,16 +65,8 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 		this.startNextDownloadJob();
 	}
 
-	pushJob(
-		releaseId: string,
-		releaseAssetId: string,
-		id: string,
-		url: string,
-		targetDirectory: string,
-	): void {
-		logger.debug(
-			`[${id}] - Pushing new download job to queue: ${url} -> ${targetDirectory}`,
-		);
+	pushJob(releaseId: string, releaseAssetId: string, id: string, url: string, targetDirectory: string): void {
+		logger.debug(`[${id}] - Pushing new download job to queue: ${url} -> ${targetDirectory}`);
 		const job = this.db
 			.insert(T_DOWNLOAD_QUEUE)
 			.values({
@@ -119,9 +111,7 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 			.returning()
 			.all();
 
-		logger.info(
-			`Cancelled ${result.length} download jobs for release id: ${releaseId}`,
-		);
+		logger.info(`Cancelled ${result.length} download jobs for release id: ${releaseId}`);
 
 		this.emit(DownloadQueueEvents.CANCELLED, result);
 	}
@@ -189,9 +179,7 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 				exePath: this.wgetExecutablePath,
 				target: job.targetDirectory,
 				onProgress: (p) => {
-					logger.info(
-						`[${job.id}] - Download progress: ${p.progress.toFixed(2)}% ${p.summary}`,
-					);
+					logger.info(`[${job.id}] - Download progress: ${p.progress.toFixed(2)}% ${p.summary}`);
 					this.db
 						.update(T_DOWNLOAD_QUEUE)
 						.set({

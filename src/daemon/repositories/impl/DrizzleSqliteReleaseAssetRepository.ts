@@ -1,15 +1,9 @@
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { T_MOD_RELEASE_ASSETS, T_MOD_RELEASES } from "../../database/schema.ts";
-import type {
-	ReleaseAsset,
-	ReleaseAssetRepository,
-	ReleaseData,
-} from "../ReleaseAssetRepository.ts";
+import type { ReleaseAsset, ReleaseAssetRepository, ReleaseData } from "../ReleaseAssetRepository.ts";
 
-export class DrizzleSqliteReleaseAssetRepository
-	implements ReleaseAssetRepository
-{
+export class DrizzleSqliteReleaseAssetRepository implements ReleaseAssetRepository {
 	constructor(private readonly db: BunSQLiteDatabase) {}
 
 	getReleaseById(releaseId: string): ReleaseData | undefined {
@@ -26,10 +20,6 @@ export class DrizzleSqliteReleaseAssetRepository
 	}
 
 	getAssetsForRelease(releaseId: string): ReleaseAsset[] {
-		return this.db
-			.select()
-			.from(T_MOD_RELEASE_ASSETS)
-			.where(eq(T_MOD_RELEASE_ASSETS.releaseId, releaseId))
-			.all();
+		return this.db.select().from(T_MOD_RELEASE_ASSETS).where(eq(T_MOD_RELEASE_ASSETS.releaseId, releaseId)).all();
 	}
 }

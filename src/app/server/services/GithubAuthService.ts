@@ -31,10 +31,7 @@ export class GithubAuthService implements AuthService {
 		logger.debug("Fetching authenticated user information from GitHub");
 		const kit = new Octokit({ auth: auth.authentication.token });
 		const { data } = await kit.rest.users.getAuthenticated();
-		logger.debug(
-			{ id: data.id, login: data.login },
-			"Fetched authenticated GitHub user",
-		);
+		logger.debug({ id: data.id, login: data.login }, "Fetched authenticated GitHub user");
 
 		return {
 			id: data.id.toString(),

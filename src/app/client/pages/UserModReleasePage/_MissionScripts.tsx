@@ -16,17 +16,11 @@ import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaFileCode } from "react-icons/fa";
 import { z } from "zod";
-import {
-	ModReleaseMissionScriptDataRoot,
-	ModReleaseMissionScriptDataRunOn,
-} from "../../_autogen/api.ts";
+import { ModReleaseMissionScriptDataRoot, ModReleaseMissionScriptDataRunOn } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
 import { PathWithRoot } from "../../components/PathWithRoot.tsx";
-import {
-	type TranslateFunction,
-	useAppTranslation,
-} from "../../i18n/useAppTranslation.ts";
+import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 const missionScriptFormSchema = z.object({
@@ -127,10 +121,7 @@ function _MissionScriptForm(props: {
 	);
 }
 
-function handleAddMissionScript(
-	t: TranslateFunction,
-	form: UserModReleaseForm,
-) {
+function handleAddMissionScript(t: TranslateFunction, form: UserModReleaseForm) {
 	openModal({
 		title: t("ADD_MISSION_SCRIPT"),
 		size: "xl",
@@ -145,11 +136,7 @@ function handleAddMissionScript(
 	});
 }
 
-function handleEditMissionScript(
-	t: TranslateFunction,
-	form: UserModReleaseForm,
-	index: number,
-) {
+function handleEditMissionScript(t: TranslateFunction, form: UserModReleaseForm, index: number) {
 	openModal({
 		title: t("EDIT_MISSION_SCRIPT"),
 		size: "xl",
@@ -180,10 +167,7 @@ function _NoMissionScripts() {
 	);
 }
 
-function getMissionScriptRunOnLabel(
-	runOn: ModReleaseMissionScriptDataRunOn,
-	t: any,
-) {
+function getMissionScriptRunOnLabel(runOn: ModReleaseMissionScriptDataRunOn, t: any) {
 	switch (runOn) {
 		case "MISSION_START_BEFORE_SANITIZE":
 			return t("MISSION_SCRIPT_RUN_ON_BEFORE_SANITIZE");
@@ -194,10 +178,7 @@ function getMissionScriptRunOnLabel(
 	}
 }
 
-function getMissionScriptRootLabel(
-	root: ModReleaseMissionScriptDataRoot,
-	t: any,
-) {
+function getMissionScriptRootLabel(root: ModReleaseMissionScriptDataRoot, t: any) {
 	switch (root) {
 		case "DCS_WORKING_DIR":
 			return t("MISSION_SCRIPT_ROOT_WORKING_DIR");
@@ -219,11 +200,7 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 						{t("MISSION_SCRIPTS_TITLE")}
 					</Text>
 					<Group gap={"xs"}>
-						<Button
-							size={"xs"}
-							variant={"light"}
-							onClick={() => handleAddMissionScript(t, props.form)}
-						>
+						<Button size={"xs"} variant={"light"} onClick={() => handleAddMissionScript(t, props.form)}>
 							{t("ADD_MISSION_SCRIPT")}
 						</Button>
 						<Help
@@ -256,19 +233,13 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 									<Text size={"xs"} fw={"bold"}>
 										{t("MISSION_SCRIPT_PATH_LABEL")}:
 									</Text>
-									<PathWithRoot
-										size={"xs"}
-										path={it.path}
-										root={getMissionScriptRootLabel(it.root, t)}
-									/>
+									<PathWithRoot size={"xs"} path={it.path} root={getMissionScriptRootLabel(it.root, t)} />
 								</Stack>
 								<Stack gap={2}>
 									<Text size={"xs"} fw={"bold"}>
 										{t("MISSION_SCRIPT_RUN_ON_LABEL")}:
 									</Text>
-									<Text size={"xs"}>
-										{getMissionScriptRunOnLabel(it.runOn, t)}
-									</Text>
+									<Text size={"xs"}>{getMissionScriptRunOnLabel(it.runOn, t)}</Text>
 								</Stack>
 							</SimpleGrid>
 

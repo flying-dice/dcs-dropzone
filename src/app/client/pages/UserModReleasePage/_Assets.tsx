@@ -1,15 +1,4 @@
-import {
-	ActionIcon,
-	Alert,
-	Button,
-	Card,
-	Checkbox,
-	Divider,
-	Group,
-	Stack,
-	Text,
-	TextInput,
-} from "@mantine/core";
+import { ActionIcon, Alert, Button, Card, Checkbox, Divider, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
@@ -65,9 +54,7 @@ function _AssetForm(props: {
 						<Button
 							size={"xs"}
 							variant={"subtle"}
-							onClick={() =>
-								form.setFieldValue("urls", [...form.values.urls, ""])
-							}
+							onClick={() => form.setFieldValue("urls", [...form.values.urls, ""])}
 						>
 							{t("ADD_URL")}
 						</Button>
@@ -178,17 +165,10 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						Assets
 					</Text>
 					<Group gap={"xs"}>
-						<Button
-							size={"xs"}
-							variant={"light"}
-							onClick={() => handleAddAsset(props.form)}
-						>
+						<Button size={"xs"} variant={"light"} onClick={() => handleAddAsset(props.form)}>
 							Add Asset
 						</Button>
-						<Help
-							title={<Text fw={"bold"}>Assets</Text>}
-							markdown={t("ASSET_HELP_MD")}
-						/>
+						<Help title={<Text fw={"bold"}>Assets</Text>} markdown={t("ASSET_HELP_MD")} />
 					</Group>
 				</Group>
 				{props.form.values.assets.length === 0 && <_NoAssets />}
@@ -198,9 +178,7 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						name={it.name}
 						urls={it.urls}
 						isArchive={it.isArchive}
-						onClick={() =>
-							handleEditAsset(props.form, props.form.values.assets.indexOf(it))
-						}
+						onClick={() => handleEditAsset(props.form, props.form.values.assets.indexOf(it))}
 					/>
 				))}
 			</Stack>

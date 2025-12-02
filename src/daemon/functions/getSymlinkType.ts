@@ -5,9 +5,5 @@ export function getSymlinkType(pathlike: PathLike): SymlinkType {
 
 	const isDir = srcStat.isDirectory();
 
-	return process.platform === "win32" && isDir
-		? "junction"
-		: isDir
-			? "dir"
-			: "file";
+	return process.platform === "win32" && isDir ? "junction" : isDir ? "dir" : "file";
 }

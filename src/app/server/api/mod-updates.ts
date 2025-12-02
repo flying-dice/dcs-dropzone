@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { findUpdateInformationByIds } from "../queries/FindUpdateInformationByIds.ts";
+import findUpdateInformationByIds from "../queries/FindUpdateInformationByIds.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModLatestReleaseData } from "../schemas/ModLatestReleaseData.ts";
 

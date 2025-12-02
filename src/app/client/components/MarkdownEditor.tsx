@@ -1,10 +1,4 @@
-import {
-	Button,
-	Group,
-	Stack,
-	Text,
-	useComputedColorScheme,
-} from "@mantine/core";
+import { Button, Group, Stack, Text, useComputedColorScheme } from "@mantine/core";
 import { Editor, type Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useState } from "react";
@@ -19,13 +13,7 @@ type EditorButtonProps = {
 };
 function EditorButton(props: EditorButtonProps) {
 	return (
-		<Button
-			fw={"normal"}
-			variant={"subtle"}
-			leftSection={<props.icon />}
-			size={"compact-sm"}
-			onClick={props.onClick}
-		>
+		<Button fw={"normal"} variant={"subtle"} leftSection={<props.icon />} size={"compact-sm"} onClick={props.onClick}>
 			{props.label}
 		</Button>
 	);
@@ -37,15 +25,11 @@ export type MarkdownEditorProps = {
 };
 export function MarkdownEditor(props: MarkdownEditorProps) {
 	const colorScheme = useComputedColorScheme();
-	const [editorInstance, setEditorInstance] =
-		useState<editor.IStandaloneCodeEditor | null>(null);
+	const [editorInstance, setEditorInstance] = useState<editor.IStandaloneCodeEditor | null>(null);
 
 	const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null);
 
-	function handleEditorDidMount(
-		editor: editor.IStandaloneCodeEditor,
-		monaco: Monaco,
-	) {
+	function handleEditorDidMount(editor: editor.IStandaloneCodeEditor, monaco: Monaco) {
 		monacoEditorService.registerMarkdownShortcuts(editor, monaco);
 		setEditorInstance(editor);
 		setMonacoInstance(monaco);
@@ -77,10 +61,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiBold}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionBold(
-									editorInstance,
-									monacoInstance,
-								)();
+								monacoEditorService.makeSelectionBold(editorInstance, monacoInstance)();
 							}
 						}}
 					/>
@@ -89,10 +70,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiItalic}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionItalic(
-									editorInstance,
-									monacoInstance,
-								)();
+								monacoEditorService.makeSelectionItalic(editorInstance, monacoInstance)();
 							}
 						}}
 					/>
@@ -101,10 +79,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiLink}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionLink(
-									editorInstance,
-									monacoInstance,
-								)();
+								monacoEditorService.makeSelectionLink(editorInstance, monacoInstance)();
 							}
 						}}
 					/>
@@ -113,10 +88,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiImageAlt}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionImage(
-									editorInstance,
-									monacoInstance,
-								)();
+								monacoEditorService.makeSelectionImage(editorInstance, monacoInstance)();
 							}
 						}}
 					/>

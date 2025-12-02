@@ -21,11 +21,7 @@ export function NavShortcut(props: CategoryShortcutProps) {
 			active={active}
 			styles={{ root: { borderRadius: "0.5rem" } }}
 			leftSection={<props.icon />}
-			rightSection={
-				isNumber(props.count) ? (
-					<Badge color={props.countColor}>{props.count}</Badge>
-				) : undefined
-			}
+			rightSection={isNumber(props.count) ? <Badge color={props.countColor}>{props.count}</Badge> : undefined}
 			label={
 				<Text fz={14} fw={"normal"}>
 					{props.label}

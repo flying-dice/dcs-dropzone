@@ -10,10 +10,7 @@ export function _Tags(props: { form: UserModForm }) {
 					Tags
 				</Text>
 
-				<AppTagsInput
-					value={props.form.values.tags}
-					onChange={(v) => props.form.setFieldValue("tags", v)}
-				/>
+				<AppTagsInput value={props.form.values.tags} onChange={(v) => props.form.setFieldValue("tags", v)} />
 			</Stack>
 		</Card>
 	);

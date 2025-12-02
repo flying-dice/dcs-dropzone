@@ -19,8 +19,7 @@ router.get(
 	describeJsonRoute({
 		operationId: "getCategories",
 		summary: "Get Categories",
-		description:
-			"Retrieves a list of all mod categories along with the count of published mods in each category.",
+		description: "Retrieves a list of all mod categories along with the count of published mods in each category.",
 		tags: ["Categories"],
 		responses: {
 			[StatusCodes.OK]: z.record(z.enum(ModCategory), z.number()),

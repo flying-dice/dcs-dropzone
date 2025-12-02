@@ -11,17 +11,10 @@ export type UpdateModCommand = {
 	updateData: ModUpdateData;
 	modId: string;
 };
-export default async function ({
-	user,
-	updateData,
-	modId,
-}: UpdateModCommand): Promise<Result<undefined, "NotFound">> {
+export default async function ({ user, updateData, modId }: UpdateModCommand): Promise<Result<undefined, "NotFound">> {
 	logger.debug({ userId: user.id, modId }, "updateMod start");
 
-	const mod = await Mod.findOneAndUpdate(
-		{ id: modId, maintainers: user.id },
-		updateData,
-	).exec();
+	const mod = await Mod.findOneAndUpdate({ id: modId, maintainers: user.id }, updateData).exec();
 
 	if (!mod) {
 		logger.warn({ modId }, "User attempted to update mod but it was not found");

@@ -22,10 +22,7 @@ export type HelpProps = {
 
 export function Help(props: HelpProps) {
 	return (
-		<ActionIcon
-			variant={props.variant || "subtle"}
-			onClick={() => openMarkdownModal(props.markdown, props.title)}
-		>
+		<ActionIcon variant={props.variant || "subtle"} onClick={() => openMarkdownModal(props.markdown, props.title)}>
 			<FaCircleInfo />
 		</ActionIcon>
 	);

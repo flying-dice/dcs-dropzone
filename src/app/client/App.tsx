@@ -31,33 +31,15 @@ export function App() {
 				<Routes>
 					<Route path="/" element={<Homepage />} />
 					<Route path={"/mods"} element={<ModsPage />} />
-					<Route
-						path={"/downloaded"}
-						element={<DownloadedPage variant={"downloads"} />}
-					/>
-					<Route
-						path={"/enabled"}
-						element={<DownloadedPage variant={"enabled"} />}
-					/>
-					<Route
-						path={"/updates"}
-						element={<DownloadedPage variant={"updates"} />}
-					/>
+					<Route path={"/downloaded"} element={<DownloadedPage variant={"downloads"} />} />
+					<Route path={"/enabled"} element={<DownloadedPage variant={"enabled"} />} />
+					<Route path={"/updates"} element={<DownloadedPage variant={"updates"} />} />
 
 					{user && (
 						<>
-							<Route
-								path={"/user-mods"}
-								element={<UserModsPage user={user} />}
-							/>
-							<Route
-								path={"/user-mods/:modId"}
-								element={<UserModPage user={user} />}
-							/>
-							<Route
-								path={"/user-mods/:modId/releases/:releaseId"}
-								element={<UserModReleasePage user={user} />}
-							/>
+							<Route path={"/user-mods"} element={<UserModsPage user={user} />} />
+							<Route path={"/user-mods/:modId"} element={<UserModPage user={user} />} />
+							<Route path={"/user-mods/:modId/releases/:releaseId"} element={<UserModReleasePage user={user} />} />
 						</>
 					)}
 				</Routes>

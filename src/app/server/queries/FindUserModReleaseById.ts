@@ -6,20 +6,16 @@ import type { UserData } from "../schemas/UserData.ts";
 
 const logger = getLogger("FindUserModReleaseById");
 
-export type FindUserModReleaseByIdProps = {
+export type FindUserModReleaseByIdQuery = {
 	user: UserData;
 	modId: string;
 	releaseId: string;
 };
 
-export async function findUserModReleaseById(
-	props: FindUserModReleaseByIdProps,
-): Promise<Result<ModReleaseData, "NotFound">> {
-	const { modId, releaseId, user } = props;
-	logger.debug(
-		{ userId: user.id, modId, releaseId },
-		"findUserModReleaseById start",
-	);
+export default async function (query: FindUserModReleaseByIdQuery): Promise<Result<ModReleaseData, "NotFound">> {
+	const { modId, releaseId, user } = query;
+
+	logger.debug({ userId: user.id, modId, releaseId }, "findUserModReleaseById start");
 
 	const release = await ModRelease.findOne({
 		id: releaseId,

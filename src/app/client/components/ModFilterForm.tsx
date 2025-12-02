@@ -1,12 +1,4 @@
-import {
-	Button,
-	Group,
-	MultiSelect,
-	Select,
-	SimpleGrid,
-	Stack,
-	TextInput,
-} from "@mantine/core";
+import { Button, Group, MultiSelect, Select, SimpleGrid, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaMagnifyingGlass, FaShapes, FaTag, FaUser } from "react-icons/fa6";

@@ -20,11 +20,7 @@ export class MigrationService {
 		};
 	}
 
-	protected constructor(
-		id: string,
-		migration: () => Promise<void>,
-		serviceId: string,
-	) {
+	protected constructor(id: string, migration: () => Promise<void>, serviceId: string) {
 		this.migrationId = id;
 		this.serviceId = serviceId;
 		this.migrationFunction = migration;
@@ -60,16 +56,10 @@ export class MigrationService {
 
 		try {
 			await this.migrationFunction();
-			logger.info(
-				this.context,
-				"Migration completed successfully, marking as complete.",
-			);
+			logger.info(this.context, "Migration completed successfully, marking as complete.");
 			await this.complete();
 		} catch (error) {
-			logger.error(
-				this.context,
-				`Migration failed with error: ${error}, marking as failed.`,
-			);
+			logger.error(this.context, `Migration failed with error: ${error}, marking as failed.`);
 			await this.fail(error?.toString() || "Unknown error");
 		}
 	}
@@ -108,13 +98,7 @@ export class MigrationService {
 			},
 		)
 			.exec()
-			.then(
-				(it) =>
-					it ||
-					Promise.reject(
-						`Failed to mark migration ${this.migrationId} as complete`,
-					),
-			);
+			.then((it) => it || Promise.reject(`Failed to mark migration ${this.migrationId} as complete`));
 	}
 
 	private async fail(error: string): Promise<void> {
@@ -130,13 +114,7 @@ export class MigrationService {
 			},
 		)
 			.exec()
-			.then(
-				(it) =>
-					it ||
-					Promise.reject(
-						`Failed to mark migration ${this.migrationId} as failed`,
-					),
-			);
+			.then((it) => it || Promise.reject(`Failed to mark migration ${this.migrationId} as failed`));
 	}
 
 	private async acquireLock(): Promise<Migration | null> {

@@ -1,13 +1,4 @@
-import {
-	AppShell,
-	Container,
-	Group,
-	Pagination,
-	Select,
-	Stack,
-	Text,
-	useComputedColorScheme,
-} from "@mantine/core";
+import { AppShell, Container, Group, Pagination, Select, Stack, Text, useComputedColorScheme } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { useEffect, useMemo, useState } from "react";
 import { useGetMods } from "../_autogen/api.ts";
@@ -43,15 +34,10 @@ export function ModsPage() {
 		? modFilterService.transformMaintainers(mods.data.data.filter.maintainers)
 		: [];
 
-	const tagsData = mods.data?.data.filter.tags
-		? modFilterService.transformTags(mods.data.data.filter.tags)
-		: [];
+	const tagsData = mods.data?.data.filter.tags ? modFilterService.transformTags(mods.data.data.filter.tags) : [];
 
 	const total = useMemo(
-		() =>
-			mods.data?.status === StatusCodes.OK
-				? mods.data?.data.page.totalPages
-				: 1,
+		() => (mods.data?.status === StatusCodes.OK ? mods.data?.data.page.totalPages : 1),
 		[mods.data],
 	);
 
@@ -80,15 +66,14 @@ export function ModsPage() {
 							tags={tagsData}
 						/>
 
-						{mods.data?.status === StatusCodes.OK &&
-							mods.data.data.data.length === 0 && (
-								<EmptyState
-									withoutBorder
-									title={t("NO_MODS_FOUND_TITLE")}
-									description={t("NO_MODS_FOUND_SUBTITLE_DESC")}
-									icon={AppIcons.Featured}
-								/>
-							)}
+						{mods.data?.status === StatusCodes.OK && mods.data.data.data.length === 0 && (
+							<EmptyState
+								withoutBorder
+								title={t("NO_MODS_FOUND_TITLE")}
+								description={t("NO_MODS_FOUND_SUBTITLE_DESC")}
+								icon={AppIcons.Featured}
+							/>
+						)}
 
 						{mods.data?.status === StatusCodes.OK &&
 							mods.data.data.data.map((mod) => (
@@ -114,14 +99,8 @@ export function ModsPage() {
 								/>
 								<Text size={"xs"} c={"dimmed"}>
 									{t("DISPLAYING_RANGE", {
-										start:
-											(mods.data.data.page.number - 1) *
-												mods.data.data.page.size +
-											1,
-										end:
-											(mods.data.data.page.number - 1) *
-												mods.data.data.page.size +
-											mods.data.data.data.length,
+										start: (mods.data.data.page.number - 1) * mods.data.data.page.size + 1,
+										end: (mods.data.data.page.number - 1) * mods.data.data.page.size + mods.data.data.data.length,
 										total: mods.data.data.page.totalElements,
 									})}
 								</Text>

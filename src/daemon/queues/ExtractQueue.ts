@@ -6,11 +6,7 @@ import { getLogger } from "log4js";
 import { DownloadJobStatus, ExtractJobStatus } from "../../common/data.ts";
 import { TypedEventEmitter } from "../../common/TypedEventEmitter.ts";
 import { spawnSevenzip } from "../child_process/sevenzip.ts";
-import {
-	T_DOWNLOAD_QUEUE,
-	T_EXTRACT_DOWNLOAD_JOIN,
-	T_EXTRACT_QUEUE,
-} from "../database/schema.ts";
+import { T_DOWNLOAD_QUEUE, T_EXTRACT_DOWNLOAD_JOIN, T_EXTRACT_QUEUE } from "../database/schema.ts";
 
 const logger = getLogger("ExtractQueue");
 
@@ -78,9 +74,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 		targetDirectory: string,
 		downloadJobIds: string[],
 	): void {
-		logger.debug(
-			`[${id}] - Pushing new extract job to queue: ${archivePath} -> ${targetDirectory}`,
-		);
+		logger.debug(`[${id}] - Pushing new extract job to queue: ${archivePath} -> ${targetDirectory}`);
 		const job = this.db.transaction((tx) => {
 			const insertedJob = tx
 				.insert(T_EXTRACT_QUEUE)
@@ -121,9 +115,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 			.where(eq(T_EXTRACT_QUEUE.releaseId, releaseId))
 			.get();
 
-		return average?.progressPercent
-			? Math.floor(Number(average.progressPercent))
-			: null;
+		return average?.progressPercent ? Math.floor(Number(average.progressPercent)) : null;
 	}
 
 	cancelJobsForRelease(releaseId: string): void {
@@ -143,10 +135,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 			.all();
 
 		for (const extractJob of extractJobs) {
-			this.db
-				.delete(T_EXTRACT_DOWNLOAD_JOIN)
-				.where(eq(T_EXTRACT_DOWNLOAD_JOIN.extractJobId, extractJob.id))
-				.run();
+			this.db.delete(T_EXTRACT_DOWNLOAD_JOIN).where(eq(T_EXTRACT_DOWNLOAD_JOIN.extractJobId, extractJob.id)).run();
 		}
 
 		const result = this.db
@@ -155,9 +144,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 			.returning()
 			.all();
 
-		logger.info(
-			`Cancelled ${result.length} extract jobs for release id: ${releaseId}`,
-		);
+		logger.info(`Cancelled ${result.length} extract jobs for release id: ${releaseId}`);
 
 		this.emit(ExtractQueueEvents.CANCELLED, result);
 	}
@@ -211,10 +198,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 						this.db
 							.select({ id: T_EXTRACT_DOWNLOAD_JOIN.id })
 							.from(T_EXTRACT_DOWNLOAD_JOIN)
-							.innerJoin(
-								T_DOWNLOAD_QUEUE,
-								eq(T_EXTRACT_DOWNLOAD_JOIN.downloadJobId, T_DOWNLOAD_QUEUE.id),
-							)
+							.innerJoin(T_DOWNLOAD_QUEUE, eq(T_EXTRACT_DOWNLOAD_JOIN.downloadJobId, T_DOWNLOAD_QUEUE.id))
 							.where(
 								and(
 									eq(T_EXTRACT_DOWNLOAD_JOIN.extractJobId, T_EXTRACT_QUEUE.id),
@@ -249,9 +233,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 				exePath: this.sevenzipExecutablePath,
 				targetDir: job.targetDirectory,
 				onProgress: (p) => {
-					logger.info(
-						`[${job.id}] - Extract progress: ${p.progress.toFixed(2)}%${p.summary ? ` ${p.summary}` : ""}`,
-					);
+					logger.info(`[${job.id}] - Extract progress: ${p.progress.toFixed(2)}%${p.summary ? ` ${p.summary}` : ""}`);
 					this.db
 						.update(T_EXTRACT_QUEUE)
 						.set({

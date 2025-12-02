@@ -1,22 +1,13 @@
 import { Button, Card, Divider, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
 import { useNavigate } from "react-router-dom";
-import {
-	deleteUserModRelease,
-	type ModData,
-	type ModReleaseData,
-	useGetUserModReleases,
-} from "../../_autogen/api.ts";
+import { deleteUserModRelease, type ModData, type ModReleaseData, useGetUserModReleases } from "../../_autogen/api.ts";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
-export function _FormActions(props: {
-	form: UserModReleaseForm;
-	mod: ModData;
-	release: ModReleaseData;
-}) {
+export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; release: ModReleaseData }) {
 	const { t } = useAppTranslation();
 	const nav = useNavigate();
 	const releases = useGetUserModReleases(props.mod.id);
@@ -43,10 +34,7 @@ export function _FormActions(props: {
 			onConfirm: async () => {
 				await deleteUserModRelease(props.mod.id, props.release.id);
 				await releases.refetch();
-				showSuccessNotification(
-					t("DELETE_RELEASE_SUCCESS_TITLE"),
-					t("DELETE_RELEASE_SUCCESS_DESC"),
-				);
+				showSuccessNotification(t("DELETE_RELEASE_SUCCESS_TITLE"), t("DELETE_RELEASE_SUCCESS_DESC"));
 				nav(`/user-mods/${props.mod.id}`);
 			},
 		});
@@ -62,10 +50,7 @@ export function _FormActions(props: {
 						{t("DISCARD_CHANGES")}
 					</Button>
 				) : (
-					<Button
-						variant={"default"}
-						onClick={() => nav(`/user-mods/${props.mod.id}`)}
-					>
+					<Button variant={"default"} onClick={() => nav(`/user-mods/${props.mod.id}`)}>
 						{t("BACK_TO_MOD_PAGE")}
 					</Button>
 				)}
@@ -73,11 +58,7 @@ export function _FormActions(props: {
 					{t("DELETE_RELEASE")}
 				</Button>
 				<Divider />
-				<ModReleaseDaemonControls
-					mod={props.mod}
-					release={props.release}
-					form={props.form}
-				/>
+				<ModReleaseDaemonControls mod={props.mod} release={props.release} form={props.form} />
 			</Stack>
 		</Card>
 	);

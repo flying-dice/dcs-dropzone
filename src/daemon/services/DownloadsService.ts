@@ -9,9 +9,7 @@ const logger = getLogger("SubscriptionService");
 /**
  * Factory function type for creating ReleaseAssetService instances
  */
-export type ReleaseAssetServiceFactory = (
-	releaseId: string,
-) => ReleaseAssetService;
+export type ReleaseAssetServiceFactory = (releaseId: string) => ReleaseAssetService;
 
 export class DownloadsService {
 	constructor(
@@ -29,9 +27,7 @@ export class DownloadsService {
 
 		this.toggleService.disableRelease(releaseId);
 
-		await this.releaseAssetServiceFactory(
-			releaseId,
-		).removeReleaseAssetsAndFolder();
+		await this.releaseAssetServiceFactory(releaseId).removeReleaseAssetsAndFolder();
 
 		this.repo.deleteByReleaseId(releaseId);
 
@@ -43,12 +39,8 @@ export class DownloadsService {
 
 		this.repo.saveRelease(data);
 
-		logger.info(
-			`Successfully added mod: ${data.modName} (release: ${data.version})`,
-		);
+		logger.info(`Successfully added mod: ${data.modName} (release: ${data.version})`);
 
-		await this.releaseAssetServiceFactory(
-			data.releaseId,
-		).downloadAndExtractReleaseAssets();
+		await this.releaseAssetServiceFactory(data.releaseId).downloadAndExtractReleaseAssets();
 	}
 }

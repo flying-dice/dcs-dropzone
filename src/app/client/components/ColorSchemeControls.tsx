@@ -10,13 +10,7 @@ export function ColorSchemeControls() {
 		<Menu>
 			<Menu.Target>
 				<ActionIcon variant={"default"} size={"lg"}>
-					{colorScheme === "dark" ? (
-						<BsMoon />
-					) : colorScheme === "light" ? (
-						<BsSun />
-					) : (
-						<BsLaptop />
-					)}
+					{colorScheme === "dark" ? <BsMoon /> : colorScheme === "light" ? <BsSun /> : <BsLaptop />}
 				</ActionIcon>
 			</Menu.Target>
 			<Menu.Dropdown>

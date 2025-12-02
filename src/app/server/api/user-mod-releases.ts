@@ -4,12 +4,12 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import createRelease from "../commands/CreateRelease.ts";
+import createRelease from "../commands/CreateRelease/index.ts";
 import deleteRelease from "../commands/DeleteRelease.ts";
 import updateRelease from "../commands/UpdateRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { findUserModReleaseById } from "../queries/FindUserModReleaseById.ts";
-import { findUserModReleases } from "../queries/FindUserModReleases.ts";
+import findUserModReleaseById from "../queries/FindUserModReleaseById.ts";
+import findUserModReleases from "../queries/FindUserModReleases.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
@@ -27,8 +27,7 @@ router.get(
 	describeJsonRoute({
 		operationId: "getUserModReleases",
 		summary: "Get user mod releases",
-		description:
-			"Retrieves all releases for a specific mod owned by the authenticated user.",
+		description: "Retrieves all releases for a specific mod owned by the authenticated user.",
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -97,9 +96,7 @@ router.get(
 		const { id, releaseId } = c.req.valid("param");
 		const user = c.var.getUser();
 
-		logger.debug(
-			`User '${user.id}' is requesting release '${releaseId}' for mod '${id}'`,
-		);
+		logger.debug(`User '${user.id}' is requesting release '${releaseId}' for mod '${id}'`);
 
 		const result = await findUserModReleaseById({
 			user,
@@ -129,8 +126,7 @@ router.post(
 	describeJsonRoute({
 		operationId: "createUserModRelease",
 		summary: "Create user mod release",
-		description:
-			"Creates a new release for a mod owned by the authenticated user.",
+		description: "Creates a new release for a mod owned by the authenticated user.",
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -157,8 +153,8 @@ router.post(
 		});
 
 		return result.match(
-			(body) => c.json(body, StatusCodes.CREATED),
-			(error) =>
+			(body: unknown) => c.json(body, StatusCodes.CREATED),
+			(error: unknown) =>
 				c.json(
 					ErrorData.parse({
 						code: StatusCodes.NOT_FOUND,
@@ -178,8 +174,7 @@ router.put(
 	describeJsonRoute({
 		operationId: "updateUserModRelease",
 		summary: "Update user mod release",
-		description:
-			"Updates fields of an existing release for a mod owned by the authenticated user.",
+		description: "Updates fields of an existing release for a mod owned by the authenticated user.",
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -203,9 +198,7 @@ router.put(
 		const updates = c.req.valid("json");
 		const user = c.var.getUser();
 
-		logger.debug(
-			`User '${user.id}' is updating release '${releaseId}' for mod '${id}'`,
-		);
+		logger.debug(`User '${user.id}' is updating release '${releaseId}' for mod '${id}'`);
 
 		const result = await updateRelease({
 			user,
@@ -244,8 +237,7 @@ router.delete(
 	describeJsonRoute({
 		operationId: "deleteUserModRelease",
 		summary: "Delete user mod release",
-		description:
-			"Deletes an existing release for a mod owned by the authenticated user.",
+		description: "Deletes an existing release for a mod owned by the authenticated user.",
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -267,9 +259,7 @@ router.delete(
 		const { id, releaseId } = c.req.valid("param");
 		const user = c.var.getUser();
 
-		logger.debug(
-			`User '${user.id}' is deleting release '${releaseId}' for mod '${id}'`,
-		);
+		logger.debug(`User '${user.id}' is deleting release '${releaseId}' for mod '${id}'`);
 
 		const result = await deleteRelease({
 			user,

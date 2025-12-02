@@ -9,10 +9,7 @@ import {
 	ModVisibility,
 	SymbolicLinkDestRoot,
 } from "../../../common/data.ts";
-import {
-	getRegistryEntry,
-	getRegistryIndex,
-} from "../../client/_autogen/legacy_api.ts";
+import { getRegistryEntry, getRegistryIndex } from "../../client/_autogen/legacy_api.ts";
 import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import { ModData } from "../schemas/ModData.ts";
@@ -44,10 +41,7 @@ export default async function () {
 	for (const { id } of legacyIndex.data) {
 		const registryEntry = await getRegistryEntry(id);
 
-		logger.debug(
-			{ id: registryEntry.data.id, name: registryEntry.data.name },
-			`Migrating Registry Entry ${id}`,
-		);
+		logger.debug({ id: registryEntry.data.id, name: registryEntry.data.name }, `Migrating Registry Entry ${id}`);
 
 		const existingMod = await Mod.findOne({
 			name: registryEntry.data.name,
@@ -59,15 +53,11 @@ export default async function () {
 			id: modDocumentId,
 			name: registryEntry.data.name,
 			description: registryEntry.data.description,
-			content: Buffer.from(registryEntry.data.content, "base64").toString(
-				"utf-8",
-			),
+			content: Buffer.from(registryEntry.data.content, "base64").toString("utf-8"),
 			visibility: ModVisibility.PUBLIC,
 			screenshots: [],
 			thumbnail: registryEntry.data.imageUrl,
-			tags: registryEntry.data.tags.map((it) =>
-				camelToKebabCase(toCamelCase(it)),
-			),
+			tags: registryEntry.data.tags.map((it) => camelToKebabCase(toCamelCase(it))),
 			category: ModCategories.includes(registryEntry.data.category as any)
 				? registryEntry.data.category
 				: ModCategory.OTHER,
@@ -102,9 +92,7 @@ export default async function () {
 				version: version.version,
 			}).lean();
 
-			const releaseId = existingRelease
-				? existingRelease.id
-				: crypto.randomUUID();
+			const releaseId = existingRelease ? existingRelease.id : crypto.randomUUID();
 
 			const release: ModReleaseData = ModReleaseData.parse({
 				id: releaseId,
@@ -113,17 +101,9 @@ export default async function () {
 				changelog: version.name,
 				visibility: ModVisibility.PUBLIC,
 				assets: version.assets.map((assets) => ({
-					name: decodeURIComponent(
-						basename(assets.remoteSource).replace(
-							extname(assets.remoteSource),
-							"",
-						),
-					),
+					name: decodeURIComponent(basename(assets.remoteSource).replace(extname(assets.remoteSource), "")),
 					urls: [assets.remoteSource],
-					isArchive:
-						assets.remoteSource.match(
-							/\.(zip|rar|7z|tar\.gz|tar\.bz2|tar\.xz)$/i,
-						) !== null,
+					isArchive: assets.remoteSource.match(/\.(zip|rar|7z|tar\.gz|tar\.bz2|tar\.xz)$/i) !== null,
 				})),
 				symbolicLinks: version.assets.flatMap((assets) =>
 					assets.links.map((link): ModReleaseSymbolicLinkData => {
@@ -151,11 +131,9 @@ export default async function () {
 				),
 			});
 
-			await ModRelease.findOneAndUpdate(
-				{ mod_id: modDocument.id, version: release.version },
-				release,
-				{ upsert: true },
-			);
+			await ModRelease.findOneAndUpdate({ mod_id: modDocument.id, version: release.version }, release, {
+				upsert: true,
+			});
 
 			const releaseDocument = await ModRelease.findOne({
 				mod_id: modDocument.id,

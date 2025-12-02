@@ -1,10 +1,4 @@
-import {
-	AppShell,
-	Container,
-	Flex,
-	Stack,
-	useComputedColorScheme,
-} from "@mantine/core";
+import { AppShell, Container, Flex, Stack, useComputedColorScheme } from "@mantine/core";
 import {
 	type ModData,
 	type ModReleaseData,
@@ -35,16 +29,11 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 	const releases = useGetUserModReleases(props.mod.id);
 	const release = useGetUserModReleaseById(props.mod.id, props.release.id);
 	const form = useUserModReleaseForm(props.mod, props.release);
-	const [_, handleSubmit] = useUserModReleaseFormSubmit(
-		props.mod,
-		props.release,
-		props.user,
-		async () => {
-			await release.refetch();
-			await releases.refetch();
-			form.resetTouched();
-		},
-	);
+	const [_, handleSubmit] = useUserModReleaseFormSubmit(props.mod, props.release, props.user, async () => {
+		await release.refetch();
+		await releases.refetch();
+		form.resetTouched();
+	});
 
 	return (
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
@@ -60,11 +49,7 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 						</Stack>
 						<Stack w={breakpoint.isMd ? "100%" : 300} miw={300}>
 							<_Summary form={form} />
-							<_FormActions
-								form={form}
-								mod={props.mod}
-								release={props.release}
-							/>
+							<_FormActions form={form} mod={props.mod} release={props.release} />
 						</Stack>
 					</Flex>
 				</form>

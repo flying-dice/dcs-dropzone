@@ -1,9 +1,5 @@
 import { useAsync, useAsyncFn } from "react-use";
-import {
-	getModUpdatesByIds,
-	type ModData,
-	type ModReleaseData,
-} from "../_autogen/api.ts";
+import { getModUpdatesByIds, type ModData, type ModReleaseData } from "../_autogen/api.ts";
 import {
 	addReleaseToDaemon,
 	disableRelease,
@@ -31,9 +27,7 @@ export function useDaemonDownloads() {
 		[daemonReleases.data],
 	);
 
-	const enabled = daemonReleases.data?.data.filter(
-		(it) => it.status === ModAndReleaseDataStatus.ENABLED,
-	);
+	const enabled = daemonReleases.data?.data.filter((it) => it.status === ModAndReleaseDataStatus.ENABLED);
 
 	return {
 		enabledCount: enabled?.length,
@@ -42,22 +36,13 @@ export function useDaemonDownloads() {
 		downloadCount: daemonReleases.data?.data.length,
 		latestVersions,
 		refetch: daemonReleases.refetch,
-		active: daemonReleases.data?.data.filter(
-			(it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS,
-		),
-		isActive:
-			daemonReleases.data?.data.some(
-				(it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS,
-			) ?? false,
+		active: daemonReleases.data?.data.filter((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS),
+		isActive: daemonReleases.data?.data.some((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS) ?? false,
 		configureDaemon,
 	};
 }
 
-export function useDaemonDownloader(
-	mod: ModData,
-	release: ModReleaseData,
-	form?: UserModReleaseForm,
-) {
+export function useDaemonDownloader(mod: ModData, release: ModReleaseData, form?: UserModReleaseForm) {
 	const { t } = useAppTranslation();
 	const daemonReleases = useGetAllDaemonReleases({
 		query: { refetchInterval: 1000 },
@@ -76,10 +61,7 @@ export function useDaemonDownloader(
 				symbolicLinks: form?.values.symbolicLinks || release.symbolicLinks,
 			});
 			await daemonReleases.refetch();
-			showSuccessNotification(
-				t("ADDED_SUCCESS_TITLE"),
-				t("ADDED_SUCCESS_DESC"),
-			);
+			showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
 		} catch (e) {
 			showErrorNotification(e);
 		}
@@ -89,10 +71,7 @@ export function useDaemonDownloader(
 		try {
 			await removeReleaseFromDaemon(release.id);
 			await daemonReleases.refetch();
-			showSuccessNotification(
-				t("REMOVE_SUCCESS_TITLE"),
-				t("REMOVE_SUCCESS_DESC"),
-			);
+			showSuccessNotification(t("REMOVE_SUCCESS_TITLE"), t("REMOVE_SUCCESS_DESC"));
 		} catch (e) {
 			showErrorNotification(e);
 		}
@@ -100,24 +79,16 @@ export function useDaemonDownloader(
 
 	const [toggling, toggle] = useAsyncFn(async () => {
 		try {
-			const subscription = daemonReleases.data?.data.find(
-				(it) => it.releaseId === release.id,
-			);
+			const subscription = daemonReleases.data?.data.find((it) => it.releaseId === release.id);
 
 			if (!subscription) return;
 
 			if (subscription.status === ModAndReleaseDataStatus.ENABLED) {
 				await disableRelease(release.id);
-				showSuccessNotification(
-					"Success",
-					"Mod release has been disabled successfully.",
-				);
+				showSuccessNotification("Success", "Mod release has been disabled successfully.");
 			} else {
 				await enableRelease(release.id);
-				showSuccessNotification(
-					"Success",
-					"Mod release has been enabled successfully.",
-				);
+				showSuccessNotification("Success", "Mod release has been enabled successfully.");
 			}
 		} catch (e) {
 			showErrorNotification(e);
@@ -134,17 +105,10 @@ export function useDaemonDownloader(
 		toggling,
 		toggle,
 		configureDaemon,
-		daemonRelease: daemonReleases.data?.data.find(
-			(it) => it.releaseId === release.id,
-		),
+		daemonRelease: daemonReleases.data?.data.find((it) => it.releaseId === release.id),
 		isReady() {
-			const sub = daemonReleases.data?.data.find(
-				(it) => it.releaseId === release.id,
-			);
-			return (
-				sub?.status === ModAndReleaseDataStatus.ENABLED ||
-				sub?.status === ModAndReleaseDataStatus.DISABLED
-			);
+			const sub = daemonReleases.data?.data.find((it) => it.releaseId === release.id);
+			return sub?.status === ModAndReleaseDataStatus.ENABLED || sub?.status === ModAndReleaseDataStatus.DISABLED;
 		},
 	};
 }

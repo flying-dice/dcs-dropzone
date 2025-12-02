@@ -12,15 +12,10 @@ import {
 	T_MOD_RELEASE_SYMBOLIC_LINKS,
 	T_MOD_RELEASES,
 } from "../../database/schema.ts";
-import {
-	ModAndReleaseData,
-	type ModReleaseAssetStatusData,
-} from "../../schemas/ModAndReleaseData.ts";
+import { ModAndReleaseData, type ModReleaseAssetStatusData } from "../../schemas/ModAndReleaseData.ts";
 import type { DownloadsRepository } from "../DownloadsRepository.ts";
 
-export class DrizzleSqliteSubscriptionRepository
-	implements DownloadsRepository
-{
+export class DrizzleSqliteSubscriptionRepository implements DownloadsRepository {
 	constructor(private readonly db: BunSQLiteDatabase) {}
 
 	getAll(): ModAndReleaseData[] {
@@ -62,9 +57,7 @@ export class DrizzleSqliteSubscriptionRepository
 					assets.map((it) => it.statusData.status),
 					symbolicLinks,
 				),
-				overallPercentProgress: totalPercentProgress(
-					assets.flatMap((it) => it.statusData.overallPercentProgress),
-				),
+				overallPercentProgress: totalPercentProgress(assets.flatMap((it) => it.statusData.overallPercentProgress)),
 			});
 		}
 
@@ -140,33 +133,19 @@ export class DrizzleSqliteSubscriptionRepository
 	deleteByReleaseId(releaseId: string): void {
 		this.db.transaction(
 			(trx) => {
-				trx
-					.delete(T_MOD_RELEASE_ASSETS)
-					.where(eq(T_MOD_RELEASE_ASSETS.releaseId, releaseId))
-					.run();
+				trx.delete(T_MOD_RELEASE_ASSETS).where(eq(T_MOD_RELEASE_ASSETS.releaseId, releaseId)).run();
 
-				trx
-					.delete(T_MOD_RELEASE_SYMBOLIC_LINKS)
-					.where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.releaseId, releaseId))
-					.run();
+				trx.delete(T_MOD_RELEASE_SYMBOLIC_LINKS).where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.releaseId, releaseId)).run();
 
-				trx
-					.delete(T_MOD_RELEASE_MISSION_SCRIPTS)
-					.where(eq(T_MOD_RELEASE_MISSION_SCRIPTS.releaseId, releaseId))
-					.run();
+				trx.delete(T_MOD_RELEASE_MISSION_SCRIPTS).where(eq(T_MOD_RELEASE_MISSION_SCRIPTS.releaseId, releaseId)).run();
 
-				trx
-					.delete(T_MOD_RELEASES)
-					.where(eq(T_MOD_RELEASES.releaseId, releaseId))
-					.run();
+				trx.delete(T_MOD_RELEASES).where(eq(T_MOD_RELEASES.releaseId, releaseId)).run();
 			},
 			{ behavior: "immediate" },
 		);
 	}
 
-	private getJobDataForAsset(
-		releaseAsset: typeof T_MOD_RELEASE_ASSETS.$inferSelect,
-	): ModReleaseAssetStatusData {
+	private getJobDataForAsset(releaseAsset: typeof T_MOD_RELEASE_ASSETS.$inferSelect): ModReleaseAssetStatusData {
 		const downloadJobs = this.db
 			.select()
 			.from(T_DOWNLOAD_QUEUE)
@@ -178,23 +157,16 @@ export class DrizzleSqliteSubscriptionRepository
 			.where(eq(T_EXTRACT_QUEUE.releaseAssetId, releaseAsset.id))
 			.all();
 
-		const downloadPercentProgress = totalPercentProgress(
-			downloadJobs.map((it) => it.progressPercent),
-		);
+		const downloadPercentProgress = totalPercentProgress(downloadJobs.map((it) => it.progressPercent));
 
-		const extractPercentProgress = totalPercentProgress(
-			extractJobs.map((it) => it.progressPercent),
-		);
+		const extractPercentProgress = totalPercentProgress(extractJobs.map((it) => it.progressPercent));
 
 		const overallPercentProgress = totalPercentProgress([
 			...downloadJobs.map((it) => it.progressPercent),
 			...extractJobs.map((it) => it.progressPercent),
 		]);
 
-		const status: AssetStatus = inferAssetStatusFromJobs(
-			downloadJobs,
-			extractJobs,
-		);
+		const status: AssetStatus = inferAssetStatusFromJobs(downloadJobs, extractJobs);
 
 		return {
 			downloadPercentProgress,

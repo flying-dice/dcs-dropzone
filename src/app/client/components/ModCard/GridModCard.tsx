@@ -35,11 +35,7 @@ export function GridModCard(props: ModCardProps) {
 						<Badge variant={"light"}>{props.category}</Badge>
 						<Group gap={"xs"}>
 							<Stat icon={FaDownload} stat={props.downloads} />
-							<Stat
-								iconColor={"dcsyellow"}
-								icon={FaStar}
-								stat={props.averageRating.toFixed(1)}
-							/>
+							<Stat iconColor={"dcsyellow"} icon={FaStar} stat={props.averageRating.toFixed(1)} />
 						</Group>
 					</Group>
 				</Stack>

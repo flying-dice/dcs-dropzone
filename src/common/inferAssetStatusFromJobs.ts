@@ -1,7 +1,4 @@
-import type {
-	T_DOWNLOAD_QUEUE,
-	T_EXTRACT_QUEUE,
-} from "../daemon/database/schema.ts";
+import type { T_DOWNLOAD_QUEUE, T_EXTRACT_QUEUE } from "../daemon/database/schema.ts";
 import { AssetStatus, DownloadJobStatus, ExtractJobStatus } from "./data.ts";
 
 export function inferAssetStatusFromJobs(
@@ -19,18 +16,14 @@ export function inferAssetStatusFromJobs(
 	}
 
 	if (
-		downloadJobStatuses.every(
-			(status) => status === DownloadJobStatus.PENDING,
-		) &&
+		downloadJobStatuses.every((status) => status === DownloadJobStatus.PENDING) &&
 		extractJobStatuses.every((status) => status === ExtractJobStatus.PENDING)
 	) {
 		return AssetStatus.PENDING;
 	}
 
 	if (
-		downloadJobStatuses.every(
-			(status) => status === DownloadJobStatus.COMPLETED,
-		) &&
+		downloadJobStatuses.every((status) => status === DownloadJobStatus.COMPLETED) &&
 		extractJobStatuses.every((status) => status === ExtractJobStatus.COMPLETED)
 	) {
 		return AssetStatus.COMPLETED;

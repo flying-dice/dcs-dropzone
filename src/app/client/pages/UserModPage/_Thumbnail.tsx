@@ -1,12 +1,4 @@
-import {
-	Button,
-	Card,
-	Center,
-	Group,
-	Stack,
-	Text,
-	Textarea,
-} from "@mantine/core";
+import { Button, Card, Center, Group, Stack, Text, Textarea } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";

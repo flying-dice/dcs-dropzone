@@ -4,25 +4,16 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";
 import { z } from "zod";
 import { zKebabCaseString } from "../../../../common/zod.ts";
-import {
-	type ModData,
-	ModDataCategory,
-	ModDataVisibility,
-	type UserData,
-	updateUserMod,
-} from "../../_autogen/api.ts";
+import { type ModData, ModDataCategory, ModDataVisibility, type UserData, updateUserMod } from "../../_autogen/api.ts";
 import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 
 export const userModFormValues = z.object({
 	name: z.string().min(2, { message: "Name should have at least 2 letters" }),
 	category: z.enum(ModDataCategory),
-	description: z
-		.string()
-		.min(10, { message: "Short Description should have at least 10 letters" })
-		.max(100, {
-			message: "Short Description should have at most 100 letters",
-		}),
+	description: z.string().min(10, { message: "Short Description should have at least 10 letters" }).max(100, {
+		message: "Short Description should have at most 100 letters",
+	}),
 	content: z.string().min(20, {
 		message: "Detailed Description should have at least 20 letters",
 	}),
@@ -53,11 +44,7 @@ export const useUserModForm = (mod: ModData) =>
 
 export type UserModForm = ReturnType<typeof useUserModForm>;
 
-export const useUserModFormSubmit = (
-	mod: ModData,
-	user: UserData,
-	onSuccess: () => Promise<void> | void,
-) =>
+export const useUserModFormSubmit = (mod: ModData, user: UserData, onSuccess: () => Promise<void> | void) =>
 	useAsyncFn(
 		async (values: UserModFormValues) => {
 			try {
@@ -75,14 +62,9 @@ export const useUserModFormSubmit = (
 				});
 				if (res.status === StatusCodes.OK) {
 					await onSuccess();
-					showSuccessNotification(
-						"Mod updated successfully!",
-						"Your mod has been updated.",
-					);
+					showSuccessNotification("Mod updated successfully!", "Your mod has been updated.");
 				} else {
-					showErrorNotification(
-						new Error(`Error updating user mod with status code ${res.status}`),
-					);
+					showErrorNotification(new Error(`Error updating user mod with status code ${res.status}`));
 				}
 			} catch (e) {
 				showErrorNotification(e);

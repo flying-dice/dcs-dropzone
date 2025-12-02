@@ -1,13 +1,4 @@
-import {
-	Badge,
-	Group,
-	type MantineColor,
-	Paper,
-	Progress,
-	Stack,
-	Text,
-	ThemeIcon,
-} from "@mantine/core";
+import { Badge, Group, type MantineColor, Paper, Progress, Stack, Text, ThemeIcon } from "@mantine/core";
 import { FaFileArchive } from "react-icons/fa";
 import { FaFile } from "react-icons/fa6";
 import { ModReleaseAssetStatusDataStatus } from "../_autogen/daemon_api.ts";
@@ -42,9 +33,7 @@ export function AssetListItem(props: AssetListItemProps) {
 		>
 			<Stack>
 				<Group gap={"xs"}>
-					<ThemeIcon variant={"light"}>
-						{props.isArchive ? <FaFileArchive /> : <FaFile />}
-					</ThemeIcon>
+					<ThemeIcon variant={"light"}>{props.isArchive ? <FaFileArchive /> : <FaFile />}</ThemeIcon>
 					<Text>{props.name}</Text>
 					{props.isArchive && (
 						<Badge variant={"light"} style={{ textTransform: "none" }}>

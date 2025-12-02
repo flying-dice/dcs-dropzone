@@ -23,10 +23,7 @@ export default async function ({
 	}).exec();
 
 	if (!result) {
-		logger.warn(
-			{ releaseId },
-			"User attempted to delete release but it was not found",
-		);
+		logger.warn({ releaseId }, "User attempted to delete release but it was not found");
 		return err("NotFound");
 	}
 

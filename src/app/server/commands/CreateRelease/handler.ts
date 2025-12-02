@@ -1,30 +1,20 @@
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
-import { ModVisibility } from "../../../common/data.ts";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
-import type { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
-import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import type { UserData } from "../schemas/UserData.ts";
+import { err, ok } from "neverthrow";
+import { ModVisibility } from "../../../../common/data.ts";
+import { Mod } from "../../entities/Mod.ts";
+import { ModRelease } from "../../entities/ModRelease.ts";
+import { ModReleaseData } from "../../schemas/ModReleaseData.ts";
+import type { Command, CommandResult } from "./types.ts";
 
-const logger = getLogger("CreateReleaseCommand");
+const logger = getLogger("CreateRelease");
 
-export type CreateReleaseCommand = {
-	user: UserData;
-	modId: string;
-	createData: ModReleaseCreateData;
-};
-export default async function ({
-	user,
-	modId,
-	createData,
-}: CreateReleaseCommand): Promise<Result<ModReleaseData, "NotFound">> {
+export async function handler(command: Command): Promise<CommandResult> {
+	const { user, modId, createData } = command;
 	logger.debug({ userId: user.id, modId, createData }, "start");
 
 	const id = crypto.randomUUID();
 
 	const mod = await Mod.findOne({ id: modId }).exec();
-
 	if (!mod) {
 		logger.warn({ modId }, "Mod not found when creating release");
 		return err("NotFound");

@@ -109,8 +109,7 @@ export interface ModReleaseMissionScriptData {
 	runOn: ModReleaseMissionScriptDataRunOn;
 }
 
-export type ModAndReleaseDataStatus =
-	(typeof ModAndReleaseDataStatus)[keyof typeof ModAndReleaseDataStatus];
+export type ModAndReleaseDataStatus = (typeof ModAndReleaseDataStatus)[keyof typeof ModAndReleaseDataStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ModAndReleaseDataStatus = {
@@ -173,17 +172,13 @@ export type getApiHealthResponseError = getApiHealthResponse503 & {
 	headers: Headers;
 };
 
-export type getApiHealthResponse =
-	| getApiHealthResponseSuccess
-	| getApiHealthResponseError;
+export type getApiHealthResponse = getApiHealthResponseSuccess | getApiHealthResponseError;
 
 export const getGetApiHealthUrl = () => {
 	return `/api/health`;
 };
 
-export const getApiHealth = async (
-	options?: RequestInit,
-): Promise<getApiHealthResponse> => {
+export const getApiHealth = async (options?: RequestInit): Promise<getApiHealthResponse> => {
 	return daemonFetch<getApiHealthResponse>(getGetApiHealthUrl(), {
 		...options,
 		method: "GET",
@@ -198,18 +193,15 @@ export const getGetApiHealthQueryOptions = <
 	TData = Awaited<ReturnType<typeof getApiHealth>>,
 	TError = GetApiHealth503,
 >(options?: {
-	query?: Partial<
-		UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
-	>;
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>>;
 	request?: SecondParameter<typeof daemonFetch>;
 }) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
 	const queryKey = queryOptions?.queryKey ?? getGetApiHealthQueryKey();
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiHealth>>> = ({
-		signal,
-	}) => getApiHealth({ signal, ...requestOptions });
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiHealth>>> = ({ signal }) =>
+		getApiHealth({ signal, ...requestOptions });
 
 	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
 		Awaited<ReturnType<typeof getApiHealth>>,
@@ -218,19 +210,12 @@ export const getGetApiHealthQueryOptions = <
 	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetApiHealthQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getApiHealth>>
->;
+export type GetApiHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getApiHealth>>>;
 export type GetApiHealthQueryError = GetApiHealth503;
 
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
-	TError = GetApiHealth503,
->(
+export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = GetApiHealth503>(
 	options: {
-		query: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
-		> &
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>> &
 			Pick<
 				DefinedInitialDataOptions<
 					Awaited<ReturnType<typeof getApiHealth>>,
@@ -245,14 +230,9 @@ export function useGetApiHealth<
 ): DefinedUseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
-	TError = GetApiHealth503,
->(
+export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = GetApiHealth503>(
 	options?: {
-		query?: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
-		> &
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>> &
 			Pick<
 				UndefinedInitialDataOptions<
 					Awaited<ReturnType<typeof getApiHealth>>,
@@ -267,14 +247,9 @@ export function useGetApiHealth<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
-	TError = GetApiHealth503,
->(
+export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = GetApiHealth503>(
 	options?: {
-		query?: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
-		>;
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>>;
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
@@ -285,14 +260,9 @@ export function useGetApiHealth<
  * @summary Daemon health check
  */
 
-export function useGetApiHealth<
-	TData = Awaited<ReturnType<typeof getApiHealth>>,
-	TError = GetApiHealth503,
->(
+export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = GetApiHealth503>(
 	options?: {
-		query?: Partial<
-			UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>
-		>;
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>>;
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
@@ -301,10 +271,9 @@ export function useGetApiHealth<
 } {
 	const queryOptions = getGetApiHealthQueryOptions(options);
 
-	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-		TData,
-		TError
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -316,10 +285,9 @@ export type addReleaseToDaemonResponse200 = {
 	status: 200;
 };
 
-export type addReleaseToDaemonResponseSuccess =
-	addReleaseToDaemonResponse200 & {
-		headers: Headers;
-	};
+export type addReleaseToDaemonResponseSuccess = addReleaseToDaemonResponse200 & {
+	headers: Headers;
+};
 
 export type addReleaseToDaemonResponse = addReleaseToDaemonResponseSuccess;
 
@@ -339,10 +307,7 @@ export const addReleaseToDaemon = async (
 	});
 };
 
-export const getAddReleaseToDaemonMutationOptions = <
-	TError = unknown,
-	TContext = unknown,
->(options?: {
+export const getAddReleaseToDaemonMutationOptions = <TError = unknown, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof addReleaseToDaemon>>,
 		TError,
@@ -358,17 +323,14 @@ export const getAddReleaseToDaemonMutationOptions = <
 > => {
 	const mutationKey = ["addReleaseToDaemon"];
 	const { mutation: mutationOptions, request: requestOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
+		? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
 			? options
 			: { ...options, mutation: { ...options.mutation, mutationKey } }
 		: { mutation: { mutationKey }, request: undefined };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof addReleaseToDaemon>>,
-		{ data: ModAndReleaseData }
-	> = (props) => {
+	const mutationFn: MutationFunction<Awaited<ReturnType<typeof addReleaseToDaemon>>, { data: ModAndReleaseData }> = (
+		props,
+	) => {
 		const { data } = props ?? {};
 
 		return addReleaseToDaemon(data, requestOptions);
@@ -377,9 +339,7 @@ export const getAddReleaseToDaemonMutationOptions = <
 	return { mutationFn, ...mutationOptions };
 };
 
-export type AddReleaseToDaemonMutationResult = NonNullable<
-	Awaited<ReturnType<typeof addReleaseToDaemon>>
->;
+export type AddReleaseToDaemonMutationResult = NonNullable<Awaited<ReturnType<typeof addReleaseToDaemon>>>;
 export type AddReleaseToDaemonMutationBody = ModAndReleaseData;
 export type AddReleaseToDaemonMutationError = unknown;
 
@@ -394,12 +354,7 @@ export const useAddReleaseToDaemon = <TError = unknown, TContext = unknown>(
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
-): UseMutationResult<
-	Awaited<ReturnType<typeof addReleaseToDaemon>>,
-	TError,
-	{ data: ModAndReleaseData },
-	TContext
-> => {
+): UseMutationResult<Awaited<ReturnType<typeof addReleaseToDaemon>>, TError, { data: ModAndReleaseData }, TContext> => {
 	const mutationOptions = getAddReleaseToDaemonMutationOptions(options);
 
 	return useMutation(mutationOptions, queryClient);
@@ -410,10 +365,9 @@ export type getAllDaemonReleasesResponse200 = {
 	status: 200;
 };
 
-export type getAllDaemonReleasesResponseSuccess =
-	getAllDaemonReleasesResponse200 & {
-		headers: Headers;
-	};
+export type getAllDaemonReleasesResponseSuccess = getAllDaemonReleasesResponse200 & {
+	headers: Headers;
+};
 
 export type getAllDaemonReleasesResponse = getAllDaemonReleasesResponseSuccess;
 
@@ -421,16 +375,11 @@ export const getGetAllDaemonReleasesUrl = () => {
 	return `/api/downloads`;
 };
 
-export const getAllDaemonReleases = async (
-	options?: RequestInit,
-): Promise<getAllDaemonReleasesResponse> => {
-	return daemonFetch<getAllDaemonReleasesResponse>(
-		getGetAllDaemonReleasesUrl(),
-		{
-			...options,
-			method: "GET",
-		},
-	);
+export const getAllDaemonReleases = async (options?: RequestInit): Promise<getAllDaemonReleasesResponse> => {
+	return daemonFetch<getAllDaemonReleasesResponse>(getGetAllDaemonReleasesUrl(), {
+		...options,
+		method: "GET",
+	});
 };
 
 export const getGetAllDaemonReleasesQueryKey = () => {
@@ -441,22 +390,15 @@ export const getGetAllDaemonReleasesQueryOptions = <
 	TData = Awaited<ReturnType<typeof getAllDaemonReleases>>,
 	TError = unknown,
 >(options?: {
-	query?: Partial<
-		UseQueryOptions<
-			Awaited<ReturnType<typeof getAllDaemonReleases>>,
-			TError,
-			TData
-		>
-	>;
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>>;
 	request?: SecondParameter<typeof daemonFetch>;
 }) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
 	const queryKey = queryOptions?.queryKey ?? getGetAllDaemonReleasesQueryKey();
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getAllDaemonReleases>>
-	> = ({ signal }) => getAllDaemonReleases({ signal, ...requestOptions });
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllDaemonReleases>>> = ({ signal }) =>
+		getAllDaemonReleases({ signal, ...requestOptions });
 
 	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
 		Awaited<ReturnType<typeof getAllDaemonReleases>>,
@@ -465,23 +407,12 @@ export const getGetAllDaemonReleasesQueryOptions = <
 	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetAllDaemonReleasesQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getAllDaemonReleases>>
->;
+export type GetAllDaemonReleasesQueryResult = NonNullable<Awaited<ReturnType<typeof getAllDaemonReleases>>>;
 export type GetAllDaemonReleasesQueryError = unknown;
 
-export function useGetAllDaemonReleases<
-	TData = Awaited<ReturnType<typeof getAllDaemonReleases>>,
-	TError = unknown,
->(
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
 	options: {
-		query: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getAllDaemonReleases>>,
-				TError,
-				TData
-			>
-		> &
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>> &
 			Pick<
 				DefinedInitialDataOptions<
 					Awaited<ReturnType<typeof getAllDaemonReleases>>,
@@ -496,18 +427,9 @@ export function useGetAllDaemonReleases<
 ): DefinedUseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetAllDaemonReleases<
-	TData = Awaited<ReturnType<typeof getAllDaemonReleases>>,
-	TError = unknown,
->(
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
 	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getAllDaemonReleases>>,
-				TError,
-				TData
-			>
-		> &
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>> &
 			Pick<
 				UndefinedInitialDataOptions<
 					Awaited<ReturnType<typeof getAllDaemonReleases>>,
@@ -522,18 +444,9 @@ export function useGetAllDaemonReleases<
 ): UseQueryResult<TData, TError> & {
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetAllDaemonReleases<
-	TData = Awaited<ReturnType<typeof getAllDaemonReleases>>,
-	TError = unknown,
->(
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
 	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getAllDaemonReleases>>,
-				TError,
-				TData
-			>
-		>;
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>>;
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
@@ -541,18 +454,9 @@ export function useGetAllDaemonReleases<
 	queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetAllDaemonReleases<
-	TData = Awaited<ReturnType<typeof getAllDaemonReleases>>,
-	TError = unknown,
->(
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
 	options?: {
-		query?: Partial<
-			UseQueryOptions<
-				Awaited<ReturnType<typeof getAllDaemonReleases>>,
-				TError,
-				TData
-			>
-		>;
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>>;
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
@@ -561,10 +465,9 @@ export function useGetAllDaemonReleases<
 } {
 	const queryOptions = getGetAllDaemonReleasesQueryOptions(options);
 
-	const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-		TData,
-		TError
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -576,13 +479,11 @@ export type removeReleaseFromDaemonResponse200 = {
 	status: 200;
 };
 
-export type removeReleaseFromDaemonResponseSuccess =
-	removeReleaseFromDaemonResponse200 & {
-		headers: Headers;
-	};
+export type removeReleaseFromDaemonResponseSuccess = removeReleaseFromDaemonResponse200 & {
+	headers: Headers;
+};
 
-export type removeReleaseFromDaemonResponse =
-	removeReleaseFromDaemonResponseSuccess;
+export type removeReleaseFromDaemonResponse = removeReleaseFromDaemonResponseSuccess;
 
 export const getRemoveReleaseFromDaemonUrl = (releaseId: string) => {
 	return `/api/downloads/${releaseId}`;
@@ -592,19 +493,13 @@ export const removeReleaseFromDaemon = async (
 	releaseId: string,
 	options?: RequestInit,
 ): Promise<removeReleaseFromDaemonResponse> => {
-	return daemonFetch<removeReleaseFromDaemonResponse>(
-		getRemoveReleaseFromDaemonUrl(releaseId),
-		{
-			...options,
-			method: "DELETE",
-		},
-	);
+	return daemonFetch<removeReleaseFromDaemonResponse>(getRemoveReleaseFromDaemonUrl(releaseId), {
+		...options,
+		method: "DELETE",
+	});
 };
 
-export const getRemoveReleaseFromDaemonMutationOptions = <
-	TError = unknown,
-	TContext = unknown,
->(options?: {
+export const getRemoveReleaseFromDaemonMutationOptions = <TError = unknown, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof removeReleaseFromDaemon>>,
 		TError,
@@ -620,17 +515,14 @@ export const getRemoveReleaseFromDaemonMutationOptions = <
 > => {
 	const mutationKey = ["removeReleaseFromDaemon"];
 	const { mutation: mutationOptions, request: requestOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
+		? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
 			? options
 			: { ...options, mutation: { ...options.mutation, mutationKey } }
 		: { mutation: { mutationKey }, request: undefined };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof removeReleaseFromDaemon>>,
-		{ releaseId: string }
-	> = (props) => {
+	const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeReleaseFromDaemon>>, { releaseId: string }> = (
+		props,
+	) => {
 		const { releaseId } = props ?? {};
 
 		return removeReleaseFromDaemon(releaseId, requestOptions);
@@ -639,16 +531,11 @@ export const getRemoveReleaseFromDaemonMutationOptions = <
 	return { mutationFn, ...mutationOptions };
 };
 
-export type RemoveReleaseFromDaemonMutationResult = NonNullable<
-	Awaited<ReturnType<typeof removeReleaseFromDaemon>>
->;
+export type RemoveReleaseFromDaemonMutationResult = NonNullable<Awaited<ReturnType<typeof removeReleaseFromDaemon>>>;
 
 export type RemoveReleaseFromDaemonMutationError = unknown;
 
-export const useRemoveReleaseFromDaemon = <
-	TError = unknown,
-	TContext = unknown,
->(
+export const useRemoveReleaseFromDaemon = <TError = unknown, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof removeReleaseFromDaemon>>,
@@ -659,12 +546,7 @@ export const useRemoveReleaseFromDaemon = <
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
-): UseMutationResult<
-	Awaited<ReturnType<typeof removeReleaseFromDaemon>>,
-	TError,
-	{ releaseId: string },
-	TContext
-> => {
+): UseMutationResult<Awaited<ReturnType<typeof removeReleaseFromDaemon>>, TError, { releaseId: string }, TContext> => {
 	const mutationOptions = getRemoveReleaseFromDaemonMutationOptions(options);
 
 	return useMutation(mutationOptions, queryClient);
@@ -688,46 +570,25 @@ export const getEnableReleaseUrl = (releaseId: string) => {
 	return `/api/toggle/${releaseId}/enable`;
 };
 
-export const enableRelease = async (
-	releaseId: string,
-	options?: RequestInit,
-): Promise<enableReleaseResponse> => {
+export const enableRelease = async (releaseId: string, options?: RequestInit): Promise<enableReleaseResponse> => {
 	return daemonFetch<enableReleaseResponse>(getEnableReleaseUrl(releaseId), {
 		...options,
 		method: "POST",
 	});
 };
 
-export const getEnableReleaseMutationOptions = <
-	TError = unknown,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof enableRelease>>,
-		TError,
-		{ releaseId: string },
-		TContext
-	>;
+export const getEnableReleaseMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+	mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
 	request?: SecondParameter<typeof daemonFetch>;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof enableRelease>>,
-	TError,
-	{ releaseId: string },
-	TContext
-> => {
+}): UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext> => {
 	const mutationKey = ["enableRelease"];
 	const { mutation: mutationOptions, request: requestOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
+		? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
 			? options
 			: { ...options, mutation: { ...options.mutation, mutationKey } }
 		: { mutation: { mutationKey }, request: undefined };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof enableRelease>>,
-		{ releaseId: string }
-	> = (props) => {
+	const mutationFn: MutationFunction<Awaited<ReturnType<typeof enableRelease>>, { releaseId: string }> = (props) => {
 		const { releaseId } = props ?? {};
 
 		return enableRelease(releaseId, requestOptions);
@@ -736,9 +597,7 @@ export const getEnableReleaseMutationOptions = <
 	return { mutationFn, ...mutationOptions };
 };
 
-export type EnableReleaseMutationResult = NonNullable<
-	Awaited<ReturnType<typeof enableRelease>>
->;
+export type EnableReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof enableRelease>>>;
 
 export type EnableReleaseMutationError = unknown;
 
@@ -747,21 +606,11 @@ export type EnableReleaseMutationError = unknown;
  */
 export const useEnableRelease = <TError = unknown, TContext = unknown>(
 	options?: {
-		mutation?: UseMutationOptions<
-			Awaited<ReturnType<typeof enableRelease>>,
-			TError,
-			{ releaseId: string },
-			TContext
-		>;
+		mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
-): UseMutationResult<
-	Awaited<ReturnType<typeof enableRelease>>,
-	TError,
-	{ releaseId: string },
-	TContext
-> => {
+): UseMutationResult<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext> => {
 	const mutationOptions = getEnableReleaseMutationOptions(options);
 
 	return useMutation(mutationOptions, queryClient);
@@ -785,46 +634,25 @@ export const getDisableReleaseUrl = (releaseId: string) => {
 	return `/api/toggle/${releaseId}/disable`;
 };
 
-export const disableRelease = async (
-	releaseId: string,
-	options?: RequestInit,
-): Promise<disableReleaseResponse> => {
+export const disableRelease = async (releaseId: string, options?: RequestInit): Promise<disableReleaseResponse> => {
 	return daemonFetch<disableReleaseResponse>(getDisableReleaseUrl(releaseId), {
 		...options,
 		method: "POST",
 	});
 };
 
-export const getDisableReleaseMutationOptions = <
-	TError = unknown,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof disableRelease>>,
-		TError,
-		{ releaseId: string },
-		TContext
-	>;
+export const getDisableReleaseMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+	mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
 	request?: SecondParameter<typeof daemonFetch>;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof disableRelease>>,
-	TError,
-	{ releaseId: string },
-	TContext
-> => {
+}): UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext> => {
 	const mutationKey = ["disableRelease"];
 	const { mutation: mutationOptions, request: requestOptions } = options
-		? options.mutation &&
-			"mutationKey" in options.mutation &&
-			options.mutation.mutationKey
+		? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
 			? options
 			: { ...options, mutation: { ...options.mutation, mutationKey } }
 		: { mutation: { mutationKey }, request: undefined };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof disableRelease>>,
-		{ releaseId: string }
-	> = (props) => {
+	const mutationFn: MutationFunction<Awaited<ReturnType<typeof disableRelease>>, { releaseId: string }> = (props) => {
 		const { releaseId } = props ?? {};
 
 		return disableRelease(releaseId, requestOptions);
@@ -833,9 +661,7 @@ export const getDisableReleaseMutationOptions = <
 	return { mutationFn, ...mutationOptions };
 };
 
-export type DisableReleaseMutationResult = NonNullable<
-	Awaited<ReturnType<typeof disableRelease>>
->;
+export type DisableReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof disableRelease>>>;
 
 export type DisableReleaseMutationError = unknown;
 
@@ -844,21 +670,11 @@ export type DisableReleaseMutationError = unknown;
  */
 export const useDisableRelease = <TError = unknown, TContext = unknown>(
 	options?: {
-		mutation?: UseMutationOptions<
-			Awaited<ReturnType<typeof disableRelease>>,
-			TError,
-			{ releaseId: string },
-			TContext
-		>;
+		mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
 		request?: SecondParameter<typeof daemonFetch>;
 	},
 	queryClient?: QueryClient,
-): UseMutationResult<
-	Awaited<ReturnType<typeof disableRelease>>,
-	TError,
-	{ releaseId: string },
-	TContext
-> => {
+): UseMutationResult<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext> => {
 	const mutationOptions = getDisableReleaseMutationOptions(options);
 
 	return useMutation(mutationOptions, queryClient);

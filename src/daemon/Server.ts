@@ -6,10 +6,7 @@ import { openAPIRouteHandler } from "hono-openapi";
 import downloads from "./api/downloads.ts";
 import health from "./api/health.ts";
 import toggle from "./api/toggle.ts";
-import {
-	type AppContext,
-	appContextMiddleware,
-} from "./middleware/appContext.ts";
+import { type AppContext, appContextMiddleware } from "./middleware/appContext.ts";
 import { requestResponseLogger } from "./middleware/requestResponseLogger.ts";
 
 export function createServer(deps: AppContext["Variables"]): Hono<AppContext> {

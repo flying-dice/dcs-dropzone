@@ -14,9 +14,7 @@ export const ModData = z
 		screenshots: z.array(z.string()),
 		thumbnail: z.string(),
 		visibility: z.enum(ModVisibility),
-		maintainers: z
-			.array(z.string())
-			.min(1, "A mod must have at least one maintainer."),
+		maintainers: z.array(z.string()).min(1, "A mod must have at least one maintainer."),
 		downloadsCount: z.number(),
 		ratingsCount: z.number(),
 		averageRating: z.number(),

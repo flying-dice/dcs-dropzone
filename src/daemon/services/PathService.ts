@@ -35,10 +35,7 @@ export class PathService {
 		return secureJoin(this.getReleaseWorkingDirectory(releaseId), path);
 	}
 
-	getAbsoluteSymbolicLinkDestPath(
-		destRoot: SymbolicLinkDestRoot,
-		path: string,
-	): string {
+	getAbsoluteSymbolicLinkDestPath(destRoot: SymbolicLinkDestRoot, path: string): string {
 		return secureJoin(this.getDestRootPath(destRoot), path);
 	}
 }

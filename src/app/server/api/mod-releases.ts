@@ -4,8 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import { findPublicModReleaseById } from "../queries/FindPublicModReleaseById.ts";
-import { findPublicModReleases } from "../queries/FindPublicModReleases.ts";
+import findPublicModReleaseById from "../queries/FindPublicModReleaseById.ts";
+import findPublicModReleases from "../queries/FindPublicModReleases.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
 

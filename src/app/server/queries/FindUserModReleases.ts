@@ -11,27 +11,19 @@ export type FindUserModReleasesCommand = {
 	modId: string;
 	user: UserData;
 };
-export async function findUserModReleases({
+export default async function ({
 	modId,
 	user,
 }: FindUserModReleasesCommand): Promise<Result<ModReleaseData[], "NotFound">> {
 	logger.debug({ userId: user.id, modId }, "findUserModReleases start");
 
-	const mod = await Mod.findOne({ id: modId, maintainers: user.id })
-		.lean()
-		.exec();
+	const mod = await Mod.findOne({ id: modId, maintainers: user.id }).lean().exec();
 	if (!mod) {
-		logger.warn(
-			{ userId: user.id, modId },
-			"User attempted to access releases for a mod they do not own",
-		);
+		logger.warn({ userId: user.id, modId }, "User attempted to access releases for a mod they do not own");
 		return err("NotFound");
 	}
 
-	const releases = await ModRelease.find({ mod_id: modId })
-		.sort({ createdAt: -1 })
-		.lean()
-		.exec();
+	const releases = await ModRelease.find({ mod_id: modId }).sort({ createdAt: -1 }).lean().exec();
 
 	return ok(ModReleaseData.array().parse(releases));
 }

@@ -66,9 +66,7 @@ export class AppDatabase {
 		for (const migration of this.migrations) {
 			this.logger.debug(`Checking migration ${migration.filename}`);
 			if (this.isMigrationApplied(migration)) {
-				this.logger.debug(
-					`Migration ${migration.filename} already applied, skipping`,
-				);
+				this.logger.debug(`Migration ${migration.filename} already applied, skipping`);
 				continue;
 			}
 			applyMigration(migration);
@@ -99,10 +97,7 @@ export class AppDatabase {
 	 * @param migrations {Record<string, string>} - The migrations as a record of filename to SQL.
 	 * @returns {AppDatabase} - The AppDatabase instance.
 	 */
-	static withMigrations(
-		filename: string,
-		migrations: Record<string, string>,
-	): AppDatabase {
+	static withMigrations(filename: string, migrations: Record<string, string>): AppDatabase {
 		const _migrations: AppDatabaseMigration[] = Object.entries(migrations).map(
 			([filename, sql]) => new AppDatabaseMigration(filename, sql),
 		);

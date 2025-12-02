@@ -1,11 +1,4 @@
-import {
-	AppShell,
-	Button,
-	Container,
-	Group,
-	Stack,
-	useComputedColorScheme,
-} from "@mantine/core";
+import { AppShell, Button, Container, Group, Stack, useComputedColorScheme } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { StatusCodes } from "http-status-codes";
 import { FaPlus } from "react-icons/fa";
@@ -36,10 +29,7 @@ export function UserModsPage(_: UserModsPageProps) {
 	});
 
 	const handleNewMod = () => {
-		openNewModModal(
-			t("CREATE_NEW_MOD"),
-			<NewModForm onSubmit={handleNewModSubmit} onCancel={modals.closeAll} />,
-		);
+		openNewModModal(t("CREATE_NEW_MOD"), <NewModForm onSubmit={handleNewModSubmit} onCancel={modals.closeAll} />);
 	};
 
 	return (
@@ -56,31 +46,19 @@ export function UserModsPage(_: UserModsPageProps) {
 						<StatCard
 							icon={AppIcons.Mods}
 							label={t("PUBLISHED_MODS")}
-							value={
-								mods.data?.status === StatusCodes.OK
-									? mods.data.data.meta.published
-									: "-"
-							}
+							value={mods.data?.status === StatusCodes.OK ? mods.data.data.meta.published : "-"}
 						/>
 						<StatCard
 							icon={AppIcons.Downloaded}
 							iconColor={"grape"}
 							label={t("TOTAL_DOWNLOADS")}
-							value={
-								mods.data?.status === StatusCodes.OK
-									? mods.data.data.meta.totalDownloads
-									: "-"
-							}
+							value={mods.data?.status === StatusCodes.OK ? mods.data.data.meta.totalDownloads : "-"}
 						/>
 						<StatCard
 							icon={AppIcons.Ratings}
 							iconColor={"green"}
 							label={t("AVERAGE_RATING")}
-							value={
-								mods.data?.status === StatusCodes.OK
-									? mods.data.data.meta.averageRating.toFixed(2)
-									: "-"
-							}
+							value={mods.data?.status === StatusCodes.OK ? mods.data.data.meta.averageRating.toFixed(2) : "-"}
 						/>
 					</Group>
 

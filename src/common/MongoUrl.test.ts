@@ -10,9 +10,7 @@ it("parses a valid MongoDB URI correctly", () => {
 });
 
 it("throws an error for an invalid MongoDB URI", () => {
-	expect(() => new MongoUrl("invalid-uri")).toThrow(
-		"Invalid MongoDB URI: invalid-uri",
-	);
+	expect(() => new MongoUrl("invalid-uri")).toThrow("Invalid MongoDB URI: invalid-uri");
 });
 
 it("identifies an in-memory database URI", () => {

@@ -12,25 +12,19 @@ describe("secureJoin", () => {
 	test("throws an error when child escapes root using '..'", () => {
 		const root = "/home/user";
 		const child = "../etc/passwd";
-		expect(() => secureJoin(root, child)).toThrow(
-			"Resolved path escapes root: ../etc/passwd",
-		);
+		expect(() => secureJoin(root, child)).toThrow("Resolved path escapes root: ../etc/passwd");
 	});
 
 	test("throws an error when child escapes root using absolute path", () => {
 		const root = "/home/user";
 		const child = "/etc/passwd";
-		expect(() => secureJoin(root, child)).toThrow(
-			"Resolved path escapes root: /etc/passwd",
-		);
+		expect(() => secureJoin(root, child)).toThrow("Resolved path escapes root: /etc/passwd");
 	});
 
 	test("throws an error when child escapes root using Windows drive letter", () => {
 		const root = "C:\\home\\user";
 		const child = "D:\\other\\file.txt";
-		expect(() => secureJoin(root, child)).toThrow(
-			"Resolved path escapes root: D:\\other\\file.txt",
-		);
+		expect(() => secureJoin(root, child)).toThrow("Resolved path escapes root: D:\\other\\file.txt");
 	});
 
 	test("returns the resolved path when child is the root itself", () => {

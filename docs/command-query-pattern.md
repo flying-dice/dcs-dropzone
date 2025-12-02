@@ -9,45 +9,67 @@ This document explains how the server-side code under `src/app/server` uses the 
 This separation avoids service classes that simply orchestrate between the HTTP handler and the ORM.
 
 ## Folder layout
+We adopt one-folder-per-operation.
 ```
 src/app/server/
-  commands/   # write operations (side effects)
-  queries/    # read operations (no side effects)
-  entities/   # persistence models
-  schemas/    # Zod DTOs for IO contracts
-  middleware/ # cross-cutting (auth, logging)
-  services/   # narrowly-scoped helpers where needed
+  commands/
+    CreateMod/
+      handler.ts        # the command implementation (pure function)
+      types.ts          # Params/Result types (and error types if needed)
+      handler.test.ts   # tests for the command (optional)
+      index.ts          # re-exports for concise imports (optional)
+    UpdateRelease/
+      handler.ts
+      contract.ts
+      handler.test.ts
+    ...
+  queries/
+    FindUserModById/
+      handler.ts        # the query implementation (no side-effects)
+      types.ts          # Params/Result types
+      handler.test.ts
+      index.ts
+    GetAllTags/
+      handler.ts
+      contract.ts
+  entities/             # persistence models
+  schemas/              # shared DTOs (domain-level) if needed
+  middleware/           # cross-cutting (auth, logging)
+  services/             # narrowly-scoped helpers where needed
 ```
 
 ## Design principles
-- Single operation per file. Export one default function (the command/query) and its typed props.
-- Pure inputs/outputs. Inputs and outputs are validated using Zod schemas (`schemas/`).
+- Single operation per folder. The folder contains a `handler.ts` (logic) and `types.ts` (Params/Result). Optionally `index.ts` re-exports typed `execute`.
+- Pure inputs/outputs. Inputs and outputs are described using `types.ts`; validate at the edges (API) with Zod as needed.
 - No hidden state. Dependencies should be passed in via parameters where needed.
 - Logging at boundaries. Each command/query logs `start` and success/failure with enough context for tracing.
 - Errors as data. Prefer `neverthrow` `Result<T, E>` or thrown domain errors that are handled at the API layer.
-- Tests near code. Each command/query may have a sibling `*.test.ts`.
+- Tests near code. Each command/query may have a sibling `handler.test.ts`.
 
 ## Commands
-- Shape: `export type XCommand = { /* inputs */ }; export default async function (props: XCommand): Promise<OutDTO> { }`
 - Do: authorization checks, input validation, idempotency safeguards, write to DB, emit events/metrics.
-- Don’t: return partially-saved data; either succeed and return the final DTO or surface a domain error.
+- Don’t: return partially saved data; either succeed and return the final DTO or surface a domain error.
 
-Example: `commands/CreateMod.ts`
-- Validates inputs via `ModCreateData` and assembles a `ModData` DTO.
-- Persists as a single unit and returns the validated DTO.
+Example: `commands/CreateMod/`
+- `types.ts` exports `Command/Params` and `Result` types.
+- `handler.ts` exports `execute(params: Params): Promise<Result>`; API layer should Zod-validate inbound requests before calling execute.
+- Keep side-effects inside the command and return the final DTO.
 
 ## Queries
-- Shape: `export type XQuery = { /* inputs */ }; export default async function (props: XQuery): Promise<Result<DTO, E>> { }`
 - Do: filtering, paging, projections to DTOs.
 - Don’t: mutate state.
 
-Example: `queries/FindUserModById.ts`
-- Authorizes by `maintainers: user.id` criteria.
+Shape:
+- `queries/FindUserModById/types.ts` defines `Params` and `Result` (often `neverthrow`-wrapped for NotFound).
+- `queries/FindUserModById/handler.ts` implements the read and returns the typed `Result`.
+
+Example: `queries/FindUserModById/`
+- Authorizes by `maintainers: user.id` criterion.
 - Returns a `Result<ModData, "NotFound">`.
 
 ## Validation and DTOs
-- All external IO (request JSON, DB reads) flows through Zod schemas under `schemas/` (e.g., `ModData`, `UserData`).
-- Commands and Querieis typically return DTOs defined in `schemas/`.
+- Prefer co-located `types.ts` per operation for request/response shapes.
+- Use shared `schemas/` (Zod) for parsing/validating DTOs at the API boundary; commands/queries consume typed data.
 
 ## Error handling
 - Known/Checked Exceptions are wrapped in a `Result` utilising the `neverthrow` library.
@@ -64,29 +86,23 @@ Example: `queries/FindUserModById.ts`
  
 ## API layer integration
 - API handlers should:
-  1) Validate/parse inputs.
-  2) Call a command or query.
+  1) Validate/parse inputs using Zod DTOs in `schemas/` (or an operation-specific validator if present).
+  2) Call `execute` from the operation's `handler.ts` (or its `index.ts` re-export) with typed `types.ts` Params.
   3) Map `Result` or DTO to HTTP.
 - Avoid putting business logic inside API handlers.
 
 ## Testing guidance
-- Prefer Tests that span a useful slice, less focus on unit tests when testing the Mid Layer.
+- Prefer tests that exercise the operation end‑to‑end at the module boundary.
+- Place tests next to the operation: `commands/VerbNoun/handler.test.ts`, `queries/VerbNoun/handler.test.ts`.
 - Assertions focus on:
   - Correct DTOs returned (or `Result` values)
   - Correct authorization/filtering
-  - The Database Layer operations execute as expected, should use MongoMemoryServer rather than mocking i.e.
-
-```typescript
-// See [CreateMod.test.ts](../src/app/server/commands/CreateMod.test.ts)
-    beforeEach(async () => {
-        const mongod = await MongoMemoryServer.create();
-        await mongoose.connect(mongod.getUri());
-    });
-```
+  - DB effects for commands (use an in‑memory DB like MongoMemoryServer or a stubbed repo)
 
 ## Conventions summary
-- One operation per file.
-- Clear naming: `VerbNoun.ts` (CreateMod, UpdateRelease, FindUserModById).
-- Zod at edges, `Result` for expected absence.
+- One operation per folder (VerbNoun/).
+- Files: `handler.ts`, `types.ts`, optional `index.ts`, and `handler.test.ts`.
+- Clear naming: `commands/CreateMod`, `queries/FindUserModById`.
+- Zod at edges (API layer), `Result` for expected absence.
 - No shared mutable state; inject dependencies.
 - Keep HTTP handlers thin; keep logic in commands/queries.

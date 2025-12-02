@@ -30,8 +30,7 @@ router.get(
 			"Handles the OAuth callback from the selected provider and establishes a user session via a signed cookie.",
 		responses: {
 			[StatusCodes.MOVED_TEMPORARILY]: {
-				description:
-					"Redirects the user to the homepage after successfully establishing a session.",
+				description: "Redirects the user to the homepage after successfully establishing a session.",
 			},
 		},
 	}),
@@ -46,27 +45,15 @@ router.get(
 
 		const authResult = await authService.handleCallback(code, state);
 
-		logger.debug(
-			{ provider, userId: authResult.id, username: authResult.username },
-			"Auth callback success",
-		);
+		logger.debug({ provider, userId: authResult.id, username: authResult.username }, "Auth callback success");
 
 		const userData = await handleAuthResult({ authResult });
 
-		logger.debug(
-			{ userId: authResult.id },
-			"Session token issued; setting cookie",
-		);
+		logger.debug({ userId: authResult.id }, "Session token issued; setting cookie");
 
-		await setSignedCookie(
-			c,
-			appConfig.userCookieName,
-			userData.id,
-			appConfig.userCookieSecret,
-			{
-				maxAge: appConfig.userCookieMaxAge,
-			},
-		);
+		await setSignedCookie(c, appConfig.userCookieName, userData.id, appConfig.userCookieSecret, {
+			maxAge: appConfig.userCookieMaxAge,
+		});
 
 		logger.debug(
 			{
@@ -89,8 +76,7 @@ router.get(
 			"Initiates the OAuth web flow for the selected provider and redirects the user to the provider's authorization page.",
 		responses: {
 			[StatusCodes.MOVED_TEMPORARILY]: {
-				description:
-					"Redirects the user agent to the provider authorization URL.",
+				description: "Redirects the user agent to the provider authorization URL.",
 			},
 		},
 	}),
@@ -109,8 +95,7 @@ router.get(
 		tags: ["Auth"],
 		operationId: "getAuthenticatedUser",
 		summary: "Get authenticated user",
-		description:
-			"Returns the authenticated user's profile derived from the session cookie.",
+		description: "Returns the authenticated user's profile derived from the session cookie.",
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.OK]: UserData,
@@ -120,10 +105,7 @@ router.get(
 	cookieAuth(),
 	(c) => {
 		const user = c.var.getUser();
-		logger.debug(
-			{ userId: user.id, username: user.username },
-			"Returning authenticated user",
-		);
+		logger.debug({ userId: user.id, username: user.username }, "Returning authenticated user");
 		return c.json(user);
 	},
 );
@@ -134,16 +116,14 @@ router.get(
 		operationId: "logout",
 		tags: ["Auth"],
 		summary: "Logout",
-		description:
-			"Clears the authentication cookie and redirects to the homepage.",
+		description: "Clears the authentication cookie and redirects to the homepage.",
 		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.MOVED_TEMPORARILY]: {
 				description: "Redirects the user to the homepage after logout.",
 			},
 			[StatusCodes.UNAUTHORIZED]: {
-				description:
-					"If the session is missing or invalid, the cookie is simply not present; redirect still occurs.",
+				description: "If the session is missing or invalid, the cookie is simply not present; redirect still occurs.",
 			},
 		},
 	}),

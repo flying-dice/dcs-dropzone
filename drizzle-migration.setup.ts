@@ -12,10 +12,7 @@ const outFolder = resolve("./src/daemon/database");
 const outFile = join(outFolder, "db-ddl.ts");
 
 for await (const path of glob.scan({ absolute: true, onlyFiles: true })) {
-	const relativePath = relative(outFolder, path).replaceAll(
-		win32.sep,
-		posix.sep,
-	);
+	const relativePath = relative(outFolder, path).replaceAll(win32.sep, posix.sep);
 
 	files.push(relativePath);
 }
@@ -25,9 +22,7 @@ const exports: string[] = [];
 
 for (const file of files) {
 	const varName = `_${toSnakeCase(basename(file))}`;
-	imports.push(
-		`// @ts-expect-error\nimport ${varName} from "./${file}" with { type: "text" };`,
-	);
+	imports.push(`// @ts-expect-error\nimport ${varName} from "./${file}" with { type: "text" };`);
 	exports.push(varName);
 }
 

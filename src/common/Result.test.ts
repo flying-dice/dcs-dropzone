@@ -3,16 +3,7 @@
 
 import { describe, expect, it } from "bun:test";
 import { z } from "zod";
-import {
-	err,
-	fromPromise,
-	fromThrowable,
-	isErr,
-	isOk,
-	match,
-	ok,
-	type Result,
-} from "./Result";
+import { err, fromPromise, fromThrowable, isErr, isOk, match, ok, type Result } from "./Result";
 
 describe("Result core primitives", () => {
 	describe("ok()", () => {
@@ -104,8 +95,7 @@ describe("Result core primitives", () => {
 			type ValidationError = { kind: "validation"; field: string };
 
 			const parseError: ParseError = { kind: "parse", error: "invalid json" };
-			const result: Result<number, ParseError | ValidationError> =
-				err(parseError);
+			const result: Result<number, ParseError | ValidationError> = err(parseError);
 
 			if (isErr(result)) {
 				const [, error] = result;
@@ -286,10 +276,7 @@ describe("Documenting example: JSON parsing + validation", () => {
 
 	// JSON parse + Zod validation:
 	// error is either a parse error or a validation error
-	function parseJsonWithSchema<T>(
-		input: string,
-		schema: z.ZodSchema<T>,
-	): Result<T, ParseError | ValidationError> {
+	function parseJsonWithSchema<T>(input: string, schema: z.ZodSchema<T>): Result<T, ParseError | ValidationError> {
 		const [value, parseErr] = parseJson(input);
 
 		if (parseErr) {
@@ -361,9 +348,7 @@ describe("Documenting example: JSON parsing + validation", () => {
 
 			expect(error.kind).toBe("validation");
 			expect(error.error).toBeInstanceOf(z.ZodError);
-			expect(
-				error.kind === "validation" && error.error.issues.length,
-			).toBeGreaterThan(0);
+			expect(error.kind === "validation" && error.error.issues.length).toBeGreaterThan(0);
 		}
 	});
 

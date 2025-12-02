@@ -1,9 +1,4 @@
-import {
-	AspectRatio,
-	type AspectRatioProps,
-	Image,
-	type ImageProps,
-} from "@mantine/core";
+import { AspectRatio, type AspectRatioProps, Image, type ImageProps } from "@mantine/core";
 
 export type ModImageProps = {
 	src: string;
@@ -21,13 +16,7 @@ const aspectRatio = 300 / 190;
 
 export function ModImage(props: ModImageProps) {
 	return (
-		<AspectRatio
-			{...props.props?.aspectRatio}
-			ratio={aspectRatio}
-			w={props.w}
-			h={props.h}
-			flex={"auto"}
-		>
+		<AspectRatio {...props.props?.aspectRatio} ratio={aspectRatio} w={props.w} h={props.h} flex={"auto"}>
 			<Image {...props.props?.image} src={props.src} radius={props.radius} />
 		</AspectRatio>
 	);

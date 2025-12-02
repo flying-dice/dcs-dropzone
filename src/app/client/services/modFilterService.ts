@@ -26,9 +26,7 @@ export const modFilterService = {
 	/**
 	 * Transform maintainer objects into select options
 	 */
-	transformMaintainers: (
-		maintainers: Array<{ id: string; username: string }>,
-	): SelectOption[] => {
+	transformMaintainers: (maintainers: Array<{ id: string; username: string }>): SelectOption[] => {
 		return maintainers.map((maintainer) => ({
 			value: maintainer.id,
 			label: maintainer.username,

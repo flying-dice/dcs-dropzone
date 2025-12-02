@@ -1,15 +1,4 @@
-import {
-	Button,
-	Card,
-	Group,
-	Paper,
-	Select,
-	SimpleGrid,
-	Stack,
-	Text,
-	TextInput,
-	ThemeIcon,
-} from "@mantine/core";
+import { Button, Card, Group, Paper, Select, SimpleGrid, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
@@ -19,21 +8,15 @@ import { ModReleaseSymbolicLinkDataDestRoot } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
 import { PathWithRoot } from "../../components/PathWithRoot.tsx";
-import {
-	type TranslateFunction,
-	useAppTranslation,
-} from "../../i18n/useAppTranslation.ts";
+import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { isRelativePath } from "../../utils/isRelativePath.ts";
 import { SymbolicLinkDestRoot, type UserModReleaseForm } from "./form.ts";
 
 const symbolicLinkFormSchema = z.object({
 	src: z.string().min(1, "Source path is required"),
-	dest: z
-		.string()
-		.min(1, "Destination path is required")
-		.refine(isRelativePath, {
-			message: "Destination path must be a relative path from the root",
-		}),
+	dest: z.string().min(1, "Destination path is required").refine(isRelativePath, {
+		message: "Destination path must be a relative path from the root",
+	}),
 	destRoot: z.enum(ModReleaseSymbolicLinkDataDestRoot),
 });
 type SymbolicLinkFormValues = z.infer<typeof symbolicLinkFormSchema>;
@@ -126,11 +109,7 @@ function handleAddSymbolicLink(t: TranslateFunction, form: UserModReleaseForm) {
 	});
 }
 
-function handleEditSymbolicLink(
-	t: TranslateFunction,
-	form: UserModReleaseForm,
-	index: number,
-) {
+function handleEditSymbolicLink(t: TranslateFunction, form: UserModReleaseForm, index: number) {
 	openModal({
 		title: t("EDIT_SYMBOLIC_LINK"),
 		size: "xl",
@@ -153,11 +132,7 @@ function handleEditSymbolicLink(
 function _NoSymbolicLinks() {
 	const { t } = useAppTranslation();
 	return (
-		<EmptyState
-			title={t("NO_SYMBOLIC_LINKS_TITLE")}
-			description={t("NO_SYMBOLIC_LINKS_DESCRIPTION")}
-			icon={FaLink}
-		/>
+		<EmptyState title={t("NO_SYMBOLIC_LINKS_TITLE")} description={t("NO_SYMBOLIC_LINKS_DESCRIPTION")} icon={FaLink} />
 	);
 }
 
@@ -171,17 +146,10 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 						{t("SYMBOLIC_LINKS_TITLE")}
 					</Text>
 					<Group gap={"xs"}>
-						<Button
-							size={"xs"}
-							variant={"light"}
-							onClick={() => handleAddSymbolicLink(t, props.form)}
-						>
+						<Button size={"xs"} variant={"light"} onClick={() => handleAddSymbolicLink(t, props.form)}>
 							{t("ADD_SYMBOLIC_LINK")}
 						</Button>
-						<Help
-							title={<Text fw={"bold"}>{t("SYMBOLIC_LINKS_TITLE")}</Text>}
-							markdown={t("SYMBOLIC_LINK_HELP_MD")}
-						/>
+						<Help title={<Text fw={"bold"}>{t("SYMBOLIC_LINKS_TITLE")}</Text>} markdown={t("SYMBOLIC_LINK_HELP_MD")} />
 					</Group>
 				</Group>
 				{props.form.values.symbolicLinks.length === 0 && <_NoSymbolicLinks />}

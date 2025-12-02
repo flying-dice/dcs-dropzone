@@ -219,10 +219,7 @@ export function match<T, E, TR, ER>(
  * @param errorMapper {(e: unknown) => E} [errorMapper] - Optional function to map the thrown error to type E.
  * @returns {Result<T, E>} A Result containing the function's return value or the thrown error.
  */
-export function fromThrowable<T, E = unknown>(
-	fn: () => T,
-	errorMapper?: (e: unknown) => E,
-): Result<T, E> {
+export function fromThrowable<T, E = unknown>(fn: () => T, errorMapper?: (e: unknown) => E): Result<T, E> {
 	try {
 		return ok<T, E>(fn());
 	} catch (e) {
@@ -241,9 +238,7 @@ export function fromThrowable<T, E = unknown>(
  * @param {Promise<T>} p - The Promise to convert.
  * @returns {Promise<Result<T, E>>} A Promise containing a Result.
  */
-export async function fromPromise<T, E = unknown>(
-	p: Promise<T>,
-): Promise<Result<T, E>> {
+export async function fromPromise<T, E = unknown>(p: Promise<T>): Promise<Result<T, E>> {
 	try {
 		const value = await p;
 		return ok<T, E>(value);

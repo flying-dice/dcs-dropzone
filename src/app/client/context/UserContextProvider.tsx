@@ -18,8 +18,7 @@ export function UserContextProvider({ children }: { children: ReactNode }) {
 			value={{
 				login: handleLogin,
 				logout: handleLogout,
-				user:
-					user.data?.status === 200 && user.data.data ? user.data.data : null,
+				user: user.data?.status === 200 && user.data.data ? user.data.data : null,
 			}}
 		>
 			{children}

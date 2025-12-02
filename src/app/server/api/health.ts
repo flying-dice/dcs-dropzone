@@ -28,10 +28,7 @@ router.get(
 			return c.body(null, StatusCodes.OK);
 		} catch (error) {
 			logger.warn({ error: String(error) }, "Health check ping failure");
-			return c.json(
-				ErrorData.parse({ error: String(error) }),
-				StatusCodes.SERVICE_UNAVAILABLE,
-			);
+			return c.json(ErrorData.parse({ error: String(error) }), StatusCodes.SERVICE_UNAVAILABLE);
 		}
 	},
 );

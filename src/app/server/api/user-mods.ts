@@ -4,12 +4,12 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import createMod from "../commands/CreateMod.ts";
+import createMod from "../commands/CreateMod/index.ts";
 import deleteMod from "../commands/DeleteMod.ts";
 import updateMod from "../commands/UpdateMod.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { findAllUserMods } from "../queries/FindAllUserMods.ts";
-import { findUserModById } from "../queries/FindUserModById.ts";
+import findAllUserMods from "../queries/FindAllUserMods.ts";
+import findUserModById from "../queries/FindUserModById.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModCreateData } from "../schemas/ModCreateData.ts";
 import { ModData } from "../schemas/ModData.ts";
@@ -30,8 +30,7 @@ router.get(
 	describeJsonRoute({
 		operationId: "getUserMods",
 		summary: "Get user mods",
-		description:
-			"Retrieves a list of all mods owned by the authenticated user.",
+		description: "Retrieves a list of all mods owned by the authenticated user.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -63,8 +62,7 @@ router.get(
 	describeJsonRoute({
 		operationId: "getUserModById",
 		summary: "Get user mod by ID",
-		description:
-			"Retrieves a specific mod owned by the authenticated user by its ID.",
+		description: "Retrieves a specific mod owned by the authenticated user by its ID.",
 		tags: ["User Mods"],
 		security: [{ cookieAuth: [] }],
 		responses: {
@@ -127,9 +125,7 @@ router.post(
 		const createData = c.req.valid("json");
 		const user = c.var.getUser();
 
-		logger.debug(
-			`User '${user.id}' is creating a new mod '${createData.name}'`,
-		);
+		logger.debug(`User '${user.id}' is creating a new mod '${createData.name}'`);
 		const result = await createMod({
 			user,
 			createData,

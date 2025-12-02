@@ -11,10 +11,7 @@ export function _BasicInfo(props: { form: UserModReleaseForm }) {
 				<Text size={"lg"} fw={"bold"}>
 					Release Information
 				</Text>
-				<TextInput
-					label="Release Version"
-					{...props.form.getInputProps("version")}
-				/>
+				<TextInput label="Release Version" {...props.form.getInputProps("version")} />
 				<Select
 					{...props.form.getInputProps("visibility")}
 					label={"Visibility"}

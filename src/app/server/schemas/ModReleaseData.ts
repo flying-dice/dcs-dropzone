@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-	MissionScriptRunOn,
-	ModVisibility,
-	SymbolicLinkDestRoot,
-} from "../../../common/data.ts";
+import { MissionScriptRunOn, ModVisibility, SymbolicLinkDestRoot } from "../../../common/data.ts";
 
 // Asset schema
 export const ModReleaseAssetData = z
@@ -34,9 +30,7 @@ export const ModReleaseSymbolicLinkData = z
 		description: "Data representation of a symbolic link configuration.",
 	});
 
-export type ModReleaseSymbolicLinkData = z.infer<
-	typeof ModReleaseSymbolicLinkData
->;
+export type ModReleaseSymbolicLinkData = z.infer<typeof ModReleaseSymbolicLinkData>;
 
 // Mission script schema
 export const ModReleaseMissionScriptData = z
@@ -53,9 +47,7 @@ export const ModReleaseMissionScriptData = z
 		description: "Data representation of a mission script configuration.",
 	});
 
-export type ModReleaseMissionScriptData = z.infer<
-	typeof ModReleaseMissionScriptData
->;
+export type ModReleaseMissionScriptData = z.infer<typeof ModReleaseMissionScriptData>;
 
 // ModRelease schema
 export const ModReleaseData = z

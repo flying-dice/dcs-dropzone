@@ -2,11 +2,7 @@ import { Button, Card, Divider, Group, Stack, Text } from "@mantine/core";
 import { modals, openModal } from "@mantine/modals";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
-import {
-	createUserModRelease,
-	type ModData,
-	useGetUserModReleases,
-} from "../../_autogen/api.ts";
+import { createUserModRelease, type ModData, useGetUserModReleases } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { NewReleaseForm } from "../../components/NewReleaseForm.tsx";
 import { UserModRelease } from "../../components/UserModRelease.tsx";
@@ -21,9 +17,7 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 	const { t } = useAppTranslation();
 
 	const footerText =
-		modReleases.data?.status === StatusCodes.OK
-			? `Total Releases: ${modReleases.data.data.data.length}`
-			: `Loading...`;
+		modReleases.data?.status === StatusCodes.OK ? `Total Releases: ${modReleases.data.data.data.length}` : `Loading...`;
 
 	const handleNewRelease = () => {
 		openModal({
@@ -63,21 +57,16 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 						New Release
 					</Button>
 				</Group>
-				{modReleases.data?.status === StatusCodes.OK &&
-					modReleases.data.data?.data.length === 0 && (
-						<EmptyState
-							title={t("EMPTY_RELEASES_TITLE")}
-							description={t("EMPTY_RELEASES_DESCRIPTION")}
-							icon={AppIcons.Releases}
-						/>
-					)}
+				{modReleases.data?.status === StatusCodes.OK && modReleases.data.data?.data.length === 0 && (
+					<EmptyState
+						title={t("EMPTY_RELEASES_TITLE")}
+						description={t("EMPTY_RELEASES_DESCRIPTION")}
+						icon={AppIcons.Releases}
+					/>
+				)}
 				{modReleases.data?.status === StatusCodes.OK &&
 					modReleases.data.data.data.map((release) => (
-						<UserModRelease
-							key={release.id}
-							release={release}
-							onClick={() => nav(`releases/${release.id}`)}
-						/>
+						<UserModRelease key={release.id} release={release} onClick={() => nav(`releases/${release.id}`)} />
 					))}
 
 				<Divider />

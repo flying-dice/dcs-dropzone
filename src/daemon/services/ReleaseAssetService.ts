@@ -3,10 +3,7 @@ import { basename, join, resolve } from "node:path";
 import { getLogger, type Logger } from "log4js";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ExtractQueue } from "../queues/ExtractQueue.ts";
-import type {
-	ReleaseAssetRepository,
-	ReleaseData,
-} from "../repositories/ReleaseAssetRepository.ts";
+import type { ReleaseAssetRepository, ReleaseData } from "../repositories/ReleaseAssetRepository.ts";
 
 const logger = getLogger("ReleaseDownloadService");
 
@@ -20,9 +17,7 @@ export class ReleaseAssetService {
 		private readonly downloadQueue: DownloadQueue,
 		private readonly extractQueue: ExtractQueue,
 	) {
-		logger.debug(
-			`ReleaseAssetService initialized for releaseId: ${this.releaseId}`,
-		);
+		logger.debug(`ReleaseAssetService initialized for releaseId: ${this.releaseId}`);
 
 		const release = this.repository.getReleaseById(this.releaseId);
 
@@ -65,13 +60,7 @@ export class ReleaseAssetService {
 			for (const [idx, url] of asset.urls.entries()) {
 				const downloadJobId = `${asset.id}:${idx}`;
 				this.logger.debug(`Pushing download job for URL: ${url}`);
-				this.downloadQueue.pushJob(
-					this.releaseId,
-					asset.id,
-					downloadJobId,
-					url,
-					releaseFolder,
-				);
+				this.downloadQueue.pushJob(this.releaseId, asset.id, downloadJobId, url, releaseFolder);
 				downloadJobIds.push(downloadJobId);
 			}
 
@@ -79,10 +68,7 @@ export class ReleaseAssetService {
 			if (asset.isArchive && asset.urls.length > 0) {
 				// For multipart archives, the first file is typically the main archive
 				const firstUrl = asset.urls[0] as string;
-				const archivePath = join(
-					releaseFolder,
-					decodeURIComponent(basename(firstUrl)),
-				);
+				const archivePath = join(releaseFolder, decodeURIComponent(basename(firstUrl)));
 
 				this.logger.debug(
 					`Pushing extract job for archive: ${archivePath} with ${downloadJobIds.length} download dependencies`,
@@ -105,9 +91,7 @@ export class ReleaseAssetService {
 			}
 		}
 
-		this.logger.info(
-			`All download and extract jobs pushed to queues, waiting for completion`,
-		);
+		this.logger.info(`All download and extract jobs pushed to queues, waiting for completion`);
 	}
 
 	private async ensureReleaseFolder(): Promise<string> {
