@@ -11,7 +11,8 @@ export type CreateModCommand = {
 	user: UserData;
 	createData: ModCreateData;
 };
-export default async function createMod({
+
+export default async function ({
 	user,
 	createData,
 }: CreateModCommand): Promise<ModData> {

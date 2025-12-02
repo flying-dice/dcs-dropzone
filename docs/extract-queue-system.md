@@ -4,7 +4,7 @@
 
 The extract queue system provides a robust, database-backed solution for managing archive extraction with automatic retry, crash recovery, and dependency tracking. The database is the single source of truth, ensuring extractions can survive application restarts without data loss.
 
-This system works in tandem with the [Download Queue System](./download-queue-system.md) - extract jobs only begin once all their dependent download jobs are completed.
+This system works in tandem with the [Download Queue System](./download-queue-system.md) — extract jobs begin once none of their dependent download jobs are incomplete with remaining retries (i.e., all are COMPLETED or have exhausted retries).
 
 ## Architecture
 
@@ -116,7 +116,7 @@ When extraction fails (e.g., corrupt archive, 7zip process error), the job retur
 
 Before an extract job can start:
 1. All linked download jobs in `EXTRACT_DOWNLOAD_JOIN` must exist
-2. All linked download jobs must have status `COMPLETED`
+2. All linked download jobs must be either `COMPLETED` or have exhausted retries (no incomplete downloads with remaining retries)
 3. The extract job must have `status = PENDING`
 4. The extract job must have `attempt < maxAttempts`
 5. The extract job must have `nextAttemptAfter <= now()`
