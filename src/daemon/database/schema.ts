@@ -6,6 +6,11 @@ import {
 	type SymbolicLinkDestRoot,
 } from "../../common/data.ts";
 
+export const T_APP_ATTRIBUTES = sqliteTable("APP_ATTRIBUTES", {
+	key: text("key").primaryKey(),
+	value: text("value", { mode: "json" }).$type<any>().notNull(),
+});
+
 export const T_MOD_RELEASES = sqliteTable("MOD_RELEASES", {
 	releaseId: text("release_id").primaryKey(),
 	modId: text("mod_id").notNull(),

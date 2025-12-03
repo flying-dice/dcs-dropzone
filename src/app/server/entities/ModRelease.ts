@@ -11,6 +11,7 @@ const schema = new Schema(
 		missionScripts: { type: [Object], default: [] },
 		visibility: { type: String, required: true },
 		featuredAt: { type: Date, default: null },
+		downloadsCount: { type: Number, default: 0 },
 		createdAt: { type: Date, default: Date.now },
 		updatedAt: { type: Date, default: Date.now },
 	},

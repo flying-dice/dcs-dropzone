@@ -34,6 +34,12 @@ export interface UserData {
 }
 
 export interface ErrorData {
+	/**
+	 * @minimum 100
+	 * @maximum 599
+	 */
+	code: number;
+	message?: string;
 	error: string;
 }
 
@@ -66,8 +72,6 @@ export interface ModSummaryData {
 	maintainers: string[];
 	tags: string[];
 	downloadsCount: number;
-	averageRating: number;
-	ratingsCount: number;
 }
 
 /**
@@ -76,11 +80,6 @@ export interface ModSummaryData {
 export interface UserModsMetaData {
 	published: number;
 	totalDownloads: number;
-	/**
-	 * @minimum 0
-	 * @maximum 5
-	 */
-	averageRating: number;
 }
 
 export type ModDataCategory = (typeof ModDataCategory)[keyof typeof ModDataCategory];
@@ -124,8 +123,6 @@ export interface ModData {
 	/** @minItems 1 */
 	maintainers: string[];
 	downloadsCount: number;
-	ratingsCount: number;
-	averageRating: number;
 }
 
 export type ModCreateDataCategory = (typeof ModCreateDataCategory)[keyof typeof ModCreateDataCategory];
@@ -150,6 +147,10 @@ export interface ModCreateData {
 	name: string;
 	category: ModCreateDataCategory;
 	description: string;
+}
+
+export interface OkData {
+	ok?: boolean;
 }
 
 export type ModUpdateDataCategory = (typeof ModUpdateDataCategory)[keyof typeof ModUpdateDataCategory];
@@ -278,6 +279,7 @@ export interface ModReleaseData {
 	symbolicLinks: ModReleaseSymbolicLinkData[];
 	missionScripts: ModReleaseMissionScriptData[];
 	visibility: ModReleaseDataVisibility;
+	downloadsCount: number;
 	createdAt?: string;
 	updatedAt?: string;
 }
@@ -360,6 +362,7 @@ export type UpdateUserModReleaseBody = {
 	symbolicLinks: ModReleaseSymbolicLinkData[];
 	missionScripts: ModReleaseMissionScriptData[];
 	visibility: UpdateUserModReleaseBodyVisibility;
+	downloadsCount: number;
 	createdAt?: string;
 	updatedAt?: string;
 };
@@ -419,6 +422,10 @@ export type GetModReleases200 = {
 	data: ModReleaseData[];
 };
 
+export type RegisterModReleaseDownloadByIdBody = {
+	daemonInstanceId: string;
+};
+
 export type GetModUpdatesByIdsBody = {
 	ids: string;
 };
@@ -472,11 +479,7 @@ export const authProviderCallback = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: authProviderCallbackResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as authProviderCallbackResponse;
+	return { data, status: res.status, headers: res.headers } as authProviderCallbackResponse;
 };
 
 export const getAuthProviderCallbackQueryKey = (provider?: "github", params?: AuthProviderCallbackParams) => {
@@ -501,14 +504,11 @@ export const getAuthProviderCallbackQueryOptions = <
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof authProviderCallback>>> = ({ signal }) =>
 		authProviderCallback(provider, params, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!provider,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof authProviderCallback>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!provider, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof authProviderCallback>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type AuthProviderCallbackQueryResult = NonNullable<Awaited<ReturnType<typeof authProviderCallback>>>;
@@ -530,9 +530,7 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authProviderCallback>>, TError = void>(
 	provider: "github",
 	params: AuthProviderCallbackParams,
@@ -549,9 +547,7 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authProviderCallback>>, TError = void>(
 	provider: "github",
 	params: AuthProviderCallbackParams,
@@ -560,9 +556,7 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary OAuth provider callback
  */
@@ -575,9 +569,7 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getAuthProviderCallbackQueryOptions(provider, params, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -619,11 +611,7 @@ export const authProviderLogin = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: authProviderLoginResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as authProviderLoginResponse;
+	return { data, status: res.status, headers: res.headers } as authProviderLoginResponse;
 };
 
 export const getAuthProviderLoginQueryKey = (provider?: "github") => {
@@ -644,14 +632,11 @@ export const getAuthProviderLoginQueryOptions = <TData = Awaited<ReturnType<type
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof authProviderLogin>>> = ({ signal }) =>
 		authProviderLogin(provider, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!provider,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof authProviderLogin>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!provider, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof authProviderLogin>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type AuthProviderLoginQueryResult = NonNullable<Awaited<ReturnType<typeof authProviderLogin>>>;
@@ -672,9 +657,7 @@ export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProvi
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProviderLogin>>, TError = void>(
 	provider: "github",
 	options?: {
@@ -690,9 +673,7 @@ export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProvi
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProviderLogin>>, TError = void>(
 	provider: "github",
 	options?: {
@@ -700,9 +681,7 @@ export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProvi
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Start OAuth login
  */
@@ -714,9 +693,7 @@ export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProvi
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getAuthProviderLoginQueryOptions(provider, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -738,7 +715,7 @@ export type getAuthenticatedUserResponse200 = {
 };
 
 export type getAuthenticatedUserResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
@@ -764,11 +741,7 @@ export const getAuthenticatedUser = async (options?: RequestInit): Promise<getAu
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getAuthenticatedUserResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getAuthenticatedUserResponse;
+	return { data, status: res.status, headers: res.headers } as getAuthenticatedUserResponse;
 };
 
 export const getGetAuthenticatedUserQueryKey = () => {
@@ -777,7 +750,7 @@ export const getGetAuthenticatedUserQueryKey = () => {
 
 export const getGetAuthenticatedUserQueryOptions = <
 	TData = Awaited<ReturnType<typeof getAuthenticatedUser>>,
-	TError = void,
+	TError = ErrorData,
 >(options?: {
 	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthenticatedUser>>, TError, TData>>;
 	fetch?: RequestInit;
@@ -797,9 +770,9 @@ export const getGetAuthenticatedUserQueryOptions = <
 };
 
 export type GetAuthenticatedUserQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthenticatedUser>>>;
-export type GetAuthenticatedUserQueryError = void;
+export type GetAuthenticatedUserQueryError = ErrorData;
 
-export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = void>(
+export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = ErrorData>(
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthenticatedUser>>, TError, TData>> &
 			Pick<
@@ -813,10 +786,8 @@ export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAut
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = void>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthenticatedUser>>, TError, TData>> &
 			Pick<
@@ -830,31 +801,25 @@ export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAut
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = void>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthenticatedUser>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get authenticated user
  */
 
-export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = void>(
+export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthenticatedUser>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetAuthenticatedUserQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -936,9 +901,7 @@ export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = v
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = void>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>> &
@@ -949,18 +912,14 @@ export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = v
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = void>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Logout
  */
@@ -971,9 +930,7 @@ export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = v
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getLogoutQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1021,11 +978,7 @@ export const checkHealth = async (options?: RequestInit): Promise<checkHealthRes
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: checkHealthResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as checkHealthResponse;
+	return { data, status: res.status, headers: res.headers } as checkHealthResponse;
 };
 
 export const getCheckHealthQueryKey = () => {
@@ -1070,9 +1023,7 @@ export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>> &
@@ -1087,18 +1038,14 @@ export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Health Check
  */
@@ -1109,9 +1056,7 @@ export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getCheckHealthQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1133,14 +1078,19 @@ export type getUserModsResponse200 = {
 };
 
 export type getUserModsResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
+};
+
+export type getUserModsResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type getUserModsResponseSuccess = getUserModsResponse200 & {
 	headers: Headers;
 };
-export type getUserModsResponseError = getUserModsResponse401 & {
+export type getUserModsResponseError = (getUserModsResponse401 | getUserModsResponse500) & {
 	headers: Headers;
 };
 
@@ -1159,18 +1109,17 @@ export const getUserMods = async (options?: RequestInit): Promise<getUserModsRes
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getUserModsResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getUserModsResponse;
+	return { data, status: res.status, headers: res.headers } as getUserModsResponse;
 };
 
 export const getGetUserModsQueryKey = () => {
 	return [`/api/user-mods`] as const;
 };
 
-export const getGetUserModsQueryOptions = <TData = Awaited<ReturnType<typeof getUserMods>>, TError = void>(options?: {
+export const getGetUserModsQueryOptions = <
+	TData = Awaited<ReturnType<typeof getUserMods>>,
+	TError = ErrorData,
+>(options?: {
 	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>>;
 	fetch?: RequestInit;
 }) => {
@@ -1189,9 +1138,9 @@ export const getGetUserModsQueryOptions = <TData = Awaited<ReturnType<typeof get
 };
 
 export type GetUserModsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserMods>>>;
-export type GetUserModsQueryError = void;
+export type GetUserModsQueryError = ErrorData;
 
-export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = void>(
+export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = ErrorData>(
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>> &
 			Pick<
@@ -1205,10 +1154,8 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = void>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>> &
 			Pick<
@@ -1222,31 +1169,25 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = void>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mods
  */
 
-export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = void>(
+export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1268,12 +1209,12 @@ export type createUserModResponse201 = {
 };
 
 export type createUserModResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type createUserModResponse500 = {
-	data: void;
+	data: ErrorData;
 	status: 500;
 };
 
@@ -1304,14 +1245,10 @@ export const createUserMod = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: createUserModResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as createUserModResponse;
+	return { data, status: res.status, headers: res.headers } as createUserModResponse;
 };
 
-export const getCreateUserModMutationOptions = <TError = void, TContext = unknown>(options?: {
+export const getCreateUserModMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError, { data: ModCreateData }, TContext>;
 	fetch?: RequestInit;
 }): UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError, { data: ModCreateData }, TContext> => {
@@ -1333,12 +1270,12 @@ export const getCreateUserModMutationOptions = <TError = void, TContext = unknow
 
 export type CreateUserModMutationResult = NonNullable<Awaited<ReturnType<typeof createUserMod>>>;
 export type CreateUserModMutationBody = ModCreateData;
-export type CreateUserModMutationError = void;
+export type CreateUserModMutationError = ErrorData;
 
 /**
  * @summary Create user mod
  */
-export const useCreateUserMod = <TError = void, TContext = unknown>(
+export const useCreateUserMod = <TError = ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<Awaited<ReturnType<typeof createUserMod>>, TError, { data: ModCreateData }, TContext>;
 		fetch?: RequestInit;
@@ -1360,19 +1297,28 @@ export type getUserModByIdResponse200 = {
 };
 
 export type getUserModByIdResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type getUserModByIdResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type getUserModByIdResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type getUserModByIdResponseSuccess = getUserModByIdResponse200 & {
 	headers: Headers;
 };
-export type getUserModByIdResponseError = (getUserModByIdResponse401 | getUserModByIdResponse404) & {
+export type getUserModByIdResponseError = (
+	| getUserModByIdResponse401
+	| getUserModByIdResponse404
+	| getUserModByIdResponse500
+) & {
 	headers: Headers;
 };
 
@@ -1391,18 +1337,14 @@ export const getUserModById = async (id: string, options?: RequestInit): Promise
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getUserModByIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getUserModByIdResponse;
+	return { data, status: res.status, headers: res.headers } as getUserModByIdResponse;
 };
 
 export const getGetUserModByIdQueryKey = (id?: string) => {
 	return [`/api/user-mods/${id}`] as const;
 };
 
-export const getGetUserModByIdQueryOptions = <TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
+export const getGetUserModByIdQueryOptions = <TData = Awaited<ReturnType<typeof getUserModById>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData>>;
@@ -1416,20 +1358,17 @@ export const getGetUserModByIdQueryOptions = <TData = Awaited<ReturnType<typeof 
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserModById>>> = ({ signal }) =>
 		getUserModById(id, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!id,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserModById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModById>>>;
-export type GetUserModByIdQueryError = void;
+export type GetUserModByIdQueryError = ErrorData;
 
-export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
+export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = ErrorData>(
 	id: string,
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData>> &
@@ -1444,10 +1383,8 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData>> &
@@ -1462,33 +1399,27 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mod by ID
  */
 
-export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
+export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModByIdQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1505,24 +1436,33 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
  * @summary Update user mod
  */
 export type updateUserModResponse200 = {
-	data: void;
+	data: OkData;
 	status: 200;
 };
 
 export type updateUserModResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type updateUserModResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type updateUserModResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type updateUserModResponseSuccess = updateUserModResponse200 & {
 	headers: Headers;
 };
-export type updateUserModResponseError = (updateUserModResponse401 | updateUserModResponse404) & {
+export type updateUserModResponseError = (
+	| updateUserModResponse401
+	| updateUserModResponse404
+	| updateUserModResponse500
+) & {
 	headers: Headers;
 };
 
@@ -1547,14 +1487,10 @@ export const updateUserMod = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: updateUserModResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as updateUserModResponse;
+	return { data, status: res.status, headers: res.headers } as updateUserModResponse;
 };
 
-export const getUpdateUserModMutationOptions = <TError = void, TContext = unknown>(options?: {
+export const getUpdateUserModMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof updateUserMod>>,
 		TError,
@@ -1588,12 +1524,12 @@ export const getUpdateUserModMutationOptions = <TError = void, TContext = unknow
 
 export type UpdateUserModMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserMod>>>;
 export type UpdateUserModMutationBody = ModUpdateData;
-export type UpdateUserModMutationError = void;
+export type UpdateUserModMutationError = ErrorData;
 
 /**
  * @summary Update user mod
  */
-export const useUpdateUserMod = <TError = void, TContext = unknown>(
+export const useUpdateUserMod = <TError = ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof updateUserMod>>,
@@ -1620,24 +1556,33 @@ export const useUpdateUserMod = <TError = void, TContext = unknown>(
  * @summary Delete user mod
  */
 export type deleteUserModResponse200 = {
-	data: void;
+	data: OkData;
 	status: 200;
 };
 
 export type deleteUserModResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type deleteUserModResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type deleteUserModResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type deleteUserModResponseSuccess = deleteUserModResponse200 & {
 	headers: Headers;
 };
-export type deleteUserModResponseError = (deleteUserModResponse401 | deleteUserModResponse404) & {
+export type deleteUserModResponseError = (
+	| deleteUserModResponse401
+	| deleteUserModResponse404
+	| deleteUserModResponse500
+) & {
 	headers: Headers;
 };
 
@@ -1656,14 +1601,10 @@ export const deleteUserMod = async (id: string, options?: RequestInit): Promise<
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: deleteUserModResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as deleteUserModResponse;
+	return { data, status: res.status, headers: res.headers } as deleteUserModResponse;
 };
 
-export const getDeleteUserModMutationOptions = <TError = void, TContext = unknown>(options?: {
+export const getDeleteUserModMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteUserMod>>, TError, { id: string }, TContext>;
 	fetch?: RequestInit;
 }): UseMutationOptions<Awaited<ReturnType<typeof deleteUserMod>>, TError, { id: string }, TContext> => {
@@ -1685,12 +1626,12 @@ export const getDeleteUserModMutationOptions = <TError = void, TContext = unknow
 
 export type DeleteUserModMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUserMod>>>;
 
-export type DeleteUserModMutationError = void;
+export type DeleteUserModMutationError = ErrorData;
 
 /**
  * @summary Delete user mod
  */
-export const useDeleteUserMod = <TError = void, TContext = unknown>(
+export const useDeleteUserMod = <TError = ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteUserMod>>, TError, { id: string }, TContext>;
 		fetch?: RequestInit;
@@ -1712,14 +1653,28 @@ export type getUserModReleasesResponse200 = {
 };
 
 export type getUserModReleasesResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
+};
+
+export type getUserModReleasesResponse404 = {
+	data: ErrorData;
+	status: 404;
+};
+
+export type getUserModReleasesResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type getUserModReleasesResponseSuccess = getUserModReleasesResponse200 & {
 	headers: Headers;
 };
-export type getUserModReleasesResponseError = getUserModReleasesResponse401 & {
+export type getUserModReleasesResponseError = (
+	| getUserModReleasesResponse401
+	| getUserModReleasesResponse404
+	| getUserModReleasesResponse500
+) & {
 	headers: Headers;
 };
 
@@ -1738,11 +1693,7 @@ export const getUserModReleases = async (id: string, options?: RequestInit): Pro
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getUserModReleasesResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getUserModReleasesResponse;
+	return { data, status: res.status, headers: res.headers } as getUserModReleasesResponse;
 };
 
 export const getGetUserModReleasesQueryKey = (id?: string) => {
@@ -1751,7 +1702,7 @@ export const getGetUserModReleasesQueryKey = (id?: string) => {
 
 export const getGetUserModReleasesQueryOptions = <
 	TData = Awaited<ReturnType<typeof getUserModReleases>>,
-	TError = void,
+	TError = ErrorData,
 >(
 	id: string,
 	options?: {
@@ -1766,20 +1717,17 @@ export const getGetUserModReleasesQueryOptions = <
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserModReleases>>> = ({ signal }) =>
 		getUserModReleases(id, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!id,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getUserModReleases>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserModReleases>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModReleasesQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModReleases>>>;
-export type GetUserModReleasesQueryError = void;
+export type GetUserModReleasesQueryError = ErrorData;
 
-export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = void>(
+export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = ErrorData>(
 	id: string,
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModReleases>>, TError, TData>> &
@@ -1794,10 +1742,8 @@ export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserM
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = void>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModReleases>>, TError, TData>> &
@@ -1812,33 +1758,27 @@ export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserM
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = void>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModReleases>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mod releases
  */
 
-export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = void>(
+export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserModReleases>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModReleasesQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1860,19 +1800,28 @@ export type createUserModReleaseResponse201 = {
 };
 
 export type createUserModReleaseResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type createUserModReleaseResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type createUserModReleaseResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type createUserModReleaseResponseSuccess = createUserModReleaseResponse201 & {
 	headers: Headers;
 };
-export type createUserModReleaseResponseError = (createUserModReleaseResponse401 | createUserModReleaseResponse404) & {
+export type createUserModReleaseResponseError = (
+	| createUserModReleaseResponse401
+	| createUserModReleaseResponse404
+	| createUserModReleaseResponse500
+) & {
 	headers: Headers;
 };
 
@@ -1897,14 +1846,10 @@ export const createUserModRelease = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: createUserModReleaseResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as createUserModReleaseResponse;
+	return { data, status: res.status, headers: res.headers } as createUserModReleaseResponse;
 };
 
-export const getCreateUserModReleaseMutationOptions = <TError = void, TContext = unknown>(options?: {
+export const getCreateUserModReleaseMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof createUserModRelease>>,
 		TError,
@@ -1939,12 +1884,12 @@ export const getCreateUserModReleaseMutationOptions = <TError = void, TContext =
 
 export type CreateUserModReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof createUserModRelease>>>;
 export type CreateUserModReleaseMutationBody = ModReleaseCreateData;
-export type CreateUserModReleaseMutationError = void;
+export type CreateUserModReleaseMutationError = ErrorData;
 
 /**
  * @summary Create user mod release
  */
-export const useCreateUserModRelease = <TError = void, TContext = unknown>(
+export const useCreateUserModRelease = <TError = ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof createUserModRelease>>,
@@ -1976,13 +1921,18 @@ export type getUserModReleaseByIdResponse200 = {
 };
 
 export type getUserModReleaseByIdResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type getUserModReleaseByIdResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type getUserModReleaseByIdResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type getUserModReleaseByIdResponseSuccess = getUserModReleaseByIdResponse200 & {
@@ -1991,6 +1941,7 @@ export type getUserModReleaseByIdResponseSuccess = getUserModReleaseByIdResponse
 export type getUserModReleaseByIdResponseError = (
 	| getUserModReleaseByIdResponse401
 	| getUserModReleaseByIdResponse404
+	| getUserModReleaseByIdResponse500
 ) & {
 	headers: Headers;
 };
@@ -2014,11 +1965,7 @@ export const getUserModReleaseById = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getUserModReleaseByIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getUserModReleaseByIdResponse;
+	return { data, status: res.status, headers: res.headers } as getUserModReleaseByIdResponse;
 };
 
 export const getGetUserModReleaseByIdQueryKey = (id?: string, releaseId?: string) => {
@@ -2027,7 +1974,7 @@ export const getGetUserModReleaseByIdQueryKey = (id?: string, releaseId?: string
 
 export const getGetUserModReleaseByIdQueryOptions = <
 	TData = Awaited<ReturnType<typeof getUserModReleaseById>>,
-	TError = void,
+	TError = ErrorData,
 >(
 	id: string,
 	releaseId: string,
@@ -2043,20 +1990,17 @@ export const getGetUserModReleaseByIdQueryOptions = <
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserModReleaseById>>> = ({ signal }) =>
 		getUserModReleaseById(id, releaseId, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!(id && releaseId),
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getUserModReleaseById>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!(id && releaseId), ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserModReleaseById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModReleaseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModReleaseById>>>;
-export type GetUserModReleaseByIdQueryError = void;
+export type GetUserModReleaseByIdQueryError = ErrorData;
 
-export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = void>(
+export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options: {
@@ -2072,10 +2016,8 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = void>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options?: {
@@ -2091,10 +2033,8 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = void>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options?: {
@@ -2102,14 +2042,12 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mod release by ID
  */
 
-export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = void>(
+export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options?: {
@@ -2117,9 +2055,7 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModReleaseByIdQueryOptions(id, releaseId, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -2136,24 +2072,33 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
  * @summary Update user mod release
  */
 export type updateUserModReleaseResponse200 = {
-	data: void;
+	data: OkData;
 	status: 200;
 };
 
 export type updateUserModReleaseResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type updateUserModReleaseResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type updateUserModReleaseResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type updateUserModReleaseResponseSuccess = updateUserModReleaseResponse200 & {
 	headers: Headers;
 };
-export type updateUserModReleaseResponseError = (updateUserModReleaseResponse401 | updateUserModReleaseResponse404) & {
+export type updateUserModReleaseResponseError = (
+	| updateUserModReleaseResponse401
+	| updateUserModReleaseResponse404
+	| updateUserModReleaseResponse500
+) & {
 	headers: Headers;
 };
 
@@ -2179,14 +2124,10 @@ export const updateUserModRelease = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: updateUserModReleaseResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as updateUserModReleaseResponse;
+	return { data, status: res.status, headers: res.headers } as updateUserModReleaseResponse;
 };
 
-export const getUpdateUserModReleaseMutationOptions = <TError = void, TContext = unknown>(options?: {
+export const getUpdateUserModReleaseMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof updateUserModRelease>>,
 		TError,
@@ -2221,12 +2162,12 @@ export const getUpdateUserModReleaseMutationOptions = <TError = void, TContext =
 
 export type UpdateUserModReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserModRelease>>>;
 export type UpdateUserModReleaseMutationBody = UpdateUserModReleaseBody;
-export type UpdateUserModReleaseMutationError = void;
+export type UpdateUserModReleaseMutationError = ErrorData;
 
 /**
  * @summary Update user mod release
  */
-export const useUpdateUserModRelease = <TError = void, TContext = unknown>(
+export const useUpdateUserModRelease = <TError = ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof updateUserModRelease>>,
@@ -2253,24 +2194,33 @@ export const useUpdateUserModRelease = <TError = void, TContext = unknown>(
  * @summary Delete user mod release
  */
 export type deleteUserModReleaseResponse200 = {
-	data: void;
+	data: OkData;
 	status: 200;
 };
 
 export type deleteUserModReleaseResponse401 = {
-	data: void;
+	data: ErrorData;
 	status: 401;
 };
 
 export type deleteUserModReleaseResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type deleteUserModReleaseResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type deleteUserModReleaseResponseSuccess = deleteUserModReleaseResponse200 & {
 	headers: Headers;
 };
-export type deleteUserModReleaseResponseError = (deleteUserModReleaseResponse401 | deleteUserModReleaseResponse404) & {
+export type deleteUserModReleaseResponseError = (
+	| deleteUserModReleaseResponse401
+	| deleteUserModReleaseResponse404
+	| deleteUserModReleaseResponse500
+) & {
 	headers: Headers;
 };
 
@@ -2293,14 +2243,10 @@ export const deleteUserModRelease = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: deleteUserModReleaseResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as deleteUserModReleaseResponse;
+	return { data, status: res.status, headers: res.headers } as deleteUserModReleaseResponse;
 };
 
-export const getDeleteUserModReleaseMutationOptions = <TError = void, TContext = unknown>(options?: {
+export const getDeleteUserModReleaseMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof deleteUserModRelease>>,
 		TError,
@@ -2335,12 +2281,12 @@ export const getDeleteUserModReleaseMutationOptions = <TError = void, TContext =
 
 export type DeleteUserModReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUserModRelease>>>;
 
-export type DeleteUserModReleaseMutationError = void;
+export type DeleteUserModReleaseMutationError = ErrorData;
 
 /**
  * @summary Delete user mod release
  */
-export const useDeleteUserModRelease = <TError = void, TContext = unknown>(
+export const useDeleteUserModRelease = <TError = ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof deleteUserModRelease>>,
@@ -2376,10 +2322,15 @@ export type getModByIdResponse404 = {
 	status: 404;
 };
 
+export type getModByIdResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
 export type getModByIdResponseSuccess = getModByIdResponse200 & {
 	headers: Headers;
 };
-export type getModByIdResponseError = getModByIdResponse404 & {
+export type getModByIdResponseError = (getModByIdResponse404 | getModByIdResponse500) & {
 	headers: Headers;
 };
 
@@ -2398,18 +2349,17 @@ export const getModById = async (id: string, options?: RequestInit): Promise<get
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getModByIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getModByIdResponse;
+	return { data, status: res.status, headers: res.headers } as getModByIdResponse;
 };
 
 export const getGetModByIdQueryKey = (id?: string) => {
 	return [`/api/mods/${id}`] as const;
 };
 
-export const getGetModByIdQueryOptions = <TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404>(
+export const getGetModByIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof getModById>>,
+	TError = GetModById404 | ErrorData,
+>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>>;
@@ -2423,20 +2373,17 @@ export const getGetModByIdQueryOptions = <TData = Awaited<ReturnType<typeof getM
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getModById>>> = ({ signal }) =>
 		getModById(id, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!id,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getModById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getModById>>>;
-export type GetModByIdQueryError = GetModById404;
+export type GetModByIdQueryError = GetModById404 | ErrorData;
 
-export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404>(
+export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404 | ErrorData>(
 	id: string,
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>> &
@@ -2451,10 +2398,8 @@ export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TE
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404 | ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>> &
@@ -2469,33 +2414,27 @@ export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TE
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404 | ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mod by ID
  */
 
-export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404>(
+export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404 | ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModById>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModByIdQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -2516,11 +2455,19 @@ export type getModsResponse200 = {
 	status: 200;
 };
 
+export type getModsResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
 export type getModsResponseSuccess = getModsResponse200 & {
 	headers: Headers;
 };
+export type getModsResponseError = getModsResponse500 & {
+	headers: Headers;
+};
 
-export type getModsResponse = getModsResponseSuccess;
+export type getModsResponse = getModsResponseSuccess | getModsResponseError;
 
 export const getGetModsUrl = (params: GetModsParams) => {
 	const normalizedParams = new URLSearchParams();
@@ -2552,7 +2499,7 @@ export const getGetModsQueryKey = (params?: GetModsParams) => {
 	return [`/api/mods`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetModsQueryOptions = <TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
+export const getGetModsQueryOptions = <TData = Awaited<ReturnType<typeof getMods>>, TError = ErrorData>(
 	params: GetModsParams,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>>;
@@ -2574,9 +2521,9 @@ export const getGetModsQueryOptions = <TData = Awaited<ReturnType<typeof getMods
 };
 
 export type GetModsQueryResult = NonNullable<Awaited<ReturnType<typeof getMods>>>;
-export type GetModsQueryError = unknown;
+export type GetModsQueryError = ErrorData;
 
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = ErrorData>(
 	params: GetModsParams,
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>> &
@@ -2587,10 +2534,8 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = ErrorData>(
 	params: GetModsParams,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>> &
@@ -2601,33 +2546,27 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = ErrorData>(
 	params: GetModsParams,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mods
  */
 
-export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = unknown>(
+export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = ErrorData>(
 	params: GetModsParams,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModsQueryOptions(params, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -2648,11 +2587,24 @@ export type getModReleasesResponse200 = {
 	status: 200;
 };
 
+export type getModReleasesResponse404 = {
+	data: ErrorData;
+	status: 404;
+};
+
+export type getModReleasesResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
 export type getModReleasesResponseSuccess = getModReleasesResponse200 & {
 	headers: Headers;
 };
+export type getModReleasesResponseError = (getModReleasesResponse404 | getModReleasesResponse500) & {
+	headers: Headers;
+};
 
-export type getModReleasesResponse = getModReleasesResponseSuccess;
+export type getModReleasesResponse = getModReleasesResponseSuccess | getModReleasesResponseError;
 
 export const getGetModReleasesUrl = (id: string) => {
 	return `/api/mods/${id}/releases`;
@@ -2667,18 +2619,14 @@ export const getModReleases = async (id: string, options?: RequestInit): Promise
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getModReleasesResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getModReleasesResponse;
+	return { data, status: res.status, headers: res.headers } as getModReleasesResponse;
 };
 
 export const getGetModReleasesQueryKey = (id?: string) => {
 	return [`/api/mods/${id}/releases`] as const;
 };
 
-export const getGetModReleasesQueryOptions = <TData = Awaited<ReturnType<typeof getModReleases>>, TError = unknown>(
+export const getGetModReleasesQueryOptions = <TData = Awaited<ReturnType<typeof getModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>>;
@@ -2692,20 +2640,17 @@ export const getGetModReleasesQueryOptions = <TData = Awaited<ReturnType<typeof 
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getModReleases>>> = ({ signal }) =>
 		getModReleases(id, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!id,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getModReleases>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetModReleasesQueryResult = NonNullable<Awaited<ReturnType<typeof getModReleases>>>;
-export type GetModReleasesQueryError = unknown;
+export type GetModReleasesQueryError = ErrorData;
 
-export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = unknown>(
+export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = ErrorData>(
 	id: string,
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>> &
@@ -2720,10 +2665,8 @@ export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleas
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = unknown>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>> &
@@ -2738,33 +2681,27 @@ export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleas
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = unknown>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mod releases
  */
 
-export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = unknown>(
+export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModReleases>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModReleasesQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -2786,14 +2723,19 @@ export type getModReleaseByIdResponse200 = {
 };
 
 export type getModReleaseByIdResponse404 = {
-	data: void;
+	data: ErrorData;
 	status: 404;
+};
+
+export type getModReleaseByIdResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type getModReleaseByIdResponseSuccess = getModReleaseByIdResponse200 & {
 	headers: Headers;
 };
-export type getModReleaseByIdResponseError = getModReleaseByIdResponse404 & {
+export type getModReleaseByIdResponseError = (getModReleaseByIdResponse404 | getModReleaseByIdResponse500) & {
 	headers: Headers;
 };
 
@@ -2816,18 +2758,17 @@ export const getModReleaseById = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getModReleaseByIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getModReleaseByIdResponse;
+	return { data, status: res.status, headers: res.headers } as getModReleaseByIdResponse;
 };
 
 export const getGetModReleaseByIdQueryKey = (id?: string, releaseId?: string) => {
 	return [`/api/mods/${id}/releases/${releaseId}`] as const;
 };
 
-export const getGetModReleaseByIdQueryOptions = <TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = void>(
+export const getGetModReleaseByIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof getModReleaseById>>,
+	TError = ErrorData,
+>(
 	id: string,
 	releaseId: string,
 	options?: {
@@ -2842,20 +2783,17 @@ export const getGetModReleaseByIdQueryOptions = <TData = Awaited<ReturnType<type
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getModReleaseById>>> = ({ signal }) =>
 		getModReleaseById(id, releaseId, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!(id && releaseId),
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getModReleaseById>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!(id && releaseId), ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getModReleaseById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetModReleaseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getModReleaseById>>>;
-export type GetModReleaseByIdQueryError = void;
+export type GetModReleaseByIdQueryError = ErrorData;
 
-export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = void>(
+export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options: {
@@ -2871,10 +2809,8 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = void>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options?: {
@@ -2890,10 +2826,8 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = void>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options?: {
@@ -2901,14 +2835,12 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mod release by ID
  */
 
-export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = void>(
+export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
 	options?: {
@@ -2916,9 +2848,7 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModReleaseByIdQueryOptions(id, releaseId, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -2931,6 +2861,126 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 }
 
 /**
+ * Registers a download for a specific public release for a mod by its ID.
+ * @summary Register mod release download by ID
+ */
+export type registerModReleaseDownloadByIdResponse200 = {
+	data: OkData;
+	status: 200;
+};
+
+export type registerModReleaseDownloadByIdResponse404 = {
+	data: ErrorData;
+	status: 404;
+};
+
+export type registerModReleaseDownloadByIdResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
+export type registerModReleaseDownloadByIdResponseSuccess = registerModReleaseDownloadByIdResponse200 & {
+	headers: Headers;
+};
+export type registerModReleaseDownloadByIdResponseError = (
+	| registerModReleaseDownloadByIdResponse404
+	| registerModReleaseDownloadByIdResponse500
+) & {
+	headers: Headers;
+};
+
+export type registerModReleaseDownloadByIdResponse =
+	| registerModReleaseDownloadByIdResponseSuccess
+	| registerModReleaseDownloadByIdResponseError;
+
+export const getRegisterModReleaseDownloadByIdUrl = (id: string, releaseId: string) => {
+	return `/api/mods/${id}/releases/${releaseId}/downloads`;
+};
+
+export const registerModReleaseDownloadById = async (
+	id: string,
+	releaseId: string,
+	registerModReleaseDownloadByIdBody: RegisterModReleaseDownloadByIdBody,
+	options?: RequestInit,
+): Promise<registerModReleaseDownloadByIdResponse> => {
+	const res = await fetch(getRegisterModReleaseDownloadByIdUrl(id, releaseId), {
+		...options,
+		method: "POST",
+		headers: { "Content-Type": "application/json", ...options?.headers },
+		body: JSON.stringify(registerModReleaseDownloadByIdBody),
+	});
+
+	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+	const data: registerModReleaseDownloadByIdResponse["data"] = body ? JSON.parse(body) : {};
+	return { data, status: res.status, headers: res.headers } as registerModReleaseDownloadByIdResponse;
+};
+
+export const getRegisterModReleaseDownloadByIdMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof registerModReleaseDownloadById>>,
+		TError,
+		{ id: string; releaseId: string; data: RegisterModReleaseDownloadByIdBody },
+		TContext
+	>;
+	fetch?: RequestInit;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof registerModReleaseDownloadById>>,
+	TError,
+	{ id: string; releaseId: string; data: RegisterModReleaseDownloadByIdBody },
+	TContext
+> => {
+	const mutationKey = ["registerModReleaseDownloadById"];
+	const { mutation: mutationOptions, fetch: fetchOptions } = options
+		? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, fetch: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof registerModReleaseDownloadById>>,
+		{ id: string; releaseId: string; data: RegisterModReleaseDownloadByIdBody }
+	> = (props) => {
+		const { id, releaseId, data } = props ?? {};
+
+		return registerModReleaseDownloadById(id, releaseId, data, fetchOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type RegisterModReleaseDownloadByIdMutationResult = NonNullable<
+	Awaited<ReturnType<typeof registerModReleaseDownloadById>>
+>;
+export type RegisterModReleaseDownloadByIdMutationBody = RegisterModReleaseDownloadByIdBody;
+export type RegisterModReleaseDownloadByIdMutationError = ErrorData;
+
+/**
+ * @summary Register mod release download by ID
+ */
+export const useRegisterModReleaseDownloadById = <TError = ErrorData, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof registerModReleaseDownloadById>>,
+			TError,
+			{ id: string; releaseId: string; data: RegisterModReleaseDownloadByIdBody },
+			TContext
+		>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<
+	Awaited<ReturnType<typeof registerModReleaseDownloadById>>,
+	TError,
+	{ id: string; releaseId: string; data: RegisterModReleaseDownloadByIdBody },
+	TContext
+> => {
+	const mutationOptions = getRegisterModReleaseDownloadByIdMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
  * Retrieves public releases for a specific set of mods by IDs.
  * @summary Gets Release Information for a set of Mods
  */
@@ -2939,11 +2989,19 @@ export type getModUpdatesByIdsResponse200 = {
 	status: 200;
 };
 
+export type getModUpdatesByIdsResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
 export type getModUpdatesByIdsResponseSuccess = getModUpdatesByIdsResponse200 & {
 	headers: Headers;
 };
+export type getModUpdatesByIdsResponseError = getModUpdatesByIdsResponse500 & {
+	headers: Headers;
+};
 
-export type getModUpdatesByIdsResponse = getModUpdatesByIdsResponseSuccess;
+export type getModUpdatesByIdsResponse = getModUpdatesByIdsResponseSuccess | getModUpdatesByIdsResponseError;
 
 export const getGetModUpdatesByIdsUrl = () => {
 	return `/api/mod-updates`;
@@ -2963,14 +3021,10 @@ export const getModUpdatesByIds = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getModUpdatesByIdsResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getModUpdatesByIdsResponse;
+	return { data, status: res.status, headers: res.headers } as getModUpdatesByIdsResponse;
 };
 
-export const getGetModUpdatesByIdsMutationOptions = <TError = unknown, TContext = unknown>(options?: {
+export const getGetModUpdatesByIdsMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof getModUpdatesByIds>>,
 		TError,
@@ -3005,12 +3059,12 @@ export const getGetModUpdatesByIdsMutationOptions = <TError = unknown, TContext 
 
 export type GetModUpdatesByIdsMutationResult = NonNullable<Awaited<ReturnType<typeof getModUpdatesByIds>>>;
 export type GetModUpdatesByIdsMutationBody = GetModUpdatesByIdsBody;
-export type GetModUpdatesByIdsMutationError = unknown;
+export type GetModUpdatesByIdsMutationError = ErrorData;
 
 /**
  * @summary Gets Release Information for a set of Mods
  */
-export const useGetModUpdatesByIds = <TError = unknown, TContext = unknown>(
+export const useGetModUpdatesByIds = <TError = ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof getModUpdatesByIds>>,
@@ -3041,11 +3095,19 @@ export type getFeaturedModsResponse200 = {
 	status: 200;
 };
 
+export type getFeaturedModsResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
 export type getFeaturedModsResponseSuccess = getFeaturedModsResponse200 & {
 	headers: Headers;
 };
+export type getFeaturedModsResponseError = getFeaturedModsResponse500 & {
+	headers: Headers;
+};
 
-export type getFeaturedModsResponse = getFeaturedModsResponseSuccess;
+export type getFeaturedModsResponse = getFeaturedModsResponseSuccess | getFeaturedModsResponseError;
 
 export const getGetFeaturedModsUrl = () => {
 	return `/api/featured-mods`;
@@ -3060,11 +3122,7 @@ export const getFeaturedMods = async (options?: RequestInit): Promise<getFeature
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getFeaturedModsResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getFeaturedModsResponse;
+	return { data, status: res.status, headers: res.headers } as getFeaturedModsResponse;
 };
 
 export const getGetFeaturedModsQueryKey = () => {
@@ -3073,7 +3131,7 @@ export const getGetFeaturedModsQueryKey = () => {
 
 export const getGetFeaturedModsQueryOptions = <
 	TData = Awaited<ReturnType<typeof getFeaturedMods>>,
-	TError = unknown,
+	TError = ErrorData,
 >(options?: {
 	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>>;
 	fetch?: RequestInit;
@@ -3093,9 +3151,9 @@ export const getGetFeaturedModsQueryOptions = <
 };
 
 export type GetFeaturedModsQueryResult = NonNullable<Awaited<ReturnType<typeof getFeaturedMods>>>;
-export type GetFeaturedModsQueryError = unknown;
+export type GetFeaturedModsQueryError = ErrorData;
 
-export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = unknown>(
+export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = ErrorData>(
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>> &
 			Pick<
@@ -3109,10 +3167,8 @@ export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeatured
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = unknown>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>> &
 			Pick<
@@ -3126,31 +3182,25 @@ export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeatured
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = unknown>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Featured mods
  */
 
-export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = unknown>(
+export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetFeaturedModsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -3171,11 +3221,19 @@ export type getCategoriesResponse200 = {
 	status: 200;
 };
 
+export type getCategoriesResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
 export type getCategoriesResponseSuccess = getCategoriesResponse200 & {
 	headers: Headers;
 };
+export type getCategoriesResponseError = getCategoriesResponse500 & {
+	headers: Headers;
+};
 
-export type getCategoriesResponse = getCategoriesResponseSuccess;
+export type getCategoriesResponse = getCategoriesResponseSuccess | getCategoriesResponseError;
 
 export const getGetCategoriesUrl = () => {
 	return `/api/categories`;
@@ -3190,11 +3248,7 @@ export const getCategories = async (options?: RequestInit): Promise<getCategorie
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getCategoriesResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getCategoriesResponse;
+	return { data, status: res.status, headers: res.headers } as getCategoriesResponse;
 };
 
 export const getGetCategoriesQueryKey = () => {
@@ -3203,7 +3257,7 @@ export const getGetCategoriesQueryKey = () => {
 
 export const getGetCategoriesQueryOptions = <
 	TData = Awaited<ReturnType<typeof getCategories>>,
-	TError = unknown,
+	TError = ErrorData,
 >(options?: {
 	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>>;
 	fetch?: RequestInit;
@@ -3223,9 +3277,9 @@ export const getGetCategoriesQueryOptions = <
 };
 
 export type GetCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof getCategories>>>;
-export type GetCategoriesQueryError = unknown;
+export type GetCategoriesQueryError = ErrorData;
 
-export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = unknown>(
+export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = ErrorData>(
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>> &
 			Pick<
@@ -3239,10 +3293,8 @@ export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = unknown>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>> &
 			Pick<
@@ -3256,31 +3308,25 @@ export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = unknown>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Categories
  */
 
-export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = unknown>(
+export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetCategoriesQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -3301,11 +3347,19 @@ export type getTagsResponse200 = {
 	status: 200;
 };
 
+export type getTagsResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
 export type getTagsResponseSuccess = getTagsResponse200 & {
 	headers: Headers;
 };
+export type getTagsResponseError = getTagsResponse500 & {
+	headers: Headers;
+};
 
-export type getTagsResponse = getTagsResponseSuccess;
+export type getTagsResponse = getTagsResponseSuccess | getTagsResponseError;
 
 export const getGetTagsUrl = () => {
 	return `/api/tags`;
@@ -3327,7 +3381,7 @@ export const getGetTagsQueryKey = () => {
 	return [`/api/tags`] as const;
 };
 
-export const getGetTagsQueryOptions = <TData = Awaited<ReturnType<typeof getTags>>, TError = unknown>(options?: {
+export const getGetTagsQueryOptions = <TData = Awaited<ReturnType<typeof getTags>>, TError = ErrorData>(options?: {
 	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>>;
 	fetch?: RequestInit;
 }) => {
@@ -3346,9 +3400,9 @@ export const getGetTagsQueryOptions = <TData = Awaited<ReturnType<typeof getTags
 };
 
 export type GetTagsQueryResult = NonNullable<Awaited<ReturnType<typeof getTags>>>;
-export type GetTagsQueryError = unknown;
+export type GetTagsQueryError = ErrorData;
 
-export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = unknown>(
+export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = ErrorData>(
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>> &
 			Pick<
@@ -3358,10 +3412,8 @@ export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError =
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = unknown>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>> &
 			Pick<
@@ -3371,31 +3423,25 @@ export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError =
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = unknown>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Tags
  */
 
-export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = unknown>(
+export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetTagsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -3412,19 +3458,19 @@ export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError =
  * @summary Migrate Legacy Registry
  */
 export type migrateLegacyRegistryResponse200 = {
-	data: void;
+	data: OkData;
 	status: 200;
 };
 
-export type migrateLegacyRegistryResponse401 = {
-	data: void;
-	status: 401;
+export type migrateLegacyRegistryResponse500 = {
+	data: ErrorData;
+	status: 500;
 };
 
 export type migrateLegacyRegistryResponseSuccess = migrateLegacyRegistryResponse200 & {
 	headers: Headers;
 };
-export type migrateLegacyRegistryResponseError = migrateLegacyRegistryResponse401 & {
+export type migrateLegacyRegistryResponseError = migrateLegacyRegistryResponse500 & {
 	headers: Headers;
 };
 
@@ -3443,11 +3489,7 @@ export const migrateLegacyRegistry = async (options?: RequestInit): Promise<migr
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: migrateLegacyRegistryResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as migrateLegacyRegistryResponse;
+	return { data, status: res.status, headers: res.headers } as migrateLegacyRegistryResponse;
 };
 
 export const getMigrateLegacyRegistryQueryKey = () => {
@@ -3456,7 +3498,7 @@ export const getMigrateLegacyRegistryQueryKey = () => {
 
 export const getMigrateLegacyRegistryQueryOptions = <
 	TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>,
-	TError = void,
+	TError = ErrorData,
 >(options?: {
 	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError, TData>>;
 	fetch?: RequestInit;
@@ -3476,9 +3518,9 @@ export const getMigrateLegacyRegistryQueryOptions = <
 };
 
 export type MigrateLegacyRegistryQueryResult = NonNullable<Awaited<ReturnType<typeof migrateLegacyRegistry>>>;
-export type MigrateLegacyRegistryQueryError = void;
+export type MigrateLegacyRegistryQueryError = ErrorData;
 
-export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = void>(
+export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = ErrorData>(
 	options: {
 		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError, TData>> &
 			Pick<
@@ -3492,10 +3534,8 @@ export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migra
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = void>(
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError, TData>> &
 			Pick<
@@ -3509,31 +3549,25 @@ export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migra
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = void>(
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Migrate Legacy Registry
  */
 
-export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = void>(
+export function useMigrateLegacyRegistry<TData = Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof migrateLegacyRegistry>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getMigrateLegacyRegistryQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {

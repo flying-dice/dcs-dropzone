@@ -14,13 +14,11 @@ export type DownloadJob = typeof T_DOWNLOAD_QUEUE.$inferSelect;
 export type DownloadQueueOrchestratorConfig = {
 	db: BunSQLiteDatabase;
 	wgetExecutablePath: string;
-	maxRetries?: number;
 };
 
 export class DownloadQueue {
 	private readonly db: BunSQLiteDatabase;
 	private readonly wgetExecutablePath: string;
-	private readonly maxRetries: number;
 
 	private active: {
 		job: DownloadJob;
@@ -30,15 +28,9 @@ export class DownloadQueue {
 	constructor(config: DownloadQueueOrchestratorConfig) {
 		this.db = config.db;
 		this.wgetExecutablePath = config.wgetExecutablePath;
-		this.maxRetries = config.maxRetries ?? 3;
 
-		logger.info("DownloadQueueOrchestrator initialized", {
-			maxRetries: this.maxRetries,
-		});
-
-		// Periodically check for new jobs every 5 seconds
 		setInterval(() => {
-			this.startNextDownloadJob();
+			if (!this.active) this.startNextDownloadJob();
 		}, 1000);
 	}
 
@@ -171,7 +163,7 @@ export class DownloadQueue {
 					.set({
 						status: DownloadJobStatus.PENDING,
 						attempt: job.attempt + 1,
-						nextAttemptAfter: addSeconds(new Date(), 30), // Retry after a minimum 30 seconds
+						nextAttemptAfter: addSeconds(new Date(), 30),
 					})
 					.where(eq(T_DOWNLOAD_QUEUE.id, job.id))
 					.returning()

@@ -32,8 +32,6 @@ describe("UpdateMod", () => {
 			visibility: "PRIVATE",
 			maintainers: ["u1"],
 			downloadsCount: 0,
-			ratingsCount: 0,
-			averageRating: 0,
 		});
 
 		const result = await updateMod({
@@ -71,8 +69,6 @@ describe("UpdateMod", () => {
 			visibility: "PRIVATE",
 			maintainers: ["someone-else"],
 			downloadsCount: 0,
-			ratingsCount: 0,
-			averageRating: 0,
 		});
 
 		const result = await updateMod({

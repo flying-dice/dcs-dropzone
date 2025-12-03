@@ -1,5 +1,5 @@
 import { Badge, Card, Flex, Group, Stack, Text } from "@mantine/core";
-import { FaDownload, FaStar } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 import { ModImage } from "../ModImage.tsx";
 import { Stat } from "../Stat.tsx";
 import type { ModCardProps } from "./types.ts";
@@ -33,7 +33,6 @@ export function ListModCard(props: ModCardProps) {
 							<Badge variant={"light"}>{props.category}</Badge>
 							<Group wrap={"nowrap"} gap={"xs"}>
 								<Stat icon={FaDownload} stat={props.downloads} />
-								<Stat iconColor={"dcsyellow"} icon={FaStar} stat={props.averageRating.toFixed(1)} />
 							</Group>
 						</Group>
 					</Stack>

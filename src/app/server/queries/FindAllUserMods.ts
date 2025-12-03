@@ -42,20 +42,9 @@ export default async function (query: FindAllUserModsQuery): Promise<FindAllUser
 		},
 	]).exec();
 
-	const averageRating = await ModSummary.aggregate([
-		{ $match: { maintainers: user.id } },
-		{
-			$group: {
-				_id: null,
-				average: { $avg: "$averageRating" },
-			},
-		},
-	]);
-
 	const meta: UserModsMetaData = {
 		published: countPublished,
 		totalDownloads: totalDownloads[0]?.total || 0,
-		averageRating: averageRating[0]?.average || 0,
 	};
 
 	return {

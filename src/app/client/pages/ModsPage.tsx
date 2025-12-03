@@ -1,9 +1,11 @@
 import { AppShell, Container, Group, Pagination, Select, Stack, Text, useComputedColorScheme } from "@mantine/core";
+import { HttpStatusCode } from "axios";
 import { StatusCodes } from "http-status-codes";
 import { useEffect, useMemo, useState } from "react";
-import { useGetMods } from "../_autogen/api.ts";
+import { match } from "ts-pattern";
+import { type getModsResponseSuccess, useGetMods } from "../_autogen/api.ts";
 import { EmptyState } from "../components/EmptyState.tsx";
-import { ModCard } from "../components/ModCard/index.tsx";
+import { ModCard } from "../components/ModCard";
 import { ModFilterForm } from "../components/ModFilterForm.tsx";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { useModFilters } from "../hooks/useModFilters.ts";
@@ -26,15 +28,20 @@ export function ModsPage() {
 		...filters,
 	});
 
-	const categoriesData = mods.data?.data.filter.categories
-		? modFilterService.transformCategories(mods.data.data.filter.categories, t)
-		: [];
+	const categoriesData =
+		mods.data?.status === HttpStatusCode.Ok && mods.data?.data.filter.categories
+			? modFilterService.transformCategories(mods.data.data.filter.categories, t)
+			: [];
 
-	const usersData = mods.data?.data.filter.maintainers
-		? modFilterService.transformMaintainers(mods.data.data.filter.maintainers)
-		: [];
+	const usersData =
+		mods.data?.status === HttpStatusCode.Ok && mods.data?.data.filter.maintainers
+			? modFilterService.transformMaintainers(mods.data.data.filter.maintainers)
+			: [];
 
-	const tagsData = mods.data?.data.filter.tags ? modFilterService.transformTags(mods.data.data.filter.tags) : [];
+	const tagsData =
+		mods.data?.status === HttpStatusCode.Ok && mods.data?.data.filter.tags
+			? modFilterService.transformTags(mods.data.data.filter.tags)
+			: [];
 
 	const total = useMemo(
 		() => (mods.data?.status === StatusCodes.OK ? mods.data?.data.page.totalPages : 1),
@@ -66,47 +73,49 @@ export function ModsPage() {
 							tags={tagsData}
 						/>
 
-						{mods.data?.status === StatusCodes.OK && mods.data.data.data.length === 0 && (
-							<EmptyState
-								withoutBorder
-								title={t("NO_MODS_FOUND_TITLE")}
-								description={t("NO_MODS_FOUND_SUBTITLE_DESC")}
-								icon={AppIcons.Featured}
-							/>
-						)}
-
-						{mods.data?.status === StatusCodes.OK &&
-							mods.data.data.data.map((mod) => (
-								<ModCard
-									key={mod.id}
-									imageUrl={mod.thumbnail}
-									category={mod.category}
-									averageRating={mod.averageRating}
-									title={mod.name}
-									summary={mod.description || ""}
-									downloads={mod.downloadsCount}
-									variant={breakpoint.isXs ? "grid" : "list"}
+						{match(mods.data)
+							.when(
+								(res) => res?.status === StatusCodes.OK && res.data.data.length > 0,
+								(res: getModsResponseSuccess) => (
+									<Stack>
+										{res.data.data.map((mod) => (
+											<ModCard
+												key={mod.id}
+												imageUrl={mod.thumbnail}
+												category={mod.category}
+												title={mod.name}
+												summary={mod.description || ""}
+												downloads={mod.downloadsCount}
+												variant={breakpoint.isXs ? "grid" : "list"}
+											/>
+										))}
+										<Group justify={"space-between"} align={"center"}>
+											<Select
+												w={75}
+												data={["5", "10", "20", "50", "100"]}
+												value={size.toString()}
+												onChange={(v) => v && setSize(+v)}
+											/>
+											<Text size={"xs"} c={"dimmed"}>
+												{t("DISPLAYING_RANGE", {
+													start: (res.data.page.number - 1) * res.data.page.size + 1,
+													end: (res.data.page.number - 1) * res.data.page.size + res.data.data.length,
+													total: res.data.page.totalElements,
+												})}
+											</Text>
+											<Pagination total={total} onChange={setPage} value={page} />
+										</Group>
+									</Stack>
+								),
+							)
+							.otherwise(() => (
+								<EmptyState
+									withoutBorder
+									title={t("NO_MODS_FOUND_TITLE")}
+									description={t("NO_MODS_FOUND_SUBTITLE_DESC")}
+									icon={AppIcons.Featured}
 								/>
 							))}
-
-						{mods.data?.status === StatusCodes.OK && (
-							<Group justify={"space-between"} align={"center"}>
-								<Select
-									w={75}
-									data={["5", "10", "20", "50", "100"]}
-									value={size.toString()}
-									onChange={(v) => v && setSize(+v)}
-								/>
-								<Text size={"xs"} c={"dimmed"}>
-									{t("DISPLAYING_RANGE", {
-										start: (mods.data.data.page.number - 1) * mods.data.data.page.size + 1,
-										end: (mods.data.data.page.number - 1) * mods.data.data.page.size + mods.data.data.data.length,
-										total: mods.data.data.page.totalElements,
-									})}
-								</Text>
-								<Pagination total={total} onChange={setPage} value={page} />
-							</Group>
-						)}
 					</Stack>
 				</Stack>
 			</Container>

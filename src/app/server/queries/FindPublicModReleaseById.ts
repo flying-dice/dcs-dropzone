@@ -19,10 +19,8 @@ export default async function (query: FindPublicModReleaseByIdQuery): Promise<Fi
 
 	logger.debug({ modId, releaseId }, "start");
 
-	const mod = await Mod.findOne({ id: releaseId }).exec();
-
-	if (!mod) {
-		logger.debug({ modId }, "Mod not found");
+	if (!(await Mod.exists({ id: modId, visibility: ModVisibility.PUBLIC }).exec())) {
+		logger.debug({ modId }, "Public mod not found");
 		return err("ModNotFound");
 	}
 

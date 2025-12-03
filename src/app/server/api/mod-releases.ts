@@ -4,10 +4,14 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
+import type { ModAndReleaseData } from "../../client/_autogen/daemon_api.ts";
+import registerModReleaseDownload from "../commands/RegisterModReleaseDownload.ts";
 import findPublicModReleaseById from "../queries/FindPublicModReleaseById.ts";
 import findPublicModReleases from "../queries/FindPublicModReleases.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
+import { ModReleaseDownloadData } from "../schemas/ModReleaseDownloadData.ts";
+import { OkData } from "../schemas/OkData.ts";
 
 const router = new Hono();
 
@@ -94,6 +98,44 @@ router.get(
 					StatusCodes.NOT_FOUND,
 				),
 		);
+	},
+);
+
+/**
+ * GET /api/mods/:id/releases/:releaseId - Get a specific public release
+ */
+router.post(
+	"/:id/releases/:releaseId/downloads",
+	describeJsonRoute({
+		operationId: "registerModReleaseDownloadById",
+		summary: "Register mod release download by ID",
+		description: "Registers a download for a specific public release for a mod by its ID.",
+		tags: ["Mod Release Downloads"],
+		responses: {
+			[StatusCodes.OK]: OkData,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
+		},
+	}),
+	validator(
+		"param",
+		z.object({
+			id: z.string(),
+			releaseId: z.string(),
+		}),
+	),
+	validator("json", ModReleaseDownloadData.pick({ daemonInstanceId: true })),
+	async (c) => {
+		const { id, releaseId } = c.req.valid("param");
+		const { daemonInstanceId } = c.req.valid("json");
+
+		logger.debug(`Fetching public release '${releaseId}' for mod '${id}'`);
+
+		const commandData: ModReleaseDownloadData = { modId: id, releaseId, daemonInstanceId };
+		await registerModReleaseDownload({ data: ModReleaseDownloadData.parse(commandData) });
+
+		const okData: OkData = { ok: true };
+		return c.json(OkData.parse(okData), StatusCodes.OK);
 	},
 );
 

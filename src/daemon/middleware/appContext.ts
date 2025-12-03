@@ -9,6 +9,7 @@ import type { PathService } from "../services/PathService.ts";
  */
 export type AppContext = {
 	Variables: {
+		daemonInstanceId: string;
 		downloadQueue: DownloadQueue;
 		extractQueue: ExtractQueue;
 		pathService: PathService;

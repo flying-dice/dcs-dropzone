@@ -38,13 +38,12 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const mod = await getModById(id);
+		const result = await getModById(id);
 
-		if (!mod) {
-			throw new HTTPException(StatusCodes.NOT_FOUND);
-		}
-
-		return c.json(mod, StatusCodes.OK);
+		return result.match(
+			(mod) => c.json(mod, StatusCodes.OK),
+			(error) => c.json(ErrorData.parse(<ErrorData>{ code: StatusCodes.NOT_FOUND, error })),
+		);
 	},
 );
 

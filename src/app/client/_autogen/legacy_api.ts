@@ -275,11 +275,7 @@ export const getApiHealth = async (options?: RequestInit): Promise<getApiHealthR
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getApiHealthResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getApiHealthResponse;
+	return { data, status: res.status, headers: res.headers } as getApiHealthResponse;
 };
 
 export const getGetApiHealthQueryKey = () => {
@@ -324,9 +320,7 @@ export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>> &
@@ -341,18 +335,14 @@ export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiHealth>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Health Check
  */
@@ -363,9 +353,7 @@ export function useGetApiHealth<TData = Awaited<ReturnType<typeof getApiHealth>>
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetApiHealthQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -405,11 +393,7 @@ export const getUserMods = async (options?: RequestInit): Promise<getUserModsRes
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getUserModsResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getUserModsResponse;
+	return { data, status: res.status, headers: res.headers } as getUserModsResponse;
 };
 
 export const getGetUserModsQueryKey = () => {
@@ -454,9 +438,7 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>> &
@@ -471,18 +453,14 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get All User Mods
  */
@@ -493,9 +471,7 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -548,11 +524,7 @@ export const getUserModById = async (id: string, options?: RequestInit): Promise
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getUserModByIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getUserModByIdResponse;
+	return { data, status: res.status, headers: res.headers } as getUserModByIdResponse;
 };
 
 export const getGetUserModByIdQueryKey = (id?: string) => {
@@ -573,14 +545,11 @@ export const getGetUserModByIdQueryOptions = <TData = Awaited<ReturnType<typeof 
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserModById>>> = ({ signal }) =>
 		getUserModById(id, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!id,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getUserModById>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getUserModById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModById>>>;
@@ -601,9 +570,7 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
 	id: string,
 	options?: {
@@ -619,9 +586,7 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = void>(
 	id: string,
 	options?: {
@@ -629,9 +594,7 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get User Mod By ID
  */
@@ -643,9 +606,7 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModByIdQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -700,11 +661,7 @@ export const updateUserMod = async (id: string, mod: Mod, options?: RequestInit)
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: updateUserModResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as updateUserModResponse;
+	return { data, status: res.status, headers: res.headers } as updateUserModResponse;
 };
 
 export const getUpdateUserModMutationOptions = <TError = void, TContext = unknown>(options?: {
@@ -781,11 +738,7 @@ export const getSudoModSchema = async (options?: RequestInit): Promise<getSudoMo
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getSudoModSchemaResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getSudoModSchemaResponse;
+	return { data, status: res.status, headers: res.headers } as getSudoModSchemaResponse;
 };
 
 export const getGetSudoModSchemaQueryKey = () => {
@@ -830,9 +783,7 @@ export function useGetSudoModSchema<TData = Awaited<ReturnType<typeof getSudoMod
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetSudoModSchema<TData = Awaited<ReturnType<typeof getSudoModSchema>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSudoModSchema>>, TError, TData>> &
@@ -847,18 +798,14 @@ export function useGetSudoModSchema<TData = Awaited<ReturnType<typeof getSudoMod
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetSudoModSchema<TData = Awaited<ReturnType<typeof getSudoModSchema>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSudoModSchema>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Sudo Mod Schema
  */
@@ -869,9 +816,7 @@ export function useGetSudoModSchema<TData = Awaited<ReturnType<typeof getSudoMod
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetSudoModSchemaQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -911,11 +856,7 @@ export const getSudoMods = async (options?: RequestInit): Promise<getSudoModsRes
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getSudoModsResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getSudoModsResponse;
+	return { data, status: res.status, headers: res.headers } as getSudoModsResponse;
 };
 
 export const getGetSudoModsQueryKey = () => {
@@ -960,9 +901,7 @@ export function useGetSudoMods<TData = Awaited<ReturnType<typeof getSudoMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetSudoMods<TData = Awaited<ReturnType<typeof getSudoMods>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSudoMods>>, TError, TData>> &
@@ -977,18 +916,14 @@ export function useGetSudoMods<TData = Awaited<ReturnType<typeof getSudoMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetSudoMods<TData = Awaited<ReturnType<typeof getSudoMods>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSudoMods>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get All User Mods.
  */
@@ -999,9 +934,7 @@ export function useGetSudoMods<TData = Awaited<ReturnType<typeof getSudoMods>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetSudoModsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1049,11 +982,7 @@ export const getSudoModById = async (id: string, options?: RequestInit): Promise
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getSudoModByIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getSudoModByIdResponse;
+	return { data, status: res.status, headers: res.headers } as getSudoModByIdResponse;
 };
 
 export const getGetSudoModByIdQueryKey = (id?: string) => {
@@ -1074,14 +1003,11 @@ export const getGetSudoModByIdQueryOptions = <TData = Awaited<ReturnType<typeof 
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getSudoModById>>> = ({ signal }) =>
 		getSudoModById(id, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!id,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getSudoModById>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getSudoModById>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetSudoModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getSudoModById>>>;
@@ -1102,9 +1028,7 @@ export function useGetSudoModById<TData = Awaited<ReturnType<typeof getSudoModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetSudoModById<TData = Awaited<ReturnType<typeof getSudoModById>>, TError = void>(
 	id: string,
 	options?: {
@@ -1120,9 +1044,7 @@ export function useGetSudoModById<TData = Awaited<ReturnType<typeof getSudoModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetSudoModById<TData = Awaited<ReturnType<typeof getSudoModById>>, TError = void>(
 	id: string,
 	options?: {
@@ -1130,9 +1052,7 @@ export function useGetSudoModById<TData = Awaited<ReturnType<typeof getSudoModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get User Mod By ID.
  */
@@ -1144,9 +1064,7 @@ export function useGetSudoModById<TData = Awaited<ReturnType<typeof getSudoModBy
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetSudoModByIdQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1196,11 +1114,7 @@ export const setSudoModbyId = async (id: string, mod: Mod, options?: RequestInit
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: setSudoModbyIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as setSudoModbyIdResponse;
+	return { data, status: res.status, headers: res.headers } as setSudoModbyIdResponse;
 };
 
 export const getSetSudoModbyIdMutationOptions = <TError = void, TContext = unknown>(options?: {
@@ -1290,11 +1204,7 @@ export const deleteSudoModById = async (id: string, options?: RequestInit): Prom
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: deleteSudoModByIdResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as deleteSudoModByIdResponse;
+	return { data, status: res.status, headers: res.headers } as deleteSudoModByIdResponse;
 };
 
 export const getDeleteSudoModByIdMutationOptions = <TError = void, TContext = unknown>(options?: {
@@ -1379,11 +1289,7 @@ export const getAuthByProviderCallback = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getAuthByProviderCallbackResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getAuthByProviderCallbackResponse;
+	return { data, status: res.status, headers: res.headers } as getAuthByProviderCallbackResponse;
 };
 
 export const getGetAuthByProviderCallbackQueryKey = (provider?: "github", params?: GetAuthByProviderCallbackParams) => {
@@ -1408,14 +1314,11 @@ export const getGetAuthByProviderCallbackQueryOptions = <
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthByProviderCallback>>> = ({ signal }) =>
 		getAuthByProviderCallback(provider, params, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!provider,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderCallback>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!provider, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthByProviderCallback>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetAuthByProviderCallbackQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthByProviderCallback>>>;
@@ -1440,9 +1343,7 @@ export function useGetAuthByProviderCallback<
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthByProviderCallback<
 	TData = Awaited<ReturnType<typeof getAuthByProviderCallback>>,
 	TError = unknown,
@@ -1462,9 +1363,7 @@ export function useGetAuthByProviderCallback<
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthByProviderCallback<
 	TData = Awaited<ReturnType<typeof getAuthByProviderCallback>>,
 	TError = unknown,
@@ -1476,9 +1375,7 @@ export function useGetAuthByProviderCallback<
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary OAuth provider callback
  */
@@ -1494,9 +1391,7 @@ export function useGetAuthByProviderCallback<
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetAuthByProviderCallbackQueryOptions(provider, params, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1538,11 +1433,7 @@ export const getAuthByProviderLogin = async (
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getAuthByProviderLoginResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getAuthByProviderLoginResponse;
+	return { data, status: res.status, headers: res.headers } as getAuthByProviderLoginResponse;
 };
 
 export const getGetAuthByProviderLoginQueryKey = (provider?: "github") => {
@@ -1566,14 +1457,11 @@ export const getGetAuthByProviderLoginQueryOptions = <
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthByProviderLogin>>> = ({ signal }) =>
 		getAuthByProviderLogin(provider, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!provider,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!provider, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getAuthByProviderLogin>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetAuthByProviderLoginQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthByProviderLogin>>>;
@@ -1594,9 +1482,7 @@ export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getA
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError = unknown>(
 	provider: "github",
 	options?: {
@@ -1612,9 +1498,7 @@ export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getA
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getAuthByProviderLogin>>, TError = unknown>(
 	provider: "github",
 	options?: {
@@ -1622,9 +1506,7 @@ export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getA
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Redirect to OAuth provider login page
  */
@@ -1636,9 +1518,7 @@ export function useGetAuthByProviderLogin<TData = Awaited<ReturnType<typeof getA
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetAuthByProviderLoginQueryOptions(provider, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1679,11 +1559,7 @@ export const getAuthUser = async (options?: RequestInit): Promise<getAuthUserRes
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getAuthUserResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getAuthUserResponse;
+	return { data, status: res.status, headers: res.headers } as getAuthUserResponse;
 };
 
 export const getGetAuthUserQueryKey = () => {
@@ -1728,9 +1604,7 @@ export function useGetAuthUser<TData = Awaited<ReturnType<typeof getAuthUser>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthUser<TData = Awaited<ReturnType<typeof getAuthUser>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData>> &
@@ -1745,18 +1619,14 @@ export function useGetAuthUser<TData = Awaited<ReturnType<typeof getAuthUser>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthUser<TData = Awaited<ReturnType<typeof getAuthUser>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthUser>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get authenticated user data
  */
@@ -1767,9 +1637,7 @@ export function useGetAuthUser<TData = Awaited<ReturnType<typeof getAuthUser>>, 
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetAuthUserQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1808,11 +1676,7 @@ export const getAuthLogout = async (options?: RequestInit): Promise<getAuthLogou
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getAuthLogoutResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getAuthLogoutResponse;
+	return { data, status: res.status, headers: res.headers } as getAuthLogoutResponse;
 };
 
 export const getGetAuthLogoutQueryKey = () => {
@@ -1857,9 +1721,7 @@ export function useGetAuthLogout<TData = Awaited<ReturnType<typeof getAuthLogout
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthLogout<TData = Awaited<ReturnType<typeof getAuthLogout>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData>> &
@@ -1874,18 +1736,14 @@ export function useGetAuthLogout<TData = Awaited<ReturnType<typeof getAuthLogout
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthLogout<TData = Awaited<ReturnType<typeof getAuthLogout>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthLogout>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Logout
  */
@@ -1896,9 +1754,7 @@ export function useGetAuthLogout<TData = Awaited<ReturnType<typeof getAuthLogout
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetAuthLogoutQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -1937,11 +1793,7 @@ export const getRegistryIndex = async (options?: RequestInit): Promise<getRegist
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getRegistryIndexResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getRegistryIndexResponse;
+	return { data, status: res.status, headers: res.headers } as getRegistryIndexResponse;
 };
 
 export const getGetRegistryIndexQueryKey = () => {
@@ -1986,9 +1838,7 @@ export function useGetRegistryIndex<TData = Awaited<ReturnType<typeof getRegistr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetRegistryIndex<TData = Awaited<ReturnType<typeof getRegistryIndex>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegistryIndex>>, TError, TData>> &
@@ -2003,18 +1853,14 @@ export function useGetRegistryIndex<TData = Awaited<ReturnType<typeof getRegistr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetRegistryIndex<TData = Awaited<ReturnType<typeof getRegistryIndex>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegistryIndex>>, TError, TData>>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Registry Index
  */
@@ -2025,9 +1871,7 @@ export function useGetRegistryIndex<TData = Awaited<ReturnType<typeof getRegistr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetRegistryIndexQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
@@ -2066,11 +1910,7 @@ export const getRegistryEntry = async (id: string, options?: RequestInit): Promi
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
 	const data: getRegistryEntryResponse["data"] = body ? JSON.parse(body) : {};
-	return {
-		data,
-		status: res.status,
-		headers: res.headers,
-	} as getRegistryEntryResponse;
+	return { data, status: res.status, headers: res.headers } as getRegistryEntryResponse;
 };
 
 export const getGetRegistryEntryQueryKey = (id?: string) => {
@@ -2091,14 +1931,11 @@ export const getGetRegistryEntryQueryOptions = <TData = Awaited<ReturnType<typeo
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistryEntry>>> = ({ signal }) =>
 		getRegistryEntry(id, { signal, ...fetchOptions });
 
-	return {
-		queryKey,
-		queryFn,
-		enabled: !!id,
-		...queryOptions,
-	} as UseQueryOptions<Awaited<ReturnType<typeof getRegistryEntry>>, TError, TData> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
+	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getRegistryEntry>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetRegistryEntryQueryResult = NonNullable<Awaited<ReturnType<typeof getRegistryEntry>>>;
@@ -2119,9 +1956,7 @@ export function useGetRegistryEntry<TData = Awaited<ReturnType<typeof getRegistr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetRegistryEntry<TData = Awaited<ReturnType<typeof getRegistryEntry>>, TError = unknown>(
 	id: string,
 	options?: {
@@ -2137,9 +1972,7 @@ export function useGetRegistryEntry<TData = Awaited<ReturnType<typeof getRegistr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetRegistryEntry<TData = Awaited<ReturnType<typeof getRegistryEntry>>, TError = unknown>(
 	id: string,
 	options?: {
@@ -2147,9 +1980,7 @@ export function useGetRegistryEntry<TData = Awaited<ReturnType<typeof getRegistr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-};
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Registry Entry
  */
@@ -2161,9 +1992,7 @@ export function useGetRegistryEntry<TData = Awaited<ReturnType<typeof getRegistr
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-	queryKey: DataTag<QueryKey, TData, TError>;
-} {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetRegistryEntryQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {

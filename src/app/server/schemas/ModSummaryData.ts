@@ -11,8 +11,6 @@ export const ModSummaryData = ModData.pick({
 	maintainers: true,
 	tags: true,
 	downloadsCount: true,
-	averageRating: true,
-	ratingsCount: true,
 }).meta({
 	ref: "ModSummaryData",
 	title: "Mod Summary Data",

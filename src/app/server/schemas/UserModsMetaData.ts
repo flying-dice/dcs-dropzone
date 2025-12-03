@@ -4,7 +4,6 @@ export const UserModsMetaData = z
 	.object({
 		published: z.number(),
 		totalDownloads: z.number(),
-		averageRating: z.number().min(0).max(5),
 	})
 	.meta({
 		ref: "UserModsMetaData",

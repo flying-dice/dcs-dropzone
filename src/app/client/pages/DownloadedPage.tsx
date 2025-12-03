@@ -11,25 +11,16 @@ import {
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
+import { StatusCodes } from "http-status-codes";
 import { sortBy } from "lodash";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { useAsyncFn } from "react-use";
-import { getModById, getModReleaseById } from "../_autogen/api.ts";
-import {
-	addReleaseToDaemon,
-	disableRelease,
-	enableRelease,
-	ModAndReleaseDataStatus,
-	removeReleaseFromDaemon,
-} from "../_autogen/daemon_api.ts";
+import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
 import { EmptyState } from "../components/EmptyState.tsx";
 import { StatCard } from "../components/StatCard.tsx";
-import { useDaemonDownloads } from "../hooks/useDaemon.ts";
+import { useDaemon } from "../hooks/useDaemon.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { AppIcons } from "../icons.ts";
 import { orDefaultValue } from "../utils/orDefaultValue.ts";
-import { showErrorNotification } from "../utils/showErrorNotification.tsx";
-import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
 
 /**
  * Check if a mod subscription status can be toggled
@@ -48,78 +39,7 @@ export function DownloadedPage(props: DownloadedPageProps) {
 	const { t } = useAppTranslation();
 	const colorScheme = useComputedColorScheme();
 
-	const { enabledCount, downloadCount, downloads, refetch, latestVersions } = useDaemonDownloads();
-
-	const [, toggle] = useAsyncFn(
-		async (releaseId: string) => {
-			const sxn = downloads?.find((s) => s.releaseId === releaseId);
-			if (!sxn) return;
-
-			try {
-				if (sxn.status === ModAndReleaseDataStatus.ENABLED) {
-					await disableRelease(sxn.releaseId);
-					await refetch();
-					showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
-				} else if (sxn.status === ModAndReleaseDataStatus.DISABLED) {
-					await enableRelease(sxn.releaseId);
-					await refetch();
-					showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
-				}
-			} catch (e) {
-				showErrorNotification(e);
-			}
-		},
-		[downloads, refetch],
-	);
-
-	const [, remove] = useAsyncFn(
-		async (releaseId: string) => {
-			try {
-				await removeReleaseFromDaemon(releaseId);
-				await refetch();
-				showSuccessNotification(t("REMOVE_SUCCESS_TITLE"), t("REMOVE_SUCCESS_DESC"));
-			} catch (e) {
-				showErrorNotification(e);
-			}
-		},
-		[refetch],
-	);
-
-	const [, update] = useAsyncFn(
-		async (modId: string, currentReleaseId: string, latestReleaseId: string) => {
-			const mod = await getModById(modId);
-
-			if (!mod.data || mod.status !== 200) {
-				showErrorNotification(t("MOD_NOT_FOUND_ERROR"));
-				return;
-			}
-
-			const latest = await getModReleaseById(modId, latestReleaseId);
-
-			if (!latest.data || latest.status !== 200) {
-				showErrorNotification(t("LATEST_RELEASE_NOT_FOUND_ERROR"));
-				return;
-			}
-
-			try {
-				await addReleaseToDaemon({
-					modId: mod.data.id,
-					releaseId: latest.data.id,
-					modName: mod.data.name,
-					version: latest.data.version,
-					assets: latest.data.assets,
-					dependencies: mod.data.dependencies,
-					missionScripts: latest.data.missionScripts,
-					symbolicLinks: latest.data.symbolicLinks,
-				});
-				await removeReleaseFromDaemon(currentReleaseId);
-				await refetch();
-			} catch (e) {
-				showErrorNotification(e);
-			}
-		},
-		[refetch],
-	);
+	const { toggle, update, remove, enabledCount, downloadCount, downloads, latestVersions, outdatedCount } = useDaemon();
 
 	let _subscriptions = sortBy(downloads, "modName");
 
@@ -129,12 +49,14 @@ export function DownloadedPage(props: DownloadedPageProps) {
 
 	if (props.variant === "updates") {
 		_subscriptions = _subscriptions.filter((sxn) => {
+			if (latestVersions.value?.status !== StatusCodes.OK) return false;
 			const latest = latestVersions.value?.data.find((lv) => lv.mod_id === sxn.modId);
 			return latest ? latest.version !== sxn.version : false;
 		});
 	}
 
 	const rows = _subscriptions?.map((sxn) => {
+		if (latestVersions.value?.status !== StatusCodes.OK) return false;
 		const latest = latestVersions.value?.data.find((lv) => lv.mod_id === sxn.modId);
 
 		const isLatest = latest ? latest.version === sxn.version : true;
@@ -173,7 +95,12 @@ export function DownloadedPage(props: DownloadedPageProps) {
 						</Menu.Target>
 						<Menu.Dropdown>
 							{!isLatest && latest && (
-								<Menu.Item onClick={() => update(sxn.modId, sxn.releaseId, latest.id)}>{t("UPDATE")}</Menu.Item>
+								<Menu.Item
+									disabled={_subscriptions.some((it) => it.releaseId !== latest.id)}
+									onClick={() => update(sxn.modId, sxn.releaseId, latest.id)}
+								>
+									{t("UPDATE")}
+								</Menu.Item>
 							)}
 							<Menu.Item disabled={!canBeToggled(sxn.status)} onClick={() => toggle(sxn.releaseId)}>
 								{sxn.status === ModAndReleaseDataStatus.ENABLED ? t("DISABLE") : t("ENABLE")}
@@ -203,7 +130,12 @@ export function DownloadedPage(props: DownloadedPageProps) {
 							label={t("ENABLED")}
 							value={orDefaultValue(enabledCount, "-")}
 						/>
-						<StatCard icon={AppIcons.Updates} iconColor={"orange"} label={t("UPDATES")} value={"-"} />
+						<StatCard
+							icon={AppIcons.Updates}
+							iconColor={"orange"}
+							label={t("UPDATES")}
+							value={orDefaultValue(outdatedCount, "-")}
+						/>
 					</Group>
 					<Stack>
 						<Text fz={"lg"} fw={"bold"}>

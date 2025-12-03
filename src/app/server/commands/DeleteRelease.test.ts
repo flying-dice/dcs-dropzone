@@ -33,8 +33,6 @@ describe("DeleteRelease", () => {
 			visibility: "PRIVATE",
 			maintainers: ["u1"],
 			downloadsCount: 0,
-			ratingsCount: 0,
-			averageRating: 0,
 		});
 		await ModRelease.create({
 			id: "r1",
@@ -81,8 +79,6 @@ describe("DeleteRelease", () => {
 			visibility: "PRIVATE",
 			maintainers: ["u1"],
 			downloadsCount: 0,
-			ratingsCount: 0,
-			averageRating: 0,
 		});
 		const result = await deleteRelease({
 			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },

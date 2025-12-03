@@ -46,8 +46,6 @@ describe("CreateMod", () => {
 			dependencies: [],
 			visibility: "PRIVATE",
 			maintainers: ["123456789"],
-			averageRating: 0,
-			ratingsCount: 0,
 			downloadsCount: 0,
 		});
 	});

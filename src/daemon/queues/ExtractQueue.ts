@@ -15,14 +15,12 @@ export type ExtractJob = typeof T_EXTRACT_QUEUE.$inferSelect;
 export type ExtractQueueOrchestratorConfig = {
 	db: BunSQLiteDatabase;
 	sevenzipExecutablePath: string;
-	maxRetries?: number;
 	downloadQueue: DownloadQueue;
 };
 
 export class ExtractQueue {
 	private readonly db: BunSQLiteDatabase;
 	private readonly sevenzipExecutablePath: string;
-	private readonly maxRetries: number;
 
 	private active: {
 		job: ExtractJob;
@@ -32,15 +30,9 @@ export class ExtractQueue {
 	constructor(config: ExtractQueueOrchestratorConfig) {
 		this.db = config.db;
 		this.sevenzipExecutablePath = config.sevenzipExecutablePath;
-		this.maxRetries = config.maxRetries ?? 3;
 
-		logger.info("ExtractQueueOrchestrator initialized", {
-			maxRetries: this.maxRetries,
-		});
-
-		// Periodically check for new jobs every 5 seconds
 		setInterval(() => {
-			this.startNextExtractJob();
+			if (!this.active) this.startNextExtractJob();
 		}, 1000);
 	}
 
@@ -53,7 +45,7 @@ export class ExtractQueue {
 		downloadJobIds: string[],
 	): void {
 		logger.debug(`[${id}] - Pushing new extract job to queue: ${archivePath} -> ${targetDirectory}`);
-		const job = this.db.transaction((tx) => {
+		this.db.transaction((tx) => {
 			const insertedJob = tx
 				.insert(T_EXTRACT_QUEUE)
 				.values({
@@ -140,8 +132,6 @@ export class ExtractQueue {
 			return existingJob;
 		}
 
-		// Find extract jobs where all dependent download jobs are completed
-		// This uses a NOT EXISTS subquery to ensure no incomplete downloads exist
 		return this.db
 			.update(T_EXTRACT_QUEUE)
 			.set({
@@ -152,8 +142,6 @@ export class ExtractQueue {
 					eq(T_EXTRACT_QUEUE.status, ExtractJobStatus.PENDING),
 					lt(T_EXTRACT_QUEUE.attempt, T_EXTRACT_QUEUE.maxAttempts),
 					lte(T_EXTRACT_QUEUE.nextAttemptAfter, new Date()),
-					// Ensure all dependent download jobs are completed or have permanently failed
-					// Uses notExists to check that no incomplete downloads exist (that still have retries)
 					notExists(
 						this.db
 							.select({ id: T_EXTRACT_DOWNLOAD_JOIN.id })
@@ -162,12 +150,7 @@ export class ExtractQueue {
 							.where(
 								and(
 									eq(T_EXTRACT_DOWNLOAD_JOIN.extractJobId, T_EXTRACT_QUEUE.id),
-									// Download is NOT completed AND still has retries left
-									// (if download has exhausted retries, we shouldn't block on it)
-									and(
-										ne(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.COMPLETED),
-										lt(T_DOWNLOAD_QUEUE.attempt, T_DOWNLOAD_QUEUE.maxAttempts),
-									),
+									ne(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.COMPLETED),
 								),
 							),
 					),
@@ -196,9 +179,7 @@ export class ExtractQueue {
 					logger.info(`[${job.id}] - Extract progress: ${p.progress.toFixed(2)}%${p.summary ? ` ${p.summary}` : ""}`);
 					this.db
 						.update(T_EXTRACT_QUEUE)
-						.set({
-							progressPercent: p.progress,
-						})
+						.set({ progressPercent: p.progress })
 						.where(eq(T_EXTRACT_QUEUE.id, job.id))
 						.run();
 				},

@@ -1,9 +1,33 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "92d0a4ee-7db5-4701-b5b0-b673082d4d01",
-	"prevId": "5395cf20-8f44-4959-8545-8b0ade1e5282",
+	"id": "0fdd827c-8e2a-4d11-b31f-5d9d03499132",
+	"prevId": "b9343c5e-9441-452c-b3e7-f5f40003b1ab",
 	"tables": {
+		"APP_ATTRIBUTES": {
+			"name": "APP_ATTRIBUTES",
+			"columns": {
+				"key": {
+					"name": "key",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"value": {
+					"name": "value",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
 		"DOWNLOAD_QUEUE": {
 			"name": "DOWNLOAD_QUEUE",
 			"columns": {
@@ -147,7 +171,7 @@
 					"tableTo": "EXTRACT_QUEUE",
 					"columnsFrom": ["extract_job_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"EXTRACT_DOWNLOAD_JOIN_download_job_id_DOWNLOAD_QUEUE_id_fk": {
@@ -156,7 +180,7 @@
 					"tableTo": "DOWNLOAD_QUEUE",
 					"columnsFrom": ["download_job_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -300,6 +324,13 @@
 				},
 				"version": {
 					"name": "version",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"dependencies": {
+					"name": "dependencies",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true,

@@ -19,7 +19,6 @@ export default {
 		ASSET_URLS_DESCRIPTION: "For assets with multi-part files add multiple URLs.",
 		ASSET_URLS_LABEL: "Asset URLs",
 		AUTO: "Auto",
-		AVERAGE_RATING: "Average Rating",
 		BACK_TO_MOD_PAGE: "Back to Mod Page",
 		BACK_TO_MODS_PAGE: "Back to Mods Page",
 		BASIC_INFORMATION: "Basic information",
@@ -38,6 +37,10 @@ export default {
 		NO_MODS_DOWNLOADED_TITLE: "No mods downloaded",
 		NO_MODS_DOWNLOADED_SUBTITLE_DESC:
 			"You haven't downloaded any mods yet. Browse the mods page to find and download to mods that interest you.",
+
+		NO_USER_MODS_TITLE: "No mods published",
+		NO_USER_MODS_SUBTITLE_DESC:
+			"You haven't published any mods yet. Click the button above to create and publish your first mod.",
 
 		CONFIRM_REMOVE_SCREENSHOT_DESC: "Are you sure you want to remove this screenshot?",
 		CONFIRM_REMOVE_SCREENSHOT_TITLE: "Confirm Remove Screenshot",
@@ -202,5 +205,12 @@ export default {
 		UPDATE: "Update",
 		LATEST_RELEASE_NOT_FOUND_ERROR: "Latest release not found.",
 		MOD_NOT_FOUND_ERROR: "Mod not found.",
+
+		DAEMON_CONNECTION_SUCCESS: "Connected to daemon successfully",
+		DAEMON_CONNECTING: "Connecting to daemon...",
+		DAEMON_CONNECTION_ERROR: "Error connecting to daemon",
+		NO_ACTIVE_DOWNLOADS: "No active downloads",
+
+		ERROR_TAKING_ACTION: "Error taking action: {{error}}",
 	},
 };

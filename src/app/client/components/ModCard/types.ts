@@ -4,7 +4,6 @@ import type { IconType } from "react-icons";
 export type ModCardProps = {
 	imageUrl: string;
 	category: string;
-	averageRating: number;
 	title: string;
 	summary: string;
 	downloads: number;

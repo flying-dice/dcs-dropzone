@@ -9,7 +9,7 @@ import { _Releases } from "./_Releases.tsx";
 import { _Screenshots } from "./_Screenshots.tsx";
 import { _Tags } from "./_Tags.tsx";
 import { _Thumbnail } from "./_Thumbnail.tsx";
-import { _UserModRating } from "./_UserModRating.tsx";
+import { _UserModMetrics } from "./_UserModMetrics.tsx";
 import { _VisibilityAndPermissions } from "./_VisibilityAndPermissions.tsx";
 import { useUserModForm, useUserModFormSubmit } from "./form.ts";
 
@@ -47,10 +47,7 @@ export function _UserModPage(props: UserModPageProps) {
 						<Stack w={breakpoint.isMd ? "100%" : 300} miw={300}>
 							<_Thumbnail form={form} />
 							<_VisibilityAndPermissions form={form} />
-							<_UserModRating
-								subscriptions={mod.data?.status === 200 ? mod.data.data.downloadsCount : 0}
-								rating={mod.data?.status === 200 ? mod.data.data.averageRating : 0}
-							/>
+							<_UserModMetrics downloads={mod.data?.status === 200 ? mod.data.data.downloadsCount : 0} />
 							<_Screenshots form={form} />
 							<_FormActions form={form} mod={props.mod} />
 						</Stack>

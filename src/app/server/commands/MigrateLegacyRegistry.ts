@@ -63,9 +63,7 @@ export default async function () {
 				: ModCategory.OTHER,
 			dependencies: registryEntry.data.dependencies || [],
 			maintainers: ["16135506"],
-			downloadsCount: 20,
-			ratingsCount: 5,
-			averageRating: 3.2,
+			downloadsCount: 0,
 		});
 
 		await Mod.findOneAndUpdate({ name: mod.name }, mod, {

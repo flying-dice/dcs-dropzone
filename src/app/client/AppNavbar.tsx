@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { type ModDataCategory, useGetCategories } from "./_autogen/api.ts";
 import { CategoryShortcut } from "./components/CategoryShortcut.tsx";
 import { NavShortcut } from "./components/NavShortcut.tsx";
-import { useDaemonDownloads } from "./hooks/useDaemon.ts";
+import { useDaemon } from "./hooks/useDaemon.ts";
 import type { I18nKeys } from "./i18n/I18nKeys.ts";
 import { useAppTranslation } from "./i18n/useAppTranslation.ts";
 import { AppIcons } from "./icons.ts";
@@ -15,7 +15,7 @@ export function AppNavbar(props: AppNavbarProps) {
 	const { t } = useAppTranslation();
 	const categories = useGetCategories();
 	const nav = useNavigate();
-	const downloads = useDaemonDownloads();
+	const downloads = useDaemon();
 
 	const handleClick = (category: ModDataCategory) => {
 		const params = new URLSearchParams();
@@ -45,7 +45,13 @@ export function AppNavbar(props: AppNavbarProps) {
 						countColor={"green"}
 						to={"/enabled"}
 					/>
-					<NavShortcut icon={AppIcons.Updates} label={t("UPDATES")} count={3} countColor={"red"} to={"/updates"} />
+					<NavShortcut
+						icon={AppIcons.Updates}
+						label={t("UPDATES")}
+						count={downloads.outdatedCount}
+						countColor={"red"}
+						to={"/updates"}
+					/>
 					{props.withMyMods && <NavShortcut icon={AppIcons.UserMods} label={t("MY_MODS")} to={"/user-mods"} />}
 				</Stack>
 				<Stack gap="0">

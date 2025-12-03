@@ -31,8 +31,6 @@ export default async function (command: CreateModCommand): Promise<CreateModResu
 		dependencies: [],
 		visibility: ModVisibility.PRIVATE,
 		maintainers: [user.id],
-		averageRating: 0,
-		ratingsCount: 0,
 		downloadsCount: 0,
 	};
 

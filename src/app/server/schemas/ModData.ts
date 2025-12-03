@@ -16,8 +16,6 @@ export const ModData = z
 		visibility: z.enum(ModVisibility),
 		maintainers: z.array(z.string()).min(1, "A mod must have at least one maintainer."),
 		downloadsCount: z.number(),
-		ratingsCount: z.number(),
-		averageRating: z.number(),
 	})
 	.meta({
 		ref: "ModData",

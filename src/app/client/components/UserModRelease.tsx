@@ -39,7 +39,7 @@ export function UserModRelease(props: UserModReleaseProps) {
 						addSuffix: true,
 					})}`}
 				/>
-				<Stat icon={FaDownload} stat={`${Math.floor(Math.random() * 1000)} Downloads`} />
+				<Stat icon={FaDownload} stat={`${props.release.downloadsCount} Downloads`} />
 			</Group>
 		</Alert>
 	);
