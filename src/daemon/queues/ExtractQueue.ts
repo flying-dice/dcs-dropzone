@@ -1,13 +1,12 @@
 import { ok } from "node:assert";
 import { addSeconds } from "date-fns";
-import { and, asc, avg, eq, lt, lte, ne, notExists } from "drizzle-orm";
+import { and, asc, eq, lt, lte, ne, notExists } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus, ExtractJobStatus } from "../../common/data.ts";
-import { TypedEventEmitter } from "../../common/TypedEventEmitter.ts";
 import { spawnSevenzip } from "../child_process/sevenzip.ts";
 import { T_DOWNLOAD_QUEUE, T_EXTRACT_DOWNLOAD_JOIN, T_EXTRACT_QUEUE } from "../database/schema.ts";
-import { type DownloadQueue, DownloadQueueEvents } from "./DownloadQueue.ts";
+import type { DownloadQueue } from "./DownloadQueue.ts";
 
 const logger = getLogger("ExtractQueue");
 
@@ -20,21 +19,7 @@ export type ExtractQueueOrchestratorConfig = {
 	downloadQueue: DownloadQueue;
 };
 
-export enum ExtractQueueEvents {
-	PUSH = "push",
-	EXTRACTED = "extracted",
-	FAILED = "failed",
-	CANCELLED = "cancelled",
-}
-
-export type ExtractQueueEventPayloads = {
-	[ExtractQueueEvents.PUSH]: [ExtractJob];
-	[ExtractQueueEvents.EXTRACTED]: [ExtractJob & { extractedPath: string }];
-	[ExtractQueueEvents.FAILED]: [ExtractJob];
-	[ExtractQueueEvents.CANCELLED]: [ExtractJob[]];
-};
-
-export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
+export class ExtractQueue {
 	private readonly db: BunSQLiteDatabase;
 	private readonly sevenzipExecutablePath: string;
 	private readonly maxRetries: number;
@@ -45,7 +30,6 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 	} | null = null;
 
 	constructor(config: ExtractQueueOrchestratorConfig) {
-		super();
 		this.db = config.db;
 		this.sevenzipExecutablePath = config.sevenzipExecutablePath;
 		this.maxRetries = config.maxRetries ?? 3;
@@ -54,20 +38,10 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 			maxRetries: this.maxRetries,
 		});
 
-		config.downloadQueue.on(DownloadQueueEvents.DOWNLOADED, () => this.startNextExtractJob());
-
-		// Listen to events to trigger the next job without Delay
-		this.on(ExtractQueueEvents.PUSH, () => this.startNextExtractJob());
-		this.on(ExtractQueueEvents.EXTRACTED, () => this.startNextExtractJob());
-		this.on(ExtractQueueEvents.FAILED, () => this.startNextExtractJob());
-
-		// Periodically check for new jobs every 30 seconds
+		// Periodically check for new jobs every 5 seconds
 		setInterval(() => {
 			this.startNextExtractJob();
-		}, 30000);
-
-		// Resume any in-progress jobs on startup
-		this.startNextExtractJob();
+		}, 1000);
 	}
 
 	pushJob(
@@ -107,19 +81,6 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 
 			return insertedJob;
 		});
-		this.emit(ExtractQueueEvents.PUSH, job);
-	}
-
-	getOverallProgressForRelease(releaseId: string): number | null {
-		const average = this.db
-			.select({
-				progressPercent: avg(T_EXTRACT_QUEUE.progressPercent),
-			})
-			.from(T_EXTRACT_QUEUE)
-			.where(eq(T_EXTRACT_QUEUE.releaseId, releaseId))
-			.get();
-
-		return average?.progressPercent ? Math.floor(Number(average.progressPercent)) : null;
 	}
 
 	cancelJobsForRelease(releaseId: string): void {
@@ -149,8 +110,6 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 			.all();
 
 		logger.info(`Cancelled ${result.length} extract jobs for release id: ${releaseId}`);
-
-		this.emit(ExtractQueueEvents.CANCELLED, result);
 	}
 
 	private startNextExtractJob(): void {
@@ -158,7 +117,6 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 		const job = this.selectOrClaimNextJob();
 
 		if (!job) {
-			logger.info("No pending extract jobs in the queue");
 			return;
 		}
 
@@ -172,8 +130,6 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 	}
 
 	private selectOrClaimNextJob(): ExtractJob | undefined {
-		logger.info("Fetching next extract job");
-
 		const existingJob = this.db
 			.select()
 			.from(T_EXTRACT_QUEUE)
@@ -254,7 +210,7 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 			(extractedPath) => {
 				logger.info(`[${job.id}] - Extraction completed: ${extractedPath}`);
 
-				const _job = this.db
+				this.db
 					.update(T_EXTRACT_QUEUE)
 					.set({
 						status: ExtractJobStatus.COMPLETED,
@@ -263,12 +219,10 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 					.where(eq(T_EXTRACT_QUEUE.id, job.id))
 					.returning()
 					.get();
-
-				this.emit(ExtractQueueEvents.EXTRACTED, { ..._job, extractedPath });
 			},
 			(error) => {
 				logger.error(`[${job.id}] - Extraction failed: ${error}`);
-				const _job = this.db
+				this.db
 					.update(T_EXTRACT_QUEUE)
 					.set({
 						status: ExtractJobStatus.PENDING,
@@ -278,8 +232,6 @@ export class ExtractQueue extends TypedEventEmitter<ExtractQueueEventPayloads> {
 					.where(eq(T_EXTRACT_QUEUE.id, job.id))
 					.returning()
 					.get();
-
-				this.emit(ExtractQueueEvents.FAILED, _job);
 			},
 		);
 

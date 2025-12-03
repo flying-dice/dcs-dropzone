@@ -1,10 +1,9 @@
 import { ok } from "node:assert";
 import { addSeconds } from "date-fns";
-import { and, asc, avg, eq, lt, lte } from "drizzle-orm";
+import { and, asc, eq, lt, lte } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus } from "../../common/data.ts";
-import { TypedEventEmitter } from "../../common/TypedEventEmitter.ts";
 import { spawnWget } from "../child_process/wget.ts";
 import { T_DOWNLOAD_QUEUE } from "../database/schema.ts";
 
@@ -18,20 +17,7 @@ export type DownloadQueueOrchestratorConfig = {
 	maxRetries?: number;
 };
 
-export enum DownloadQueueEvents {
-	PUSH = "push",
-	DOWNLOADED = "downloaded",
-	FAILED = "failed",
-	CANCELLED = "cancelled",
-}
-export type DownloadQueueEventPayloads = {
-	[DownloadQueueEvents.PUSH]: [DownloadJob];
-	[DownloadQueueEvents.DOWNLOADED]: [DownloadJob & { filePath: string }];
-	[DownloadQueueEvents.FAILED]: [DownloadJob];
-	[DownloadQueueEvents.CANCELLED]: [DownloadJob[]];
-};
-
-export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads> {
+export class DownloadQueue {
 	private readonly db: BunSQLiteDatabase;
 	private readonly wgetExecutablePath: string;
 	private readonly maxRetries: number;
@@ -42,7 +28,6 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 	} | null = null;
 
 	constructor(config: DownloadQueueOrchestratorConfig) {
-		super();
 		this.db = config.db;
 		this.wgetExecutablePath = config.wgetExecutablePath;
 		this.maxRetries = config.maxRetries ?? 3;
@@ -51,23 +36,15 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 			maxRetries: this.maxRetries,
 		});
 
-		// Listen to events to trigger the next job without Delay
-		this.on(DownloadQueueEvents.PUSH, () => this.startNextDownloadJob());
-		this.on(DownloadQueueEvents.DOWNLOADED, () => this.startNextDownloadJob());
-		this.on(DownloadQueueEvents.FAILED, () => this.startNextDownloadJob());
-
-		// Periodically check for new jobs every 30 seconds
+		// Periodically check for new jobs every 5 seconds
 		setInterval(() => {
 			this.startNextDownloadJob();
-		}, 30000);
-
-		// Resume any in-progress jobs on startup
-		this.startNextDownloadJob();
+		}, 1000);
 	}
 
 	pushJob(releaseId: string, releaseAssetId: string, id: string, url: string, targetDirectory: string): void {
 		logger.debug(`[${id}] - Pushing new download job to queue: ${url} -> ${targetDirectory}`);
-		const job = this.db
+		this.db
 			.insert(T_DOWNLOAD_QUEUE)
 			.values({
 				id,
@@ -80,20 +57,6 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 			})
 			.returning()
 			.get();
-
-		this.emit(DownloadQueueEvents.PUSH, job);
-	}
-
-	getOverallProgressForRelease(releaseId: string): number {
-		const average = this.db
-			.select({
-				progressPercent: avg(T_DOWNLOAD_QUEUE.progressPercent),
-			})
-			.from(T_DOWNLOAD_QUEUE)
-			.where(eq(T_DOWNLOAD_QUEUE.releaseId, releaseId))
-			.get();
-
-		return Math.floor(Number(average?.progressPercent ?? 0));
 	}
 
 	cancelJobsForRelease(releaseId: string): void {
@@ -112,8 +75,6 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 			.all();
 
 		logger.info(`Cancelled ${result.length} download jobs for release id: ${releaseId}`);
-
-		this.emit(DownloadQueueEvents.CANCELLED, result);
 	}
 
 	private startNextDownloadJob(): void {
@@ -121,7 +82,6 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 		const job = this.selectOrClaimNextJob();
 
 		if (!job) {
-			logger.info("No pending download jobs in the queue");
 			return;
 		}
 
@@ -135,8 +95,6 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 	}
 
 	private selectOrClaimNextJob(): DownloadJob | undefined {
-		logger.info("Fetching next job");
-
 		const existingJob = this.db
 			.select()
 			.from(T_DOWNLOAD_QUEUE)
@@ -196,7 +154,7 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 			(filePath) => {
 				logger.info(`[${job.id}] - Download completed: ${filePath}`);
 
-				const _job = this.db
+				this.db
 					.update(T_DOWNLOAD_QUEUE)
 					.set({
 						status: DownloadJobStatus.COMPLETED,
@@ -205,12 +163,10 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 					.where(eq(T_DOWNLOAD_QUEUE.id, job.id))
 					.returning()
 					.get();
-
-				this.emit(DownloadQueueEvents.DOWNLOADED, { ..._job, filePath });
 			},
 			(error) => {
 				logger.error(`[${job.id}] - Download failed: ${error}`);
-				const _job = this.db
+				this.db
 					.update(T_DOWNLOAD_QUEUE)
 					.set({
 						status: DownloadJobStatus.PENDING,
@@ -220,8 +176,6 @@ export class DownloadQueue extends TypedEventEmitter<DownloadQueueEventPayloads>
 					.where(eq(T_DOWNLOAD_QUEUE.id, job.id))
 					.returning()
 					.get();
-
-				this.emit(DownloadQueueEvents.FAILED, _job);
 			},
 		);
 
