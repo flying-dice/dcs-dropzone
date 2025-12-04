@@ -1,6 +1,6 @@
 import { ok } from "node:assert";
 import { addSeconds } from "date-fns";
-import { and, asc, eq, lt, lte } from "drizzle-orm";
+import { and, asc, eq, lte } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus } from "../../common/data.ts";
@@ -105,7 +105,6 @@ export class DownloadQueue {
 			.where(
 				and(
 					eq(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.PENDING),
-					lt(T_DOWNLOAD_QUEUE.attempt, T_DOWNLOAD_QUEUE.maxAttempts),
 					lte(T_DOWNLOAD_QUEUE.nextAttemptAfter, new Date()),
 				),
 			)

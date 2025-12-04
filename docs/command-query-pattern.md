@@ -2,6 +2,8 @@
 
 This document explains how the server-side code under `src/app/server` uses the command–query pattern instead of a large service layer. Each operation is explicit, composable, and testable.
 
+**Note:** This pattern is used in the **app server** component. The daemon service uses a different architecture focused on queue management and system operations.
+
 ## Why commands and queries?
 - Commands perform state changes (create/update/delete). They must be explicit about side effects and validations.
 - Queries read data and return DTOs. They must be side‑effect‑free and cache‑friendly.
@@ -21,12 +23,20 @@ src/app/server/
     DeleteRelease.ts
     HandleAuthResult.ts
     MigrateLegacyRegistry.ts
+    RegisterModReleaseDownload.ts
   queries/
     FindUserModById.ts
     FindUserModReleases.ts
     FindUserModReleaseById.ts
+    FindAllUserMods.ts
+    FindPublicModReleases.ts
+    FindPublicModReleaseById.ts
+    GetAllPublishedMods.ts
+    GetAllFeaturedMods.ts
     GetAllTags.ts
-    ...
+    GetCategoryCounts.ts
+    GetModById.ts
+    FindUpdateInformationByIds.ts
   entities/
   schemas/
   middleware/
@@ -68,7 +78,7 @@ export default async function (cmd: UpdateModCommand): Promise<UpdateModResult> 
 
 ## Testing guidance
 - Place tests next to the file using the `<Name>.test.ts` convention (same folder as the operation).
-- Use MongoMemoryServer in command tests that touch Mongo; isolate connections per test to avoid interference.
+- The app server uses Mongoose (MongoDB) for data persistence. Use MongoMemoryServer in tests that require MongoDB access to provide isolated test environments.
 - Prefer local doubles over mocks for any auxiliary behavior; plain objects over Maps in tests.
 
 ## Conventions summary

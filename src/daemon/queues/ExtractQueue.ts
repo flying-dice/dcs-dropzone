@@ -1,6 +1,6 @@
 import { ok } from "node:assert";
 import { addSeconds } from "date-fns";
-import { and, asc, eq, lt, lte, ne, notExists } from "drizzle-orm";
+import { and, asc, eq, lte, ne, notExists } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus, ExtractJobStatus } from "../../common/data.ts";
@@ -140,7 +140,6 @@ export class ExtractQueue {
 			.where(
 				and(
 					eq(T_EXTRACT_QUEUE.status, ExtractJobStatus.PENDING),
-					lt(T_EXTRACT_QUEUE.attempt, T_EXTRACT_QUEUE.maxAttempts),
 					lte(T_EXTRACT_QUEUE.nextAttemptAfter, new Date()),
 					notExists(
 						this.db
