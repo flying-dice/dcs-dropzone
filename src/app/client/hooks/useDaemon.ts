@@ -1,6 +1,5 @@
-import { StatusCodes } from "http-status-codes";
-import { useAsync, useAsyncFn } from "react-use";
-import { getModUpdatesByIds } from "../_autogen/api.ts";
+import { useMemo } from "react";
+import { useAsyncFn } from "react-use";
 import { ModAndReleaseDataStatus, removeReleaseFromDaemon, useGetAllDaemonReleases } from "../_autogen/daemon_api.ts";
 import addReleaseToDaemonById from "../commands/AddReleaseToDaemonById.ts";
 import toggleReleaseById from "../commands/ToggleReleaseById.ts";
@@ -13,24 +12,6 @@ export function useDaemon() {
 	const { t } = useAppTranslation();
 	const daemonReleases = useGetAllDaemonReleases({
 		query: { refetchInterval: 1000 },
-	});
-
-	const latestVersions = useAsync(
-		() =>
-			getModUpdatesByIds({
-				ids: (daemonReleases.data?.data.map((it) => it.modId) || []).join(","),
-			}),
-		[daemonReleases.data],
-	);
-
-	const enabled = daemonReleases.data?.data.filter((it) => it.status === ModAndReleaseDataStatus.ENABLED);
-
-	const outdated = daemonReleases?.data?.data.filter((it) => {
-		const latest =
-			latestVersions.value?.status === StatusCodes.OK &&
-			latestVersions.value?.data.find((mod) => mod.mod_id === it.modId);
-		if (!latest) return false;
-		return latest.version !== it.version;
 	});
 
 	const [adding, add] = useAsyncFn(
@@ -93,13 +74,9 @@ export function useDaemon() {
 	);
 
 	return {
-		enabledCount: enabled?.length,
-		enabled,
 		downloads: daemonReleases.data?.data,
+		downloadsIds: useMemo(() => daemonReleases.data?.data.map((it) => it.releaseId), [daemonReleases.data]),
 		downloadCount: daemonReleases.data?.data.length,
-		outdatedCount: outdated?.length,
-		outdated,
-		latestVersions,
 		refetch: daemonReleases.refetch,
 		active: daemonReleases.data?.data.filter((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS),
 		isActive: daemonReleases.data?.data.some((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS) ?? false,

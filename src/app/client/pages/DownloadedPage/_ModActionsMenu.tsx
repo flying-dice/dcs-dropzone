@@ -1,6 +1,7 @@
 import { ActionIcon, Menu } from "@mantine/core";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
+import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
+import { useDaemon } from "../../hooks/useDaemon.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { LatestVersion } from "./_DownloadedModsTable.tsx";
 
@@ -14,35 +15,35 @@ function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
 }
 
-export function _ModActionsMenu(props: {
-	status: ModAndReleaseDataStatus | undefined;
-	latest: LatestVersion | undefined;
-	isLatest: boolean;
-	hasUpdateInProgress: boolean;
-	onToggle: () => void;
-	onUpdate: () => void;
-	onRemove: () => void;
-}) {
+export function _ModActionsMenu(props: { mod: ModAndReleaseData; latest?: LatestVersion }) {
 	const { t } = useAppTranslation();
-	const { status, latest, isLatest } = props;
+	const { toggle, update, remove, updating } = useDaemon();
+
+	const handleToggle = () => toggle(props.mod.releaseId);
+
+	const handleUpdate = () => (props.latest ? update(props.mod.modId, props.mod.releaseId, props.latest.id) : null);
+
+	const handleRemove = () => remove(props.mod.releaseId);
+
+	const isLatest = props.latest ? props.latest.version === props.mod.version : null;
 
 	return (
 		<Menu>
 			<Menu.Target>
-				<ActionIcon variant={"default"}>
+				<ActionIcon variant={"subtle"}>
 					<BsThreeDotsVertical />
 				</ActionIcon>
 			</Menu.Target>
 			<Menu.Dropdown>
-				{!isLatest && latest && (
-					<Menu.Item disabled={props.hasUpdateInProgress} onClick={props.onUpdate}>
+				{!isLatest && handleUpdate && (
+					<Menu.Item disabled={updating.loading} onClick={handleUpdate}>
 						{t("UPDATE")}
 					</Menu.Item>
 				)}
-				<Menu.Item disabled={!canBeToggled(status)} onClick={props.onToggle}>
-					{status === ModAndReleaseDataStatus.ENABLED ? t("DISABLE") : t("ENABLE")}
+				<Menu.Item disabled={!canBeToggled(props.mod.status)} onClick={handleToggle}>
+					{props.mod.status === ModAndReleaseDataStatus.ENABLED ? t("DISABLE") : t("ENABLE")}
 				</Menu.Item>
-				<Menu.Item onClick={props.onRemove}>{t("REMOVE")}</Menu.Item>
+				<Menu.Item onClick={handleRemove}>{t("REMOVE")}</Menu.Item>
 			</Menu.Dropdown>
 		</Menu>
 	);

@@ -4,8 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import { describeJsonRoute } from "../../../common/describeJsonRoute.ts";
-import type { ModAndReleaseData } from "../../client/_autogen/daemon_api.ts";
 import registerModReleaseDownload from "../commands/RegisterModReleaseDownload.ts";
+import findLatestPublicModReleaseByModId from "../queries/FindLatestPublicModReleaseByModId.ts";
 import findPublicModReleaseById from "../queries/FindPublicModReleaseById.ts";
 import findPublicModReleases from "../queries/FindPublicModReleases.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
@@ -48,6 +48,46 @@ router.get(
 			(error) =>
 				c.json(
 					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
+	},
+);
+
+router.get(
+	"/:id/releases/latest",
+	describeJsonRoute({
+		operationId: "getLatestModReleaseById",
+		summary: "Get latest mod release by ID",
+		description: "Retrieves the latest public release for a mod by its ID.",
+		tags: ["Mod Releases"],
+		responses: {
+			[StatusCodes.OK]: ModReleaseData,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
+		},
+	}),
+	validator(
+		"param",
+		z.object({
+			id: z.string(),
+		}),
+	),
+	async (c) => {
+		const { id } = c.req.valid("param");
+
+		logger.debug(`Fetching latest release for mod '${id}'`);
+
+		const result = await findLatestPublicModReleaseByModId({ modId: id });
+
+		return result.match(
+			(data) => c.json(data, StatusCodes.OK),
+			(error) =>
+				c.json(
+					ErrorData.parse(<ErrorData>{
 						code: StatusCodes.NOT_FOUND,
 						error,
 					}),

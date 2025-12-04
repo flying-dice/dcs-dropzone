@@ -24,14 +24,14 @@ router.post(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	validator("json", z.object({ ids: z.string() })),
+	validator("json", z.object({ modIds: z.string().array() })),
 	async (c) => {
-		const { ids } = c.req.valid("json");
+		const { modIds } = c.req.valid("json");
 
-		logger.debug(`Fetching public releases for mod '${ids}'`);
+		logger.debug(`Fetching public releases for mod '${modIds}'`);
 
 		const releases = await findUpdateInformationByIds({
-			modIds: ids.split(","),
+			modIds,
 		});
 
 		return c.json(releases, StatusCodes.OK);

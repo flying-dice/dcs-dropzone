@@ -1,11 +1,13 @@
 import { Group } from "@mantine/core";
 import { StatCard } from "../../components/StatCard.tsx";
+import { useDashboardMetrics } from "../../hooks/useDashboardMetrics.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 import { orDefaultValue } from "../../utils/orDefaultValue.ts";
 
-export function _StatsCards(props: { downloadCount: number; enabledCount: number; outdatedCount: number }) {
+export function _StatsCards() {
 	const { t } = useAppTranslation();
+	const { enabled, outdated, downloads } = useDashboardMetrics();
 
 	return (
 		<Group>
@@ -13,19 +15,14 @@ export function _StatsCards(props: { downloadCount: number; enabledCount: number
 				icon={AppIcons.Downloaded}
 				iconColor={"grape"}
 				label={t("DOWNLOADED")}
-				value={orDefaultValue(props.downloadCount, "-")}
+				value={orDefaultValue(downloads, "-")}
 			/>
-			<StatCard
-				icon={AppIcons.Enabled}
-				iconColor={"green"}
-				label={t("ENABLED")}
-				value={orDefaultValue(props.enabledCount, "-")}
-			/>
+			<StatCard icon={AppIcons.Enabled} iconColor={"green"} label={t("ENABLED")} value={orDefaultValue(enabled, "-")} />
 			<StatCard
 				icon={AppIcons.Updates}
 				iconColor={"orange"}
 				label={t("UPDATES")}
-				value={orDefaultValue(props.outdatedCount, "-")}
+				value={orDefaultValue(outdated, "-")}
 			/>
 		</Group>
 	);

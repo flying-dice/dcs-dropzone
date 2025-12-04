@@ -2,7 +2,7 @@ import { Button, Group, Stack, Text } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import { useGetMods } from "../../_autogen/api.ts";
+import { useGetPopularMods } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
@@ -13,7 +13,7 @@ export function _PopularMods() {
 	const nav = useNavigate();
 	const { t } = useAppTranslation();
 	const breakpoint = useBreakpoint();
-	const mods = useGetMods({ page: 1, size: 10 });
+	const popularMods = useGetPopularMods();
 
 	return (
 		<Stack>
@@ -21,13 +21,13 @@ export function _PopularMods() {
 				{t("POPULAR_MODS")}
 			</Text>
 
-			{match(mods.data)
+			{match(popularMods.data)
 				.when(
 					(res) => res?.status === StatusCodes.OK,
 					(res) =>
 						res &&
 						res.status === StatusCodes.OK &&
-						res.data.data.map((mod) => (
+						res.data.map((mod) => (
 							<ModCard
 								key={mod.id}
 								imageUrl={mod.thumbnail}

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { type ModDataCategory, useGetCategories } from "./_autogen/api.ts";
 import { CategoryShortcut } from "./components/CategoryShortcut.tsx";
 import { NavShortcut } from "./components/NavShortcut.tsx";
-import { useDaemon } from "./hooks/useDaemon.ts";
+import { useDashboardMetrics } from "./hooks/useDashboardMetrics.ts";
 import type { I18nKeys } from "./i18n/I18nKeys.ts";
 import { useAppTranslation } from "./i18n/useAppTranslation.ts";
 import { AppIcons } from "./icons.ts";
@@ -15,7 +15,6 @@ export function AppNavbar(props: AppNavbarProps) {
 	const { t } = useAppTranslation();
 	const categories = useGetCategories();
 	const nav = useNavigate();
-	const downloads = useDaemon();
 
 	const handleClick = (category: ModDataCategory) => {
 		const params = new URLSearchParams();
@@ -26,29 +25,26 @@ export function AppNavbar(props: AppNavbarProps) {
 		});
 	};
 
+	const { downloads, enabled, outdated } = useDashboardMetrics();
+
 	return (
 		<AppShell.Navbar>
 			<Stack p={"md"} gap={"xl"}>
 				<Stack gap={"xs"}>
 					<NavShortcut icon={AppIcons.Home} label={t("DASHBOARD")} to={"/"} />
 					<NavShortcut icon={AppIcons.Mods} label={t("BROWSE_MODS")} to={"/mods"} />
-					<NavShortcut
-						icon={AppIcons.Downloaded}
-						label={t("DOWNLOADED")}
-						to={"/downloaded"}
-						count={downloads.downloadCount}
-					/>
+					<NavShortcut icon={AppIcons.Downloaded} label={t("DOWNLOADED")} to={"/downloaded"} count={downloads} />
 					<NavShortcut
 						icon={AppIcons.Enabled}
 						label={t("ENABLED")}
-						count={downloads.enabledCount}
+						count={enabled}
 						countColor={"green"}
 						to={"/enabled"}
 					/>
 					<NavShortcut
 						icon={AppIcons.Updates}
 						label={t("UPDATES")}
-						count={downloads.outdatedCount}
+						count={outdated}
 						countColor={"red"}
 						to={"/updates"}
 					/>

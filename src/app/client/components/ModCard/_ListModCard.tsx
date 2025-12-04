@@ -7,7 +7,7 @@ import type { ModCardProps } from "./types.ts";
 /**
  * List variant of ModCard - optimized for list layouts
  */
-export function ListModCard(props: ModCardProps) {
+export function _ListModCard(props: ModCardProps) {
 	return (
 		<Card
 			flex={"auto"}

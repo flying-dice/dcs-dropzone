@@ -1,49 +1,29 @@
 import { Group } from "@mantine/core";
-import { StatusCodes } from "http-status-codes";
-import { match } from "ts-pattern";
-import { useGetMods } from "../../_autogen/api.ts";
 import { StatCard } from "../../components/StatCard.tsx";
+import { useDashboardMetrics } from "../../hooks/useDashboardMetrics.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 import { orDefaultValue } from "../../utils/orDefaultValue.ts";
 
-export function _StatsCards(props: {
-	downloadCount: number | undefined;
-	enabledCount: number | undefined;
-	outdatedCount: number | undefined;
-}) {
+export function _StatsCards() {
 	const { t } = useAppTranslation();
-	const mods = useGetMods({ page: 1, size: 10 });
+	const { totalMods, downloads, enabled, outdated } = useDashboardMetrics();
 
 	return (
 		<Group>
-			<StatCard
-				icon={AppIcons.Mods}
-				label={t("TOTAL_MODS")}
-				value={match(mods.data)
-					.when(
-						(res) => res?.status === StatusCodes.OK,
-						(res) => (res?.status === StatusCodes.OK ? res.data.page.totalElements : "-"),
-					)
-					.otherwise(() => "-")}
-			/>
+			<StatCard icon={AppIcons.Mods} label={t("TOTAL_MODS")} value={orDefaultValue(totalMods, "-")} />
 			<StatCard
 				icon={AppIcons.Downloaded}
 				iconColor={"grape"}
 				label={t("DOWNLOADS")}
-				value={orDefaultValue(props.downloadCount, "-")}
+				value={orDefaultValue(downloads, "-")}
 			/>
-			<StatCard
-				icon={AppIcons.Enabled}
-				iconColor={"green"}
-				label={t("ENABLED")}
-				value={orDefaultValue(props.enabledCount, "-")}
-			/>
+			<StatCard icon={AppIcons.Enabled} iconColor={"green"} label={t("ENABLED")} value={orDefaultValue(enabled, "-")} />
 			<StatCard
 				icon={AppIcons.Updates}
 				iconColor={"orange"}
 				label={t("UPDATES")}
-				value={orDefaultValue(props.outdatedCount, "-")}
+				value={orDefaultValue(outdated, "-")}
 			/>
 		</Group>
 	);

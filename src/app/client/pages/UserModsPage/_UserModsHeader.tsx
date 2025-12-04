@@ -6,7 +6,7 @@ export function _UserModsHeader(props: { onNewMod: () => void }) {
 	const { t } = useAppTranslation();
 
 	return (
-		<Group>
+		<Group justify={"end"}>
 			<Button leftSection={<FaPlus />} onClick={props.onNewMod}>
 				{t("PUBLISH_NEW_MOD")}
 			</Button>

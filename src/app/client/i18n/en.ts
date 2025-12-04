@@ -212,5 +212,6 @@ export default {
 		NO_ACTIVE_DOWNLOADS: "No active downloads",
 
 		ERROR_TAKING_ACTION: "Error taking action: {{error}}",
+		DOWNLOADS: "Downloads",
 	},
 };

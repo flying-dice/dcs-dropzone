@@ -1,5 +1,5 @@
-import { GridModCard } from "./GridModCard.tsx";
-import { ListModCard } from "./ListModCard.tsx";
+import { _GridModCard } from "./_GridModCard.tsx";
+import { _ListModCard } from "./_ListModCard.tsx";
 import type { ModCardProps } from "./types.ts";
 
 /**
@@ -8,13 +8,13 @@ import type { ModCardProps } from "./types.ts";
  */
 export function ModCard(props: ModCardProps) {
 	if (props.variant === "grid") {
-		return <GridModCard {...props} />;
+		return <_GridModCard {...props} />;
 	}
 	if (props.variant === "list") {
-		return <ListModCard {...props} />;
+		return <_ListModCard {...props} />;
 	}
 	// Default to list if variant is not recognized
-	return <ListModCard {...props} />;
+	return <_ListModCard {...props} />;
 }
 
 export type { ModCardProps };

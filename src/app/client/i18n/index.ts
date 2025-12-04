@@ -14,9 +14,7 @@ await i18n
 	.init({
 		fallbackLng: "en",
 		debug: true,
-		resources: {
-			en,
-		},
+		resources: { en },
 		interpolation: {
 			escapeValue: false,
 		},

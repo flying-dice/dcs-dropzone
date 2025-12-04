@@ -1,10 +1,12 @@
 import "../common/log4js.ts";
 import { serve } from "bun";
+import { getLogger } from "log4js";
 import index from "./client/index.html";
 import Application from "./server/Application.ts";
 import appConfig from "./server/ApplicationConfig.ts";
 
-console.log(`🌍 DCS Dropzone Registry Webapp Starting...`);
+const logger = getLogger("bootstrap");
+logger.info(`🌍 DCS Dropzone Registry Webapp Starting...`);
 
 const server = serve({
 	port: appConfig.port,
@@ -19,4 +21,4 @@ const server = serve({
 	},
 });
 
-console.log(`🚀 Server running at ${server.url}`);
+logger.info(`🚀 Server running at ${server.url}`);

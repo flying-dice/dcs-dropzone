@@ -7,7 +7,7 @@ import type { ModCardProps } from "./types.ts";
 /**
  * Grid variant of ModCard - optimized for grid layouts
  */
-export function GridModCard(props: ModCardProps) {
+export function _GridModCard(props: ModCardProps) {
 	return (
 		<Card
 			flex={"auto"}

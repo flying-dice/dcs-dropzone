@@ -30,8 +30,8 @@ export function _UserModsPage(_: UserModsPageProps) {
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
 			<Container size={"xl"}>
 				<Stack py={"md"} gap={"xl"}>
-					<_UserModsHeader onNewMod={handleNewMod} />
 					<_UserModsStats />
+					<_UserModsHeader onNewMod={handleNewMod} />
 					<_UserModsList />
 				</Stack>
 			</Container>
