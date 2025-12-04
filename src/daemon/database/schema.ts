@@ -67,7 +67,6 @@ export const T_DOWNLOAD_QUEUE = sqliteTable("DOWNLOAD_QUEUE", {
 	status: text("status").notNull().$type<DownloadJobStatus>().default(DownloadJobStatus.PENDING),
 	progressPercent: int("progress_percent").notNull().default(0),
 	attempt: int("attempt").notNull().default(0),
-	maxAttempts: int("max_attempts").notNull().default(3),
 	nextAttemptAfter: int("next_attempt_after", { mode: "timestamp" }).notNull(),
 	createdAt: int("created_at", { mode: "timestamp" }).notNull(),
 });
@@ -85,7 +84,6 @@ export const T_EXTRACT_QUEUE = sqliteTable("EXTRACT_QUEUE", {
 	status: text("status").notNull().$type<ExtractJobStatus>().default(ExtractJobStatus.PENDING),
 	progressPercent: int("progress_percent").notNull().default(0),
 	attempt: int("attempt").notNull().default(0),
-	maxAttempts: int("max_attempts").notNull().default(3),
 	nextAttemptAfter: int("next_attempt_after", { mode: "timestamp" }).notNull(),
 	createdAt: int("created_at", { mode: "timestamp" }).notNull(),
 });
