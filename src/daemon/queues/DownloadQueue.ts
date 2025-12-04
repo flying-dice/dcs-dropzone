@@ -103,10 +103,7 @@ export class DownloadQueue {
 				status: DownloadJobStatus.IN_PROGRESS,
 			})
 			.where(
-				and(
-					eq(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.PENDING),
-					lte(T_DOWNLOAD_QUEUE.nextAttemptAfter, new Date()),
-				),
+				and(eq(T_DOWNLOAD_QUEUE.status, DownloadJobStatus.PENDING), lte(T_DOWNLOAD_QUEUE.nextAttemptAfter, new Date())),
 			)
 			.orderBy(asc(T_DOWNLOAD_QUEUE.createdAt))
 			.limit(1)

@@ -5,12 +5,12 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 import { AppHeader } from "./AppHeader.tsx";
 import { AppNavbar } from "./AppNavbar.tsx";
 import { useUserContext } from "./context/UserContext.ts";
-import { DownloadedPage } from "./pages/DownloadedPage.tsx";
-import { Homepage } from "./pages/HomePage.tsx";
-import { ModsPage } from "./pages/ModsPage.tsx";
+import { DownloadedPage } from "./pages/DownloadedPage";
+import { Homepage } from "./pages/HomePage";
+import { ModsPage } from "./pages/ModsPage";
 import { UserModPage } from "./pages/UserModPage";
 import { UserModReleasePage } from "./pages/UserModReleasePage";
-import { UserModsPage } from "./pages/UserModsPage.tsx";
+import { UserModsPage } from "./pages/UserModsPage";
 
 export function App() {
 	const { user } = useUserContext();
