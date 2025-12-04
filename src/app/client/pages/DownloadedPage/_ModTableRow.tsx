@@ -10,7 +10,7 @@ import type { LatestVersion } from "./_DownloadedModsTable.tsx";
  * @param status The mod subscription status
  * @returns True if the status can be toggled, false otherwise
  */
-function canBeToggled(status: ModAndReleaseDataStatus | undefined) {
+function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
 }
 
@@ -46,7 +46,7 @@ export function _ModTableRow(props: {
 				{sxn.status === ModAndReleaseDataStatus.IN_PROGRESS ? (
 					<Progress value={sxn.overallPercentProgress || 0} striped={true} animated={true} />
 				) : (
-					sxn.status || "PENDING"
+					t(sxn.status || "PENDING")
 				)}
 			</Table.Td>
 			<Table.Td>
