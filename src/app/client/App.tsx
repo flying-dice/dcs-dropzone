@@ -6,7 +6,7 @@ import { AppHeader } from "./AppHeader.tsx";
 import { AppNavbar } from "./AppNavbar.tsx";
 import { useUserContext } from "./context/UserContext.ts";
 import { DownloadedPage } from "./pages/DownloadedPage";
-import { Homepage } from "./pages/HomePage.tsx";
+import { Homepage } from "./pages/HomePage";
 import { ModsPage } from "./pages/ModsPage.tsx";
 import { UserModPage } from "./pages/UserModPage";
 import { UserModReleasePage } from "./pages/UserModReleasePage";
