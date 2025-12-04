@@ -1,7 +1,6 @@
 import { Stack, Table, Text } from "@mantine/core";
-import type { StatusCodes } from "http-status-codes";
-import type { ModAndReleaseData } from "../../_autogen/daemon_api.ts";
 import type { getModUpdatesByIdsResponseSuccess } from "../../_autogen/api.ts";
+import type { ModAndReleaseData } from "../../_autogen/daemon_api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";

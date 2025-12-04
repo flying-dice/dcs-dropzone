@@ -1,10 +1,10 @@
 import { Stack, Text } from "@mantine/core";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { ModFilterForm, type ModFilterFormProps } from "../../components/ModFilterForm.tsx";
+import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 
 export function _ModsHeader(props: ModFilterFormProps) {
 	const { t } = useAppTranslation();
-	
+
 	return (
 		<Stack>
 			<Text fz={"lg"} fw={"bold"}>

@@ -1,26 +1,22 @@
-import { Button, Group, Stack, Text } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import type { getModsResponse } from "../../_autogen/api.ts";
+import type { getUserModsResponse } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 
-export function _PopularMods(props: { popularMods: getModsResponse | undefined }) {
+export function _UserModsList(props: { mods: getUserModsResponse | undefined }) {
 	const nav = useNavigate();
 	const { t } = useAppTranslation();
 	const breakpoint = useBreakpoint();
 
 	return (
 		<Stack>
-			<Text fz={"lg"} fw={"bold"}>
-				{t("POPULAR_MODS")}
-			</Text>
-
-			{match(props.popularMods)
+			{match(props.mods)
 				.when(
 					(res) => res?.status === StatusCodes.OK,
 					(res) =>
@@ -34,30 +30,18 @@ export function _PopularMods(props: { popularMods: getModsResponse | undefined }
 								title={mod.name}
 								summary={mod.description || ""}
 								downloads={mod.downloadsCount}
-								isDownloaded={false}
 								variant={breakpoint.isXs ? "grid" : "list"}
+								onClick={() => nav(mod.id)}
 							/>
 						)),
 				)
 				.otherwise(() => (
 					<EmptyState
-						withoutBorder
-						title={t("NO_POPULAR_MODS_FOUND_TITLE")}
-						description={t("NO_POPULAR_MODS_FOUND_SUBTITLE_DESC")}
+						title={t("NO_USER_MODS_TITLE")}
+						description={t("NO_USER_MODS_SUBTITLE_DESC")}
 						icon={AppIcons.Mods}
 					/>
 				))}
-
-			<Group justify={"center"}>
-				<Button
-					variant={"default"}
-					onClick={async () => {
-						await nav("/mods");
-					}}
-				>
-					{t("VIEW_ALL_MODS")}
-				</Button>
-			</Group>
 		</Stack>
 	);
 }

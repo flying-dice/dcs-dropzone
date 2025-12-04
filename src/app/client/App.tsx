@@ -10,7 +10,7 @@ import { Homepage } from "./pages/HomePage";
 import { ModsPage } from "./pages/ModsPage";
 import { UserModPage } from "./pages/UserModPage";
 import { UserModReleasePage } from "./pages/UserModReleasePage";
-import { UserModsPage } from "./pages/UserModsPage.tsx";
+import { UserModsPage } from "./pages/UserModsPage";
 
 export function App() {
 	const { user } = useUserContext();

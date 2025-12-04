@@ -20,19 +20,21 @@ export function _FeaturedMods(props: { featuredMods: getFeaturedModsResponse | u
 					(res) => res?.status === StatusCodes.OK && res.data.length > 0,
 					(res) => (
 						<Group align={"stretch"}>
-							{res && res.status === StatusCodes.OK && res.data.map((mod) => (
-								<Flex w={250} key={mod.id} flex={"auto"}>
-									<ModCard
-										imageUrl={mod.thumbnail}
-										category={mod.category}
-										title={mod.name}
-										summary={mod.description || ""}
-										downloads={mod.downloadsCount}
-										isDownloaded={false}
-										variant={"grid"}
-									/>
-								</Flex>
-							))}
+							{res &&
+								res.status === StatusCodes.OK &&
+								res.data.map((mod) => (
+									<Flex w={250} key={mod.id} flex={"auto"}>
+										<ModCard
+											imageUrl={mod.thumbnail}
+											category={mod.category}
+											title={mod.name}
+											summary={mod.description || ""}
+											downloads={mod.downloadsCount}
+											isDownloaded={false}
+											variant={"grid"}
+										/>
+									</Flex>
+								))}
 						</Group>
 					),
 				)

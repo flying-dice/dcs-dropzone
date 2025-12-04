@@ -33,7 +33,11 @@ export function _DownloadedPage(props: DownloadedPageProps) {
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
 			<Container size={"xl"}>
 				<Stack py={"xl"} gap={"xl"}>
-					<_StatsCards downloadCount={downloadCount || 0} enabledCount={enabledCount || 0} outdatedCount={outdatedCount || 0} />
+					<_StatsCards
+						downloadCount={downloadCount || 0}
+						enabledCount={enabledCount || 0}
+						outdatedCount={outdatedCount || 0}
+					/>
 					<_DownloadedModsTable
 						subscriptions={_subscriptions}
 						latestVersions={latestVersions.value?.status === StatusCodes.OK ? latestVersions.value : null}

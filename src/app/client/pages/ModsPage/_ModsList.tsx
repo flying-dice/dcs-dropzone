@@ -19,17 +19,19 @@ export function _ModsList(props: { mods: getModsResponse | undefined }) {
 					(res) => res?.status === StatusCodes.OK && res.data.data.length > 0,
 					(res) => (
 						<Stack>
-							{res && res.status === StatusCodes.OK && res.data.data.map((mod) => (
-								<ModCard
-									key={mod.id}
-									imageUrl={mod.thumbnail}
-									category={mod.category}
-									title={mod.name}
-									summary={mod.description || ""}
-									downloads={mod.downloadsCount}
-									variant={breakpoint.isXs ? "grid" : "list"}
-								/>
-							))}
+							{res &&
+								res.status === StatusCodes.OK &&
+								res.data.data.map((mod) => (
+									<ModCard
+										key={mod.id}
+										imageUrl={mod.thumbnail}
+										category={mod.category}
+										title={mod.name}
+										summary={mod.description || ""}
+										downloads={mod.downloadsCount}
+										variant={breakpoint.isXs ? "grid" : "list"}
+									/>
+								))}
 						</Stack>
 					),
 				)
