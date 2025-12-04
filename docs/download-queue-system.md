@@ -11,7 +11,7 @@ The download queue system provides a robust, database-backed solution for managi
 1. **DownloadQueue** - Main service that manages the queue
    - Polls database for pending jobs every second
    - Processes one download at a time (single-job concurrency)
-   - Handles retry logic with configurable delay
+   - Handles retry logic with fixed 30-second delay
    - Resumes any in-progress jobs on startup
    - No event emitters (jobs are tracked via database status)
 
@@ -82,10 +82,10 @@ console.log(`Found ${jobs.length} download jobs`);
 ```
 PENDING → IN_PROGRESS → COMPLETED
               ↓ (on failure)
-           PENDING (retry with delay, up to maxAttempts)
+           PENDING (retry after 30s, up to maxAttempts)
 ```
 
-When a download fails (e.g., network error, wget process error), the job returns to `PENDING` status with an incremented `attempt` counter and `nextAttemptAfter` timestamp set to control retry timing. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
+When a download fails (e.g., network error, wget process error), the job returns to `PENDING` status with an incremented `attempt` counter. The job will be retried after 30 seconds. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
 
 ### States
 
@@ -152,12 +152,12 @@ On startup, the download queue automatically:
 - Partial downloads are automatically resumed
 - No need to restart from byte zero
 
-### 3. Retry with Delay
+### 3. Retry with Fixed Delay
 
-Failed downloads are retried based on `nextAttemptAfter` timestamp:
+Failed downloads retry after 30 seconds:
 - Job status returns to `PENDING`
 - `attempt` counter increments
-- `nextAttemptAfter` timestamp controls when the job can be retried
+- `nextAttemptAfter` set to 30 seconds in future
 
 ### 4. Cancellation Support
 

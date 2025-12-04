@@ -13,7 +13,7 @@ This system works in tandem with the [Download Queue System](./download-queue-sy
 1. **ExtractQueue** - Main service that manages the extraction queue
    - Polls database for pending jobs every second
    - Manages single-job concurrency (one extraction at a time)
-   - Handles retry logic with configurable delay
+   - Handles retry logic with fixed 30-second delay
    - Performs crash recovery on startup
    - Waits for all dependent downloads to complete before starting
 
@@ -90,10 +90,10 @@ console.log(`Found ${jobs.length} extract jobs`);
 ```
 PENDING → IN_PROGRESS → COMPLETED
               ↓ (on failure)
-           PENDING (retry with delay, up to maxAttempts)
+           PENDING (retry after 30s, up to maxAttempts)
 ```
 
-When extraction fails (e.g., corrupt archive, 7zip process error), the job returns to `PENDING` status with an incremented `attempt` counter and `nextAttemptAfter` timestamp. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
+When extraction fails (e.g., corrupt archive, 7zip process error), the job returns to `PENDING` status with an incremented `attempt` counter. The job will be retried after 30 seconds. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
 
 ### States
 
@@ -195,8 +195,8 @@ CREATE TABLE EXTRACT_DOWNLOAD_JOIN (
   extract_job_id TEXT NOT NULL,
   download_job_id TEXT NOT NULL,
   
-  FOREIGN KEY (extract_job_id) REFERENCES EXTRACT_QUEUE(id),
-  FOREIGN KEY (download_job_id) REFERENCES DOWNLOAD_QUEUE(id)
+  FOREIGN KEY (extract_job_id) REFERENCES EXTRACT_QUEUE(id) ON DELETE CASCADE,
+  FOREIGN KEY (download_job_id) REFERENCES DOWNLOAD_QUEUE(id) ON DELETE CASCADE
 );
 ```
 
@@ -243,12 +243,12 @@ On startup, the extract queue automatically:
 - Uses database join with `notExists` subquery for efficient checking
 - Supports multipart archives (multiple download jobs → single extract job)
 
-### 3. Retry with Delay
+### 3. Retry with Fixed Delay
 
-Failed extractions are retried based on `nextAttemptAfter` timestamp:
+Failed extractions retry after 30 seconds:
 - Job status returns to `PENDING`
 - `attempt` counter increments
-- `nextAttemptAfter` timestamp controls when the job can be retried
+- `nextAttemptAfter` set to 30 seconds in future
 
 ### 4. Cancellation Support
 
