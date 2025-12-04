@@ -5,7 +5,7 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 import { AppHeader } from "./AppHeader.tsx";
 import { AppNavbar } from "./AppNavbar.tsx";
 import { useUserContext } from "./context/UserContext.ts";
-import { DownloadedPage } from "./pages/DownloadedPage.tsx";
+import { DownloadedPage } from "./pages/DownloadedPage";
 import { Homepage } from "./pages/HomePage.tsx";
 import { ModsPage } from "./pages/ModsPage.tsx";
 import { UserModPage } from "./pages/UserModPage";
