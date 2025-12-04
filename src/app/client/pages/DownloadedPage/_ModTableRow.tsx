@@ -1,8 +1,8 @@
-import { ActionIcon, Checkbox, Menu, Progress, Table, Text } from "@mantine/core";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { Checkbox, Progress, Table, Text } from "@mantine/core";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { LatestVersion } from "./_DownloadedModsTable.tsx";
+import { _ModActionsMenu } from "./_ModActionsMenu.tsx";
 
 /**
  * Check if a mod subscription status can be toggled
@@ -29,11 +29,7 @@ export function _ModTableRow(props: {
 	return (
 		<Table.Tr>
 			<Table.Th>
-				<Checkbox
-					disabled={!canBeToggled(sxn.status)}
-					checked={sxn.status === ModAndReleaseDataStatus.ENABLED}
-					onChange={props.onToggle}
-				/>
+				<Checkbox disabled={!canBeToggled(sxn.status)} checked={sxn.status === ModAndReleaseDataStatus.ENABLED} />
 			</Table.Th>
 			<Table.Td>{sxn.modName}</Table.Td>
 			<Table.Td>
@@ -50,24 +46,15 @@ export function _ModTableRow(props: {
 				)}
 			</Table.Td>
 			<Table.Td>
-				<Menu>
-					<Menu.Target>
-						<ActionIcon variant={"default"}>
-							<BsThreeDotsVertical />
-						</ActionIcon>
-					</Menu.Target>
-					<Menu.Dropdown>
-						{!isLatest && latest && (
-							<Menu.Item disabled={props.hasUpdateInProgress} onClick={props.onUpdate}>
-								{t("UPDATE")}
-							</Menu.Item>
-						)}
-						<Menu.Item disabled={!canBeToggled(sxn.status)} onClick={props.onToggle}>
-							{sxn.status === ModAndReleaseDataStatus.ENABLED ? t("DISABLE") : t("ENABLE")}
-						</Menu.Item>
-						<Menu.Item onClick={props.onRemove}>{t("REMOVE")}</Menu.Item>
-					</Menu.Dropdown>
-				</Menu>
+				<_ModActionsMenu
+					status={sxn.status}
+					latest={latest}
+					isLatest={isLatest}
+					hasUpdateInProgress={props.hasUpdateInProgress}
+					onToggle={props.onToggle}
+					onUpdate={props.onUpdate}
+					onRemove={props.onRemove}
+				/>
 			</Table.Td>
 		</Table.Tr>
 	);

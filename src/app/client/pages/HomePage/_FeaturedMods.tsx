@@ -1,21 +1,22 @@
 import { Center, Flex, Group, Stack, Text } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { match } from "ts-pattern";
-import type { getFeaturedModsResponse } from "../../_autogen/api.ts";
+import { useGetFeaturedMods } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { ModCard } from "../../components/ModCard";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 
-export function _FeaturedMods(props: { featuredMods: getFeaturedModsResponse | undefined }) {
+export function _FeaturedMods() {
 	const { t } = useAppTranslation();
+	const featuredMods = useGetFeaturedMods();
 
 	return (
 		<Stack>
 			<Text fz={"lg"} fw={"bold"}>
 				{t("FEATURED_MODS")}
 			</Text>
-			{match(props.featuredMods)
+			{match(featuredMods.data)
 				.when(
 					(res) => res?.status === StatusCodes.OK && res.data.length > 0,
 					(res) => (

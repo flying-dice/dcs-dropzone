@@ -1,18 +1,23 @@
 import { Group, Pagination, Select, Text } from "@mantine/core";
-import type { getModsResponse } from "../../_autogen/api.ts";
+import { useGetMods } from "../../_autogen/api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 
 export function _PaginationControls(props: {
-	mods: getModsResponse | undefined;
 	page: number;
 	size: number;
 	total: number;
+	filters: Record<string, unknown>;
 	onPageChange: (page: number) => void;
 	onSizeChange: (size: string | null) => void;
 }) {
 	const { t } = useAppTranslation();
+	const mods = useGetMods({
+		page: props.page,
+		size: props.size,
+		...props.filters,
+	});
 
-	if (!props.mods || props.mods.status !== 200) {
+	if (!mods.data || mods.data.status !== 200) {
 		return null;
 	}
 
@@ -26,9 +31,9 @@ export function _PaginationControls(props: {
 			/>
 			<Text size={"xs"} c={"dimmed"}>
 				{t("DISPLAYING_RANGE", {
-					start: (props.mods.data.page.number - 1) * props.mods.data.page.size + 1,
-					end: (props.mods.data.page.number - 1) * props.mods.data.page.size + props.mods.data.data.length,
-					total: props.mods.data.page.totalElements,
+					start: (mods.data.data.page.number - 1) * mods.data.data.page.size + 1,
+					end: (mods.data.data.page.number - 1) * mods.data.data.page.size + mods.data.data.data.length,
+					total: mods.data.data.page.totalElements,
 				})}
 			</Text>
 			<Pagination total={props.total} onChange={props.onPageChange} value={props.page} />

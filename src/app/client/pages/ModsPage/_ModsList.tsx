@@ -1,20 +1,25 @@
 import { Stack } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { match } from "ts-pattern";
-import type { getModsResponse } from "../../_autogen/api.ts";
+import { useGetMods } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 
-export function _ModsList(props: { mods: getModsResponse | undefined }) {
+export function _ModsList(props: { page: number; size: number; filters: Record<string, unknown> }) {
 	const { t } = useAppTranslation();
 	const breakpoint = useBreakpoint();
+	const mods = useGetMods({
+		page: props.page,
+		size: props.size,
+		...props.filters,
+	});
 
 	return (
 		<>
-			{match(props.mods)
+			{match(mods.data)
 				.when(
 					(res) => res?.status === StatusCodes.OK && res.data.data.length > 0,
 					(res) => (

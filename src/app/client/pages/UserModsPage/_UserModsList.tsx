@@ -2,21 +2,22 @@ import { Stack } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import type { getUserModsResponse } from "../../_autogen/api.ts";
+import { useGetUserMods } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 
-export function _UserModsList(props: { mods: getUserModsResponse | undefined }) {
+export function _UserModsList() {
 	const nav = useNavigate();
 	const { t } = useAppTranslation();
 	const breakpoint = useBreakpoint();
+	const mods = useGetUserMods();
 
 	return (
 		<Stack>
-			{match(props.mods)
+			{match(mods.data)
 				.when(
 					(res) => res?.status === StatusCodes.OK,
 					(res) =>
