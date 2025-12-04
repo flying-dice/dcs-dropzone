@@ -9,11 +9,11 @@ The download queue system provides a robust, database-backed solution for managi
 ### Components
 
 1. **DownloadQueue** - Main service that manages the queue
-   - Polls database for pending jobs every 30 seconds
+   - Polls database for pending jobs every second
    - Processes one download at a time (single-job concurrency)
-   - Handles retry logic with fixed 30-second delay
+   - Handles retry logic with configurable delay
    - Resumes any in-progress jobs on startup
-   - Emits events for job lifecycle (PUSH, DOWNLOADED, FAILED, CANCELLED)
+   - No event emitters (jobs are tracked via database status)
 
 2. **spawnWget** - Child process function for wget
    - Validates inputs with Zod schema
@@ -37,7 +37,7 @@ import Application from "./daemon/Application.ts";
 // The download queue is automatically started on application launch
 const { downloadQueue } = Application;
 
-// Enqueue a new download (typically done by ReleaseAssetService)
+// Enqueue a new download
 downloadQueue.pushJob(
   'release-123',           // releaseId
   'asset-456',             // releaseAssetId
@@ -45,45 +45,34 @@ downloadQueue.pushJob(
   'https://example.com/file.zip',  // url
   '/downloads'             // targetDirectory
 );
-
-// Check overall progress for a release
-const progress = downloadQueue.getOverallProgressForRelease('release-123');
-console.log(`Download progress: ${progress}%`);
 ```
 
 ### Cancel Jobs
 
-Most callers should not cancel jobs directly. Use `ReleaseAssetService.removeReleaseAssetsAndFolder()` to cleanly remove a release; it will cancel both download and extract jobs for that release and remove the folder.
+Cancel all download jobs for a specific release:
 
 ```typescript
-// Preferred (service-level lifecycle)
-await releaseAssetService.removeReleaseAssetsAndFolder();
-
-// Low-level (queues) — use only from ReleaseAssetService or maintenance scripts
-// downloadQueue.cancelJobsForRelease('release-123');
+// Cancel all jobs for a release
+downloadQueue.cancelJobsForRelease('release-123');
 ```
 
-### Event Handling
+### Checking Job Status
+
+Query the database directly to check job status:
 
 ```typescript
-import { DownloadQueueEvents } from "./daemon/queues/DownloadQueue.ts";
+import { db } from "./daemon/database";
+import { T_DOWNLOAD_QUEUE } from "./daemon/database/schema.ts";
+import { eq } from "drizzle-orm";
 
-// Listen for download events
-downloadQueue.on(DownloadQueueEvents.PUSH, (job) => {
-  console.log(`New download job queued: ${job.id}`);
-});
+// Get all jobs for a release
+const jobs = db
+  .select()
+  .from(T_DOWNLOAD_QUEUE)
+  .where(eq(T_DOWNLOAD_QUEUE.releaseId, 'release-123'))
+  .all();
 
-downloadQueue.on(DownloadQueueEvents.DOWNLOADED, (job) => {
-  console.log(`Download completed: ${job.filePath}`);
-});
-
-downloadQueue.on(DownloadQueueEvents.FAILED, (job) => {
-  console.log(`Download failed: ${job.id}, attempt ${job.attempt}`);
-});
-
-downloadQueue.on(DownloadQueueEvents.CANCELLED, (jobs) => {
-  console.log(`Cancelled ${jobs.length} jobs`);
-});
+console.log(`Found ${jobs.length} download jobs`);
 ```
 
 ## Job Lifecycle
@@ -93,10 +82,10 @@ downloadQueue.on(DownloadQueueEvents.CANCELLED, (jobs) => {
 ```
 PENDING → IN_PROGRESS → COMPLETED
               ↓ (on failure)
-           PENDING (retry after 30s, up to maxAttempts)
+           PENDING (retry with delay, up to maxAttempts)
 ```
 
-When a download fails (e.g., network error, wget process error), the job returns to `PENDING` status with an incremented `attempt` counter. The job will be retried after 30 seconds. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
+When a download fails (e.g., network error, wget process error), the job returns to `PENDING` status with an incremented `attempt` counter and `nextAttemptAfter` timestamp set to control retry timing. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
 
 ### States
 
@@ -163,18 +152,18 @@ On startup, the download queue automatically:
 - Partial downloads are automatically resumed
 - No need to restart from byte zero
 
-### 3. Retry with Fixed Delay
+### 3. Retry with Delay
 
-Failed downloads retry after 30 seconds:
+Failed downloads are retried based on `nextAttemptAfter` timestamp:
 - Job status returns to `PENDING`
 - `attempt` counter increments
-- `nextAttemptAfter` set to 30 seconds in future
+- `nextAttemptAfter` timestamp controls when the job can be retried
 
 ### 4. Cancellation Support
 
 - Active jobs can be cancelled via AbortController
 - All jobs for a release can be cancelled at once
-- Emits `CANCELLED` event with list of cancelled jobs
+- Cancelled jobs are deleted from the database
 
 ## Configuration
 
@@ -184,9 +173,10 @@ Configure the download queue in `Application.ts`:
 const downloadQueue = new DownloadQueue({
   db: _db,
   wgetExecutablePath: applicationConfig.binaries.wget,
-  maxRetries: 3,  // Default max retries per job
 });
 ```
+
+The `maxAttempts` is stored per-job in the database (default: 3).
 
 ## Database Schema
 
@@ -223,16 +213,19 @@ CREATE TABLE DOWNLOAD_QUEUE (
 );
 ```
 
-## Integration with ReleaseAssetService
+## Integration Points
 
-Ownership note: ReleaseAssetService owns enqueueing of download jobs and is the single place that cancels download jobs when a release is removed.
+The download queue is used by daemon API endpoints and commands to enqueue download jobs for mod releases. Jobs are created when:
 
-The `ReleaseAssetService` automatically creates download jobs when subscribing to a mod release:
+- A mod release is enabled/subscribed
+- Assets need to be downloaded for installation
+
+Example of creating download jobs:
 
 ```typescript
-// In ReleaseAssetService.downloadAndExtractReleaseAssets()
+// Create download jobs for each asset URL
 for (const [idx, url] of asset.urls.entries()) {
-  this.downloadQueue.pushJob(
+  downloadQueue.pushJob(
     releaseId,
     asset.id,
     `${asset.id}:${idx}`,

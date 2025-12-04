@@ -21,12 +21,20 @@ src/app/server/
     DeleteRelease.ts
     HandleAuthResult.ts
     MigrateLegacyRegistry.ts
+    RegisterModReleaseDownload.ts
   queries/
     FindUserModById.ts
     FindUserModReleases.ts
     FindUserModReleaseById.ts
+    FindAllUserMods.ts
+    FindPublicModReleases.ts
+    FindPublicModReleaseById.ts
+    GetAllPublishedMods.ts
+    GetAllFeaturedMods.ts
     GetAllTags.ts
-    ...
+    GetCategoryCounts.ts
+    GetModById.ts
+    FindUpdateInformationByIds.ts
   entities/
   schemas/
   middleware/
@@ -68,7 +76,7 @@ export default async function (cmd: UpdateModCommand): Promise<UpdateModResult> 
 
 ## Testing guidance
 - Place tests next to the file using the `<Name>.test.ts` convention (same folder as the operation).
-- Use MongoMemoryServer in command tests that touch Mongo; isolate connections per test to avoid interference.
+- The app server uses Mongoose (MongoDB) for data persistence. Use MongoMemoryServer in tests that require database access to provide isolated test environments.
 - Prefer local doubles over mocks for any auxiliary behavior; plain objects over Maps in tests.
 
 ## Conventions summary

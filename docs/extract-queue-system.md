@@ -11,9 +11,9 @@ This system works in tandem with the [Download Queue System](./download-queue-sy
 ### Components
 
 1. **ExtractQueue** - Main service that manages the extraction queue
-   - Polls database for pending jobs
+   - Polls database for pending jobs every second
    - Manages single-job concurrency (one extraction at a time)
-   - Handles retry logic with fixed delay (30 seconds)
+   - Handles retry logic with configurable delay
    - Performs crash recovery on startup
    - Waits for all dependent downloads to complete before starting
 
@@ -34,8 +34,6 @@ This system works in tandem with the [Download Queue System](./download-queue-sy
 
 ## Usage
 
-Ownership note: ReleaseAssetService owns enqueueing of extract jobs and is the single place that cancels extract jobs when a release is removed.
-
 ### Basic Usage
 
 ```typescript
@@ -44,7 +42,7 @@ import Application from "./daemon/Application.ts";
 // The extract queue is automatically started on application launch
 const { extractQueue } = Application;
 
-// Enqueue a new extraction (typically done by ReleaseAssetService)
+// Enqueue a new extraction
 extractQueue.pushJob(
   'release-123',           // releaseId
   'asset-456',             // releaseAssetId  
@@ -53,45 +51,36 @@ extractQueue.pushJob(
   '/extracted/output',     // targetDirectory
   ['download-1', 'download-2']  // dependent download job IDs
 );
-
-// Check progress for a release
-const progress = extractQueue.getOverallProgressForRelease('release-123');
-console.log(`Extraction progress: ${progress}%`);
 ```
 
 ### Cancel Jobs
 
-Most callers should not cancel jobs directly. Use `ReleaseAssetService.removeReleaseAssetsAndFolder()` to cleanly remove a release; it will cancel both download and extract jobs for that release and remove the folder.
+Cancel all extract jobs for a specific release:
 
 ```typescript
-// Preferred (service-level lifecycle)
-await releaseAssetService.removeReleaseAssetsAndFolder();
-
-// Low-level (queues) — use only from ReleaseAssetService or maintenance scripts
-// extractQueue.cancelJobsForRelease('release-123');
+// Cancel all jobs for a release
+extractQueue.cancelJobsForRelease('release-123');
 ```
 
-### Event Handling
+This will also delete the associated join table entries.
+
+### Checking Job Status
+
+Query the database to check extraction job status:
 
 ```typescript
-import { ExtractQueueEvents } from "./daemon/queues/ExtractQueue.ts";
+import { db } from "./daemon/database";
+import { T_EXTRACT_QUEUE } from "./daemon/database/schema.ts";
+import { eq } from "drizzle-orm";
 
-// Listen for extraction events
-extractQueue.on(ExtractQueueEvents.PUSH, (job) => {
-  console.log(`New extract job queued: ${job.id}`);
-});
+// Get all extract jobs for a release
+const jobs = db
+  .select()
+  .from(T_EXTRACT_QUEUE)
+  .where(eq(T_EXTRACT_QUEUE.releaseId, 'release-123'))
+  .all();
 
-extractQueue.on(ExtractQueueEvents.EXTRACTED, (job) => {
-  console.log(`Extraction completed: ${job.extractedPath}`);
-});
-
-extractQueue.on(ExtractQueueEvents.FAILED, (job) => {
-  console.log(`Extraction failed: ${job.id}, attempt ${job.attempt}`);
-});
-
-extractQueue.on(ExtractQueueEvents.CANCELLED, (jobs) => {
-  console.log(`Cancelled ${jobs.length} jobs`);
-});
+console.log(`Found ${jobs.length} extract jobs`);
 ```
 
 ## Job Lifecycle
@@ -101,10 +90,10 @@ extractQueue.on(ExtractQueueEvents.CANCELLED, (jobs) => {
 ```
 PENDING → IN_PROGRESS → COMPLETED
               ↓ (on failure)
-           PENDING (retry after 30s, up to maxAttempts)
+           PENDING (retry with delay, up to maxAttempts)
 ```
 
-When extraction fails (e.g., corrupt archive, 7zip process error), the job returns to `PENDING` status with an incremented `attempt` counter. The job will be retried after 30 seconds. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
+When extraction fails (e.g., corrupt archive, 7zip process error), the job returns to `PENDING` status with an incremented `attempt` counter and `nextAttemptAfter` timestamp. Once `attempt` reaches `maxAttempts`, the job remains in `PENDING` but won't be picked up again.
 
 ### States
 
@@ -218,10 +207,12 @@ Configure the extract queue in `Application.ts`:
 ```typescript
 const extractQueue = new ExtractQueue({
   db: _db,
+  downloadQueue,
   sevenzipExecutablePath: applicationConfig.binaries.sevenzip,
-  maxRetries: 3,  // Default max retries per job
 });
 ```
+
+The `maxAttempts` is stored per-job in the database (default: 3).
 
 ## Supported Archive Formats
 
@@ -252,29 +243,29 @@ On startup, the extract queue automatically:
 - Uses database join with `notExists` subquery for efficient checking
 - Supports multipart archives (multiple download jobs → single extract job)
 
-### 3. Retry with Fixed Delay
+### 3. Retry with Delay
 
-Failed extractions retry after 30 seconds:
+Failed extractions are retried based on `nextAttemptAfter` timestamp:
 - Job status returns to `PENDING`
 - `attempt` counter increments
-- `nextAttemptAfter` set to 30 seconds in future
+- `nextAttemptAfter` timestamp controls when the job can be retried
 
 ### 4. Cancellation Support
 
 - Active jobs can be cancelled via AbortController
 - All jobs for a release can be cancelled at once
-- Properly cleans up join table entries
+- Properly cleans up join table entries when jobs are cancelled
 
-## Integration with ReleaseAssetService
+## Integration Points
 
-The `ReleaseAssetService` automatically creates extract jobs when downloading archive assets:
+The extract queue is used by daemon API endpoints and commands to enqueue extraction jobs for downloaded archives:
 
 ```typescript
-// In ReleaseAssetService.downloadAndExtractReleaseAssets()
+// Create extract job for a downloaded archive
 if (asset.isArchive && asset.urls.length > 0) {
   const downloadJobIds = asset.urls.map((_, idx) => `${asset.id}:${idx}`);
   
-  this.extractQueue.pushJob(
+  extractQueue.pushJob(
     releaseId,
     asset.id,
     `extract:${asset.id}`,
@@ -290,9 +281,11 @@ if (asset.isArchive && asset.urls.length > 0) {
 Run the test suite:
 
 ```bash
-bun test src/daemon/queues/ExtractQueue.test.ts
-bun test src/daemon/child_process/sevenzip.test.ts
+bun test
 ```
+
+Relevant test files:
+- `src/daemon/child_process/sevenzip.test.ts`
 
 ## Troubleshooting
 
@@ -327,4 +320,3 @@ For archives larger than available RAM, 7zip may use disk-based processing which
 ## Related Documentation
 
 - [Download Queue System](./download-queue-system.md) - Companion download queue
-- [Database Migrations](../README.md#database-migrations-daemon) - Schema management
