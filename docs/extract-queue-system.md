@@ -9,7 +9,7 @@ The extract queue manages archive extraction with automatic retry, crash recover
 The extract queue:
 - Processes one extraction at a time
 - Waits for all dependent downloads to complete
-- Automatically retries failed extractions (30 second delay, 3 attempts)
+- Automatically retries failed extractions (30 second delay)
 - Recovers in-progress jobs after crashes
 - Supports multipart archives
 
@@ -33,7 +33,7 @@ PENDING → IN_PROGRESS → COMPLETED
 Extract jobs automatically wait until all required downloads are complete before starting.
 
 ### Automatic Retry
-Failed extractions are automatically retried up to 3 times with a 30-second delay between attempts.
+Failed extractions are automatically retried with a 30-second delay between attempts.
 
 ### Crash Recovery
 On startup, any jobs stuck in progress are automatically resumed.
@@ -67,7 +67,6 @@ sevenzip = "binaries/7za.exe"
 **Extractions not starting:**
 - Verify all dependent downloads completed successfully
 - Check 7zip executable path in `config.toml`
-- Verify the job hasn't exceeded max retry attempts
 - Check logs for errors
 
 **Extractions failing:**

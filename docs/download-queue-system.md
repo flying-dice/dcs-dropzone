@@ -8,7 +8,7 @@ The download queue manages file downloads with automatic retry, crash recovery, 
 
 The download queue:
 - Processes one download at a time
-- Automatically retries failed downloads (30 second delay, 3 attempts)
+- Automatically retries failed downloads (30 second delay)
 - Resumes partial downloads using wget
 - Recovers in-progress jobs after crashes
 
@@ -29,7 +29,7 @@ PENDING → IN_PROGRESS → COMPLETED
 ## Key Features
 
 ### Automatic Retry
-Failed downloads are automatically retried up to 3 times with a 30-second delay between attempts.
+Failed downloads are automatically retried with a 30-second delay between attempts.
 
 ### Resumable Downloads
 Partial downloads are resumed from where they left off using wget's continue flag.
@@ -53,7 +53,6 @@ wget = "binaries/wget.exe"
 
 **Downloads not starting:**
 - Check wget executable path in `config.toml`
-- Verify the job hasn't exceeded max retry attempts
 - Check logs for errors
 
 **Downloads failing:**
