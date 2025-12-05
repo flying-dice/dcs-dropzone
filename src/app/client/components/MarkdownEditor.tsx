@@ -4,7 +4,7 @@ import type { editor } from "monaco-editor";
 import { useState } from "react";
 import type { IconType } from "react-icons";
 import { BiBold, BiImageAlt, BiItalic, BiLink } from "react-icons/bi";
-import { monacoEditorService } from "../services/monacoEditorService.ts";
+import { monacoEditorMarkdownUtils } from "../utils/monacoEditorMarkdownUtils.ts";
 
 type EditorButtonProps = {
 	icon: IconType;
@@ -30,7 +30,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 	const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null);
 
 	function handleEditorDidMount(editor: editor.IStandaloneCodeEditor, monaco: Monaco) {
-		monacoEditorService.registerMarkdownShortcuts(editor, monaco);
+		monacoEditorMarkdownUtils.registerMarkdownShortcuts(editor, monaco);
 		setEditorInstance(editor);
 		setMonacoInstance(monaco);
 	}
@@ -61,7 +61,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiBold}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionBold(editorInstance, monacoInstance)();
+								monacoEditorMarkdownUtils.makeSelectionBold(editorInstance, monacoInstance)();
 							}
 						}}
 					/>
@@ -70,7 +70,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiItalic}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionItalic(editorInstance, monacoInstance)();
+								monacoEditorMarkdownUtils.makeSelectionItalic(editorInstance, monacoInstance)();
 							}
 						}}
 					/>
@@ -79,7 +79,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiLink}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionLink(editorInstance, monacoInstance)();
+								monacoEditorMarkdownUtils.makeSelectionLink(editorInstance, monacoInstance)();
 							}
 						}}
 					/>
@@ -88,7 +88,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 						icon={BiImageAlt}
 						onClick={() => {
 							if (editorInstance && monacoInstance) {
-								monacoEditorService.makeSelectionImage(editorInstance, monacoInstance)();
+								monacoEditorMarkdownUtils.makeSelectionImage(editorInstance, monacoInstance)();
 							}
 						}}
 					/>

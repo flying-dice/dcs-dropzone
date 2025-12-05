@@ -4,7 +4,9 @@ import { useGetMods } from "../../_autogen/api.ts";
 import type { ModFilterFormValues } from "../../components/ModFilterForm.tsx";
 import { ModFilterForm } from "../../components/ModFilterForm.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { modFilterService } from "../../services/modFilterService.ts";
+import { transformCategories } from "../../utils/transformCategories.ts";
+import { transformMaintainers } from "../../utils/transformMaintainers.ts";
+import { transformTags } from "../../utils/transformTags.ts";
 
 export function _ModsFilters(props: {
 	initialValues: ModFilterFormValues;
@@ -22,17 +24,17 @@ export function _ModsFilters(props: {
 
 	const categoriesData =
 		mods.data?.status === HttpStatusCode.Ok && mods.data?.data.filter.categories
-			? modFilterService.transformCategories(mods.data.data.filter.categories, t)
+			? transformCategories(mods.data.data.filter.categories, t)
 			: [];
 
 	const usersData =
 		mods.data?.status === HttpStatusCode.Ok && mods.data?.data.filter.maintainers
-			? modFilterService.transformMaintainers(mods.data.data.filter.maintainers)
+			? transformMaintainers(mods.data.data.filter.maintainers)
 			: [];
 
 	const tagsData =
 		mods.data?.status === HttpStatusCode.Ok && mods.data?.data.filter.tags
-			? modFilterService.transformTags(mods.data.data.filter.tags)
+			? transformTags(mods.data.data.filter.tags)
 			: [];
 
 	return (

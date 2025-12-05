@@ -9,9 +9,7 @@ import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
 
 export function useDaemon() {
 	const { t } = useAppTranslation();
-	const daemonReleases = useGetAllDaemonReleases({
-		query: { refetchInterval: 1000 },
-	});
+	const daemonReleases = useGetAllDaemonReleases();
 
 	const [adding, add] = useAsyncFn(
 		async (modId: string, releaseId: string, form?: UserModReleaseForm) => {

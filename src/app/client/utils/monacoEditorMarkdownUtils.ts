@@ -2,9 +2,9 @@ import type { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 
 /**
- * Utility service for Monaco editor markdown operations
+ * Utilities for Monaco editor markdown operations
  */
-export const monacoEditorService = {
+export const monacoEditorMarkdownUtils = {
 	/**
 	 * Wrap selected text with markdown bold syntax
 	 */
@@ -92,25 +92,25 @@ export const monacoEditorService = {
 		// Bold (Ctrl+B)
 		editor.addCommand(
 			monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB,
-			monacoEditorService.makeSelectionBold(editor, monaco),
+			monacoEditorMarkdownUtils.makeSelectionBold(editor, monaco),
 		);
 
 		// Italic (Ctrl+I)
 		editor.addCommand(
 			monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
-			monacoEditorService.makeSelectionItalic(editor, monaco),
+			monacoEditorMarkdownUtils.makeSelectionItalic(editor, monaco),
 		);
 
 		// Link (Ctrl+K)
 		editor.addCommand(
 			monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-			monacoEditorService.makeSelectionLink(editor, monaco),
+			monacoEditorMarkdownUtils.makeSelectionLink(editor, monaco),
 		);
 
 		// Make Image (Ctrl+Shift+I)
 		editor.addCommand(
 			monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyI,
-			monacoEditorService.makeSelectionImage(editor, monaco),
+			monacoEditorMarkdownUtils.makeSelectionImage(editor, monaco),
 		);
 	},
 };
