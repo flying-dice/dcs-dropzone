@@ -22,10 +22,9 @@ if (mongoUrl.isMemoryDatabase()) {
 	logger.info(`In-memory MongoDB server started at ${mongoUri}`);
 	await mongoose.connect(mongoUri);
 } else {
+	logger.info("Connecting to MongoDB...");
 	await mongoose.connect(applicationConfig.mongoUri);
 }
-
-logger.info("Connecting to MongoDB...");
 
 logger.info("Connected to MongoDB.");
 
