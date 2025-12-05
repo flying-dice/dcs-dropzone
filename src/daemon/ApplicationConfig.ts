@@ -20,6 +20,9 @@ const configSchema = z.object({
 		dcs_working_dir: z.string().min(1, "DCS working path is required"),
 		dcs_install_dir: z.string().min(1, "DCS install path is required"),
 	}),
+	app: z.object({
+		mods_dir: z.string().min(1, "Mods directory is required"),
+	}),
 });
 
 export type ApplicationConfig = z.infer<typeof configSchema>;

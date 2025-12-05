@@ -38,7 +38,7 @@ export default async function (command: RemoveReleaseCommand): Promise<RemoveRel
 	extractQueue.cancelJobsForRelease(releaseId);
 
 	// Remove the release folder from the filesystem
-	const releaseFolder = pathService.getReleaseWorkingDirectory(releaseId);
+	const releaseFolder = pathService.getReleaseDir(releaseId);
 	if (await exists(releaseFolder)) {
 		await rm(releaseFolder, { recursive: true, force: true });
 		logger.info(`Removed release folder: ${releaseFolder}`);

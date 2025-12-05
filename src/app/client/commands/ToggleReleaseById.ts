@@ -1,6 +1,6 @@
 import getDebug from "debug";
 import { StatusCodes } from "http-status-codes";
-import { err, ok, type Result } from "neverthrow";
+import { type Err, err, type Ok, ok, type Result } from "neverthrow";
 import {
 	disableRelease,
 	enableRelease,
@@ -14,7 +14,7 @@ export type ToggleReleaseByIdCommand = {
 
 export type ToggleReleaseByIdResult = Result<
 	"Enabled" | "Disabled",
-	"FailedToGetDaemonReleases" | "FailedToFindDaemonRelease"
+	"FailedToGetDaemonReleases" | "FailedToFindDaemonRelease" | string
 >;
 
 const debug = getDebug("ToggleReleaseByIdCommand");
@@ -37,10 +37,12 @@ export default async function (command: ToggleReleaseByIdCommand): Promise<Toggl
 	}
 
 	if (subscription.status === ModAndReleaseDataStatus.ENABLED) {
-		await disableRelease(releaseId);
-		return ok("Disabled");
+		return await disableRelease(releaseId)
+			.then((): Ok<"Disabled", never> => ok("Disabled"))
+			.catch((e): Err<never, string> => err(String(e.message)));
 	}
 
-	await enableRelease(releaseId);
-	return ok("Disabled");
+	return await enableRelease(releaseId)
+		.then((): Ok<"Enabled", never> => ok("Enabled"))
+		.catch((e): Err<never, string> => err(String(e.message)));
 }

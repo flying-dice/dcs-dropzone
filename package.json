@@ -23,6 +23,7 @@
 		"@dnd-kit/utilities": "^3.2.2",
 		"@fontsource/inter": "^5.2.8",
 		"@hono/standard-validator": "^0.1.5",
+		"@mantine/code-highlight": "^8.3.9",
 		"@mantine/colors-generator": "^8.3.5",
 		"@mantine/core": "^8.3.6",
 		"@mantine/dates": "^8.3.5",

@@ -6,10 +6,12 @@ import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
 import { showErrorNotification } from "../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
+import { useErrorModal } from "./useErrorModal.tsx";
 
 export function useDaemon() {
 	const { t } = useAppTranslation();
 	const daemonReleases = useGetAllDaemonReleases();
+	const showError = useErrorModal();
 
 	const [adding, add] = useAsyncFn(
 		async (modId: string, releaseId: string, form?: UserModReleaseForm) => {
@@ -45,7 +47,7 @@ export function useDaemon() {
 					else if (ok === "Disabled")
 						showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
 				},
-				(error) => showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error }))),
+				(error) => showError(error),
 			);
 			await daemonReleases.refetch();
 		},

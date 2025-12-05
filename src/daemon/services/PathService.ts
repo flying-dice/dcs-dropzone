@@ -9,8 +9,11 @@ const logger = getLogger("PathService");
 export class PathService {
 	constructor(
 		private readonly dcsPaths: Record<SymbolicLinkDestRoot, string>,
-		private readonly dropzoneWorkingDir: string,
-	) {}
+		private readonly dropzoneModsFolder: string,
+	) {
+		logger.info("PathService initialized with dcsPaths:", dcsPaths);
+		logger.info("dropzone mods folder:", dropzoneModsFolder);
+	}
 
 	getDestRootPath(destRoot: SymbolicLinkDestRoot): string {
 		logger.debug("PathService getDestRootPath", destRoot);
@@ -23,16 +26,16 @@ export class PathService {
 		return p;
 	}
 
-	getDropzoneWorkingDir(): string {
-		return this.dropzoneWorkingDir;
+	getModsDir(): string {
+		return this.dropzoneModsFolder;
 	}
 
-	getReleaseWorkingDirectory(releaseId: string): string {
-		return join(this.getDropzoneWorkingDir(), releaseId);
+	getReleaseDir(releaseId: string): string {
+		return join(this.getModsDir(), releaseId);
 	}
 
 	getAbsoluteReleasePath(releaseId: string, path: string): string {
-		return secureJoin(this.getReleaseWorkingDirectory(releaseId), path);
+		return secureJoin(this.getReleaseDir(releaseId), path);
 	}
 
 	getAbsoluteSymbolicLinkDestPath(destRoot: SymbolicLinkDestRoot, path: string): string {

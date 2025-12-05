@@ -96,7 +96,7 @@ export default async function (command: AddReleaseCommand): Promise<AddReleaseRe
 	);
 
 	// Prepare release folder and queues
-	const releaseFolder = pathService.getReleaseWorkingDirectory(data.releaseId);
+	const releaseFolder = pathService.getReleaseDir(data.releaseId);
 	await mkdir(releaseFolder, { recursive: true });
 
 	// Enqueue download and extract jobs for each asset

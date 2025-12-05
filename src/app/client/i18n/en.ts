@@ -211,6 +211,8 @@ export default {
 		DAEMON_CONNECTION_ERROR: "Error connecting to daemon",
 		NO_ACTIVE_DOWNLOADS: "No active downloads",
 
+		ERROR_TAKING_ACTION_TITLE: "Action Failed",
+		ERROR_TAKING_ACTION_DESC: "The action failed due to the following error:",
 		ERROR_TAKING_ACTION: "Error taking action: {{error}}",
 		DOWNLOADS: "Downloads",
 	},

@@ -10,6 +10,7 @@
         "@dnd-kit/utilities": "^3.2.2",
         "@fontsource/inter": "^5.2.8",
         "@hono/standard-validator": "^0.1.5",
+        "@mantine/code-highlight": "^8.3.9",
         "@mantine/colors-generator": "^8.3.5",
         "@mantine/core": "^8.3.6",
         "@mantine/dates": "^8.3.5",
@@ -205,6 +206,8 @@
     "@jsep-plugin/regex": ["@jsep-plugin/regex@1.0.4", "", { "peerDependencies": { "jsep": "^0.4.0||^1.0.0" } }, "sha512-q7qL4Mgjs1vByCaTnDFcBnV9HS7GVPJX5vyVoCgZHNSC9rjwIlmbXG5sUuorR5ndfHAIlJ8pVStxvjXHbNvtUg=="],
 
     "@jsep-plugin/ternary": ["@jsep-plugin/ternary@1.1.4", "", { "peerDependencies": { "jsep": "^0.4.0||^1.0.0" } }, "sha512-ck5wiqIbqdMX6WRQztBL7ASDty9YLgJ3sSAK5ZpBzXeySvFGCzIvM6UiAI4hTZ22fEcYQVV/zhUbNscggW+Ukg=="],
+
+    "@mantine/code-highlight": ["@mantine/code-highlight@8.3.9", "", { "dependencies": { "clsx": "^2.1.1" }, "peerDependencies": { "@mantine/core": "8.3.9", "@mantine/hooks": "8.3.9", "react": "^18.x || ^19.x", "react-dom": "^18.x || ^19.x" } }, "sha512-wST9JbpodGJyRFC2bHLObukkcx39w8Uk5bznxr4DvErtiHhbDxvn7kHK7BXWM31hiRPYFZ9nouhqv8YPWkNf2A=="],
 
     "@mantine/colors-generator": ["@mantine/colors-generator@8.3.5", "", { "peerDependencies": { "chroma-js": ">=2.4.2" } }, "sha512-hgoswBnpB+I2Al0MJ5puAiVniIieoFF5k6UPhd7R62IhyJY8WI3RCBMQdiCrOQTo8xGMcpgmcWqdkB9Dadjybg=="],
 

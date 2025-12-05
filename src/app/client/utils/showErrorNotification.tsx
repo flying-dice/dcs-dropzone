@@ -7,11 +7,11 @@ export function showErrorNotification(error: Error | unknown) {
 			message: error.message,
 			color: "red",
 		});
+	} else {
+		showNotification({
+			title: "Error",
+			message: "An unknown error occurred",
+			color: "red",
+		});
 	}
-
-	showNotification({
-		title: "Error",
-		message: "An unknown error occurred",
-		color: "red",
-	});
 }

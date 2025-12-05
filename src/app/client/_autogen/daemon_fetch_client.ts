@@ -21,7 +21,8 @@ export const daemonFetch = async <T>(url: string, options: RequestInit): Promise
 	const response = await fetch(request);
 
 	if (!response.ok) {
-		throw new Error(`Response status: ${response.status}`);
+		const bodyJson = await response.json();
+		throw new Error(bodyJson?.error || bodyJson?.message || `ERR: ${response.statusText}`);
 	}
 
 	const data = await autoParseByContentType(response);

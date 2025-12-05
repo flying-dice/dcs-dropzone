@@ -1,4 +1,6 @@
 import { Database, type Statement } from "bun:sqlite";
+import { dirname } from "node:path";
+import { ensureDirSync } from "fs-extra";
 import { getLogger } from "log4js";
 import { AppDatabaseMigration } from "./app-database-migration";
 
@@ -47,6 +49,7 @@ export class AppDatabase {
 		protected readonly filename: string,
 		protected readonly migrations: AppDatabaseMigration[],
 	) {
+		ensureDirSync(dirname(filename));
 		this.db = new Database(filename, { create: true, strict: true });
 		this.db.run(MIGRATIONS_DDL);
 

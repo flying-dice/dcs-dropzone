@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { getLogger } from "log4js";
 import { SymbolicLinkDestRoot } from "../common/data.ts";
 import applicationConfig from "./ApplicationConfig.ts";
@@ -15,7 +16,7 @@ const pathService = new PathService(
 		[SymbolicLinkDestRoot.DCS_INSTALL_DIR]: applicationConfig.dcs.dcs_install_dir,
 		[SymbolicLinkDestRoot.DCS_WORKING_DIR]: applicationConfig.dcs.dcs_working_dir,
 	},
-	process.cwd(),
+	resolve(applicationConfig.app.mods_dir),
 );
 
 logger.debug("Setting up database connection");
