@@ -11,12 +11,21 @@ function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 
 export type DownloadedModsTableRowProps = {
 	mod: ModAndReleaseData;
+	variant: "downloads" | "enabled" | "updates";
 };
 export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 	const { t } = useAppTranslation();
 	const latest = useGetLatestModReleaseById(props.mod.modId);
 	const isLatest = latest.data?.status === StatusCodes.OK ? latest.data.data.version === props.mod.version : undefined;
 	const latestVersion = latest.data?.status === StatusCodes.OK ? latest.data.data.version : undefined;
+
+	if (props.variant === "enabled" && props.mod.status !== ModAndReleaseDataStatus.ENABLED) {
+		return null;
+	}
+
+	if (props.variant === "updates" && isLatest) {
+		return null;
+	}
 
 	return (
 		<Table.Tr>

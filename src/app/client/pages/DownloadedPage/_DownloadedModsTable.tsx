@@ -1,10 +1,5 @@
 import { Stack, Table, Text } from "@mantine/core";
-import { StatusCodes } from "http-status-codes";
-import { sortBy } from "lodash";
-import { useAsync } from "react-use";
 import { match } from "ts-pattern";
-import { getModUpdatesByIds } from "../../_autogen/api.ts";
-import { ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { useDaemon } from "../../hooks/useDaemon.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
@@ -23,30 +18,14 @@ export type DownloadedModsTableProps = {
 export function _DownloadedModsTable(props: DownloadedModsTableProps) {
 	const { t } = useAppTranslation();
 
-	const { downloads, downloadsIds } = useDaemon();
-
-	const latestVersions = useAsync(() => getModUpdatesByIds({ modIds: downloadsIds || [] }), [downloadsIds]);
-
-	let _subscriptions = sortBy(downloads, "modName");
-
-	if (props.variant === "enabled") {
-		_subscriptions = _subscriptions?.filter((sxn) => sxn.status === ModAndReleaseDataStatus.ENABLED);
-	}
-
-	if (props.variant === "updates") {
-		_subscriptions = _subscriptions.filter((sxn) => {
-			if (latestVersions.value?.status !== StatusCodes.OK) return false;
-			const latest = latestVersions.value?.data.find((lv) => lv.mod_id === sxn.modId);
-			return latest ? latest.version !== sxn.version : false;
-		});
-	}
+	const { downloads } = useDaemon();
 
 	return (
 		<Stack>
 			<Text fz={"lg"} fw={"bold"}>
 				{t("DOWNLOADED")}
 			</Text>
-			{match(_subscriptions)
+			{match(downloads || [])
 				.when(
 					(rows) => rows.length,
 					(rows) => (
@@ -62,7 +41,7 @@ export function _DownloadedModsTable(props: DownloadedModsTableProps) {
 							</Table.Thead>
 							<Table.Tbody>
 								{rows.map((mod) => (
-									<_DownloadedModsTableRow key={mod.releaseId} mod={mod} />
+									<_DownloadedModsTableRow key={mod.releaseId} mod={mod} variant={props.variant} />
 								))}
 							</Table.Tbody>
 						</Table>

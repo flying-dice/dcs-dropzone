@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useAsyncFn } from "react-use";
 import { ModAndReleaseDataStatus, removeReleaseFromDaemon, useGetAllDaemonReleases } from "../_autogen/daemon_api.ts";
 import addReleaseToDaemonById from "../commands/AddReleaseToDaemonById.ts";
@@ -75,9 +74,6 @@ export function useDaemon() {
 
 	return {
 		downloads: daemonReleases.data?.data,
-		downloadsIds: useMemo(() => daemonReleases.data?.data.map((it) => it.releaseId), [daemonReleases.data]),
-		downloadCount: daemonReleases.data?.data.length,
-		refetch: daemonReleases.refetch,
 		active: daemonReleases.data?.data.filter((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS),
 		isActive: daemonReleases.data?.data.some((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS) ?? false,
 		isFetching: daemonReleases.isFetching,
