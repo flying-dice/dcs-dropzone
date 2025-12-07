@@ -1,4 +1,4 @@
-import { MongoUrl } from "common/MongoUrl";
+import { MongoUrl } from "./utils/MongoUrl.ts";
 import { getLogger } from "log4js";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import * as mongoose from "mongoose";

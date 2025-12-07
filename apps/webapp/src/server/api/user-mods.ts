@@ -1,4 +1,4 @@
-import { describeJsonRoute } from "common/describeJsonRoute";
+import { describeJsonRoute } from "hono-utils/describeJsonRoute";
 import { Hono } from "hono";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
