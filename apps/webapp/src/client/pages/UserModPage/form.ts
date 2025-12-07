@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { zKebabCaseString } from "common/zod";
+import { zKebabCaseString } from "../../server/schemas/zod-helpers.ts";
 import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";

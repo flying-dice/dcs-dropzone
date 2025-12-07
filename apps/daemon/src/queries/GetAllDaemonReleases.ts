@@ -1,4 +1,4 @@
-import { totalPercentProgress } from "common/totalPercentProgress";
+import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import {

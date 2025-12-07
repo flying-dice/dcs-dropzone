@@ -1,4 +1,4 @@
-import { zKebabCaseString } from "common/zod";
+import { zKebabCaseString } from "./zod-helpers.ts";
 import { z } from "zod";
 import { ModCategory } from "../enums/ModCategory.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";

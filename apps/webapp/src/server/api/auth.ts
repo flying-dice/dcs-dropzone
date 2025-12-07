@@ -1,4 +1,4 @@
-import { describeJsonRoute } from "common/describeJsonRoute";
+import { describeJsonRoute } from "hono-utils/describeJsonRoute";
 import { Hono } from "hono";
 import { deleteCookie, setSignedCookie } from "hono/cookie";
 import { describeRoute, validator } from "hono-openapi";
