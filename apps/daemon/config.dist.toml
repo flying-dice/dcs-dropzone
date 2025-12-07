@@ -1,0 +1,32 @@
+# =======================================
+# DCS World Configuration
+# =======================================
+[dcs]
+dcs_working_dir = "%USERPROFILE%/Saved Games/DCS"                              # Path to DCS World working directory
+dcs_install_dir = "C:/Program Files/Eagle Dynamics/DCS World"                  # Path to DCS World installation directory
+
+# =======================================
+# Third Party Binaries Configuration
+# =======================================
+[binaries]
+wget = "binaries/wget.exe"                                                     # Path to download the winget binary
+sevenzip = "binaries/7za.exe"                                                  # Path to 7zip executable
+
+# =======================================
+# Server Configuration
+# =======================================
+[server]
+host = "127.0.0.1"                                                              # Address to bind the HTTP server
+port = 3001                                                                     # Port to listen on
+
+# =======================================
+# Application Configuration
+# =======================================
+[app]
+mods_dir = "./mods"                                                             # Path to application working directory
+
+# =======================================
+# Database Configuration
+# =======================================
+[database]
+url = "index.sqlite"                                                            # Database URL

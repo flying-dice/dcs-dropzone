@@ -1,0 +1,21 @@
+{
+	"name": "hono-utils",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./*": "./src/*.ts"
+	},
+	"scripts": {
+		"biome": "biome check --write",
+		"tsc": "tsc --noEmit",
+		"check": "bun run biome && bun run tsc",
+		"test": "bun test"
+	},
+	"dependencies": {
+		"zod": "^4.1.13",
+		"hono": "^4.10.7",
+		"hono-openapi": "^1.1.2",
+		"http-status-codes": "^2.3.0"
+	}
+}

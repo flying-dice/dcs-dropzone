@@ -1,0 +1,6 @@
+export enum AssetStatus {
+	PENDING = "PENDING",
+	IN_PROGRESS = "IN_PROGRESS",
+	COMPLETED = "COMPLETED",
+	ERROR = "ERROR",
+}
