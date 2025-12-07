@@ -34,7 +34,6 @@
 		"@tanstack/react-query": "^5.90.12",
 		"@types/getenv": "^1.0.3",
 		"@types/lodash": "^4.17.21",
-		"common": "workspace:*",
 		"hono-utils": "workspace:*",
 		"date-fns": "^4.1.0",
 		"debug": "^4.4.3",
