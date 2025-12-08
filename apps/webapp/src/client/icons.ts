@@ -11,6 +11,7 @@ export const AppIcons = {
 	Enabled: FaToggleOn,
 	Updates: FaSyncAlt,
 	UserMods: FaUser,
+	Author: FaUser,
 };
 
 export const VisibilityIcons = {

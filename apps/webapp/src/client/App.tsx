@@ -7,6 +7,7 @@ import { AppNavbar } from "./AppNavbar.tsx";
 import { useUserContext } from "./context/UserContext.ts";
 import { DownloadedPage } from "./pages/DownloadedPage";
 import { Homepage } from "./pages/HomePage";
+import { ModPage } from "./pages/ModPage";
 import { ModsPage } from "./pages/ModsPage";
 import { UserModPage } from "./pages/UserModPage";
 import { UserModReleasePage } from "./pages/UserModReleasePage";
@@ -31,6 +32,7 @@ export function App() {
 				<Routes>
 					<Route path="/" element={<Homepage />} />
 					<Route path={"/mods"} element={<ModsPage />} />
+					<Route path={"/mods/:modId"} element={<ModPage />} />
 					<Route path={"/downloaded"} element={<DownloadedPage variant={"downloads"} />} />
 					<Route path={"/enabled"} element={<DownloadedPage variant={"enabled"} />} />
 					<Route path={"/updates"} element={<DownloadedPage variant={"updates"} />} />

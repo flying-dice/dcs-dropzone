@@ -1,6 +1,7 @@
 import { Alert, Skeleton, Stack } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { times } from "lodash";
+import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useGetMods } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
@@ -11,6 +12,7 @@ import { AppIcons } from "../../icons.ts";
 
 export function _ModsList(props: { page: number; size: number; filters: Record<string, unknown> }) {
 	const { t } = useAppTranslation();
+	const nav = useNavigate();
 	const breakpoint = useBreakpoint();
 	const mods = useGetMods({
 		page: props.page,
@@ -40,6 +42,7 @@ export function _ModsList(props: { page: number; size: number; filters: Record<s
 										summary={mod.description || ""}
 										downloads={mod.downloadsCount}
 										variant={breakpoint.isXs ? "grid" : "list"}
+										onClick={() => nav(mod.id)}
 									/>
 								))}
 						</Stack>
