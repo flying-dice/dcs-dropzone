@@ -1,10 +1,10 @@
+import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
+import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { openAPIRouteHandler } from "hono-openapi";
-import { jsonErrorTransformer } from "hono-utils/jsonErrorTransformer";
-import { requestResponseLogger } from "hono-utils/requestResponseLogger";
 import downloads from "./api/downloads.ts";
 import health from "./api/health.ts";
 import toggle from "./api/toggle.ts";

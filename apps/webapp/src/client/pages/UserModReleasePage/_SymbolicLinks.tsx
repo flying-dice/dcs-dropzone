@@ -9,15 +9,12 @@ import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
 import { PathWithRoot } from "../../components/PathWithRoot.tsx";
 import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { isRelativePath } from "../../utils/isRelativePath.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 const symbolicLinkFormSchema = z.object({
 	name: z.string().min(1, "Name is required"),
 	src: z.string().min(1, "Source path is required"),
-	dest: z.string().min(1, "Destination path is required").refine(isRelativePath, {
-		message: "Destination path must be a relative path from the root",
-	}),
+	dest: z.string().min(1, "Destination path is required"),
 	destRoot: z.enum(ModReleaseSymbolicLinkDataDestRoot),
 });
 type SymbolicLinkFormValues = z.infer<typeof symbolicLinkFormSchema>;

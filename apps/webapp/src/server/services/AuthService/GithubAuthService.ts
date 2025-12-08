@@ -1,6 +1,6 @@
 import { getLogger } from "log4js";
 import { OAuthApp, Octokit } from "octokit";
-import appConfig from "../ApplicationConfig.ts";
+import appConfig from "../../ApplicationConfig.ts";
 import type { AuthResult, AuthService } from "./AuthService.ts";
 
 const logger = getLogger("GithubAuthService");

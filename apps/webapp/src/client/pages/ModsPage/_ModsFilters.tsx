@@ -1,12 +1,11 @@
 import { Stack, Text } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
+import { noop } from "lodash";
+import { match } from "ts-pattern";
 import { useGetMods } from "../../_autogen/api.ts";
 import type { ModFilterFormValues } from "../../components/ModFilterForm.tsx";
 import { ModFilterForm } from "../../components/ModFilterForm.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { transformCategories } from "../../utils/transformCategories.ts";
-import { transformMaintainers } from "../../utils/transformMaintainers.ts";
-import { transformTags } from "../../utils/transformTags.ts";
 
 export function _ModsFilters(props: {
 	initialValues: ModFilterFormValues;
@@ -22,34 +21,28 @@ export function _ModsFilters(props: {
 		...props.filters,
 	});
 
-	const categoriesData =
-		mods.data?.status === StatusCodes.OK && mods.data?.data.filter.categories
-			? transformCategories(mods.data.data.filter.categories, t)
-			: [];
-
-	const usersData =
-		mods.data?.status === StatusCodes.OK && mods.data?.data.filter.maintainers
-			? transformMaintainers(mods.data.data.filter.maintainers)
-			: [];
-
-	const tagsData =
-		mods.data?.status === StatusCodes.OK && mods.data?.data.filter.tags
-			? transformTags(mods.data.data.filter.tags)
-			: [];
-
 	return (
 		<Stack>
 			<Text fz={"lg"} fw={"bold"}>
 				{t("BROWSE_MODS")}
 			</Text>
 
-			<ModFilterForm
-				initialValues={props.initialValues}
-				onSubmit={props.onSubmit}
-				categories={categoriesData}
-				users={usersData}
-				tags={tagsData}
-			/>
+			{match(mods.data)
+				.when(
+					(res) => res?.status === StatusCodes.OK,
+					(res) => (
+						<ModFilterForm
+							initialValues={props.initialValues}
+							onSubmit={props.onSubmit}
+							categories={res.data.filter.categories}
+							users={res.data.filter.maintainers}
+							tags={res.data.filter.tags}
+						/>
+					),
+				)
+				.otherwise(() => (
+					<ModFilterForm loading={true} initialValues={{}} onSubmit={noop} categories={[]} users={[]} tags={[]} />
+				))}
 		</Stack>
 	);
 }

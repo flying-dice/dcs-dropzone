@@ -15,8 +15,8 @@ sevenzip = "binaries/7za.exe"                                                  #
 # =======================================
 # Server Configuration
 # =======================================
-[server]
-host = "127.0.0.1"                                                              # Address to bind the HTTP server
+[hono]
+host = "127.0.0.1"                                                              # Address to bind the HTTP hono
 port = 3001                                                                     # Port to listen on
 
 # =======================================

@@ -1,4 +1,5 @@
-import { describeJsonRoute } from "hono-utils/describeJsonRoute";
+import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
+import { ze } from "@packages/zod";
 import { Hono } from "hono";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
@@ -9,7 +10,6 @@ import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { PageData } from "../schemas/PageData.ts";
-import { fromCsv } from "../utils/fromCsv.ts";
 
 const router = new Hono();
 
@@ -71,8 +71,8 @@ router.get(
 			page: PageData.shape.number,
 			size: PageData.shape.size,
 			category: ModData.shape.category.optional(),
-			maintainers: z.string().optional().transform(fromCsv),
-			tags: z.string().optional().transform(fromCsv),
+			maintainers: ze.csv().optional(),
+			tags: ze.csv().optional(),
 			term: z.string().optional(),
 		}),
 	),

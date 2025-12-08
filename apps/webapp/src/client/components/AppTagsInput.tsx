@@ -1,23 +1,45 @@
 import { Badge, Group, Stack, Text, TextInput } from "@mantine/core";
-import { kebabCase } from "lodash";
+import { ze } from "@packages/zod";
+import { err, ok, type Result } from "neverthrow";
 import type * as React from "react";
 import { useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
+import { z } from "zod";
+import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 
 export type AppTagsInputProps = {
 	value: string[];
 	onChange: (value: string[]) => void;
 };
 export function AppTagsInput(props: AppTagsInputProps) {
+	const { t } = useAppTranslation();
 	const [values, setValues] = useState<Set<string>>(new Set(props.value));
+
+	const validateInput = (value: string): Result<string, string> => {
+		const parseRes = ze.tag().safeParse(value);
+		if (!parseRes.success) {
+			return err(
+				z
+					.treeifyError(parseRes.error)
+					.errors.map((error) => t(error as any))
+					.join(", "),
+			);
+		}
+
+		if (values.has(value)) {
+			return err(t("DUPLICATE_TAG_ERROR"));
+		}
+
+		return ok(value);
+	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
-			const value = kebabCase(e.currentTarget.value.trim());
-			if (value && !props.value.includes(value)) {
+			const result = validateInput(e.currentTarget.value);
+			if (result.isOk()) {
 				const newValues = new Set(values);
-				newValues.add(value);
+				newValues.add(result.value);
 				setValues(newValues);
 				props.onChange(Array.from(newValues));
 				e.currentTarget.value = "";
@@ -37,12 +59,19 @@ export function AppTagsInput(props: AppTagsInputProps) {
 	return (
 		<Stack gap={"xs"}>
 			<TextInput
-				placeholder={"Add Tags (press Enter to add)"}
+				placeholder={t("TAGS_INPUT_PLACEHOLDER")}
 				onKeyDown={handleKeyDown}
 				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-					e.currentTarget.value = kebabCase(e.currentTarget.value.trim());
-					if (values.has(e.currentTarget.value)) {
-						setError("Duplicate tags are not allowed");
+					e.currentTarget.value = e.currentTarget.value.toLowerCase();
+
+					if (e.currentTarget.value === "") {
+						setError(null);
+						return;
+					}
+
+					const result = validateInput(e.currentTarget.value);
+					if (result.isErr()) {
+						setError(result.error);
 					} else {
 						setError(null);
 					}
@@ -50,7 +79,7 @@ export function AppTagsInput(props: AppTagsInputProps) {
 				error={error}
 			/>
 			<Text c="dimmed" size={"sm"}>
-				Use relevant tags to help users find your mod
+				{t("TAGS_INPUT_HELPER_TEXT")}
 			</Text>
 			<Group gap={"xs"}>
 				{props.value?.map((tag) => (
@@ -58,7 +87,7 @@ export function AppTagsInput(props: AppTagsInputProps) {
 						variant={"light"}
 						key={tag}
 						rightSection={<AiOutlineClose />}
-						style={{ cursor: "pointer" }}
+						style={{ cursor: "pointer", textTransform: "none" }}
 						onClick={handleBadgeClick(tag)}
 					>
 						{tag}

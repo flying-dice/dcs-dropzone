@@ -34,6 +34,9 @@ export default {
 		NO_MODS_FOUND_TITLE: "No mods found",
 		NO_MODS_FOUND_SUBTITLE_DESC: "Try adjusting your search or filter to find what you're looking for.",
 
+		MODS_FETCH_ERROR_TITLE: "Error fetching mods",
+		MODS_FETCH_ERROR_DESC: "There was an error fetching the mods. Please try again later.",
+
 		NO_MODS_DOWNLOADED_TITLE: "No mods downloaded",
 		NO_MODS_DOWNLOADED_SUBTITLE_DESC:
 			"You haven't downloaded any mods yet. Browse the mods page to find and download to mods that interest you.",
@@ -215,5 +218,11 @@ export default {
 		ERROR_TAKING_ACTION_DESC: "The action failed due to the following error:",
 		ERROR_TAKING_ACTION: "Error taking action: {{error}}",
 		DOWNLOADS: "Downloads",
+
+		DUPLICATE_TAG_ERROR: "Duplicate tag detected. Please use unique tags for your mod.",
+		INVALID_TAG_FORMAT_ERROR:
+			"Invalid tag format. Tags should only use 0-9 a-z and be seperated by hyphens (e.g., my-tag, a-10a, etc).",
+		TAGS_INPUT_PLACEHOLDER: "Add Tags (press Enter to add)",
+		TAGS_INPUT_HELPER_TEXT: "Use relevant tags to help users find your mod",
 	},
 };

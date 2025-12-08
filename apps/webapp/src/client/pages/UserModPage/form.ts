@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { zKebabCaseString } from "webapp";
+import { ze } from "@packages/zod";
 import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";
@@ -17,10 +17,10 @@ export const userModFormValues = z.object({
 	content: z.string().min(20, {
 		message: "Detailed Description should have at least 20 letters",
 	}),
-	tags: zKebabCaseString.array(),
+	tags: ze.tag().array(),
 	dependencies: z.array(z.string()),
-	thumbnail: z.string().url(),
-	screenshots: z.string().url().array(),
+	thumbnail: z.url(),
+	screenshots: z.url().array(),
 	visibility: z.enum(ModDataVisibility),
 });
 

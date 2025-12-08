@@ -1,9 +1,9 @@
-import "./log4js.ts";
+import "./server/infrastructure/log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
 import index from "./client/index.html";
-import Application from "./server/Application.ts";
 import appConfig from "./server/ApplicationConfig.ts";
+import { hono } from "./server/infrastructure/http/hono.ts";
 
 const logger = getLogger("bootstrap");
 logger.info(`🌍 DCS Dropzone Registry Webapp Starting...`);
@@ -13,11 +13,11 @@ const server = serve({
 	development: process.env.NODE_ENV !== "production",
 	routes: {
 		"/*": index,
-		"/auth": Application.server.fetch,
-		"/auth/**": Application.server.fetch,
-		"/api": Application.server.fetch,
-		"/api/**": Application.server.fetch,
-		"/v3/api-docs": Application.server.fetch,
+		"/auth": hono.fetch,
+		"/auth/**": hono.fetch,
+		"/api": hono.fetch,
+		"/api/**": hono.fetch,
+		"/v3/api-docs": hono.fetch,
 	},
 });
 

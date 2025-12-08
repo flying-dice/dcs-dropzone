@@ -1,4 +1,4 @@
-import { describeJsonRoute } from "hono-utils/describeJsonRoute";
+import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";

@@ -1,5 +1,5 @@
 import { expect, it } from "bun:test";
-import { MongoUrl } from "./MongoUrl";
+import { MongoUrl } from "./MongoUrl.ts";
 
 it("parses a valid MongoDB URI correctly", () => {
 	const mongoUrl = new MongoUrl("mongodb://localhost:27017/testdb");

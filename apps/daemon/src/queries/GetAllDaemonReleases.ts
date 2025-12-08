@@ -1,4 +1,3 @@
-import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import {
@@ -12,6 +11,7 @@ import {
 import type { AssetStatus } from "../enums/AssetStatus.ts";
 import { inferAssetStatusFromJobs } from "../functions/inferAssetStatusFromJobs.ts";
 import { inferReleaseStatusFromAssets } from "../functions/inferReleaseStatusFromAssets.ts";
+import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import { ModAndReleaseData, type ModReleaseAssetStatusData } from "../schemas/ModAndReleaseData.ts";
 
 export type GetAllDaemonReleasesQuery = {

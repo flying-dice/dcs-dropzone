@@ -1,8 +1,8 @@
-import { MongoUrl } from "./utils/MongoUrl.ts";
 import { getLogger } from "log4js";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import * as mongoose from "mongoose";
-import applicationConfig from "./ApplicationConfig.ts";
+import applicationConfig from "../../ApplicationConfig.ts";
+import { MongoUrl } from "./MongoUrl.ts";
 
 const logger = getLogger("Database");
 
@@ -23,7 +23,7 @@ if (mongoUrl.isMemoryDatabase()) {
 	await mongoose.connect(mongoUri);
 } else {
 	logger.info("Connecting to MongoDB...");
-	await mongoose.connect(applicationConfig.mongoUri);
+	await mongoose.connect(mongoUrl.uri);
 }
 
 logger.info("Connected to MongoDB.");

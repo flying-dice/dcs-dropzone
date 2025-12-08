@@ -1,4 +1,4 @@
-import { Button, Group, MultiSelect, Select, SimpleGrid, Stack, TextInput } from "@mantine/core";
+import { Button, Group, MultiSelect, SimpleGrid, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaMagnifyingGlass, FaShapes, FaTag, FaUser } from "react-icons/fa6";
@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ModDataCategory } from "../_autogen/api.ts";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
+import { ModCategorySelect } from "./ModCategorySelect.tsx";
 
 const categorySchema = z.codec(
 	z
@@ -33,9 +34,10 @@ export type ModFilterFormValues = z.output<typeof formValues>;
 export type ModFilterFormProps = {
 	initialValues: ModFilterFormValues;
 	onSubmit: (values: ModFilterFormValues) => void;
-	categories: { value: ModDataCategory; label: string }[];
-	users: { value: string; label: string }[];
-	tags: { value: string; label: string }[];
+	categories: ModDataCategory[];
+	users: { id: string; username: string }[];
+	tags: string[];
+	loading?: boolean;
 };
 
 export function ModFilterForm(props: ModFilterFormProps) {
@@ -54,38 +56,44 @@ export function ModFilterForm(props: ModFilterFormProps) {
 					placeholder={t("SEARCH_PLACEHOLDER")}
 					{...form.getInputProps("term")}
 					leftSection={<FaMagnifyingGlass />}
+					disabled={props.loading}
 				/>
 				<SimpleGrid cols={breakpoint.isXs ? 1 : 3}>
-					<Select
+					<ModCategorySelect
 						label={t("CATEGORY")}
-						data={props.categories || []}
+						data={props.categories}
 						placeholder={form.values.category ? undefined : t("ALL")}
 						clearable
 						searchable
 						{...form.getInputProps("category")}
 						leftSection={<FaShapes />}
+						disabled={props.loading}
 					/>
 					<MultiSelect
 						label={t("AUTHOR")}
 						placeholder={form.values.authors?.length ? undefined : t("ALL")}
 						clearable
-						data={props.users || []}
+						data={props.users.map((user) => ({ value: user.id, label: user.username }))}
 						searchable
 						{...form.getInputProps("authors")}
 						leftSection={<FaUser />}
+						disabled={props.loading}
 					/>
 					<MultiSelect
 						label={t("TAGS")}
 						placeholder={form.values.tags?.length ? undefined : t("ALL")}
 						clearable
-						data={props.tags || []}
+						data={props.tags}
 						searchable
 						{...form.getInputProps("tags")}
 						leftSection={<FaTag />}
+						disabled={props.loading}
 					/>
 				</SimpleGrid>
 				<Group justify={"flex-end"}>
-					<Button type={"submit"}>{t("APPLY")}</Button>
+					<Button type={"submit"} disabled={props.loading}>
+						{t("APPLY")}
+					</Button>
 				</Group>
 			</Stack>
 		</form>

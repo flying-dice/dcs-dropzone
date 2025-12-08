@@ -1,5 +1,6 @@
-import { Stack } from "@mantine/core";
+import { Alert, Skeleton, Stack } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
+import { times } from "lodash";
 import { match } from "ts-pattern";
 import { useGetMods } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
@@ -21,7 +22,11 @@ export function _ModsList(props: { page: number; size: number; filters: Record<s
 		<>
 			{match(mods.data)
 				.when(
-					(res) => res?.status === StatusCodes.OK && res.data.data.length > 0,
+					(res) => !res,
+					() => times(4, () => <Skeleton height={130} />),
+				)
+				.when(
+					(res) => res.status === StatusCodes.OK && res.data.data.length > 0,
 					(res) => (
 						<Stack>
 							{res &&
@@ -40,13 +45,21 @@ export function _ModsList(props: { page: number; size: number; filters: Record<s
 						</Stack>
 					),
 				)
+				.when(
+					(res) => res.status === StatusCodes.OK && res.data.data.length === 0,
+					() => (
+						<EmptyState
+							withoutBorder
+							title={t("NO_MODS_FOUND_TITLE")}
+							description={t("NO_MODS_FOUND_SUBTITLE_DESC")}
+							icon={AppIcons.Featured}
+						/>
+					),
+				)
 				.otherwise(() => (
-					<EmptyState
-						withoutBorder
-						title={t("NO_MODS_FOUND_TITLE")}
-						description={t("NO_MODS_FOUND_SUBTITLE_DESC")}
-						icon={AppIcons.Featured}
-					/>
+					<Alert title={t("MODS_FETCH_ERROR_TITLE")} color={"red"}>
+						{t("MODS_FETCH_ERROR_DESC")}
+					</Alert>
 				))}
 		</>
 	);

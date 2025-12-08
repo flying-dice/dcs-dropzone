@@ -1,17 +1,17 @@
-import { describeJsonRoute } from "hono-utils/describeJsonRoute";
+import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { Hono } from "hono";
 import { deleteCookie, setSignedCookie } from "hono/cookie";
 import { describeRoute, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import ApplicationContext from "../Application.ts";
 import appConfig from "../ApplicationConfig.ts";
 import handleAuthResult from "../commands/HandleAuthResult.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { UserData } from "../schemas/UserData.ts";
-import { AuthServiceProvider } from "../services/AuthServiceProvider.ts";
+import { AuthServiceFactory } from "../services/AuthService/AuthServiceFactory.ts";
+import { AuthServiceProvider } from "../services/AuthService/AuthServiceProvider.ts";
 
 const params = z.object({
 	provider: z.enum(AuthServiceProvider),
@@ -39,7 +39,7 @@ router.get(
 	async (c) => {
 		const provider = c.req.valid("param").provider;
 		logger.debug({ provider }, "Auth callback start");
-		const authService = ApplicationContext.getAuthService(provider);
+		const authService = AuthServiceFactory.getAuthService(provider);
 
 		const { code, state } = c.req.valid("query");
 
@@ -83,7 +83,7 @@ router.get(
 	validator("param", params),
 	(c) => {
 		const provider = c.req.valid("param").provider;
-		const authService = ApplicationContext.getAuthService(provider);
+		const authService = AuthServiceFactory.getAuthService(provider);
 		logger.debug({ provider }, "Auth login redirect");
 		return c.redirect(authService.getWebFlowAuthorizationUrl());
 	},

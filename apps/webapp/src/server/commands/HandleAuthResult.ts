@@ -1,7 +1,7 @@
 import { getLogger } from "log4js";
 import { User } from "../entities/User.ts";
 import { UserData } from "../schemas/UserData.ts";
-import type { AuthResult } from "../services/AuthService.ts";
+import type { AuthResult } from "../services/AuthService/AuthService.ts";
 
 const logger = getLogger("HandleAuthResultCommand");
 

@@ -1,4 +1,4 @@
-import { zKebabCaseString } from "./zod-helpers.ts";
+import { ze } from "@packages/zod";
 import { z } from "zod";
 import { ModCategory } from "../enums/ModCategory.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";
@@ -10,7 +10,7 @@ export const ModData = z
 		category: z.enum(ModCategory),
 		description: z.string(),
 		content: z.string(),
-		tags: zKebabCaseString.array(),
+		tags: ze.tag().array(),
 		dependencies: z.array(z.string()),
 		screenshots: z.array(z.string()),
 		thumbnail: z.string(),
