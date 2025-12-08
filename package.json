@@ -5,5 +5,11 @@
 	"workspaces": [
 		"apps/*",
 		"packages/*"
-	]
+	],
+	"scripts": {
+		"check": "bun run --workspaces check",
+		"test": "bun run --workspaces test",
+		"dev:webapp": "cd apps/webapp && bun run dev",
+		"dev:daemon": "cd apps/daemon && bun run dev"
+	}
 }
