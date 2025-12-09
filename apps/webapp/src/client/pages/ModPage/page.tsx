@@ -19,6 +19,7 @@ import { Markdown } from "../../components/Markdown.tsx";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
+import { _Releases } from "./_Releases.tsx";
 import { _Screenshots } from "./_Screenshots.tsx";
 
 type _PageProps = {
@@ -76,6 +77,9 @@ function _Page(props: _PageProps) {
 								<Markdown content={props.mod.content} />
 							</Stack>
 						</Card>
+					</Tabs.Panel>
+					<Tabs.Panel value="releases">
+						<_Releases mod={props.mod} />
 					</Tabs.Panel>
 				</Container>
 			</Tabs>

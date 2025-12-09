@@ -40,6 +40,9 @@ export default {
 		MOD_FETCH_ERROR_TITLE: "Error fetching mod",
 		MOD_FETCH_ERROR_DESC: "There was an error fetching the mod. Please try again later.",
 
+		MOD_RELEASES_FETCH_ERROR_TITLE: "Error fetching mod releases",
+		MOD_RELEASES_FETCH_ERROR_DESC: "There was an error fetching the mod releases. Please try again later.",
+
 		NO_MODS_DOWNLOADED_TITLE: "No mods downloaded",
 		NO_MODS_DOWNLOADED_SUBTITLE_DESC:
 			"You haven't downloaded any mods yet. Browse the mods page to find and download to mods that interest you.",
@@ -228,6 +231,6 @@ export default {
 			"Invalid tag format. Tags should only use 0-9 a-z and be seperated by hyphens (e.g., my-tag, a-10a, etc).",
 		TAGS_INPUT_PLACEHOLDER: "Add Tags (press Enter to add)",
 		TAGS_INPUT_HELPER_TEXT: "Use relevant tags to help users find your mod",
-		MOD_CREATED_AT_DISTANCE: "Created {{distance}} ago",
+		CREATED_AT_DISTANCE: "Created {{distance}} ago",
 	},
 };

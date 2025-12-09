@@ -34,7 +34,7 @@ export function _BasicInfo(props: _BasicInfoProps) {
 					icon={AppIcons.Releases}
 					stat={
 						props.latestRelease?.createdAt
-							? t("MOD_CREATED_AT_DISTANCE", {
+							? t("CREATED_AT_DISTANCE", {
 									distance: formatDistanceToNow(props.latestRelease.createdAt),
 								})
 							: "-"
