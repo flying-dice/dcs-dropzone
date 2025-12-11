@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useGetLatestModReleaseById, useGetModById } from "../../_autogen/api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import _Page from "./page.tsx";
+import { _Page } from "./page.tsx";
 
 export function ModPage() {
 	const { t } = useAppTranslation();
@@ -22,7 +22,8 @@ export function ModPage() {
 			(res) => res.status === StatusCodes.OK,
 			(res) => (
 				<_Page
-					mod={res.data}
+					mod={res.data.mod}
+					maintainers={res.data.maintainers}
 					latestRelease={latestRelease.data?.status === StatusCodes.OK ? latestRelease.data?.data : undefined}
 				/>
 			),

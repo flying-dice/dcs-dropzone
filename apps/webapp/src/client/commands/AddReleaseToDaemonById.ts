@@ -43,12 +43,12 @@ export default async function (command: AddReleaseToDaemonByIdCommand): Promise<
 	debug(`Requesting daemon to add releaseId: ${releaseId} for modId: ${modId}`);
 
 	const result = await addReleaseToDaemon({
-		modId: mod.data.id,
+		modId: mod.data.mod.id,
 		releaseId: release.data.id,
-		modName: mod.data.name,
+		modName: mod.data.mod.name,
 		version: form?.values.version || release.data.version,
 		assets: form?.values.assets || release.data.assets,
-		dependencies: mod.data.dependencies,
+		dependencies: mod.data.mod.dependencies,
 		missionScripts: form?.values.missionScripts || release.data.missionScripts,
 		symbolicLinks: form?.values.symbolicLinks || release.data.symbolicLinks,
 	});
@@ -60,7 +60,7 @@ export default async function (command: AddReleaseToDaemonByIdCommand): Promise<
 
 	if (!form) {
 		debug("Adding Mod Release Download Count");
-		await registerModReleaseDownloadById(mod.data.id, release.data.id, {
+		await registerModReleaseDownloadById(mod.data.mod.id, release.data.id, {
 			daemonInstanceId: health.data.daemonInstanceId,
 		});
 	}

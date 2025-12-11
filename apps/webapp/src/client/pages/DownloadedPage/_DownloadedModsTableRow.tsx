@@ -1,6 +1,5 @@
 import { Checkbox, Progress, Table, Text } from "@mantine/core";
-import { StatusCodes } from "http-status-codes";
-import { useGetLatestModReleaseById } from "../../_autogen/api.ts";
+import type { ModReleaseData } from "../../_autogen/api.ts";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _ModActionsMenu } from "./_ModActionsMenu.tsx";
@@ -11,21 +10,11 @@ function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 
 export type DownloadedModsTableRowProps = {
 	mod: ModAndReleaseData;
-	variant: "downloads" | "enabled" | "updates";
+	latest: ModReleaseData | undefined;
 };
 export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 	const { t } = useAppTranslation();
-	const latest = useGetLatestModReleaseById(props.mod.modId);
-	const isLatest = latest.data?.status === StatusCodes.OK ? latest.data.data.version === props.mod.version : undefined;
-	const latestVersion = latest.data?.status === StatusCodes.OK ? latest.data.data.version : undefined;
-
-	if (props.variant === "enabled" && props.mod.status !== ModAndReleaseDataStatus.ENABLED) {
-		return null;
-	}
-
-	if (props.variant === "updates" && isLatest) {
-		return null;
-	}
+	const isLatest = props.latest ? props.mod.version === props.latest.version : undefined;
 
 	return (
 		<Table.Tr>
@@ -41,19 +30,16 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 					{props.mod?.version}
 				</Text>
 			</Table.Td>
-			<Table.Td>{latestVersion}</Table.Td>
+			<Table.Td>{props.latest?.version || "-"}</Table.Td>
 			<Table.Td>
 				{props.mod.status === ModAndReleaseDataStatus.IN_PROGRESS ? (
 					<Progress value={props.mod.overallPercentProgress || 0} striped={true} animated={true} />
 				) : (
-					t(props.mod.status || "PENDING")
+					t(props.mod.status || ModAndReleaseDataStatus.PENDING)
 				)}
 			</Table.Td>
 			<Table.Td>
-				<_ModActionsMenu
-					mod={props.mod}
-					latest={latest.data?.status === StatusCodes.OK ? latest.data?.data : undefined}
-				/>
+				<_ModActionsMenu mod={props.mod} latest={props.latest ? props.latest : undefined} />
 			</Table.Td>
 		</Table.Tr>
 	);

@@ -4,8 +4,31 @@ import assetHelpMd from "./en_AssetHelp.md" with { type: "text" };
 import missionScriptHelp from "./en_MissionScriptHelp.md" with { type: "text" };
 import symbolicLinkHelpMd from "./en_SymbolicLinkHelp.md" with { type: "text" };
 
+const modCategoryContent: Record<ModCategory, string> = {
+	[ModCategory.CAMPAIGN]: "Campaign",
+	[ModCategory.DEVICE_PROFILES]: "Device Profiles",
+	[ModCategory.MOD]: "Mod",
+	[ModCategory.MISSION]: "Mission",
+	[ModCategory.SKIN]: "Skin",
+	[ModCategory.SOUND]: "Sound",
+	[ModCategory.TERRAIN]: "Terrain",
+	[ModCategory.UTILITY]: "Utility",
+	[ModCategory.OTHER]: "Other",
+};
+
+const modAndReleaseDataStatusContent: Record<ModAndReleaseDataStatus, string> = {
+	[ModAndReleaseDataStatus.PENDING]: "Pending",
+	[ModAndReleaseDataStatus.ENABLED]: "Enabled",
+	[ModAndReleaseDataStatus.DISABLED]: "Disabled",
+	[ModAndReleaseDataStatus.ERROR]: "Error",
+	[ModAndReleaseDataStatus.IN_PROGRESS]: "Fetching...",
+};
+
 export default {
 	translation: {
+		...modCategoryContent,
+		...modAndReleaseDataStatusContent,
+
 		ADD_DEPENDENCY: "Add dependency",
 		ADD_MISSION_SCRIPT: "Add Mission Script",
 		ADD_SYMBOLIC_LINK: "Add Symbolic Link",
@@ -46,6 +69,12 @@ export default {
 		NO_MODS_DOWNLOADED_TITLE: "No mods downloaded",
 		NO_MODS_DOWNLOADED_SUBTITLE_DESC:
 			"You haven't downloaded any mods yet. Browse the mods page to find and download to mods that interest you.",
+
+		NO_OUTDATED_MODS_TITLE: "No outdated mods",
+		NO_OUTDATED_MODS_SUBTITLE_DESC: "All your downloaded mods are up to date. Check back later for new updates.",
+
+		NO_ENABLED_MODS_TITLE: "No enabled mods",
+		NO_ENABLED_MODS_SUBTITLE_DESC: "You have no enabled mods. Enable mods from your downloaded mods list.",
 
 		NO_USER_MODS_TITLE: "No mods published",
 		NO_USER_MODS_SUBTITLE_DESC:
@@ -178,22 +207,6 @@ export default {
 		NO_POPULAR_MODS_FOUND_TITLE: "No popular mods found",
 		NO_POPULAR_MODS_FOUND_SUBTITLE_DESC: "There are currently no popular mods available.",
 
-		[ModCategory.CAMPAIGN]: "Campaign",
-		[ModCategory.DEVICE_PROFILES]: "Device Profiles",
-		[ModCategory.MOD]: "Mod",
-		[ModCategory.MISSION]: "Mission",
-		[ModCategory.SKIN]: "Skin",
-		[ModCategory.SOUND]: "Sound",
-		[ModCategory.TERRAIN]: "Terrain",
-		[ModCategory.UTILITY]: "Utility",
-		[ModCategory.OTHER]: "Other",
-
-		[ModAndReleaseDataStatus.PENDING]: "Pending",
-		[ModAndReleaseDataStatus.ENABLED]: "Enabled",
-		[ModAndReleaseDataStatus.DISABLED]: "Disabled",
-		[ModAndReleaseDataStatus.ERROR]: "Error",
-		[ModAndReleaseDataStatus.IN_PROGRESS]: "Fetching...",
-
 		ADDED_SUCCESS_TITLE: "Added Successfully",
 		ADDED_SUCCESS_DESC: "You have successfully added this mod.",
 
@@ -232,5 +245,6 @@ export default {
 		TAGS_INPUT_PLACEHOLDER: "Add Tags (press Enter to add)",
 		TAGS_INPUT_HELPER_TEXT: "Use relevant tags to help users find your mod",
 		CREATED_AT_DISTANCE: "Created {{distance}} ago",
+		UPDATED_AT_DISTANCE: "Updated {{distance}} ago",
 	},
 };

@@ -6,16 +6,14 @@ import {
 	Flex,
 	Grid,
 	GridCol,
-	Group,
-	SimpleGrid,
 	Stack,
 	Tabs,
-	TabsPanel,
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
-import type { ModData, ModReleaseData } from "../../_autogen/api.ts";
+import type { ModData, ModReleaseData, UserData } from "../../_autogen/api.ts";
 import { Markdown } from "../../components/Markdown.tsx";
+import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
@@ -24,10 +22,11 @@ import { _Screenshots } from "./_Screenshots.tsx";
 
 type _PageProps = {
 	mod: ModData;
+	maintainers: UserData[];
 	latestRelease?: ModReleaseData;
 };
 
-function _Page(props: _PageProps) {
+export function _Page(props: _PageProps) {
 	const colorScheme = useComputedColorScheme();
 	const { isSm, isMd } = useBreakpoint();
 	const { t } = useAppTranslation();
@@ -35,14 +34,19 @@ function _Page(props: _PageProps) {
 	return (
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
 			<Stack bg={colorScheme === "light" ? "white" : "dark.7"}>
-				<Grid p={"xl"}>
-					<GridCol span={isSm || isMd ? 12 : 8}>
-						<_Screenshots mod={props.mod} />
-					</GridCol>
-					<GridCol span={isSm || isMd ? 12 : 4}>
-						<_BasicInfo mod={props.mod} latestRelease={props.latestRelease} />
-					</GridCol>
-				</Grid>
+				<Container size={"xl"} pt={"md"}>
+					<Grid>
+						<GridCol span={isSm || isMd ? 12 : 8}>
+							<_Screenshots mod={props.mod} />
+						</GridCol>
+						<GridCol span={isSm || isMd ? 12 : 4}>
+							<Stack>
+								<_BasicInfo mod={props.mod} maintainers={props.maintainers} latestRelease={props.latestRelease} />
+								{props.latestRelease && <ModReleaseDaemonControls mod={props.mod} release={props.latestRelease} />}
+							</Stack>
+						</GridCol>
+					</Grid>
+				</Container>
 				<Divider />
 			</Stack>
 			<Tabs
@@ -86,5 +90,3 @@ function _Page(props: _PageProps) {
 		</AppShell.Main>
 	);
 }
-
-export default _Page;

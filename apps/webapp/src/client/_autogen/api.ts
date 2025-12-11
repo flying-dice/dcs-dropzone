@@ -357,6 +357,11 @@ export type UpdateUserModReleaseBody = {
 	updatedAt?: string;
 };
 
+export type GetModById200 = {
+	mod: ModData;
+	maintainers: UserData[];
+};
+
 export type GetModById404 = {
 	message: string;
 };
@@ -403,7 +408,7 @@ export type GetMods200Page = {
 };
 
 export type GetMods200 = {
-	data: ModData[];
+	data: ModSummaryData[];
 	page: GetMods200Page;
 	filter: ModAvailableFilterData;
 };
@@ -2309,7 +2314,7 @@ export const useDeleteUserModRelease = <TError = ErrorData, TContext = unknown>(
  * @summary Get mod by ID
  */
 export type getModByIdResponse200 = {
-	data: ModData;
+	data: GetModById200;
 	status: 200;
 };
 
@@ -3249,7 +3254,7 @@ export const useGetServerDashboardMetrics = <TError = ErrorData, TContext = unkn
  * @summary Get Featured mods
  */
 export type getFeaturedModsResponse200 = {
-	data: ModData[];
+	data: ModSummaryData[];
 	status: 200;
 };
 
@@ -3375,7 +3380,7 @@ export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeatured
  * @summary Get Popular mods
  */
 export type getPopularModsResponse200 = {
-	data: ModData[];
+	data: ModSummaryData[];
 	status: 200;
 };
 

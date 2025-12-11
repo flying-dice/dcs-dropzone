@@ -1,4 +1,4 @@
-import { Alert, Card, Stack } from "@mantine/core";
+import { Alert, Stack } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { match } from "ts-pattern";
 import { type ModData, useGetModReleases } from "../../_autogen/api.ts";

@@ -1,18 +1,21 @@
-import { ActionIcon, Badge, Button, Group, SimpleGrid, Stack, Text } from "@mantine/core";
+import { Badge, Group, SimpleGrid, Stack, Text } from "@mantine/core";
 import { formatDistanceToNow } from "date-fns";
-import { FaShare } from "react-icons/fa6";
-import type { ModData, ModReleaseData } from "../../_autogen/api.ts";
+import { FaCalendar } from "react-icons/fa6";
+import type { ModData, ModReleaseData, UserData } from "../../_autogen/api.ts";
+import { MaintainersAvatars } from "../../components/MaintainersAvatars.tsx";
 import { Stat } from "../../components/Stat.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 
 export type _BasicInfoProps = {
 	mod: ModData;
+	maintainers: UserData[];
 	latestRelease?: ModReleaseData;
 };
 
 export function _BasicInfo(props: _BasicInfoProps) {
 	const { t } = useAppTranslation();
+
 	return (
 		<Stack>
 			<Group gap={"xs"}>
@@ -31,26 +34,28 @@ export function _BasicInfo(props: _BasicInfoProps) {
 				<Stat iconColor={"blue"} icon={AppIcons.Downloaded} stat={props.mod.downloadsCount} />
 				<Stat
 					iconColor={"blue"}
-					icon={AppIcons.Releases}
+					icon={FaCalendar}
 					stat={
 						props.latestRelease?.createdAt
-							? t("CREATED_AT_DISTANCE", {
+							? t("UPDATED_AT_DISTANCE", {
 									distance: formatDistanceToNow(props.latestRelease.createdAt),
 								})
 							: "-"
 					}
 				/>
-				<Stat iconColor={"blue"} icon={AppIcons.Featured} stat={props.mod.maintainers.join(",") || "-"} />
+				<Stat
+					iconColor={"blue"}
+					icon={AppIcons.Author}
+					stat={
+						props.maintainers.length ? (
+							<MaintainersAvatars maintainers={props.maintainers} size={"sm"} limit={5} />
+						) : (
+							"-"
+						)
+					}
+				/>
 				<Stat iconColor={"blue"} icon={AppIcons.Releases} stat={props.latestRelease?.version || "-"} />
 			</SimpleGrid>
-			<Group>
-				<Button flex={"auto"} leftSection={<AppIcons.Downloaded />}>
-					{t("DOWNLOAD")}
-				</Button>
-				<ActionIcon size={"lg"} variant={"default"}>
-					<FaShare />
-				</ActionIcon>
-			</Group>
 		</Stack>
 	);
 }

@@ -13,7 +13,7 @@ const formSchema = z.object({
 
 type ThumbnailFormValues = z.infer<typeof formSchema>;
 
-function Form(props: {
+function _ThumbnailForm(props: {
 	initialValues: ThumbnailFormValues;
 	onSubmit: (values: ThumbnailFormValues) => void;
 	onCancel: () => void;
@@ -55,7 +55,7 @@ function openThumbnailModal(value: string, onChange: (value: string) => void) {
 		title: "Change Thumbnail",
 		size: "xl",
 		children: (
-			<Form
+			<_ThumbnailForm
 				initialValues={{ thumbnail: value }}
 				onSubmit={(values) => {
 					onChange(values.thumbnail);

@@ -1,7 +1,7 @@
 module.exports = {
 	api: {
 		output: {
-			target: "src/app/client/_autogen/api.ts",
+			target: "src/client/_autogen/api.ts",
 			client: "react-query",
 		},
 		input: {
@@ -10,7 +10,7 @@ module.exports = {
 	},
 	daemon_api: {
 		output: {
-			target: "src/app/client/_autogen/daemon_api.ts",
+			target: "src/client/_autogen/daemon_api.ts",
 			client: "react-query",
 			override: {
 				mutator: {
@@ -25,7 +25,7 @@ module.exports = {
 	},
 	legacy_api: {
 		output: {
-			target: "src/app/client/_autogen/legacy_api.ts",
+			target: "src/client/_autogen/legacy_api.ts",
 			client: "react-query",
 			baseUrl: "https://dcs-dropzone.app/",
 		},

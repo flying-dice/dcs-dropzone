@@ -7,7 +7,7 @@ import getAllPopularMods from "../queries/GetAllPopularMods.ts";
 import getServerMetricsData from "../queries/GetServerMetricsData.ts";
 import { DaemonInstalledVersionsData } from "../schemas/DaemonInstalledVersionsData.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
-import { ModData } from "../schemas/ModData.ts";
+import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import { ServerMetricsData } from "../schemas/ServerMetricsData.ts";
 
 const router = new Hono();
@@ -40,7 +40,7 @@ router.get(
 		description: "Retrieves a set of featured mods.",
 		tags: ["Dashboard"],
 		responses: {
-			[StatusCodes.OK]: ModData.array(),
+			[StatusCodes.OK]: ModSummaryData.array(),
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
@@ -59,7 +59,7 @@ router.get(
 		description: "Retrieves a set of popular mods.",
 		tags: ["Dashboard"],
 		responses: {
-			[StatusCodes.OK]: ModData.array(),
+			[StatusCodes.OK]: ModSummaryData.array(),
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),

@@ -1,5 +1,6 @@
 import { Center, Flex, Group, Stack, Text } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
+import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useGetFeaturedMods } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
@@ -9,6 +10,7 @@ import { AppIcons } from "../../icons.ts";
 
 export function _FeaturedMods() {
 	const { t } = useAppTranslation();
+	const nav = useNavigate();
 	const featuredMods = useGetFeaturedMods();
 
 	return (
@@ -33,6 +35,7 @@ export function _FeaturedMods() {
 											downloads={mod.downloadsCount}
 											isDownloaded={false}
 											variant={"grid"}
+											onClick={() => nav(`/mods/${mod.id}`)}
 										/>
 									</Flex>
 								))}

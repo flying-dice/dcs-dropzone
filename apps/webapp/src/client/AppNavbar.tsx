@@ -27,6 +27,12 @@ export function AppNavbar(props: AppNavbarProps) {
 
 	const { downloads, enabled, outdated } = useDashboardMetrics();
 
+	console.log({
+		downloads,
+		enabled,
+		outdated,
+	});
+
 	return (
 		<AppShell.Navbar>
 			<Stack p={"md"} gap={"xl"}>

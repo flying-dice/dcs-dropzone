@@ -9,7 +9,9 @@ import getModById from "../queries/GetModById.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";
+import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import { PageData } from "../schemas/PageData.ts";
+import { UserData } from "../schemas/UserData.ts";
 
 const router = new Hono();
 
@@ -21,7 +23,10 @@ router.get(
 		description: "Retrieves a specific published mod by its ID.",
 		tags: ["Mods"],
 		responses: {
-			[StatusCodes.OK]: ModData,
+			[StatusCodes.OK]: z.object({
+				mod: ModData,
+				maintainers: UserData.array(),
+			}),
 			[StatusCodes.NOT_FOUND]: z.object({
 				message: z.string(),
 			}),
@@ -58,7 +63,7 @@ router.get(
 		tags: ["Mods"],
 		responses: {
 			[StatusCodes.OK]: z.object({
-				data: z.array(ModData),
+				data: ModSummaryData.array(),
 				page: PageData,
 				filter: ModAvailableFilterData,
 			}),
@@ -70,7 +75,7 @@ router.get(
 		z.object({
 			page: PageData.shape.number,
 			size: PageData.shape.size,
-			category: ModData.shape.category.optional(),
+			category: ModSummaryData.shape.category.optional(),
 			maintainers: ze.csv().optional(),
 			tags: ze.csv().optional(),
 			term: z.string().optional(),

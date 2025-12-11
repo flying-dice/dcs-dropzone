@@ -10,7 +10,21 @@ import { useErrorModal } from "./useErrorModal.tsx";
 
 export function useDaemon() {
 	const { t } = useAppTranslation();
-	const daemonReleases = useGetAllDaemonReleases();
+	const daemonReleases = useGetAllDaemonReleases({
+		query: {
+			refetchInterval: (q) => {
+				if (
+					q.state.data?.data.some(
+						(it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS || it.status === ModAndReleaseDataStatus.PENDING,
+					)
+				) {
+					return 1000;
+				} else {
+					return false;
+				}
+			},
+		},
+	});
 	const showError = useErrorModal();
 
 	const [adding, add] = useAsyncFn(

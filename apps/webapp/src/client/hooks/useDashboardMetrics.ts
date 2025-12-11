@@ -1,5 +1,9 @@
-import { useEffect } from "react";
-import { type GetServerDashboardMetricsBodyItem, useGetServerDashboardMetrics } from "../_autogen/api.ts";
+import { useEffect, useState } from "react";
+import {
+	type GetServerDashboardMetrics200,
+	type GetServerDashboardMetricsBodyItem,
+	useGetServerDashboardMetrics,
+} from "../_autogen/api.ts";
 import { ModAndReleaseDataStatus, useGetAllDaemonReleases } from "../_autogen/daemon_api.ts";
 
 export type DashboardMetrics = {
@@ -13,6 +17,8 @@ export function useDashboardMetrics(): DashboardMetrics {
 	const allDaemonReleases = useGetAllDaemonReleases();
 	const metrics = useGetServerDashboardMetrics();
 
+	const [metricsCache, setMetricsCache] = useState<GetServerDashboardMetrics200 | null>(null);
+
 	useEffect(() => {
 		metrics.mutate({
 			data:
@@ -25,13 +31,19 @@ export function useDashboardMetrics(): DashboardMetrics {
 		});
 	}, [allDaemonReleases.data, metrics.mutate]);
 
+	useEffect(() => {
+		if (metrics.data?.status === 200) {
+			setMetricsCache(metrics.data.data);
+		}
+	}, [metrics.data]);
+
 	return {
-		totalMods: metrics.data?.status === 200 ? metrics.data.data.totalMods : undefined,
+		totalMods: metricsCache ? metricsCache.totalMods : undefined,
 		downloads: allDaemonReleases.data?.status === 200 ? allDaemonReleases.data.data.length : undefined,
 		enabled:
 			allDaemonReleases.data?.status === 200
 				? allDaemonReleases.data.data.filter((it) => it.status === ModAndReleaseDataStatus.ENABLED).length
 				: undefined,
-		outdated: metrics.data?.status === 200 ? metrics.data.data.outdated : undefined,
+		outdated: metricsCache ? metricsCache.outdated : undefined,
 	};
 }
