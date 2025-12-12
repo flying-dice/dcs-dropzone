@@ -25,13 +25,7 @@ export function AppNavbar(props: AppNavbarProps) {
 		});
 	};
 
-	const { downloads, enabled, outdated } = useDashboardMetrics();
-
-	console.log({
-		downloads,
-		enabled,
-		outdated,
-	});
+	const m = useDashboardMetrics();
 
 	return (
 		<AppShell.Navbar>
@@ -39,18 +33,18 @@ export function AppNavbar(props: AppNavbarProps) {
 				<Stack gap={"xs"}>
 					<NavShortcut icon={AppIcons.Home} label={t("DASHBOARD")} to={"/"} />
 					<NavShortcut icon={AppIcons.Mods} label={t("BROWSE_MODS")} to={"/mods"} />
-					<NavShortcut icon={AppIcons.Downloaded} label={t("DOWNLOADED")} to={"/downloaded"} count={downloads} />
+					<NavShortcut icon={AppIcons.Downloaded} label={t("DOWNLOADED")} to={"/downloaded"} count={m.downloads} />
 					<NavShortcut
 						icon={AppIcons.Enabled}
 						label={t("ENABLED")}
-						count={enabled}
+						count={m.enabled}
 						countColor={"green"}
 						to={"/enabled"}
 					/>
 					<NavShortcut
 						icon={AppIcons.Updates}
 						label={t("UPDATES")}
-						count={outdated}
+						count={m.outdated}
 						countColor={"red"}
 						to={"/updates"}
 					/>
