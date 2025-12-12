@@ -421,14 +421,8 @@ export type RegisterModReleaseDownloadByIdBody = {
 	daemonInstanceId: string;
 };
 
-export type GetServerDashboardMetricsBodyItem = {
-	modId: string;
-	releaseId: string;
-};
-
-export type GetServerDashboardMetrics200 = {
+export type GetCountTotalPublicMods200 = {
 	totalMods: number;
-	outdated: number;
 };
 
 export type GetCategories200 = { [key: string]: number };
@@ -3140,114 +3134,144 @@ export const useRegisterModReleaseDownloadById = <TError = ErrorData, TContext =
 };
 
 /**
- * Retrieves various metrics for the dashboard.
- * @summary Get Server Dashboard Metrics
+ * Retrieves the total number of public mods.
+ * @summary Get Total Public Mods
  */
-export type getServerDashboardMetricsResponse200 = {
-	data: GetServerDashboardMetrics200;
+export type getCountTotalPublicModsResponse200 = {
+	data: GetCountTotalPublicMods200;
 	status: 200;
 };
 
-export type getServerDashboardMetricsResponse500 = {
+export type getCountTotalPublicModsResponse500 = {
 	data: ErrorData;
 	status: 500;
 };
 
-export type getServerDashboardMetricsResponseSuccess = getServerDashboardMetricsResponse200 & {
+export type getCountTotalPublicModsResponseSuccess = getCountTotalPublicModsResponse200 & {
 	headers: Headers;
 };
-export type getServerDashboardMetricsResponseError = getServerDashboardMetricsResponse500 & {
+export type getCountTotalPublicModsResponseError = getCountTotalPublicModsResponse500 & {
 	headers: Headers;
 };
 
-export type getServerDashboardMetricsResponse =
-	| getServerDashboardMetricsResponseSuccess
-	| getServerDashboardMetricsResponseError;
+export type getCountTotalPublicModsResponse =
+	| getCountTotalPublicModsResponseSuccess
+	| getCountTotalPublicModsResponseError;
 
-export const getGetServerDashboardMetricsUrl = () => {
-	return `/api/dashboard-metrics`;
+export const getGetCountTotalPublicModsUrl = () => {
+	return `/api/total-mods-count`;
 };
 
-export const getServerDashboardMetrics = async (
-	getServerDashboardMetricsBodyItem: GetServerDashboardMetricsBodyItem[],
-	options?: RequestInit,
-): Promise<getServerDashboardMetricsResponse> => {
-	const res = await fetch(getGetServerDashboardMetricsUrl(), {
+export const getCountTotalPublicMods = async (options?: RequestInit): Promise<getCountTotalPublicModsResponse> => {
+	const res = await fetch(getGetCountTotalPublicModsUrl(), {
 		...options,
-		method: "POST",
-		headers: { "Content-Type": "application/json", ...options?.headers },
-		body: JSON.stringify(getServerDashboardMetricsBodyItem),
+		method: "GET",
 	});
 
 	const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-	const data: getServerDashboardMetricsResponse["data"] = body ? JSON.parse(body) : {};
-	return { data, status: res.status, headers: res.headers } as getServerDashboardMetricsResponse;
+	const data: getCountTotalPublicModsResponse["data"] = body ? JSON.parse(body) : {};
+	return { data, status: res.status, headers: res.headers } as getCountTotalPublicModsResponse;
 };
 
-export const getGetServerDashboardMetricsMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof getServerDashboardMetrics>>,
-		TError,
-		{ data: GetServerDashboardMetricsBodyItem[] },
-		TContext
-	>;
+export const getGetCountTotalPublicModsQueryKey = () => {
+	return [`/api/total-mods-count`] as const;
+};
+
+export const getGetCountTotalPublicModsQueryOptions = <
+	TData = Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+	TError = ErrorData,
+>(options?: {
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCountTotalPublicMods>>, TError, TData>>;
 	fetch?: RequestInit;
-}): UseMutationOptions<
-	Awaited<ReturnType<typeof getServerDashboardMetrics>>,
-	TError,
-	{ data: GetServerDashboardMetricsBodyItem[] },
-	TContext
-> => {
-	const mutationKey = ["getServerDashboardMetrics"];
-	const { mutation: mutationOptions, fetch: fetchOptions } = options
-		? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
-			? options
-			: { ...options, mutation: { ...options.mutation, mutationKey } }
-		: { mutation: { mutationKey }, fetch: undefined };
+}) => {
+	const { query: queryOptions, fetch: fetchOptions } = options ?? {};
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof getServerDashboardMetrics>>,
-		{ data: GetServerDashboardMetricsBodyItem[] }
-	> = (props) => {
-		const { data } = props ?? {};
+	const queryKey = queryOptions?.queryKey ?? getGetCountTotalPublicModsQueryKey();
 
-		return getServerDashboardMetrics(data, fetchOptions);
-	};
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getCountTotalPublicMods>>> = ({ signal }) =>
+		getCountTotalPublicMods({ signal, ...fetchOptions });
 
-	return { mutationFn, ...mutationOptions };
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetServerDashboardMetricsMutationResult = NonNullable<
-	Awaited<ReturnType<typeof getServerDashboardMetrics>>
->;
-export type GetServerDashboardMetricsMutationBody = GetServerDashboardMetricsBodyItem[];
-export type GetServerDashboardMetricsMutationError = ErrorData;
+export type GetCountTotalPublicModsQueryResult = NonNullable<Awaited<ReturnType<typeof getCountTotalPublicMods>>>;
+export type GetCountTotalPublicModsQueryError = ErrorData;
 
-/**
- * @summary Get Server Dashboard Metrics
- */
-export const useGetServerDashboardMetrics = <TError = ErrorData, TContext = unknown>(
-	options?: {
-		mutation?: UseMutationOptions<
-			Awaited<ReturnType<typeof getServerDashboardMetrics>>,
-			TError,
-			{ data: GetServerDashboardMetricsBodyItem[] },
-			TContext
-		>;
+export function useGetCountTotalPublicMods<
+	TData = Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+	TError = ErrorData,
+>(
+	options: {
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCountTotalPublicMods>>, TError, TData>> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+					TError,
+					Awaited<ReturnType<typeof getCountTotalPublicMods>>
+				>,
+				"initialData"
+			>;
 		fetch?: RequestInit;
 	},
 	queryClient?: QueryClient,
-): UseMutationResult<
-	Awaited<ReturnType<typeof getServerDashboardMetrics>>,
-	TError,
-	{ data: GetServerDashboardMetricsBodyItem[] },
-	TContext
-> => {
-	const mutationOptions = getGetServerDashboardMetricsMutationOptions(options);
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetCountTotalPublicMods<
+	TData = Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+	TError = ErrorData,
+>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCountTotalPublicMods>>, TError, TData>> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+					TError,
+					Awaited<ReturnType<typeof getCountTotalPublicMods>>
+				>,
+				"initialData"
+			>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetCountTotalPublicMods<
+	TData = Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+	TError = ErrorData,
+>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCountTotalPublicMods>>, TError, TData>>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get Total Public Mods
+ */
 
-	return useMutation(mutationOptions, queryClient);
-};
+export function useGetCountTotalPublicMods<
+	TData = Awaited<ReturnType<typeof getCountTotalPublicMods>>,
+	TError = ErrorData,
+>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCountTotalPublicMods>>, TError, TData>>;
+		fetch?: RequestInit;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getGetCountTotalPublicModsQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
 
 /**
  * Retrieves a set of featured mods.

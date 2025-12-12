@@ -10,6 +10,7 @@ import { useDaemon } from "../../hooks/useDaemon.ts";
 import type { I18nKeys } from "../../i18n/I18nKeys.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
+import { memoizedGetLatestModReleaseById } from "../../utils/MemoizedGetLatestModReleaseById.ts";
 import { _DownloadedModsTableRow } from "./_DownloadedModsTableRow.tsx";
 
 export type Variant = "downloads" | "enabled" | "updates";
@@ -51,7 +52,7 @@ export function _DownloadedModsTable(props: DownloadedModsTableProps) {
 
 		return Promise.all(
 			downloads.map(async (mod): Promise<{ mod: ModAndReleaseData; latest?: ModReleaseData }> => {
-				const latest = await getLatestModReleaseById(mod.modId);
+				const latest = await memoizedGetLatestModReleaseById.call(mod.modId);
 
 				return {
 					mod,

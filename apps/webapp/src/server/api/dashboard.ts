@@ -1,34 +1,30 @@
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { Hono } from "hono";
-import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import getAllFeaturedMods from "../queries/GetAllFeaturedMods.ts";
 import getAllPopularMods from "../queries/GetAllPopularMods.ts";
-import getServerMetricsData from "../queries/GetServerMetricsData.ts";
-import { DaemonInstalledVersionsData } from "../schemas/DaemonInstalledVersionsData.ts";
+import getCountTotalPublicMods from "../queries/GetCountTotalPublicMods.ts";
+import { CountTotalPublicModsData } from "../schemas/CountTotalPublicModsData.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
-import { ServerMetricsData } from "../schemas/ServerMetricsData.ts";
 
 const router = new Hono();
 
-router.post(
-	"/api/dashboard-metrics",
+router.get(
+	"/api/total-mods-count",
 	describeJsonRoute({
-		operationId: "getServerDashboardMetrics",
-		summary: "Get Server Dashboard Metrics",
-		description: "Retrieves various metrics for the dashboard.",
+		operationId: "getCountTotalPublicMods",
+		summary: "Get Total Public Mods",
+		description: "Retrieves the total number of public mods.",
 		tags: ["Dashboard"],
 		responses: {
-			[StatusCodes.OK]: ServerMetricsData,
+			[StatusCodes.OK]: CountTotalPublicModsData,
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	validator("json", DaemonInstalledVersionsData.array()),
 	async (c) => {
-		const daemonInstalledVersions = c.req.valid("json");
-		const metrics = await getServerMetricsData({ daemonInstalledVersions });
-		return c.json(metrics, StatusCodes.OK);
+		const totalMods = await getCountTotalPublicMods();
+		return c.json(totalMods, StatusCodes.OK);
 	},
 );
 

@@ -14,7 +14,7 @@ module.exports = {
 			client: "react-query",
 			override: {
 				mutator: {
-					path: "./src/app/client/_autogen/daemon_fetch_client.ts",
+					path: "./src/client/_autogen/daemon_fetch_client.ts",
 					name: "daemonFetch",
 				},
 			},
