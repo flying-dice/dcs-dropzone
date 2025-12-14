@@ -2,6 +2,32 @@
 
 A modern mod manager for DCS World that makes it easy to discover, download, and manage your favorite mods.
 
+## 📦 Monorepo Structure
+
+This project uses a monorepo structure organized with Bun workspaces:
+
+```
+dcs-dropzone/
+├── apps/                    # Applications
+│   ├── webapp/             # Web application (frontend + server)
+│   └── daemon/             # Daemon service for downloads & installations
+├── packages/               # Shared packages
+│   ├── hono/              # Shared Hono utilities and middleware
+│   └── zod/               # Shared Zod schemas for validation
+├── docs/                   # Technical documentation
+└── package.json           # Root workspace configuration
+```
+
+### Apps
+
+- **webapp**: The web application that provides the UI for browsing and managing mods. Built with React, Hono server, and MongoDB.
+- **daemon**: The daemon service that runs locally to handle downloading, extracting, and installing mods into your DCS World installation.
+
+### Packages
+
+- **@packages/hono**: Shared Hono utilities, middleware, and server components used across applications.
+- **@packages/zod**: Shared Zod schemas for data validation and type safety across the monorepo.
+
 ## 🚀 Getting Started
 
 ### For Users
@@ -33,9 +59,11 @@ For developers and contributors, technical documentation is available in the [`d
 ### Prerequisites
 
 - [Bun](https://bun.sh/) >= 1.0.0
-- DCS World installation
+- DCS World installation (for testing the daemon)
 
 ### Setup
+
+This is a Bun workspace monorepo. All dependencies are managed at the workspace level.
 
 1. Clone the repository:
 ```bash
@@ -43,41 +71,142 @@ git clone https://github.com/flying-dice/dcs-dropzone.git
 cd dcs-dropzone
 ```
 
-2. Install dependencies:
+2. Install dependencies for all workspace packages:
 ```bash
 bun install
 ```
 
-3. Run the development servers:
+This will install dependencies for the root workspace and all apps and packages.
+
+### Running Development Servers
+
+Each app can be run independently:
+
 ```bash
-# Web application
-bun run dev
+# Web application (runs on default port)
+bun run dev:webapp
 
 # Daemon service (in another terminal)
 bun run dev:daemon
 ```
 
+### Working with the Monorepo
+
+**Workspace Commands**: Commands can be run across all workspaces:
+
+```bash
+# Run checks (linting + type checking) across all workspaces
+bun run check
+
+# Run tests across all workspaces
+bun run test
+```
+
+**Working on Individual Apps/Packages**: Navigate to the specific directory:
+
+```bash
+# Work on webapp
+cd apps/webapp
+bun run dev          # Start dev server
+bun run check        # Lint and type-check
+bun run test         # Run tests
+
+# Work on daemon
+cd apps/daemon
+bun run dev          # Start daemon
+bun run build        # Build daemon executable
+```
+
+**Shared Packages**: The `packages/` directory contains code shared between apps:
+- Changes to `@packages/hono` or `@packages/zod` are immediately available to apps (no build step needed)
+- TypeScript references ensure type-checking works across package boundaries
+
 ### Building
+
+Build individual apps:
 
 ```bash
 # Build web application
+cd apps/webapp
 bun run build
 
-# Build daemon
-bun run build:daemon
+# Build daemon executable
+cd apps/daemon
+bun run build
 ```
 
 ### Testing
 
 ```bash
+# Run all tests across the monorepo
+bun run test
+
+# Run tests for a specific app/package
+cd apps/webapp
 bun test
+```
+
+### Code Quality
+
+The monorepo uses Biome for linting and formatting:
+
+```bash
+# Check and fix all workspaces
+bun run check
+
+# Check a specific app/package
+cd apps/webapp
+bun run check
 ```
 
 See the [docs/](./docs) folder for detailed technical documentation.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! This project uses a monorepo structure with Bun workspaces.
+
+### Getting Started
+
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/dcs-dropzone.git`
+3. Install dependencies: `bun install`
+4. Create a feature branch: `git checkout -b feature/your-feature-name`
+
+### Development Guidelines
+
+- **Code Quality**: Run `bun run check` before committing to ensure code passes linting and type-checking
+- **Testing**: Add tests for new features and ensure `bun run test` passes
+- **Monorepo Structure**:
+  - Apps go in `apps/` (self-contained applications)
+  - Shared code goes in `packages/` (reusable utilities and schemas)
+  - Keep dependencies at the workspace level when possible
+- **Commits**: Use clear, descriptive commit messages
+
+### Making Changes
+
+**For App-Specific Changes** (e.g., webapp or daemon):
+- Work in the relevant `apps/` directory
+- Test changes locally with `bun run dev`
+- Run `bun run check` and `bun test` in the app directory
+
+**For Shared Package Changes** (e.g., hono or zod packages):
+- Work in the relevant `packages/` directory
+- Changes are immediately reflected in dependent apps
+- Run checks across all workspaces: `bun run check` from root
+
+**Adding Dependencies**:
+- Shared dependencies: Add to root `package.json`
+- App-specific dependencies: Add to the app's `package.json`
+- Package-specific dependencies: Add to the package's `package.json`
+
+### Submitting Changes
+
+1. Ensure all checks pass: `bun run check && bun run test`
+2. Commit your changes
+3. Push to your fork
+4. Open a Pull Request with a clear description of your changes
+
+Please feel free to submit a Pull Request or open an issue for discussion.
 
 ## 📄 License
 

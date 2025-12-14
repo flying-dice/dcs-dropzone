@@ -1,8 +1,8 @@
-# Extract Queue System
+# Extract Queue System (Daemon)
 
 ## Overview
 
-The extract queue manages archive extraction with automatic retry, crash recovery, and dependency tracking. Extraction jobs only start after all required downloads complete successfully.
+The extract queue in the **daemon** application (`apps/daemon`) manages archive extraction with automatic retry, crash recovery, and dependency tracking. Extraction jobs only start after all required downloads complete successfully.
 
 ## How It Works
 
@@ -55,7 +55,7 @@ The available formats depend on your 7zip installation.
 
 ## Configuration
 
-The 7zip executable path is configured in `config.toml`:
+The 7zip executable path is configured in the daemon's `config.toml` (`apps/daemon/config.toml`):
 
 ```toml
 [binaries]
@@ -66,7 +66,7 @@ sevenzip = "binaries/7za.exe"
 
 **Extractions not starting:**
 - Verify all dependent downloads completed successfully
-- Check 7zip executable path in `config.toml`
+- Check 7zip executable path in `apps/daemon/config.toml`
 - Check logs for errors
 
 **Extractions failing:**

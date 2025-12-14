@@ -1,8 +1,8 @@
-# Download Queue System
+# Download Queue System (Daemon)
 
 ## Overview
 
-The download queue manages file downloads with automatic retry, crash recovery, and resumable downloads. All state is stored in the database, ensuring downloads survive application restarts.
+The download queue in the **daemon** application (`apps/daemon`) manages file downloads with automatic retry, crash recovery, and resumable downloads. All state is stored in the database, ensuring downloads survive application restarts.
 
 ## How It Works
 
@@ -42,7 +42,7 @@ Downloads can be cancelled individually or by release.
 
 ## Configuration
 
-The wget executable path is configured in `config.toml`:
+The wget executable path is configured in the daemon's `config.toml` (`apps/daemon/config.toml`):
 
 ```toml
 [binaries]
@@ -52,7 +52,7 @@ wget = "binaries/wget.exe"
 ## Troubleshooting
 
 **Downloads not starting:**
-- Check wget executable path in `config.toml`
+- Check wget executable path in `apps/daemon/config.toml`
 - Check logs for errors
 
 **Downloads failing:**
