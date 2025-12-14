@@ -7,11 +7,17 @@ import { orDefaultValue } from "../../utils/orDefaultValue.ts";
 
 export function _StatsCards() {
 	const { t } = useAppTranslation();
-	const { totalMods, downloads, enabled, outdated } = useDashboardMetrics();
+	const { totalMods, totalDownloads, downloads, enabled, outdated } = useDashboardMetrics();
 
 	return (
 		<Group>
 			<StatCard icon={AppIcons.Mods} label={t("TOTAL_MODS")} value={orDefaultValue(totalMods, "-")} />
+			<StatCard
+				icon={AppIcons.Downloaded}
+				iconColor={"cyan"}
+				label={t("TOTAL_DOWNLOADS")}
+				value={orDefaultValue(totalDownloads, "-")}
+			/>
 			<StatCard
 				icon={AppIcons.Downloaded}
 				iconColor={"grape"}

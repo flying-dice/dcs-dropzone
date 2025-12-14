@@ -3,28 +3,28 @@ import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import getAllFeaturedMods from "../queries/GetAllFeaturedMods.ts";
 import getAllPopularMods from "../queries/GetAllPopularMods.ts";
-import getCountTotalPublicMods from "../queries/GetCountTotalPublicMods.ts";
-import { CountTotalPublicModsData } from "../schemas/CountTotalPublicModsData.ts";
+import getServerMetricsData from "../queries/GetServerMetricsData.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
+import { ServerMetricsData } from "../schemas/ServerMetricsData.ts";
 
 const router = new Hono();
 
 router.get(
-	"/api/total-mods-count",
+	"/api/server-metrics",
 	describeJsonRoute({
-		operationId: "getCountTotalPublicMods",
-		summary: "Get Total Public Mods",
-		description: "Retrieves the total number of public mods.",
+		operationId: "getServerMetrics",
+		summary: "Get Server Metrics",
+		description: "Retrieves the server metrics.",
 		tags: ["Dashboard"],
 		responses: {
-			[StatusCodes.OK]: CountTotalPublicModsData,
+			[StatusCodes.OK]: ServerMetricsData,
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
 	async (c) => {
-		const totalMods = await getCountTotalPublicMods();
-		return c.json(totalMods, StatusCodes.OK);
+		const metrics = await getServerMetricsData();
+		return c.json(metrics, StatusCodes.OK);
 	},
 );
 
