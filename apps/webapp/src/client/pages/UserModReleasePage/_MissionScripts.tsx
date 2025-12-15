@@ -1,16 +1,4 @@
-import {
-	Button,
-	Card,
-	Group,
-	Paper,
-	Select,
-	SimpleGrid,
-	Stack,
-	Text,
-	TextInput,
-	ThemeIcon,
-	useComputedColorScheme,
-} from "@mantine/core";
+import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
@@ -19,7 +7,7 @@ import { z } from "zod";
 import { ModReleaseMissionScriptDataRoot, ModReleaseMissionScriptDataRunOn } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
-import { PathWithRoot } from "../../components/PathWithRoot.tsx";
+import { MissionScriptListItem } from "../../components/MissionScriptListItem.tsx";
 import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
@@ -168,31 +156,8 @@ function _NoMissionScripts() {
 	);
 }
 
-function getMissionScriptRunOnLabel(runOn: ModReleaseMissionScriptDataRunOn, t: any) {
-	switch (runOn) {
-		case "MISSION_START_BEFORE_SANITIZE":
-			return t("MISSION_SCRIPT_RUN_ON_BEFORE_SANITIZE");
-		case "MISSION_START_AFTER_SANITIZE":
-			return t("MISSION_SCRIPT_RUN_ON_AFTER_SANITIZE");
-		default:
-			return runOn;
-	}
-}
-
-function getMissionScriptRootLabel(root: ModReleaseMissionScriptDataRoot, t: any) {
-	switch (root) {
-		case "DCS_WORKING_DIR":
-			return t("MISSION_SCRIPT_ROOT_WORKING_DIR");
-		case "DCS_INSTALL_DIR":
-			return t("MISSION_SCRIPT_ROOT_INSTALL_DIR");
-		default:
-			return root;
-	}
-}
-
 export function _MissionScripts(props: { form: UserModReleaseForm }) {
 	const { t } = useAppTranslation();
-	const scheme = useComputedColorScheme();
 	return (
 		<Card withBorder>
 			<Stack>
@@ -212,48 +177,15 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 				</Group>
 				{props.form.values.missionScripts.length === 0 && <_NoMissionScripts />}
 				{props.form.values.missionScripts.map((it, index) => (
-					<Paper
-						withBorder
+					<MissionScriptListItem
 						key={`${it.path}-${it.root}-${it.runOn}-${index}`}
-						color="violet"
-						variant="light"
-						style={{ cursor: "pointer" }}
 						onClick={() => handleEditMissionScript(t, props.form, index)}
-						p={"md"}
-					>
-						<Stack>
-							<Group>
-								<ThemeIcon variant={"light"}>
-									<FaFileCode />
-								</ThemeIcon>
-								<Text>{it.name}</Text>
-							</Group>
-
-							<SimpleGrid cols={2}>
-								<Stack gap={2}>
-									<Text size={"xs"} fw={"bold"}>
-										{t("MISSION_SCRIPT_PATH_LABEL")}:
-									</Text>
-									<PathWithRoot size={"xs"} path={it.path} root={getMissionScriptRootLabel(it.root, t)} />
-								</Stack>
-								<Stack gap={2}>
-									<Text size={"xs"} fw={"bold"}>
-										{t("MISSION_SCRIPT_RUN_ON_LABEL")}:
-									</Text>
-									<Text size={"xs"}>{getMissionScriptRunOnLabel(it.runOn, t)}</Text>
-								</Stack>
-							</SimpleGrid>
-
-							<Paper p={"md"} bg={scheme === "light" ? "gray.1" : "dark.5"}>
-								<Stack gap={"xs"}>
-									<Text size={"xs"} fw={"bold"}>
-										{t("MISSION_SCRIPT_PURPOSE_LABEL")}:
-									</Text>
-									<Text size={"xs"}>{it.purpose}</Text>
-								</Stack>
-							</Paper>
-						</Stack>
-					</Paper>
+						name={it.name}
+						root={it.root}
+						runOn={it.runOn}
+						path={it.path}
+						purpose={it.purpose}
+					/>
 				))}
 			</Stack>
 		</Card>

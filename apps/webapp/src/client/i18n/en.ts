@@ -2,6 +2,8 @@ import { ModCategory } from "../../server/enums/ModCategory.ts";
 import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
 import assetHelpMd from "./en_AssetHelp.md" with { type: "text" };
 import missionScriptHelp from "./en_MissionScriptHelp.md" with { type: "text" };
+import sandboxHelpMd from "./en_SandboxHelp.md" with { type: "text" };
+import scriptExecutionNoticeMd from "./en_ScriptExecutionNotice.md" with { type: "text" };
 import symbolicLinkHelpMd from "./en_SymbolicLinkHelp.md" with { type: "text" };
 
 const modCategoryContent: Record<ModCategory, string> = {
@@ -97,6 +99,7 @@ export default {
 		DELETE_MOD_SUCCESS_TITLE: "Mod Deleted Successfully",
 		DESCRIPTION: "Description",
 		RELEASES: "Releases",
+		INSTALLATION: "Installation",
 		DISCARD: "Discard",
 		DISCARD_CHANGES: "Discard Changes",
 		DISCARD_CHANGES_CONFIRMATION: "Are you sure you want to discard all changes? This action cannot be undone.",
@@ -140,7 +143,7 @@ export default {
 		MISSION_SCRIPT_RUN_ON_LABEL: "Run On",
 		MISSION_SCRIPTS_TITLE: "Mission Scripts",
 		MISSION_SCRIPT_HELP_MD: missionScriptHelp,
-
+		HELP: "Help",
 		MOD_NAME: "Mod name",
 		STATUS: "Status",
 		VERSION: "Version",
@@ -246,5 +249,22 @@ export default {
 		TAGS_INPUT_HELPER_TEXT: "Use relevant tags to help users find your mod",
 		CREATED_AT_DISTANCE: "Created {{distance}} ago",
 		UPDATED_AT_DISTANCE: "Updated {{distance}} ago",
+		DOWNLOAD_ASSETS: "Download Assets",
+		DOWNLOAD_ASSETS_DESC: "The following assets will be downloaded and installed:",
+		SYMLINK_CONFIGURATION: "Symlink Configuration",
+		SYMLINK_CONFIGURATION_DESC: "The following symlinks will be created during installation:",
+		MISSION_SCRIPTS: "Mission Scripts",
+		MISSION_SCRIPTS_DESC:
+			"The following scripts will run before DCS World's mission scripting environment is sanitized:",
+		SCRIPT_EXECUTION_NOTICE_TITLE: "Script Execution Notice",
+		SCRIPT_EXECUTION_NOTICE_DESC_1:
+			"This mod includes {{countScriptsBeforeSanitize}} scripts that execute before DCS World’s scripting sandbox is applied.",
+		SCRIPT_EXECUTION_NOTICE_DESC_2:
+			"As a result, these scripts may have broader access than standard sandboxed scripts.",
+		SCRIPT_EXECUTION_NOTICE_DESC_3: "Please ensure you trust the source before installing.",
+		SCRIPT_EXECUTION_NOTICE_MD_LINK_TEXT: "To learn more about script sanitization, see the help documentation.",
+
+		SANITIZE_HELP_TITLE: "Sanitization Help",
+		SANITIZE_HELP_DESC_MD: sandboxHelpMd,
 	},
 };

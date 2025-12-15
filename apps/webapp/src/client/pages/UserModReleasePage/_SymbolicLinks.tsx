@@ -1,13 +1,13 @@
-import { Button, Card, Group, Paper, Select, SimpleGrid, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
+import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { FaFileCode, FaLink } from "react-icons/fa";
+import { FaLink } from "react-icons/fa";
 import { z } from "zod";
 import { ModReleaseSymbolicLinkDataDestRoot } from "../../_autogen/api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { Help } from "../../components/Help.tsx";
-import { PathWithRoot } from "../../components/PathWithRoot.tsx";
+import { SymbolicLinkListItem } from "../../components/SymbolicLinkListItem.tsx";
 import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
@@ -153,46 +153,14 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 				</Group>
 				{props.form.values.symbolicLinks.length === 0 && <_NoSymbolicLinks />}
 				{props.form.values.symbolicLinks.map((it, index) => (
-					<Paper
+					<SymbolicLinkListItem
 						key={`${it.src}-${it.dest}-${index}`}
-						withBorder
-						variant="outline"
-						style={{ cursor: "pointer" }}
 						onClick={() => handleEditSymbolicLink(t, props.form, index)}
-						p={"md"}
-					>
-						<Stack>
-							<Group>
-								<ThemeIcon variant={"light"}>
-									<FaFileCode />
-								</ThemeIcon>
-								<Text>{it.name}</Text>
-							</Group>
-
-							<SimpleGrid cols={2}>
-								<Stack gap={2}>
-									<Text size={"xs"} fw={"bold"}>
-										{t("SYMBOLIC_LINK_SRC_LABEL")}:
-									</Text>
-									<Text size={"xs"}>{it.src}</Text>
-								</Stack>
-								<Stack gap={2}>
-									<Text size={"xs"} fw={"bold"}>
-										{t("SYMBOLIC_LINK_DEST_LABEL")}:
-									</Text>
-									<PathWithRoot
-										size={"xs"}
-										path={it.dest}
-										root={
-											it.destRoot === ModReleaseSymbolicLinkDataDestRoot.DCS_WORKING_DIR
-												? t("SYMBOLIC_LINK_DEST_ROOT_WORKING_DIR")
-												: t("SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR")
-										}
-									/>
-								</Stack>
-							</SimpleGrid>
-						</Stack>
-					</Paper>
+						name={it.name}
+						src={it.src}
+						dest={it.dest}
+						destRoot={it.destRoot}
+					/>
 				))}
 			</Stack>
 		</Card>

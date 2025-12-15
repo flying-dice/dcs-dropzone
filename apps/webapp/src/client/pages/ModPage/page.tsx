@@ -1,5 +1,6 @@
 import {
 	AppShell,
+	Badge,
 	Card,
 	Container,
 	Divider,
@@ -11,12 +12,18 @@ import {
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
-import type { ModData, ModReleaseData, UserData } from "../../_autogen/api.ts";
+import {
+	type ModData,
+	type ModReleaseData,
+	ModReleaseMissionScriptDataRunOn,
+	type UserData,
+} from "../../_autogen/api.ts";
 import { Markdown } from "../../components/Markdown.tsx";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
+import { _Installation } from "./_Installation.tsx";
 import { _Releases } from "./_Releases.tsx";
 import { _Screenshots } from "./_Screenshots.tsx";
 
@@ -30,6 +37,10 @@ export function _Page(props: _PageProps) {
 	const colorScheme = useComputedColorScheme();
 	const { isSm, isMd } = useBreakpoint();
 	const { t } = useAppTranslation();
+
+	const countScriptsBeforeSanitize = props.latestRelease?.missionScripts.filter(
+		(it) => it.runOn === ModReleaseMissionScriptDataRunOn.MISSION_START_BEFORE_SANITIZE,
+	).length;
 
 	return (
 		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
@@ -69,6 +80,16 @@ export function _Page(props: _PageProps) {
 							<Tabs.Tab py={"md"} value="releases">
 								{t("RELEASES")}
 							</Tabs.Tab>
+							<Tabs.Tab
+								py={"md"}
+								value="installation"
+								disabled={!props.latestRelease}
+								rightSection={
+									countScriptsBeforeSanitize ? <Badge color={"orange"}>{countScriptsBeforeSanitize}</Badge> : undefined
+								}
+							>
+								{t("INSTALLATION")}
+							</Tabs.Tab>
 						</Tabs.List>
 					</Container>
 				</Flex>
@@ -84,6 +105,15 @@ export function _Page(props: _PageProps) {
 					</Tabs.Panel>
 					<Tabs.Panel value="releases">
 						<_Releases mod={props.mod} />
+					</Tabs.Panel>
+					<Tabs.Panel value="installation">
+						{props.latestRelease && (
+							<_Installation
+								mod={props.mod}
+								latestRelease={props.latestRelease}
+								countScriptsBeforeSanitize={countScriptsBeforeSanitize}
+							/>
+						)}
 					</Tabs.Panel>
 				</Container>
 			</Tabs>
