@@ -1,11 +1,9 @@
 import { Button, Card, Divider, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
-import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { deleteUserModRelease, type ModData, type ModReleaseData, useGetUserModReleases } from "../../_autogen/api.ts";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
@@ -42,40 +40,11 @@ export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; re
 		});
 	};
 
-	const handleMarkAsLatest = async () => {
-		try {
-			const response = await fetch(`/api/user-mods/${props.mod.id}/releases/${props.release.id}/mark-latest`, {
-				method: "POST",
-				credentials: "include",
-			});
-
-			if (response.status !== StatusCodes.OK) {
-				throw new Error("Failed to mark release as latest");
-			}
-
-			await releases.refetch();
-			showSuccessNotification(
-				"Release Marked as Latest",
-				"This release is now marked as the active release for users to download.",
-			);
-		} catch (e) {
-			showErrorNotification(e);
-		}
-	};
-
 	return (
 		<Card withBorder>
 			<Stack>
 				<Button type="submit">{t("SAVE_CHANGES")}</Button>
 				<Divider />
-				{!props.release.isLatest && (
-					<>
-						<Button variant={"filled"} color="blue" onClick={handleMarkAsLatest}>
-							Mark as Latest Release
-						</Button>
-						<Divider />
-					</>
-				)}
 				{props.form.isTouched() ? (
 					<Button variant={"default"} onClick={handleDiscard}>
 						{t("DISCARD_CHANGES")}

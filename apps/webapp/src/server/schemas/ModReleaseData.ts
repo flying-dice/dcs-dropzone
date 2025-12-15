@@ -62,7 +62,6 @@ export const ModReleaseData = z
 		symbolicLinks: z.array(ModReleaseSymbolicLinkData),
 		missionScripts: z.array(ModReleaseMissionScriptData),
 		visibility: z.enum(ModVisibility),
-		isLatest: z.boolean().default(false),
 		downloadsCount: z.number().default(0),
 		createdAt: z.coerce.string().optional(),
 		updatedAt: z.coerce.string().optional(),

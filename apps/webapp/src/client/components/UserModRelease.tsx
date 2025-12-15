@@ -1,7 +1,7 @@
 import { Alert, Badge, Group, type MantineColor, Text } from "@mantine/core";
 import { formatDistanceToNow } from "date-fns";
 import type { IconType } from "react-icons";
-import { FaCalendar, FaDownload, FaStar } from "react-icons/fa6";
+import { FaCalendar, FaDownload } from "react-icons/fa6";
 import type { ModDataVisibility, ModReleaseData } from "../_autogen/api.ts";
 import { VisibilityIcons } from "../icons.ts";
 import { Stat } from "./Stat.tsx";
@@ -29,11 +29,6 @@ export function UserModRelease(props: UserModReleaseProps) {
 					<Badge variant={"light"} color={colors[props.release.visibility]} style={{ textTransform: "none" }}>
 						{props.release.visibility}
 					</Badge>
-					{props.release.isLatest && (
-						<Badge variant={"filled"} color="blue" leftSection={<FaStar size={12} />} style={{ textTransform: "none" }}>
-							Latest
-						</Badge>
-					)}
 				</Group>
 			}
 		>

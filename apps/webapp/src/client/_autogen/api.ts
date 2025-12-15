@@ -122,6 +122,7 @@ export interface ModData {
 	visibility: ModDataVisibility;
 	/** @minItems 1 */
 	maintainers: string[];
+	latestReleaseId?: string | null;
 	downloadsCount: number;
 }
 
@@ -192,6 +193,7 @@ export interface ModUpdateData {
 	screenshots: string[];
 	dependencies: string[];
 	visibility: ModUpdateDataVisibility;
+	latestReleaseId?: string | null;
 }
 
 /**
@@ -279,7 +281,6 @@ export interface ModReleaseData {
 	symbolicLinks: ModReleaseSymbolicLinkData[];
 	missionScripts: ModReleaseMissionScriptData[];
 	visibility: ModReleaseDataVisibility;
-	isLatest?: boolean;
 	downloadsCount?: number;
 	createdAt?: string;
 	updatedAt?: string;

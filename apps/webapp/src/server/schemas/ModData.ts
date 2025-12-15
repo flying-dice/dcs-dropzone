@@ -16,6 +16,7 @@ export const ModData = z
 		thumbnail: z.string(),
 		visibility: z.enum(ModVisibility),
 		maintainers: z.array(z.string()).min(1, "A mod must have at least one maintainer."),
+		latestReleaseId: z.string().nullable().optional(),
 		downloadsCount: z.number(),
 	})
 	.meta({

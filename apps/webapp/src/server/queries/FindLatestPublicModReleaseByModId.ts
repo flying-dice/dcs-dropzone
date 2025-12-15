@@ -20,21 +20,25 @@ export default async function (
 
 	logger.debug({ modId }, "start");
 
-	if (!(await Mod.exists({ id: modId, visibility: ModVisibility.PUBLIC }).exec())) {
+	const mod = await Mod.findOne({ id: modId, visibility: ModVisibility.PUBLIC }).exec();
+	if (!mod) {
 		logger.debug({ modId }, "Public mod not found");
 		return err("ModNotFound");
 	}
 
-	// First try to find a release marked as latest
-	let release = await ModRelease.findOne({
-		mod_id: modId,
-		visibility: ModVisibility.PUBLIC,
-		isLatest: true,
-	})
-		.lean()
-		.exec();
+	// First try to find the release specified as latest in the mod
+	let release = null;
+	if (mod.latestReleaseId) {
+		release = await ModRelease.findOne({
+			id: mod.latestReleaseId,
+			mod_id: modId,
+			visibility: ModVisibility.PUBLIC,
+		})
+			.lean()
+			.exec();
+	}
 
-	// If no release is marked as latest, fall back to the most recent release
+	// If no release is marked as latest in mod, fall back to the most recent release
 	if (!release) {
 		release = await ModRelease.findOne({
 			mod_id: modId,

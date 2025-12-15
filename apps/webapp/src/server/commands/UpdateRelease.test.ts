@@ -43,7 +43,6 @@ describe("UpdateRelease", () => {
 			symbolicLinks: [],
 			missionScripts: [],
 			visibility: "PUBLIC",
-			isLatest: false,
 		});
 
 		const result = await updateRelease({
@@ -57,7 +56,6 @@ describe("UpdateRelease", () => {
 				symbolicLinks: [],
 				missionScripts: [],
 				visibility: "PUBLIC" as any,
-				isLatest: true,
 				downloadsCount: 0,
 			},
 		});
@@ -66,7 +64,6 @@ describe("UpdateRelease", () => {
 		const rel = await ModRelease.findOne({ id: "r1" }).lean();
 		expect(rel?.version).toBe("1.0.1");
 		expect(rel?.changelog).toBe("new");
-		expect(rel?.isLatest).toBe(true);
 	});
 
 	it("returns ModNotFound when mod does not exist", async () => {
@@ -81,7 +78,6 @@ describe("UpdateRelease", () => {
 				symbolicLinks: [],
 				missionScripts: [],
 				visibility: "PUBLIC" as any,
-				isLatest: false,
 				downloadsCount: 0,
 			},
 		});
@@ -115,7 +111,6 @@ describe("UpdateRelease", () => {
 				symbolicLinks: [],
 				missionScripts: [],
 				visibility: "PUBLIC" as any,
-				isLatest: false,
 				downloadsCount: 0,
 			},
 		});

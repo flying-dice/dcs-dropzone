@@ -1,4 +1,4 @@
-import { Button, Card, Divider, Group, Stack, Text } from "@mantine/core";
+import { Button, Card, Divider, Group, Select, Stack, Text } from "@mantine/core";
 import { modals, openModal } from "@mantine/modals";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +46,14 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 		});
 	};
 
+	const releaseOptions =
+		modReleases.data?.status === StatusCodes.OK
+			? modReleases.data.data.data.map((release) => ({
+					value: release.id,
+					label: `${release.version} (${release.visibility})`,
+				}))
+			: [];
+
 	return (
 		<Card withBorder>
 			<Stack>
@@ -57,6 +65,21 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 						New Release
 					</Button>
 				</Group>
+
+				{modReleases.data?.status === StatusCodes.OK && modReleases.data.data?.data.length > 0 && (
+					<>
+						<Select
+							label="Latest Release"
+							description="Select which release users will download by default"
+							placeholder="Select a release or leave empty to use most recent"
+							data={releaseOptions}
+							clearable
+							{...props.form.getInputProps("latestReleaseId")}
+						/>
+						<Divider />
+					</>
+				)}
+
 				{modReleases.data?.status === StatusCodes.OK && modReleases.data.data?.data.length === 0 && (
 					<EmptyState
 						title={t("EMPTY_RELEASES_TITLE")}

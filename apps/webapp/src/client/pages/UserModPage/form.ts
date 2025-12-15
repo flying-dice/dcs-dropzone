@@ -22,6 +22,7 @@ export const userModFormValues = z.object({
 	thumbnail: z.url(),
 	screenshots: z.url().array(),
 	visibility: z.enum(ModDataVisibility),
+	latestReleaseId: z.string().nullable().optional(),
 });
 
 export type UserModFormValues = z.infer<typeof userModFormValues>;
@@ -38,6 +39,7 @@ export const useUserModForm = (mod: ModData) =>
 			thumbnail: mod.thumbnail,
 			screenshots: mod.screenshots,
 			visibility: mod.visibility,
+			latestReleaseId: mod.latestReleaseId ?? null,
 		},
 		validate: zod4Resolver(userModFormValues),
 	});
@@ -59,6 +61,7 @@ export const useUserModFormSubmit = (mod: ModData, user: UserData, onSuccess: ()
 					tags: values.tags,
 					thumbnail: values.thumbnail,
 					visibility: values.visibility,
+					latestReleaseId: values.latestReleaseId,
 				});
 				if (res.status === StatusCodes.OK) {
 					await onSuccess();

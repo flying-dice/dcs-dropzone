@@ -12,6 +12,7 @@ export const ModUpdateData = ModData.pick({
 	screenshots: true,
 	dependencies: true,
 	visibility: true,
+	latestReleaseId: true,
 }).meta({
 	ref: "ModUpdateData",
 	title: "Mod Update Data",
