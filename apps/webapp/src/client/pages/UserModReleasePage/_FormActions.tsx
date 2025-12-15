@@ -54,7 +54,10 @@ export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; re
 			}
 
 			await releases.refetch();
-			showSuccessNotification("Release Marked as Latest", "This release is now marked as the active release for users to download.");
+			showSuccessNotification(
+				"Release Marked as Latest",
+				"This release is now marked as the active release for users to download.",
+			);
 		} catch (e) {
 			showErrorNotification(e);
 		}

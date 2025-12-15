@@ -20,10 +20,7 @@ export default async function (command: MarkReleaseAsLatestCommand): Promise<Mar
 
 	// Verify the user owns the mod
 	if (!(await Mod.exists({ id: modId, maintainers: user.id }))) {
-		logger.warn(
-			{ userId: user.id, modId },
-			"User attempted to mark release as latest for a mod they do not own",
-		);
+		logger.warn({ userId: user.id, modId }, "User attempted to mark release as latest for a mod they do not own");
 		return err("ModNotFound");
 	}
 

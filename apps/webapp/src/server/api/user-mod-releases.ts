@@ -296,7 +296,8 @@ router.post(
 	describeJsonRoute({
 		operationId: "markUserModReleaseAsLatest",
 		summary: "Mark user mod release as latest",
-		description: "Marks a specific release as the latest for a mod owned by the authenticated user. This will unmark any other releases that were previously marked as latest.",
+		description:
+			"Marks a specific release as the latest for a mod owned by the authenticated user. This will unmark any other releases that were previously marked as latest.",
 		tags: ["User Mod Releases"],
 		security: [{ cookieAuth: [] }],
 		responses: {

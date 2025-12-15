@@ -279,6 +279,7 @@ export interface ModReleaseData {
 	symbolicLinks: ModReleaseSymbolicLinkData[];
 	missionScripts: ModReleaseMissionScriptData[];
 	visibility: ModReleaseDataVisibility;
+	isLatest?: boolean;
 	downloadsCount?: number;
 	createdAt?: string;
 	updatedAt?: string;

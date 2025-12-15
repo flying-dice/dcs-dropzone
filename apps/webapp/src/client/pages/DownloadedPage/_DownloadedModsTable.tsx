@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import type { IconType } from "react-icons";
 import { useAsync } from "react-use";
 import { match } from "ts-pattern";
-import { getLatestModReleaseById, type ModReleaseData } from "../../_autogen/api.ts";
+import type { ModReleaseData } from "../../_autogen/api.ts";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { useDaemon } from "../../hooks/useDaemon.ts";

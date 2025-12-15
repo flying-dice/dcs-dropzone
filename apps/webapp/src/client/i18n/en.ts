@@ -3,7 +3,6 @@ import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
 import assetHelpMd from "./en_AssetHelp.md" with { type: "text" };
 import missionScriptHelp from "./en_MissionScriptHelp.md" with { type: "text" };
 import sandboxHelpMd from "./en_SandboxHelp.md" with { type: "text" };
-import scriptExecutionNoticeMd from "./en_ScriptExecutionNotice.md" with { type: "text" };
 import symbolicLinkHelpMd from "./en_SymbolicLinkHelp.md" with { type: "text" };
 
 const modCategoryContent: Record<ModCategory, string> = {
