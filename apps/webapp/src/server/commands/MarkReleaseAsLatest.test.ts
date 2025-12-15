@@ -3,9 +3,9 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
-import updateRelease from "./UpdateRelease.ts";
+import markReleaseAsLatest from "./MarkReleaseAsLatest.ts";
 
-describe("UpdateRelease", () => {
+describe("MarkReleaseAsLatest", () => {
 	let mongod: MongoMemoryServer;
 
 	beforeEach(async () => {
@@ -19,7 +19,7 @@ describe("UpdateRelease", () => {
 		await mongod.stop();
 	});
 
-	it("updates an existing release", async () => {
+	it("marks a release as latest and unmarks others", async () => {
 		await Mod.create({
 			id: "m1",
 			name: "M",
@@ -34,11 +34,25 @@ describe("UpdateRelease", () => {
 			maintainers: ["u1"],
 			downloadsCount: 0,
 		});
+
+		// Create two releases
 		await ModRelease.create({
 			id: "r1",
 			mod_id: "m1",
 			version: "1.0.0",
-			changelog: "old",
+			changelog: "First release",
+			assets: [],
+			symbolicLinks: [],
+			missionScripts: [],
+			visibility: "PUBLIC",
+			isLatest: true,
+		});
+
+		await ModRelease.create({
+			id: "r2",
+			mod_id: "m1",
+			version: "2.0.0",
+			changelog: "Second release",
 			assets: [],
 			symbolicLinks: [],
 			missionScripts: [],
@@ -46,44 +60,54 @@ describe("UpdateRelease", () => {
 			isLatest: false,
 		});
 
-		const result = await updateRelease({
+		// Mark r2 as latest
+		const result = await markReleaseAsLatest({
 			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },
-			updateData: {
-				id: "r1",
-				mod_id: "m1",
-				version: "1.0.1",
-				changelog: "new",
-				assets: [],
-				symbolicLinks: [],
-				missionScripts: [],
-				visibility: "PUBLIC" as any,
-				isLatest: true,
-				downloadsCount: 0,
-			},
+			modId: "m1",
+			releaseId: "r2",
 		});
 
 		expect(result.isOk()).toBe(true);
-		const rel = await ModRelease.findOne({ id: "r1" }).lean();
-		expect(rel?.version).toBe("1.0.1");
-		expect(rel?.changelog).toBe("new");
-		expect(rel?.isLatest).toBe(true);
+
+		// Check that r2 is now marked as latest
+		const r2 = await ModRelease.findOne({ id: "r2" }).lean();
+		expect(r2?.isLatest).toBe(true);
+
+		// Check that r1 is no longer marked as latest
+		const r1 = await ModRelease.findOne({ id: "r1" }).lean();
+		expect(r1?.isLatest).toBe(false);
 	});
 
 	it("returns ModNotFound when mod does not exist", async () => {
-		const result = await updateRelease({
+		const result = await markReleaseAsLatest({
 			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },
-			updateData: {
-				id: "r1",
-				mod_id: "missing",
-				version: "1.0.1",
-				changelog: "c",
-				assets: [],
-				symbolicLinks: [],
-				missionScripts: [],
-				visibility: "PUBLIC" as any,
-				isLatest: false,
-				downloadsCount: 0,
-			},
+			modId: "missing",
+			releaseId: "r1",
+		});
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBe("ModNotFound");
+	});
+
+	it("returns ModNotFound when user does not own the mod", async () => {
+		await Mod.create({
+			id: "m1",
+			name: "M",
+			category: "OTHER",
+			description: "d",
+			content: "c",
+			tags: [],
+			dependencies: [],
+			screenshots: [],
+			thumbnail: "t",
+			visibility: "PRIVATE",
+			maintainers: ["u2"],
+			downloadsCount: 0,
+		});
+
+		const result = await markReleaseAsLatest({
+			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },
+			modId: "m1",
+			releaseId: "r1",
 		});
 		expect(result.isErr()).toBe(true);
 		expect(result._unsafeUnwrapErr()).toBe("ModNotFound");
@@ -104,20 +128,11 @@ describe("UpdateRelease", () => {
 			maintainers: ["u1"],
 			downloadsCount: 0,
 		});
-		const result = await updateRelease({
+
+		const result = await markReleaseAsLatest({
 			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },
-			updateData: {
-				id: "missing",
-				mod_id: "m1",
-				version: "1.0.1",
-				changelog: "c",
-				assets: [],
-				symbolicLinks: [],
-				missionScripts: [],
-				visibility: "PUBLIC" as any,
-				isLatest: false,
-				downloadsCount: 0,
-			},
+			modId: "m1",
+			releaseId: "missing",
 		});
 		expect(result.isErr()).toBe(true);
 		expect(result._unsafeUnwrapErr()).toBe("ReleaseNotFound");

@@ -6,6 +6,7 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import createRelease from "../commands/CreateRelease.ts";
 import deleteRelease from "../commands/DeleteRelease.ts";
+import markReleaseAsLatest from "../commands/MarkReleaseAsLatest.ts";
 import updateRelease from "../commands/UpdateRelease.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 import findUserModReleaseById from "../queries/FindUserModReleaseById.ts";
@@ -262,6 +263,64 @@ router.delete(
 		logger.debug(`User '${user.id}' is deleting release '${releaseId}' for mod '${id}'`);
 
 		const result = await deleteRelease({
+			user,
+			modId: id,
+			releaseId,
+		});
+
+		return result.match(
+			() =>
+				c.json(
+					OkData.parse({
+						ok: true,
+					}),
+					StatusCodes.OK,
+				),
+			(error) =>
+				c.json(
+					ErrorData.parse({
+						code: StatusCodes.NOT_FOUND,
+						error,
+					}),
+					StatusCodes.NOT_FOUND,
+				),
+		);
+	},
+);
+
+/**
+ * POST /api/user-mods/:id/releases/:releaseId/mark-latest - Mark a release as latest
+ */
+router.post(
+	"/:id/releases/:releaseId/mark-latest",
+	describeJsonRoute({
+		operationId: "markUserModReleaseAsLatest",
+		summary: "Mark user mod release as latest",
+		description: "Marks a specific release as the latest for a mod owned by the authenticated user. This will unmark any other releases that were previously marked as latest.",
+		tags: ["User Mod Releases"],
+		security: [{ cookieAuth: [] }],
+		responses: {
+			[StatusCodes.OK]: OkData,
+			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.UNAUTHORIZED]: ErrorData,
+			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
+		},
+	}),
+	cookieAuth(),
+	validator(
+		"param",
+		z.object({
+			id: z.string(),
+			releaseId: z.string(),
+		}),
+	),
+	async (c) => {
+		const { id, releaseId } = c.req.valid("param");
+		const user = c.var.getUser();
+
+		logger.debug(`User '${user.id}' is marking release '${releaseId}' as latest for mod '${id}'`);
+
+		const result = await markReleaseAsLatest({
 			user,
 			modId: id,
 			releaseId,

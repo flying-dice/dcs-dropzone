@@ -30,6 +30,7 @@ export default async function (command: CreateReleaseCommand): Promise<CreateRel
 		symbolicLinks: [],
 		missionScripts: [],
 		visibility: ModVisibility.PUBLIC,
+		isLatest: false,
 		downloadsCount: 0,
 	};
 

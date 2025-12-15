@@ -52,6 +52,7 @@ describe("CreateRelease", () => {
 			symbolicLinks: [],
 			missionScripts: [],
 			visibility: ModVisibility.PUBLIC,
+			isLatest: false,
 		});
 	});
 

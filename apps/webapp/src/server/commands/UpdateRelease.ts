@@ -34,6 +34,7 @@ export default async function (command: UpdateReleaseCommand): Promise<UpdateRel
 			assets: updateData.assets,
 			symbolicLinks: updateData.symbolicLinks,
 			visibility: updateData.visibility,
+			isLatest: updateData.isLatest,
 		},
 	).exec();
 

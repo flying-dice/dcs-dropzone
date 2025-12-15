@@ -25,14 +25,26 @@ export default async function (
 		return err("ModNotFound");
 	}
 
-	const release = await ModRelease.findOne({
+	// First try to find a release marked as latest
+	let release = await ModRelease.findOne({
 		mod_id: modId,
 		visibility: ModVisibility.PUBLIC,
+		isLatest: true,
 	})
-		.sort({ createdAt: "desc" })
-		.limit(1)
 		.lean()
 		.exec();
+
+	// If no release is marked as latest, fall back to the most recent release
+	if (!release) {
+		release = await ModRelease.findOne({
+			mod_id: modId,
+			visibility: ModVisibility.PUBLIC,
+		})
+			.sort({ createdAt: "desc" })
+			.limit(1)
+			.lean()
+			.exec();
+	}
 
 	if (!release) {
 		logger.debug({ modId }, "Latest release not found");
