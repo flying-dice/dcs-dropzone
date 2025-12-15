@@ -7,7 +7,7 @@ import { z } from "zod";
 import createMod from "../commands/CreateMod.ts";
 import deleteMod from "../commands/DeleteMod.ts";
 import updateMod from "../commands/UpdateMod.ts";
-import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { auth } from "../middleware/auth.ts";
 import findAllUserMods from "../queries/FindAllUserMods.ts";
 import findUserModById from "../queries/FindUserModById.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
@@ -42,7 +42,7 @@ router.get(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	cookieAuth(),
+	auth(),
 	async (c) => {
 		const user = c.var.getUser();
 
@@ -72,7 +72,7 @@ router.get(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	cookieAuth(),
+	auth(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");
@@ -119,7 +119,7 @@ router.post(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	cookieAuth(),
+	auth(),
 	validator("json", ModCreateData),
 	async (c) => {
 		const createData = c.req.valid("json");
@@ -153,7 +153,7 @@ router.put(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	cookieAuth(),
+	auth(),
 	validator("param", z.object({ id: z.string() })),
 	validator("json", ModUpdateData),
 	async (c) => {
@@ -202,7 +202,7 @@ router.delete(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	cookieAuth(),
+	auth(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");

@@ -7,7 +7,7 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import appConfig from "../ApplicationConfig.ts";
 import handleAuthResult from "../commands/HandleAuthResult.ts";
-import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { auth } from "../middleware/auth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { UserData } from "../schemas/UserData.ts";
 import { AuthServiceFactory } from "../services/AuthService/AuthServiceFactory.ts";
@@ -37,6 +37,11 @@ router.get(
 	validator("param", params),
 	validator("query", z.object({ code: z.string(), state: z.string() })),
 	async (c) => {
+		if (appConfig.authDisabled) {
+			logger.warn("Auth callback attempted but auth is disabled");
+			return c.redirect(appConfig.ghHomepageUrl ?? "http://localhost:3000");
+		}
+
 		const provider = c.req.valid("param").provider;
 		logger.debug({ provider }, "Auth callback start");
 		const authService = AuthServiceFactory.getAuthService(provider);
@@ -51,7 +56,7 @@ router.get(
 
 		logger.debug({ userId: authResult.id }, "Session token issued; setting cookie");
 
-		await setSignedCookie(c, appConfig.userCookieName, userData.id, appConfig.userCookieSecret, {
+		await setSignedCookie(c, appConfig.userCookieName, userData.id, appConfig.userCookieSecret!, {
 			maxAge: appConfig.userCookieMaxAge,
 		});
 
@@ -62,7 +67,7 @@ router.get(
 			"Signed Cookie Set",
 		);
 
-		return c.redirect(appConfig.ghHomepageUrl);
+		return c.redirect(appConfig.ghHomepageUrl!);
 	},
 );
 
@@ -82,6 +87,11 @@ router.get(
 	}),
 	validator("param", params),
 	(c) => {
+		if (appConfig.authDisabled) {
+			logger.warn("Auth login attempted but auth is disabled");
+			return c.redirect(appConfig.ghHomepageUrl ?? "http://localhost:3000");
+		}
+
 		const provider = c.req.valid("param").provider;
 		const authService = AuthServiceFactory.getAuthService(provider);
 		logger.debug({ provider }, "Auth login redirect");
@@ -102,7 +112,7 @@ router.get(
 			[StatusCodes.UNAUTHORIZED]: ErrorData,
 		},
 	}),
-	cookieAuth(),
+	auth(),
 	(c) => {
 		const user = c.var.getUser();
 		logger.debug({ userId: user.id, username: user.username }, "Returning authenticated user");
@@ -128,8 +138,10 @@ router.get(
 		},
 	}),
 	(c) => {
-		deleteCookie(c, appConfig.userCookieName);
-		return c.redirect(appConfig.ghHomepageUrl);
+		if (!appConfig.authDisabled) {
+			deleteCookie(c, appConfig.userCookieName);
+		}
+		return c.redirect(appConfig.ghHomepageUrl ?? "http://localhost:3000");
 	},
 );
 

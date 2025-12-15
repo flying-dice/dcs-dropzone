@@ -5,7 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import appConfig from "../ApplicationConfig.ts";
 import migrateLegacyRegistry from "../commands/MigrateLegacyRegistry.ts";
-import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { auth } from "../middleware/auth.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { OkData } from "../schemas/OkData.ts";
 
@@ -24,7 +24,7 @@ router.get(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	cookieAuth(),
+	auth(),
 	async (c) => {
 		const user = c.var.getUser();
 		logger.debug({ userId: user.id, admins: appConfig.admins }, "Migration requested by user");

@@ -9,6 +9,12 @@ export class GithubAuthService implements AuthService {
 	private readonly app: OAuthApp;
 
 	constructor() {
+		if (!appConfig.ghClientId || !appConfig.ghClientSecret || !appConfig.ghAuthorizationCallbackUrl) {
+			throw new Error(
+				"GitHub OAuth configuration is missing. Set GH_CLIENT_ID, GH_CLIENT_SECRET, and GH_AUTHORIZATION_CALLBACK_URL environment variables.",
+			);
+		}
+
 		this.app = new OAuthApp({
 			clientType: "oauth-app",
 			clientId: appConfig.ghClientId,
