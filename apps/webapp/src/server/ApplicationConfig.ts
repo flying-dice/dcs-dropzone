@@ -31,4 +31,9 @@ const appConfig = configSchema.parse({
 	admins: string("ADMIN_IDS", "16135506"),
 });
 
+// Validate auth configuration at startup
+if (!appConfig.authDisabled && !appConfig.userCookieSecret) {
+	throw new Error("USER_COOKIE_SECRET must be set when AUTH_DISABLED is false");
+}
+
 export default appConfig;

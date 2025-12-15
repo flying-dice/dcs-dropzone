@@ -66,14 +66,15 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 					</Button>
 				</Group>
 
-				{modReleases.data?.status === StatusCodes.OK && modReleases.data.data?.data.length > 0 && (
+				{modReleases.data?.status === StatusCodes.OK && (
 					<>
 						<Select
-							label="Latest Release"
-							description="Select which release users will download by default"
-							placeholder="Select a release or leave empty to use most recent"
+							label={t("LATEST_RELEASE_LABEL")}
+							description={t("LATEST_RELEASE_DESCRIPTION")}
+							placeholder={t("LATEST_RELEASE_PLACEHOLDER")}
 							data={releaseOptions}
 							clearable
+							disabled={modReleases.data.data?.data.length === 0}
 							{...props.form.getInputProps("latestReleaseId")}
 						/>
 						<Divider />

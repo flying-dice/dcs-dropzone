@@ -20,13 +20,8 @@ export const cookieAuth = () =>
 		const requestId = c.get("requestId");
 		logger.debug({ requestId }, "Authenticating via cookie");
 
-		if (!appConfig.userCookieSecret) {
-			logger.error("Cookie secret not configured");
-			throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR);
-		}
-
 		logger.debug({ requestId }, "Retrieving token from cookie");
-		const userId = await getSignedCookie(c, appConfig.userCookieSecret, appConfig.userCookieName);
+		const userId = await getSignedCookie(c, appConfig.userCookieSecret!, appConfig.userCookieName);
 
 		if (!userId) {
 			logger.warn({ requestId }, "No signed cookie found");

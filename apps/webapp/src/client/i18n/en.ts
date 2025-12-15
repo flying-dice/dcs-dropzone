@@ -229,6 +229,9 @@ export default {
 		LATEST: "Latest",
 		UPDATE: "Update",
 		LATEST_RELEASE_NOT_FOUND_ERROR: "Latest release not found.",
+		LATEST_RELEASE_LABEL: "Latest Release",
+		LATEST_RELEASE_DESCRIPTION: "Select which release users will download by default",
+		LATEST_RELEASE_PLACEHOLDER: "No latest release set",
 		MOD_NOT_FOUND_ERROR: "Mod not found.",
 
 		DAEMON_CONNECTION_SUCCESS: "Connected to daemon successfully",

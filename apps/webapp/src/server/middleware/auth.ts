@@ -13,5 +13,6 @@ export const auth = () => {
 	if (appConfig.authDisabled) {
 		return mockAuth();
 	}
+	// cookieAuth is used when authentication is enabled (real OAuth flow)
 	return cookieAuth();
 };
