@@ -26,21 +26,19 @@ export function _PopularMods() {
 					(res) => res?.status === StatusCodes.OK && res.data.length > 0,
 					(res) => (
 						<>
-							{res &&
-								res.status === StatusCodes.OK &&
-								res.data.map((mod) => (
-									<ModCard
-										key={mod.id}
-										imageUrl={mod.thumbnail}
-										category={mod.category}
-										title={mod.name}
-										summary={mod.description || ""}
-										downloads={mod.downloadsCount}
-										isDownloaded={false}
-										variant={breakpoint.isXs ? "grid" : "list"}
-										onClick={() => nav(`/mods/${mod.id}`)}
-									/>
-								))}
+							{res.data.map((mod) => (
+								<ModCard
+									key={mod.id}
+									imageUrl={mod.thumbnail}
+									category={mod.category}
+									title={mod.name}
+									summary={mod.description || ""}
+									downloads={mod.downloadsCount}
+									isDownloaded={false}
+									variant={breakpoint.isXs ? "grid" : "list"}
+									onClick={() => nav(`/mods/${mod.id}`)}
+								/>
+							))}
 							<Group justify={"center"}>
 								<Button
 									variant={"default"}
