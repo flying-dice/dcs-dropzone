@@ -31,7 +31,7 @@ export function EmptyState(props: EmptyStateProps) {
 					{props.description}
 				</Text>
 
-				{props.action && <>{props.action}</>}
+				{props.action}
 			</Stack>
 		</Paper>
 	);
