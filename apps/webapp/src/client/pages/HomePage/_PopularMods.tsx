@@ -1,4 +1,4 @@
-import { Button, Group, Stack, Text } from "@mantine/core";
+import { Button, Center, Group, Stack, Text } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
@@ -23,43 +23,47 @@ export function _PopularMods() {
 
 			{match(popularMods.data)
 				.when(
-					(res) => res?.status === StatusCodes.OK,
-					(res) =>
-						res &&
-						res.status === StatusCodes.OK &&
-						res.data.map((mod) => (
-							<ModCard
-								key={mod.id}
-								imageUrl={mod.thumbnail}
-								category={mod.category}
-								title={mod.name}
-								summary={mod.description || ""}
-								downloads={mod.downloadsCount}
-								isDownloaded={false}
-								variant={breakpoint.isXs ? "grid" : "list"}
-								onClick={() => nav(`/mods/${mod.id}`)}
-							/>
-						)),
+					(res) => res?.status === StatusCodes.OK && res.data.length > 0,
+					(res) => (
+						<>
+							{res &&
+								res.status === StatusCodes.OK &&
+								res.data.map((mod) => (
+									<ModCard
+										key={mod.id}
+										imageUrl={mod.thumbnail}
+										category={mod.category}
+										title={mod.name}
+										summary={mod.description || ""}
+										downloads={mod.downloadsCount}
+										isDownloaded={false}
+										variant={breakpoint.isXs ? "grid" : "list"}
+										onClick={() => nav(`/mods/${mod.id}`)}
+									/>
+								))}
+							<Group justify={"center"}>
+								<Button
+									variant={"default"}
+									onClick={async () => {
+										await nav("/mods");
+									}}
+								>
+									{t("VIEW_ALL_MODS")}
+								</Button>
+							</Group>
+						</>
+					),
 				)
 				.otherwise(() => (
-					<EmptyState
-						withoutBorder
-						title={t("NO_POPULAR_MODS_FOUND_TITLE")}
-						description={t("NO_POPULAR_MODS_FOUND_SUBTITLE_DESC")}
-						icon={AppIcons.Mods}
-					/>
+					<Center>
+						<EmptyState
+							withoutBorder
+							title={t("NO_POPULAR_MODS_FOUND_TITLE")}
+							description={t("NO_POPULAR_MODS_FOUND_SUBTITLE_DESC")}
+							icon={AppIcons.Mods}
+						/>
+					</Center>
 				))}
-
-			<Group justify={"center"}>
-				<Button
-					variant={"default"}
-					onClick={async () => {
-						await nav("/mods");
-					}}
-				>
-					{t("VIEW_ALL_MODS")}
-				</Button>
-			</Group>
 		</Stack>
 	);
 }
