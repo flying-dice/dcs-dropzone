@@ -28,11 +28,11 @@ router.get(
 	async (c) => {
 		const user = c.var.getUser();
 		logger.debug({ userId: user.id, admins: appConfig.admins }, "Migration requested by user");
-		if (!appConfig.admins.includes(user.id)) {
+		if (!appConfig.admins?.includes(user.id)) {
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
-		await migrateLegacyRegistry();
+		await migrateLegacyRegistry({ user });
 
 		return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 	},

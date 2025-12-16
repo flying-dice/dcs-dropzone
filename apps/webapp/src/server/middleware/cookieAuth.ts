@@ -21,7 +21,7 @@ export const cookieAuth = () =>
 		logger.debug({ requestId }, "Authenticating via cookie");
 
 		logger.debug({ requestId }, "Retrieving token from cookie");
-		const userId = await getSignedCookie(c, appConfig.userCookieSecret, appConfig.userCookieName);
+		const userId = await getSignedCookie(c, appConfig.userCookieSecret!, appConfig.userCookieName);
 
 		if (!userId) {
 			logger.warn({ requestId }, "No signed cookie found");

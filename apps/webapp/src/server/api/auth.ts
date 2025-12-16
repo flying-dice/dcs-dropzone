@@ -1,6 +1,6 @@
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { Hono } from "hono";
-import { deleteCookie, setSignedCookie } from "hono/cookie";
+import { setSignedCookie } from "hono/cookie";
 import { describeRoute, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
@@ -55,14 +55,9 @@ router.get(
 			maxAge: appConfig.userCookieMaxAge,
 		});
 
-		logger.debug(
-			{
-				userId: authResult.id,
-			},
-			"Signed Cookie Set",
-		);
+		logger.debug({ userId: authResult.id }, "Signed Cookie Set");
 
-		return c.redirect(appConfig.ghHomepageUrl);
+		return c.redirect(appConfig.homepageUrl);
 	},
 );
 
@@ -117,7 +112,6 @@ router.get(
 		tags: ["Auth"],
 		summary: "Logout",
 		description: "Clears the authentication cookie and redirects to the homepage.",
-		security: [{ cookieAuth: [] }],
 		responses: {
 			[StatusCodes.MOVED_TEMPORARILY]: {
 				description: "Redirects the user to the homepage after logout.",
@@ -128,8 +122,7 @@ router.get(
 		},
 	}),
 	(c) => {
-		deleteCookie(c, appConfig.userCookieName);
-		return c.redirect(appConfig.ghHomepageUrl);
+		return c.redirect(appConfig.homepageUrl ?? "http://localhost:3000");
 	},
 );
 

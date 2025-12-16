@@ -13,6 +13,7 @@ const schema = new Schema(
 		thumbnail: { type: String, required: true },
 		visibility: { type: String, required: true },
 		maintainers: { type: [String], required: true },
+		latestReleaseId: { type: String, required: false },
 		downloadsCount: { type: Number, default: 0 },
 		createdAt: { type: Date, default: Date.now },
 		updatedAt: { type: Date, default: Date.now },

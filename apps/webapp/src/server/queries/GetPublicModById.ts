@@ -2,6 +2,7 @@ import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { Mod } from "../entities/Mod.ts";
 import { User } from "../entities/User.ts";
+import { ModVisibility } from "../enums/ModVisibility.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { UserData } from "../schemas/UserData.ts";
 
@@ -18,7 +19,9 @@ export type GetModByIdResult = Result<
 export default async function (id: string): Promise<GetModByIdResult> {
 	logger.debug({ id }, "Finding mod by id");
 
-	const doc = await Mod.findOne({ id }).lean().exec();
+	const doc = await Mod.findOne({ id, visibility: { $in: [ModVisibility.PUBLIC, ModVisibility.UNLISTED] } })
+		.lean()
+		.exec();
 
 	if (!doc) {
 		return err("ModNotFound");

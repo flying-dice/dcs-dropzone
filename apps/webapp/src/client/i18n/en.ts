@@ -3,7 +3,6 @@ import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
 import assetHelpMd from "./en_AssetHelp.md" with { type: "text" };
 import missionScriptHelp from "./en_MissionScriptHelp.md" with { type: "text" };
 import sandboxHelpMd from "./en_SandboxHelp.md" with { type: "text" };
-import scriptExecutionNoticeMd from "./en_ScriptExecutionNotice.md" with { type: "text" };
 import symbolicLinkHelpMd from "./en_SymbolicLinkHelp.md" with { type: "text" };
 
 const modCategoryContent: Record<ModCategory, string> = {
@@ -229,9 +228,12 @@ export default {
 
 		LATEST: "Latest",
 		UPDATE: "Update",
+		INSTALL_LATEST: "Install Latest",
 		LATEST_RELEASE_NOT_FOUND_ERROR: "Latest release not found.",
+		LATEST_RELEASE_LABEL: "Latest Release",
+		LATEST_RELEASE_DESCRIPTION: "Select which release users will download by default",
+		LATEST_RELEASE_PLACEHOLDER: "No latest release set",
 		MOD_NOT_FOUND_ERROR: "Mod not found.",
-
 		DAEMON_CONNECTION_SUCCESS: "Connected to daemon successfully",
 		DAEMON_CONNECTING: "Connecting to daemon...",
 		DAEMON_CONNECTION_ERROR: "Error connecting to daemon",

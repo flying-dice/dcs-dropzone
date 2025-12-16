@@ -5,7 +5,7 @@ import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import getAllPublishedMods from "../queries/GetAllPublishedMods.ts";
-import getModById from "../queries/GetModById.ts";
+import getModById from "../queries/GetPublicModById.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModData } from "../schemas/ModData.ts";

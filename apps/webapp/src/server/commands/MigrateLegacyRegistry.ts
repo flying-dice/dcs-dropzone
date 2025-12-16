@@ -15,6 +15,8 @@ import {
 	type ModReleaseMissionScriptData,
 	type ModReleaseSymbolicLinkData,
 } from "../schemas/ModReleaseData.ts";
+import type { ModReleaseDownloadData } from "../schemas/ModReleaseDownloadData.ts";
+import type { UserData } from "../schemas/UserData.ts";
 
 const logger = getLogger("MigrateLegacyRegistryCommand");
 
@@ -31,7 +33,12 @@ function convertLegacyPath(path: string): {
 	throw new Error("Unsupported path root");
 }
 
-export default async function () {
+export type MigrateLegacyRegistryCommand = {
+	user: UserData;
+};
+
+export default async function (command: MigrateLegacyRegistryCommand) {
+	const { user } = command;
 	logger.debug("Performing database migration");
 	const legacyIndex = await getRegistryIndex();
 
@@ -59,7 +66,7 @@ export default async function () {
 				? registryEntry.data.category
 				: ModCategory.OTHER,
 			dependencies: registryEntry.data.dependencies || [],
-			maintainers: ["16135506"],
+			maintainers: [user.id],
 			downloadsCount: 0,
 		});
 

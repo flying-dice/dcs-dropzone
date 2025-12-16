@@ -106,6 +106,8 @@ export const ModDataVisibility = {
 	UNLISTED: "UNLISTED",
 } as const;
 
+export type ModDataLatestReleaseId = string | null;
+
 /**
  * Data representation of a mod.
  */
@@ -122,6 +124,7 @@ export interface ModData {
 	visibility: ModDataVisibility;
 	/** @minItems 1 */
 	maintainers: string[];
+	latestReleaseId?: ModDataLatestReleaseId;
 	downloadsCount: number;
 }
 
@@ -177,6 +180,8 @@ export const ModUpdateDataVisibility = {
 	UNLISTED: "UNLISTED",
 } as const;
 
+export type ModUpdateDataLatestReleaseId = string | null;
+
 /**
  * Data required to create a new mod.
  */
@@ -192,6 +197,7 @@ export interface ModUpdateData {
 	screenshots: string[];
 	dependencies: string[];
 	visibility: ModUpdateDataVisibility;
+	latestReleaseId?: ModUpdateDataLatestReleaseId;
 }
 
 /**
@@ -415,6 +421,25 @@ export type GetMods200 = {
 
 export type GetModReleases200 = {
 	data: ModReleaseData[];
+};
+
+export type GetLatestModReleaseById404Error =
+	(typeof GetLatestModReleaseById404Error)[keyof typeof GetLatestModReleaseById404Error];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetLatestModReleaseById404Error = {
+	ModNotFound: "ModNotFound",
+	ReleaseNotFound: "ReleaseNotFound",
+} as const;
+
+export type GetLatestModReleaseById404 = {
+	/**
+	 * @minimum 100
+	 * @maximum 599
+	 */
+	code: number;
+	message?: string;
+	error: GetLatestModReleaseById404Error;
 };
 
 export type RegisterModReleaseDownloadByIdBody = {
@@ -2719,7 +2744,7 @@ export type getLatestModReleaseByIdResponse200 = {
 };
 
 export type getLatestModReleaseByIdResponse404 = {
-	data: ErrorData;
+	data: GetLatestModReleaseById404;
 	status: 404;
 };
 
@@ -2767,7 +2792,7 @@ export const getGetLatestModReleaseByIdQueryKey = (id?: string) => {
 
 export const getGetLatestModReleaseByIdQueryOptions = <
 	TData = Awaited<ReturnType<typeof getLatestModReleaseById>>,
-	TError = ErrorData,
+	TError = GetLatestModReleaseById404 | ErrorData,
 >(
 	id: string,
 	options?: {
@@ -2790,11 +2815,11 @@ export const getGetLatestModReleaseByIdQueryOptions = <
 };
 
 export type GetLatestModReleaseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getLatestModReleaseById>>>;
-export type GetLatestModReleaseByIdQueryError = ErrorData;
+export type GetLatestModReleaseByIdQueryError = GetLatestModReleaseById404 | ErrorData;
 
 export function useGetLatestModReleaseById<
 	TData = Awaited<ReturnType<typeof getLatestModReleaseById>>,
-	TError = ErrorData,
+	TError = GetLatestModReleaseById404 | ErrorData,
 >(
 	id: string,
 	options: {
@@ -2813,7 +2838,7 @@ export function useGetLatestModReleaseById<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetLatestModReleaseById<
 	TData = Awaited<ReturnType<typeof getLatestModReleaseById>>,
-	TError = ErrorData,
+	TError = GetLatestModReleaseById404 | ErrorData,
 >(
 	id: string,
 	options?: {
@@ -2832,7 +2857,7 @@ export function useGetLatestModReleaseById<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetLatestModReleaseById<
 	TData = Awaited<ReturnType<typeof getLatestModReleaseById>>,
-	TError = ErrorData,
+	TError = GetLatestModReleaseById404 | ErrorData,
 >(
 	id: string,
 	options?: {
@@ -2847,7 +2872,7 @@ export function useGetLatestModReleaseById<
 
 export function useGetLatestModReleaseById<
 	TData = Awaited<ReturnType<typeof getLatestModReleaseById>>,
-	TError = ErrorData,
+	TError = GetLatestModReleaseById404 | ErrorData,
 >(
 	id: string,
 	options?: {

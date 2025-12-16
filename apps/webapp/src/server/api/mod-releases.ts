@@ -5,13 +5,16 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import registerModReleaseDownload from "../commands/RegisterModReleaseDownload.ts";
-import findLatestPublicModReleaseByModId from "../queries/FindLatestPublicModReleaseByModId.ts";
+import findLatestPublicModReleaseByModId, {
+	FindLatestPublicModReleaseByModIdError,
+} from "../queries/FindLatestPublicModReleaseByModId.ts";
 import findPublicModReleaseById from "../queries/FindPublicModReleaseById.ts";
 import findPublicModReleases from "../queries/FindPublicModReleases.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { ModReleaseData } from "../schemas/ModReleaseData.ts";
 import { ModReleaseDownloadData } from "../schemas/ModReleaseDownloadData.ts";
 import { OkData } from "../schemas/OkData.ts";
+import { TypedErrorData } from "../schemas/TypedErrorData.ts";
 
 const router = new Hono();
 
@@ -66,7 +69,7 @@ router.get(
 		tags: ["Mod Releases"],
 		responses: {
 			[StatusCodes.OK]: ModReleaseData,
-			[StatusCodes.NOT_FOUND]: ErrorData,
+			[StatusCodes.NOT_FOUND]: TypedErrorData(z.enum(FindLatestPublicModReleaseByModIdError)),
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),

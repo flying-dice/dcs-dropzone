@@ -1,4 +1,4 @@
-import { Card, Stack, Tabs, Text } from "@mantine/core";
+import { Alert, Card, Stack, Tabs, Text } from "@mantine/core";
 import { Markdown } from "../../components/Markdown.tsx";
 import { MarkdownEditor } from "../../components/MarkdownEditor.tsx";
 import type { UserModReleaseForm } from "./form.ts";
@@ -10,6 +10,9 @@ export function _Changelog(props: { form: UserModReleaseForm }) {
 				<Text size={"lg"} fw={"bold"}>
 					Detailed Changelog
 				</Text>
+
+				{props.form.errors.changelog && <Alert color="red">{props.form.errors.changelog}</Alert>}
+
 				<Tabs defaultValue={"write"}>
 					<Tabs.List>
 						<Tabs.Tab value="write">Write</Tabs.Tab>

@@ -49,3 +49,4 @@ app.log
 ._app_working_dir
 ._dcs_working_dir
 ._dcs_install_dir
+.cookie_secret
