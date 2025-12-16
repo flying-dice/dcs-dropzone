@@ -1,4 +1,5 @@
 import { Paper, Stack, Text, ThemeIcon, useComputedColorScheme } from "@mantine/core";
+import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
 
 export type EmptyStateProps = {
@@ -6,6 +7,7 @@ export type EmptyStateProps = {
 	description: string;
 	icon: IconType;
 	withoutBorder?: boolean;
+	action?: ReactNode;
 };
 export function EmptyState(props: EmptyStateProps) {
 	const scheme = useComputedColorScheme();
@@ -28,6 +30,8 @@ export function EmptyState(props: EmptyStateProps) {
 				<Text c={"dimmed"} size={"sm"} style={{ textAlign: "center" }}>
 					{props.description}
 				</Text>
+
+				{props.action && <>{props.action}</>}
 			</Stack>
 		</Paper>
 	);

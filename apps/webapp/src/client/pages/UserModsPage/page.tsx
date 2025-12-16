@@ -32,7 +32,7 @@ export function _UserModsPage(_: UserModsPageProps) {
 				<Stack py={"md"} gap={"xl"}>
 					<_UserModsStats />
 					<_UserModsHeader onNewMod={handleNewMod} />
-					<_UserModsList />
+					<_UserModsList onNewMod={handleNewMod} />
 				</Stack>
 			</Container>
 		</AppShell.Main>

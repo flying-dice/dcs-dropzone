@@ -1,5 +1,6 @@
-import { Stack } from "@mantine/core";
+import { Button, Stack } from "@mantine/core";
 import { StatusCodes } from "http-status-codes";
+import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useGetUserMods } from "../../_autogen/api.ts";
@@ -9,7 +10,7 @@ import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { AppIcons } from "../../icons.ts";
 
-export function _UserModsList() {
+export function _UserModsList(props: { onNewMod: () => void }) {
 	const nav = useNavigate();
 	const { t } = useAppTranslation();
 	const breakpoint = useBreakpoint();
@@ -41,6 +42,11 @@ export function _UserModsList() {
 						title={t("NO_USER_MODS_TITLE")}
 						description={t("NO_USER_MODS_SUBTITLE_DESC")}
 						icon={AppIcons.Mods}
+						action={
+							<Button leftSection={<FaPlus />} onClick={props.onNewMod}>
+								{t("PUBLISH_NEW_MOD")}
+							</Button>
+						}
 					/>
 				))}
 		</Stack>
