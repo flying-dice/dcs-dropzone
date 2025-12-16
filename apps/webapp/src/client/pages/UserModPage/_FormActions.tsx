@@ -42,7 +42,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 	return (
 		<Card withBorder>
 			<Stack>
-				<Button type="submit">Save Changes</Button>
+				<Button type="submit">{t("SAVE_CHANGES")}</Button>
 				{props.form.isTouched() ? (
 					<Button variant={"default"} onClick={handleDiscard}>
 						{t("DISCARD_CHANGES")}

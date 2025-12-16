@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import type { IconType } from "react-icons";
 import { useAsync } from "react-use";
 import { match } from "ts-pattern";
-import type { ModReleaseData } from "../../_autogen/api.ts";
+import type { GetLatestModReleaseById404Error, ModReleaseData } from "../../_autogen/api.ts";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { EmptyState } from "../../components/EmptyState.tsx";
 import { useDaemon } from "../../hooks/useDaemon.ts";
@@ -51,14 +51,24 @@ export function _DownloadedModsTable(props: DownloadedModsTableProps) {
 		if (!downloads) return [];
 
 		return Promise.all(
-			downloads.map(async (mod): Promise<{ mod: ModAndReleaseData; latest?: ModReleaseData }> => {
-				const latest = await memoizedGetLatestModReleaseById.call(mod.modId);
-
-				return {
+			downloads.map(
+				async (
 					mod,
-					latest: latest?.status === StatusCodes.OK ? latest.data : undefined,
-				};
-			}),
+				): Promise<{
+					mod: ModAndReleaseData;
+					latest?: ModReleaseData;
+					latestError?: GetLatestModReleaseById404Error | string;
+				}> => {
+					console.log("Fetching latest for modId:", mod.modId);
+					const latest = await memoizedGetLatestModReleaseById.call(mod.modId);
+
+					return {
+						mod,
+						latest: latest?.status === StatusCodes.OK ? latest.data : undefined,
+						latestError: latest?.status !== StatusCodes.OK ? latest.data.error : undefined,
+					};
+				},
+			),
 		);
 	}, [downloads]);
 
@@ -102,7 +112,12 @@ export function _DownloadedModsTable(props: DownloadedModsTableProps) {
 							</Table.Thead>
 							<Table.Tbody>
 								{rows.map((it) => (
-									<_DownloadedModsTableRow key={it.mod.releaseId} mod={it.mod} latest={it.latest} />
+									<_DownloadedModsTableRow
+										key={it.mod.releaseId}
+										mod={it.mod}
+										latest={it.latest}
+										latestError={it.latestError}
+									/>
 								))}
 							</Table.Tbody>
 						</Table>

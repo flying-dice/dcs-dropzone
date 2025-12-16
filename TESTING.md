@@ -11,14 +11,19 @@ The app can be run without authentication or external dependencies:
 ```bash
 # Start the app with mock auth and in-memory database
 cd apps/webapp
-AUTH_DISABLED=true bun run dev
+bun run dev
 ```
 
-This will:
+This will run:
+
+```"AUTH_SERVICE_MOCK='{\"enabled\": true}' bun --hot src/index.ts"```
+
+Features of this setup:
+- Set AUTH_SERVICE_MOCK to enable mock authentication
 - Start the server on `http://localhost:3000`
 - Use an in-memory MongoDB (no external database needed)
 - Use mock authentication (no GitHub OAuth needed)
-- Automatically create a mock user in the database
+- Automatically create a mock user in the database on login
 
 ### Testing with Playwright
 
@@ -28,34 +33,7 @@ Use Playwright to:
 3. Take screenshots to verify UI changes
 4. Verify functionality end-to-end
 
-#### Example Playwright Test Session
-
-```typescript
-// Navigate to the app
-await playwright-browser_navigate("http://localhost:3000")
-
-// Wait for page to load
-await playwright-browser_wait_for({ time: 2 })
-
-// Click on a navigation link
-await playwright-browser_click({
-  element: "My Mods navigation link",
-  ref: "..." // from snapshot
-})
-
-// Fill in a form
-await playwright-browser_fill_form({
-  fields: [
-    { name: "Mod Name", type: "textbox", value: "Test Mod" },
-    { name: "Description", type: "textbox", value: "Test description" }
-  ]
-})
-
-// Take a screenshot
-await playwright-browser_take_screenshot({
-  filename: "feature-screenshot.png"
-})
-```
+Always Login as normal (pressing login), but the auth flow will use the mock user.
 
 ### Screenshot Guidelines
 
@@ -74,7 +52,7 @@ Screenshots should show:
 
 1. **Start the app:**
    ```bash
-   AUTH_DISABLED=true bun run dev
+   bun run dev
    ```
 
 2. **Open Playwright and navigate:**

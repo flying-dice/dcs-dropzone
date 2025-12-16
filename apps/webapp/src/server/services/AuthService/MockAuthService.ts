@@ -1,8 +1,14 @@
 import { getLogger } from "log4js";
-import appConfig from "../../ApplicationConfig.ts";
+import { z } from "zod";
 import type { AuthResult, AuthService } from "./AuthService.ts";
 
 const logger = getLogger("MockAuthService");
+
+export const MockAuthServiceConfig = z.object({
+	enabled: z.boolean(),
+});
+
+export type MockAuthServiceConfig = z.infer<typeof MockAuthServiceConfig>;
 
 /**
  * Mock authentication service for testing without real OAuth.
@@ -10,21 +16,21 @@ const logger = getLogger("MockAuthService");
  */
 export class MockAuthService implements AuthService {
 	private readonly mockUser: AuthResult = {
-		id: "mock-user-123",
+		id: "0",
 		username: "mockuser",
 		name: "Mock User",
-		avatarUrl: "https://avatars.githubusercontent.com/u/1?v=4",
-		profileUrl: "https://github.com/mockuser",
+		avatarUrl: "https://avatars.githubusercontent.com/u/0",
+		profileUrl: "https://github.com",
 	};
 
-	constructor() {
+	constructor(_config: MockAuthServiceConfig) {
 		logger.info("MockAuthService initialized - authentication is disabled");
 	}
 
 	getWebFlowAuthorizationUrl(): string {
 		logger.debug("Mock auth: generating authorization URL (redirecting to homepage)");
-		// Redirect to homepage since there's no real OAuth flow
-		return appConfig.ghHomepageUrl ?? "http://localhost:3000";
+		// Redirect to the homepage since there's no real OAuth flow
+		return "/auth/github/callback?code=mockcode&state=mockstate";
 	}
 
 	async handleCallback(_code: string, _state: string): Promise<AuthResult> {

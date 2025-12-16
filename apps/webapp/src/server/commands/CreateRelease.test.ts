@@ -47,7 +47,7 @@ describe("CreateRelease", () => {
 			id: expect.any(String),
 			mod_id: "mod-1",
 			version: "1.0.0",
-			changelog: "abc",
+			changelog: "Describe changes since last version...",
 			assets: [],
 			symbolicLinks: [],
 			missionScripts: [],

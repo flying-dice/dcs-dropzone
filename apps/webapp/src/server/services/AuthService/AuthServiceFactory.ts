@@ -1,34 +1,38 @@
 import { getLogger } from "log4js";
-import appConfig from "../../ApplicationConfig.ts";
+import applicationConfig from "../../ApplicationConfig.ts";
 import { AuthServiceProvider } from "./AuthServiceProvider.ts";
 import { GithubAuthService } from "./GithubAuthService.ts";
 import { MockAuthService } from "./MockAuthService.ts";
 
 const logger = getLogger("AuthServiceFactory");
 
-let githubAuthServiceInstance: GithubAuthService | null = null;
-const mockAuthServiceInstance = new MockAuthService();
+const githubAuthServiceInstance: GithubAuthService | null = applicationConfig.authServiceGh?.enabled
+	? new GithubAuthService(applicationConfig.authServiceGh)
+	: null;
+
+const mockAuthServiceInstance: MockAuthService | null = applicationConfig.authServiceMock?.enabled
+	? new MockAuthService(applicationConfig.authServiceMock)
+	: null;
+
+if (!githubAuthServiceInstance && !mockAuthServiceInstance) {
+	logger.error(
+		"Startup failed due to missing authentication configuration. At least one auth service is required. For development/testing, enable the Mock Auth Service: AUTH_SERVICE_MOCK='{\"enabled\": true}'",
+	);
+
+	throw new Error("NO_AUTH_SERVICE");
+}
 
 export const AuthServiceFactory = {
 	getAuthService(provider: AuthServiceProvider) {
-		logger.debug({ provider, authDisabled: appConfig.authDisabled }, "Selecting AuthService provider");
+		if (provider === AuthServiceProvider.GITHUB && githubAuthServiceInstance) {
+			return githubAuthServiceInstance;
+		}
 
-		// Short-circuit to mock auth if disabled
-		if (appConfig.authDisabled) {
-			logger.debug("Auth is disabled - using MockAuthService");
+		if (mockAuthServiceInstance) {
+			logger.warn("Using Mock Auth Service - not suitable for production!");
 			return mockAuthServiceInstance;
 		}
 
-		// Lazy initialize GitHub service only when auth is enabled
-		if (!githubAuthServiceInstance) {
-			githubAuthServiceInstance = new GithubAuthService();
-		}
-
-		switch (provider) {
-			case AuthServiceProvider.GITHUB:
-				return githubAuthServiceInstance;
-			default:
-				throw new Error(`Unsupported auth service provider: ${provider}`);
-		}
+		throw new Error(`No Auth Service configured for provider: ${provider}`);
 	},
 };

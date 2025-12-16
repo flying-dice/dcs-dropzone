@@ -7,11 +7,16 @@ import { ModReleaseData } from "../schemas/ModReleaseData.ts";
 
 const logger = getLogger("FindLatestPublicModReleaseByModIdQuery");
 
+export enum FindLatestPublicModReleaseByModIdError {
+	ModNotFound = "ModNotFound",
+	ReleaseNotFound = "ReleaseNotFound",
+}
+
 export type FindLatestPublicModReleaseByModIdQuery = {
 	modId: string;
 };
 
-export type FindLatestPublicModReleaseByModIdResult = Result<ModReleaseData, "ModNotFound" | "ReleaseNotFound">;
+export type FindLatestPublicModReleaseByModIdResult = Result<ModReleaseData, FindLatestPublicModReleaseByModIdError>;
 
 export default async function (
 	query: FindLatestPublicModReleaseByModIdQuery,
@@ -20,29 +25,32 @@ export default async function (
 
 	logger.debug({ modId }, "start");
 
-	const mod = await Mod.findOne({ id: modId, visibility: ModVisibility.PUBLIC }).exec();
+	const mod = await Mod.findOne({
+		id: modId,
+		visibility: { $in: [ModVisibility.PUBLIC, ModVisibility.UNLISTED] },
+	}).exec();
 	if (!mod) {
 		logger.debug({ modId }, "Public mod not found");
-		return err("ModNotFound");
+		return err(FindLatestPublicModReleaseByModIdError.ModNotFound);
 	}
 
 	// Only use the release marked as latest on the mod
 	if (!mod.latestReleaseId) {
 		logger.debug({ modId }, "No latest release set on mod");
-		return err("ReleaseNotFound");
+		return err(FindLatestPublicModReleaseByModIdError.ReleaseNotFound);
 	}
 
 	const release = await ModRelease.findOne({
 		id: mod.latestReleaseId,
 		mod_id: modId,
-		visibility: ModVisibility.PUBLIC,
+		visibility: { $in: [ModVisibility.PUBLIC, ModVisibility.UNLISTED] },
 	})
 		.lean()
 		.exec();
 
 	if (!release) {
 		logger.debug({ modId, latestReleaseId: mod.latestReleaseId }, "Latest release not found");
-		return err("ReleaseNotFound");
+		return err(FindLatestPublicModReleaseByModIdError.ReleaseNotFound);
 	}
 
 	return ok(ModReleaseData.parse(release));

@@ -7,7 +7,7 @@ import { z } from "zod";
 import createRelease from "../commands/CreateRelease.ts";
 import deleteRelease from "../commands/DeleteRelease.ts";
 import updateRelease from "../commands/UpdateRelease.ts";
-import { auth } from "../middleware/auth.ts";
+import { cookieAuth } from "../middleware/cookieAuth.ts";
 import findUserModReleaseById from "../queries/FindUserModReleaseById.ts";
 import findUserModReleases from "../queries/FindUserModReleases.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
@@ -39,7 +39,7 @@ router.get(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	auth(),
+	cookieAuth(),
 	validator("param", z.object({ id: z.string() })),
 	async (c) => {
 		const { id } = c.req.valid("param");
@@ -84,7 +84,7 @@ router.get(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	auth(),
+	cookieAuth(),
 	validator(
 		"param",
 		z.object({
@@ -136,7 +136,7 @@ router.post(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	auth(),
+	cookieAuth(),
 	validator("param", z.object({ id: z.string() })),
 	validator("json", ModReleaseCreateData),
 	async (c) => {
@@ -184,7 +184,7 @@ router.put(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	auth(),
+	cookieAuth(),
 	validator(
 		"param",
 		z.object({
@@ -247,7 +247,7 @@ router.delete(
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
-	auth(),
+	cookieAuth(),
 	validator(
 		"param",
 		z.object({

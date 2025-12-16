@@ -25,11 +25,11 @@ export default async function (command: CreateReleaseCommand): Promise<CreateRel
 		id,
 		mod_id: modId,
 		version: createData.version,
-		changelog: "abc",
+		changelog: "Describe changes since last version...",
 		assets: [],
 		symbolicLinks: [],
 		missionScripts: [],
-		visibility: ModVisibility.PUBLIC,
+		visibility: ModVisibility.PRIVATE,
 		downloadsCount: 0,
 	};
 

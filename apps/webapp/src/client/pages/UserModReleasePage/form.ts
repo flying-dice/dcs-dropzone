@@ -19,11 +19,11 @@ import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx
 export const userModReleaseFormValues = z.object({
 	version: z.string(),
 	visibility: z.enum(ModReleaseDataVisibility),
-	changelog: z.string().min(10),
+	changelog: z.string(),
 	assets: z
 		.object({
 			name: z.string(),
-			urls: z.string().url().array(),
+			urls: z.url().array(),
 			isArchive: z.boolean(),
 		})
 		.array(),

@@ -1,39 +1,58 @@
+import { randomBytes } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { ze } from "@packages/zod";
 import { int, string } from "getenv";
+import { getLogger } from "log4js";
 import { z } from "zod";
+import { GithubAuthServiceConfig } from "./services/AuthService/GithubAuthService.ts";
+import { MockAuthServiceConfig } from "./services/AuthService/MockAuthService.ts";
+
+const logger = getLogger("ApplicationConfig");
 
 const configSchema = z.object({
+	nodeEnv: z.enum(["development", "production", "test"]),
 	port: z.number().int().min(1).max(65535),
-	mongoUri: z.string(),
-	authDisabled: z.boolean(),
-	userCookieSecret: z.string().optional(),
+	mongoUri: z.string().meta({ redact: true }),
+	userCookieSecret: z.string().meta({ redact: true }),
 	userCookieName: z.string(),
 	userCookieMaxAge: z.number().int(),
-	ghClientId: z.string().optional(),
-	ghClientSecret: z.string().optional(),
-	ghAuthorizationCallbackUrl: z.string().url().optional(),
-	ghHomepageUrl: z.url().optional(),
-	admins: z.string().transform((it) => it.split(",").map((id) => id.trim())),
+	homepageUrl: z.url(),
+	admins: ze.csv(),
+	authServiceGh: GithubAuthServiceConfig.optional(),
+	authServiceMock: MockAuthServiceConfig.optional(),
 });
 
 export type ApplicationConfig = z.infer<typeof configSchema>;
 
+function getOrGenerateCookieSecret(): string {
+	if (existsSync(".cookie_secret")) {
+		return readFileSync(".cookie_secret", "utf8");
+	}
+
+	const cookieSecret = randomBytes(32).toString("base64url");
+	writeFileSync(".cookie_secret", cookieSecret);
+
+	return getOrGenerateCookieSecret();
+}
+
+const authServiceGhConfigJson = string("AUTH_SERVICE_GH", "");
+const authServiceMockConfigJson = string("AUTH_SERVICE_MOCK", "");
+
 const appConfig = configSchema.parse({
+	nodeEnv: string("NODE_ENV", "development"),
 	port: int("PORT", 3000),
 	mongoUri: string("MONGO_URI", "mongodb://memory:27017/dcs-dropzone"),
-	authDisabled: string("AUTH_DISABLED", "false") === "true",
-	userCookieSecret: string("USER_COOKIE_SECRET", "dev-secret-key"),
+	userCookieSecret: string("USER_COOKIE_SECRET", getOrGenerateCookieSecret()),
 	userCookieName: string("USER_COOKIE_NAME", "USERID"),
 	userCookieMaxAge: int("USER_COOKIE_MAX_AGE", 86400), // default to 1 day
-	ghClientId: string("GH_CLIENT_ID", ""),
-	ghClientSecret: string("GH_CLIENT_SECRET", ""),
-	ghAuthorizationCallbackUrl: string("GH_AUTHORIZATION_CALLBACK_URL", "http://localhost:3000/auth/callback"),
-	ghHomepageUrl: string("GH_HOMEPAGE_URL", "http://localhost:3000"),
-	admins: string("ADMIN_IDS", "16135506"),
+	homepageUrl: string("HOMEPAGE_URL", "http://localhost:3000"),
+	admins: string("ADMIN_IDS", "16135506, 0"),
+	authServiceGh:
+		authServiceGhConfigJson && authServiceGhConfigJson !== "" ? JSON.parse(authServiceGhConfigJson) : undefined,
+	authServiceMock:
+		authServiceMockConfigJson && authServiceMockConfigJson !== "" ? JSON.parse(authServiceMockConfigJson) : undefined,
 });
 
-// Validate auth configuration at startup
-if (!appConfig.authDisabled && !appConfig.userCookieSecret) {
-	throw new Error("USER_COOKIE_SECRET must be set when AUTH_DISABLED is false");
-}
+logger.debug(`Application configuration loaded successfully, ENV: ${appConfig.nodeEnv}`);
 
 export default appConfig;

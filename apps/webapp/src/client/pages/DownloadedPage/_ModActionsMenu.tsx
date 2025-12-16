@@ -35,9 +35,9 @@ export function _ModActionsMenu(props: { mod: ModAndReleaseData; latest?: ModRel
 				</ActionIcon>
 			</Menu.Target>
 			<Menu.Dropdown>
-				{!isLatest && handleUpdate && (
+				{!isLatest && props.latest && handleUpdate && (
 					<Menu.Item disabled={updating.loading} onClick={handleUpdate}>
-						{t("UPDATE")}
+						{t("INSTALL_LATEST")}
 					</Menu.Item>
 				)}
 				<Menu.Item disabled={!canBeToggled(props.mod.status)} onClick={handleToggle}>

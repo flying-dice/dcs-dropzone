@@ -35,7 +35,7 @@ apps/webapp/src/app/hono/
     GetAllFeaturedMods.ts
     GetAllTags.ts
     GetCategoryCounts.ts
-    GetModById.ts
+    GetPublicModById.ts
     FindUpdateInformationByIds.ts
   entities/
   schemas/
