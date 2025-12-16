@@ -33,7 +33,6 @@
 		"@monaco-editor/react": "^4.7.0",
 		"@packages/hono": "workspace:*",
 		"@packages/zod": "workspace:*",
-		"@packages/rpc": "workspace:*",
 		"@scalar/hono-api-reference": "^0.9.26",
 		"@tanstack/react-query": "^5.90.12",
 		"@types/getenv": "^1.0.3",
