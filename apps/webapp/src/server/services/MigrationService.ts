@@ -1,6 +1,6 @@
 import { subSeconds } from "date-fns";
 import { getLogger } from "log4js";
-import type { QueryFilter } from "mongoose";
+import mongoose, { type QueryFilter } from "mongoose";
 import { Migration } from "../entities/Migration.ts";
 import { MigrationStatus } from "../enums/MigrationStatus.ts";
 
@@ -29,6 +29,7 @@ export class MigrationService {
 
 	static async runMigration(id: string, migration: () => Promise<void>) {
 		logger.info(`Starting migration (${id})...`);
+		await mongoose.connection.asPromise();
 		const service = new MigrationService(id, migration, crypto.randomUUID());
 		await service.run();
 	}

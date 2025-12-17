@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
+import objectHash from "object-hash";
 import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import updateRelease from "./UpdateRelease.ts";
@@ -38,6 +39,7 @@ describe("UpdateRelease", () => {
 			id: "r1",
 			mod_id: "m1",
 			version: "1.0.0",
+			versionHash: objectHash(Date.now()),
 			changelog: "old",
 			assets: [],
 			symbolicLinks: [],
