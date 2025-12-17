@@ -1,0 +1,1 @@
+ALTER TABLE `MOD_RELEASES` ADD `version_hash` text NOT NULL;

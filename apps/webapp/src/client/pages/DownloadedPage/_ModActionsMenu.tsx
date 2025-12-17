@@ -15,7 +15,11 @@ function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
 }
 
-export function _ModActionsMenu(props: { mod: ModAndReleaseData; latest?: ModReleaseData }) {
+export function _ModActionsMenu(props: {
+	mod: ModAndReleaseData;
+	latest?: ModReleaseData;
+	isLatest?: boolean | undefined;
+}) {
 	const { t } = useAppTranslation();
 	const { toggle, update, remove, updating } = useDaemon();
 
@@ -25,8 +29,6 @@ export function _ModActionsMenu(props: { mod: ModAndReleaseData; latest?: ModRel
 
 	const handleRemove = () => remove(props.mod.releaseId);
 
-	const isLatest = props.latest ? props.latest.version === props.mod.version : null;
-
 	return (
 		<Menu>
 			<Menu.Target>
@@ -35,7 +37,7 @@ export function _ModActionsMenu(props: { mod: ModAndReleaseData; latest?: ModRel
 				</ActionIcon>
 			</Menu.Target>
 			<Menu.Dropdown>
-				{!isLatest && props.latest && handleUpdate && (
+				{props.isLatest === false && props.latest && handleUpdate && (
 					<Menu.Item disabled={updating.loading} onClick={handleUpdate}>
 						{t("INSTALL_LATEST")}
 					</Menu.Item>

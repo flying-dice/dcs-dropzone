@@ -280,6 +280,7 @@ export interface ModReleaseData {
 	id: string;
 	mod_id: string;
 	version: string;
+	versionHash: string;
 	changelog: string;
 	assets: ModReleaseAssetData[];
 	symbolicLinks: ModReleaseSymbolicLinkData[];

@@ -190,6 +190,8 @@ export default {
 		TOTAL_MODS: "Total Mods",
 		UNLISTED: "Unlisted",
 		UPDATES: "Updates",
+		UP_TO_DATE: "Up to Date",
+		OUT_OF_DATE: "Out of Date",
 		USER_ID: "User ID",
 		USER_ID_DESCRIPTION: "This is your ID, all mods you publish will be bound to this ID",
 		USER_LOGIN: "User Login",

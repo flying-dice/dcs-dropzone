@@ -1,10 +1,13 @@
 import mongoose, { type InferRawDocType, type InferSchemaType, Schema } from "mongoose";
+import objectHash from "object-hash";
+import { MigrationService } from "../services/MigrationService.ts";
 
 const schema = new Schema(
 	{
 		id: { type: String, required: true, unique: true },
 		mod_id: { type: String, required: true },
 		version: { type: String, required: true },
+		versionHash: { type: String, required: true },
 		changelog: { type: String, required: true },
 		assets: { type: [Object], required: true },
 		symbolicLinks: { type: [Object], default: [] },
@@ -21,3 +24,11 @@ const schema = new Schema(
 export const ModRelease = mongoose.model("ModRelease", schema);
 export type ModRelease = InferSchemaType<typeof schema>;
 export type ModReleaseRawDocType = InferRawDocType<typeof schema>;
+
+await MigrationService.runMigration("17122025_add_version_hash", async () => {
+	const releases = await ModRelease.find({ versionHash: { $exists: false } }).exec();
+	for (const release of releases) {
+		release.versionHash = objectHash(Date.now());
+		await release.save();
+	}
+});

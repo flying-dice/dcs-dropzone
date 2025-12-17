@@ -7,7 +7,7 @@ import { SymbolicLinkDestRoot } from "../enums/SymbolicLinkDestRoot.ts";
 export const ModReleaseAssetData = z
 	.object({
 		name: z.string().min(1, "Asset name is required"),
-		urls: z.string().url().array(),
+		urls: z.url().array(),
 		isArchive: z.boolean(),
 	})
 	.meta({
@@ -57,6 +57,7 @@ export const ModReleaseData = z
 		id: z.string(),
 		mod_id: z.string(),
 		version: z.string(),
+		versionHash: z.string(),
 		changelog: z.string(),
 		assets: z.array(ModReleaseAssetData),
 		symbolicLinks: z.array(ModReleaseSymbolicLinkData),

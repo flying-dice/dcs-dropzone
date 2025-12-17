@@ -129,6 +129,7 @@ export interface ModAndReleaseData {
 	modName: string;
 	dependencies: string[];
 	version: string;
+	versionHash: string;
 	assets: ModReleaseAssetData[];
 	symbolicLinks: ModReleaseSymbolicLinkData[];
 	missionScripts: ModReleaseMissionScriptData[];

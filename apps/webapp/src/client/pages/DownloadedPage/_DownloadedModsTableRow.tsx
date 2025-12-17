@@ -1,4 +1,4 @@
-import { Checkbox, Progress, Table, Text } from "@mantine/core";
+import { Checkbox, Progress, Table, Text, Tooltip } from "@mantine/core";
 import { match } from "ts-pattern";
 import { GetLatestModReleaseById404Error, type ModReleaseData } from "../../_autogen/api.ts";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
@@ -16,7 +16,7 @@ export type DownloadedModsTableRowProps = {
 };
 export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 	const { t } = useAppTranslation();
-	const isLatest = props.latest ? props.mod.version === props.latest.version : undefined;
+	const isLatest = props.latest ? props.latest.versionHash === props.mod.versionHash : undefined;
 
 	return (
 		<Table.Tr>
@@ -28,9 +28,11 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 			</Table.Th>
 			<Table.Td>{props.mod.modName}</Table.Td>
 			<Table.Td>
-				<Text size={"sm"} c={isLatest ? "green" : "orange"} fw={isLatest ? "normal" : "bold"}>
-					{props.mod?.version}
-				</Text>
+				<Tooltip label={isLatest ? t("UP_TO_DATE") : t("OUT_OF_DATE")}>
+					<Text size={"sm"} c={isLatest ? "green" : "orange"} fw={isLatest ? "normal" : "bold"}>
+						{props.mod?.version}
+					</Text>
+				</Tooltip>
 			</Table.Td>
 			<Table.Td>
 				{match(props)
@@ -68,7 +70,7 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 				)}
 			</Table.Td>
 			<Table.Td>
-				<_ModActionsMenu mod={props.mod} latest={props.latest ? props.latest : undefined} />
+				<_ModActionsMenu mod={props.mod} isLatest={isLatest} latest={props.latest ? props.latest : undefined} />
 			</Table.Td>
 		</Table.Tr>
 	);

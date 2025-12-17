@@ -40,6 +40,7 @@ export default async function (command: AddReleaseCommand): Promise<AddReleaseRe
 					modId: data.modId,
 					modName: data.modName,
 					version: data.version,
+					versionHash: data.versionHash,
 					dependencies: data.dependencies,
 				})
 				.run();

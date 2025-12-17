@@ -1,5 +1,6 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
+import objectHash from "object-hash";
 import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import type { ModReleaseData } from "../schemas/ModReleaseData.ts";
@@ -8,7 +9,7 @@ import type { UserData } from "../schemas/UserData.ts";
 const logger = getLogger("UpdateReleaseCommand");
 
 export type UpdateReleaseCommand = {
-	updateData: ModReleaseData;
+	updateData: Omit<ModReleaseData, "versionHash">;
 	user: UserData;
 };
 
@@ -30,10 +31,12 @@ export default async function (command: UpdateReleaseCommand): Promise<UpdateRel
 		{ id: updateData.id, mod_id: updateData.mod_id },
 		{
 			version: updateData.version,
+			versionHash: objectHash(Date.now()),
 			changelog: updateData.changelog,
 			assets: updateData.assets,
 			symbolicLinks: updateData.symbolicLinks,
 			visibility: updateData.visibility,
+			missionScripts: updateData.missionScripts,
 		},
 	).exec();
 

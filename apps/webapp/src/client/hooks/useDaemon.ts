@@ -71,13 +71,14 @@ export function useDaemon() {
 	const [updating, update] = useAsyncFn(
 		async (modId: string, currentReleaseId: string, latestReleaseId: string) => {
 			try {
+				await removeReleaseFromDaemon(currentReleaseId);
+
 				const result = await addReleaseToDaemonById({ releaseId: latestReleaseId, modId });
 				result.match(
 					() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
 					(error) => showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error }))),
 				);
 
-				await removeReleaseFromDaemon(currentReleaseId);
 				await daemonReleases.refetch();
 			} catch (e) {
 				showErrorNotification(e);

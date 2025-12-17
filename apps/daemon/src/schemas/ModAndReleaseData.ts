@@ -75,6 +75,7 @@ export const ModAndReleaseData = z
 		modName: z.string(),
 		dependencies: z.string().array(),
 		version: z.string(),
+		versionHash: z.string(),
 		assets: ModReleaseAssetData.array(),
 		symbolicLinks: ModReleaseSymbolicLinkData.array(),
 		missionScripts: ModReleaseMissionScriptData.array(),

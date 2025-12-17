@@ -1,0 +1,548 @@
+{
+	"version": "6",
+	"dialect": "sqlite",
+	"id": "a3dbe272-8ea4-4542-a155-746b89603a2e",
+	"prevId": "1a51db8d-1cca-4ad4-9973-49d7c5404d38",
+	"tables": {
+		"APP_ATTRIBUTES": {
+			"name": "APP_ATTRIBUTES",
+			"columns": {
+				"key": {
+					"name": "key",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"value": {
+					"name": "value",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"DOWNLOAD_QUEUE": {
+			"name": "DOWNLOAD_QUEUE",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_id": {
+					"name": "release_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_asset_id": {
+					"name": "release_asset_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"url": {
+					"name": "url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"target_directory": {
+					"name": "target_directory",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "'PENDING'"
+				},
+				"progress_percent": {
+					"name": "progress_percent",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": 0
+				},
+				"attempt": {
+					"name": "attempt",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": 0
+				},
+				"next_attempt_after": {
+					"name": "next_attempt_after",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"DOWNLOAD_QUEUE_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "DOWNLOAD_QUEUE_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "DOWNLOAD_QUEUE",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"DOWNLOAD_QUEUE_release_asset_id_MOD_RELEASE_ASSETS_id_fk": {
+					"name": "DOWNLOAD_QUEUE_release_asset_id_MOD_RELEASE_ASSETS_id_fk",
+					"tableFrom": "DOWNLOAD_QUEUE",
+					"tableTo": "MOD_RELEASE_ASSETS",
+					"columnsFrom": ["release_asset_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"EXTRACT_DOWNLOAD_JOIN": {
+			"name": "EXTRACT_DOWNLOAD_JOIN",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"extract_job_id": {
+					"name": "extract_job_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"download_job_id": {
+					"name": "download_job_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"EXTRACT_DOWNLOAD_JOIN_extract_job_id_EXTRACT_QUEUE_id_fk": {
+					"name": "EXTRACT_DOWNLOAD_JOIN_extract_job_id_EXTRACT_QUEUE_id_fk",
+					"tableFrom": "EXTRACT_DOWNLOAD_JOIN",
+					"tableTo": "EXTRACT_QUEUE",
+					"columnsFrom": ["extract_job_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"EXTRACT_DOWNLOAD_JOIN_download_job_id_DOWNLOAD_QUEUE_id_fk": {
+					"name": "EXTRACT_DOWNLOAD_JOIN_download_job_id_DOWNLOAD_QUEUE_id_fk",
+					"tableFrom": "EXTRACT_DOWNLOAD_JOIN",
+					"tableTo": "DOWNLOAD_QUEUE",
+					"columnsFrom": ["download_job_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"EXTRACT_QUEUE": {
+			"name": "EXTRACT_QUEUE",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_id": {
+					"name": "release_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_asset_id": {
+					"name": "release_asset_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"archive_path": {
+					"name": "archive_path",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"target_directory": {
+					"name": "target_directory",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "'PENDING'"
+				},
+				"progress_percent": {
+					"name": "progress_percent",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": 0
+				},
+				"attempt": {
+					"name": "attempt",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": 0
+				},
+				"next_attempt_after": {
+					"name": "next_attempt_after",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"EXTRACT_QUEUE_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "EXTRACT_QUEUE_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "EXTRACT_QUEUE",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"EXTRACT_QUEUE_release_asset_id_MOD_RELEASE_ASSETS_id_fk": {
+					"name": "EXTRACT_QUEUE_release_asset_id_MOD_RELEASE_ASSETS_id_fk",
+					"tableFrom": "EXTRACT_QUEUE",
+					"tableTo": "MOD_RELEASE_ASSETS",
+					"columnsFrom": ["release_asset_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"MOD_RELEASES": {
+			"name": "MOD_RELEASES",
+			"columns": {
+				"release_id": {
+					"name": "release_id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"mod_id": {
+					"name": "mod_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"mod_name": {
+					"name": "mod_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"version": {
+					"name": "version",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"version_hash": {
+					"name": "version_hash",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"dependencies": {
+					"name": "dependencies",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"MOD_RELEASE_ASSETS": {
+			"name": "MOD_RELEASE_ASSETS",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_id": {
+					"name": "release_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"is_archive": {
+					"name": "is_archive",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"urls": {
+					"name": "urls",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"MOD_RELEASE_ASSETS_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "MOD_RELEASE_ASSETS_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "MOD_RELEASE_ASSETS",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"MOD_RELEASE_MISSION_SCRIPTS": {
+			"name": "MOD_RELEASE_MISSION_SCRIPTS",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_id": {
+					"name": "release_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"purpose": {
+					"name": "purpose",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"path": {
+					"name": "path",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"root": {
+					"name": "root",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"run_on": {
+					"name": "run_on",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"installed_path": {
+					"name": "installed_path",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"MOD_RELEASE_MISSION_SCRIPTS_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "MOD_RELEASE_MISSION_SCRIPTS_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "MOD_RELEASE_MISSION_SCRIPTS",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"MOD_RELEASE_SYMBOLIC_LINKS": {
+			"name": "MOD_RELEASE_SYMBOLIC_LINKS",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"release_id": {
+					"name": "release_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"src": {
+					"name": "src",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"dest": {
+					"name": "dest",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"dest_root": {
+					"name": "dest_root",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"installed_path": {
+					"name": "installed_path",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"MOD_RELEASE_SYMBOLIC_LINKS_release_id_MOD_RELEASES_release_id_fk": {
+					"name": "MOD_RELEASE_SYMBOLIC_LINKS_release_id_MOD_RELEASES_release_id_fk",
+					"tableFrom": "MOD_RELEASE_SYMBOLIC_LINKS",
+					"tableTo": "MOD_RELEASES",
+					"columnsFrom": ["release_id"],
+					"columnsTo": ["release_id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		}
+	},
+	"views": {},
+	"enums": {},
+	"_meta": {
+		"schemas": {},
+		"tables": {},
+		"columns": {}
+	},
+	"internal": {
+		"indexes": {}
+	}
+}

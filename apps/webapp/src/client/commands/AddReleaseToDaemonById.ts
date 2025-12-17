@@ -47,6 +47,7 @@ export default async function (command: AddReleaseToDaemonByIdCommand): Promise<
 		releaseId: release.data.id,
 		modName: mod.data.mod.name,
 		version: form?.values.version || release.data.version,
+		versionHash: release.data.versionHash,
 		assets: form?.values.assets || release.data.assets,
 		dependencies: mod.data.mod.dependencies,
 		missionScripts: form?.values.missionScripts || release.data.missionScripts,

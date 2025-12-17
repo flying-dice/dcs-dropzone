@@ -1,4 +1,5 @@
 import { err, ok, type Result } from "neverthrow";
+import objectHash from "object-hash";
 import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";
@@ -25,6 +26,7 @@ export default async function (command: CreateReleaseCommand): Promise<CreateRel
 		id,
 		mod_id: modId,
 		version: createData.version,
+		versionHash: objectHash(Date.now()),
 		changelog: "Describe changes since last version...",
 		assets: [],
 		symbolicLinks: [],

@@ -2,6 +2,7 @@ import { basename, extname } from "node:path";
 import { camelToKebabCase } from "@mantine/core";
 import { toCamelCase } from "drizzle-orm/casing";
 import { getLogger } from "log4js";
+import objectHash from "object-hash";
 import { getRegistryEntry, getRegistryIndex } from "../../client/_autogen/legacy_api.ts";
 import { Mod } from "../entities/Mod.ts";
 import { ModRelease } from "../entities/ModRelease.ts";
@@ -15,7 +16,6 @@ import {
 	type ModReleaseMissionScriptData,
 	type ModReleaseSymbolicLinkData,
 } from "../schemas/ModReleaseData.ts";
-import type { ModReleaseDownloadData } from "../schemas/ModReleaseDownloadData.ts";
 import type { UserData } from "../schemas/UserData.ts";
 
 const logger = getLogger("MigrateLegacyRegistryCommand");
@@ -99,6 +99,7 @@ export default async function (command: MigrateLegacyRegistryCommand) {
 			const release: ModReleaseData = ModReleaseData.parse({
 				id: releaseId,
 				version: version.version,
+				versionHash: objectHash(Date.now()),
 				mod_id: modDocument.id,
 				changelog: version.name,
 				visibility: ModVisibility.PUBLIC,
