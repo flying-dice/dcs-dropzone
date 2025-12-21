@@ -8,7 +8,7 @@ const logger = getLogger("GithubAuthService");
 export const GithubAuthServiceConfig = z.object({
 	enabled: z.boolean(),
 	clientId: z.string(),
-	clientSecret: z.string().meta({ redact: true }),
+	clientSecret: z.string(),
 	redirectUrl: z.url(),
 });
 

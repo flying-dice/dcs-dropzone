@@ -1,6 +1,6 @@
 import mongoose, { type InferRawDocType, type InferSchemaType, Schema } from "mongoose";
 import objectHash from "object-hash";
-import { MigrationService } from "../services/MigrationService.ts";
+import { MongoMigration } from "../infrastructure/mongo-db/MongoMigration.ts";
 
 const schema = new Schema(
 	{
@@ -25,10 +25,12 @@ export const ModRelease = mongoose.model("ModRelease", schema);
 export type ModRelease = InferSchemaType<typeof schema>;
 export type ModReleaseRawDocType = InferRawDocType<typeof schema>;
 
-await MigrationService.runMigration("17122025_add_version_hash", async () => {
-	const releases = await ModRelease.find({ versionHash: { $exists: false } }).exec();
-	for (const release of releases) {
-		release.versionHash = objectHash(Date.now());
-		await release.save();
-	}
-});
+export const ModReleaseMigrations = [
+	new MongoMigration("17122025_add_version_hash", async () => {
+		const releases = await ModRelease.find({ versionHash: { $exists: false } }).exec();
+		for (const release of releases) {
+			release.versionHash = objectHash(Date.now());
+			await release.save();
+		}
+	}),
+];

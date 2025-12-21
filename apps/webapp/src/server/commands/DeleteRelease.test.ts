@@ -11,12 +11,12 @@ describe("DeleteRelease", () => {
 
 	beforeEach(async () => {
 		mongod = await MongoMemoryServer.create();
-		await mongoose.disconnect().catch(() => {});
+		await mongoose.disconnect();
 		await mongoose.connect(mongod.getUri());
 	});
 
 	afterEach(async () => {
-		await mongoose.disconnect().catch(() => {});
+		await mongoose.disconnect();
 		await mongod.stop();
 	});
 

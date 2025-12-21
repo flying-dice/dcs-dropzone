@@ -1,5 +1,5 @@
 import mongoose, { type InferRawDocType, type InferSchemaType, Schema } from "mongoose";
-import { MigrationService } from "../services/MigrationService.ts";
+import { MongoMigration } from "../infrastructure/mongo-db/MongoMigration.ts";
 import { Mod } from "./Mod.ts";
 
 const schema = new Schema(
@@ -25,28 +25,30 @@ export const ModSummary = mongoose.model("ModSummary", schema);
 export type ModSummary = InferSchemaType<typeof schema>;
 export type ModSummaryRawDocType = InferRawDocType<typeof schema>;
 
-await MigrationService.runMigration("20112025_mod_summary", async () => {
-	await ModSummary.collection.drop();
-	await ModSummary.createCollection({
-		viewOn: Mod.collection.name,
-		pipeline: [
-			{
-				$project: {
-					id: 1,
-					name: 1,
-					category: 1,
-					description: 1,
-					thumbnail: 1,
-					dependencies: 1,
-					maintainers: 1,
-					tags: 1,
-					visibility: 1,
-					downloadsCount: 1,
-					featuredAt: 1,
-					createdAt: 1,
-					updatedAt: 1,
+export const ModSummaryMigrations = [
+	new MongoMigration("20112025_mod_summary", async () => {
+		await ModSummary.collection.drop();
+		await ModSummary.createCollection({
+			viewOn: Mod.collection.name,
+			pipeline: [
+				{
+					$project: {
+						id: 1,
+						name: 1,
+						category: 1,
+						description: 1,
+						thumbnail: 1,
+						dependencies: 1,
+						maintainers: 1,
+						tags: 1,
+						visibility: 1,
+						downloadsCount: 1,
+						featuredAt: 1,
+						createdAt: 1,
+						updatedAt: 1,
+					},
 				},
-			},
-		],
-	});
-});
+			],
+		});
+	}),
+];

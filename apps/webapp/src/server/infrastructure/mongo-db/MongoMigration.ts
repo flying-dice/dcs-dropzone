@@ -1,15 +1,16 @@
 import { subSeconds } from "date-fns";
 import { getLogger } from "log4js";
-import mongoose, { type QueryFilter } from "mongoose";
-import { Migration } from "../entities/Migration.ts";
-import { MigrationStatus } from "../enums/MigrationStatus.ts";
+import type { QueryFilter } from "mongoose";
+import { Migration } from "../../entities/Migration.ts";
+import { MigrationStatus } from "../../enums/MigrationStatus.ts";
 
-const logger = getLogger("MigrationService");
+const logger = getLogger("Migrations");
+const INSTANCE_ID = crypto.randomUUID();
 
-export class MigrationService {
+export class MongoMigration {
 	private static readonly MAX_AGE_SECONDS = 30;
 
-	private readonly migrationId: string;
+	public readonly migrationId: string;
 	private readonly serviceId: string;
 
 	private readonly migrationFunction: () => Promise<void>;
@@ -21,20 +22,13 @@ export class MigrationService {
 		};
 	}
 
-	protected constructor(id: string, migration: () => Promise<void>, serviceId: string) {
+	constructor(id: string, migration: () => Promise<void>, serviceId: string = INSTANCE_ID) {
 		this.migrationId = id;
 		this.serviceId = serviceId;
 		this.migrationFunction = migration;
 	}
 
-	static async runMigration(id: string, migration: () => Promise<void>) {
-		logger.info(`Starting migration (${id})...`);
-		await mongoose.connection.asPromise();
-		const service = new MigrationService(id, migration, crypto.randomUUID());
-		await service.run();
-	}
-
-	private async run(): Promise<void> {
+	async run(): Promise<void> {
 		await this.ensureExists();
 
 		if (await this.isCompleted()) {
@@ -129,7 +123,7 @@ export class MigrationService {
 			id: this.migrationId,
 			status: MigrationStatus.RUNNING,
 			startedAt: {
-				$lt: subSeconds(new Date(), MigrationService.MAX_AGE_SECONDS),
+				$lt: subSeconds(new Date(), MongoMigration.MAX_AGE_SECONDS),
 			},
 		};
 

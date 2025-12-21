@@ -1,4 +1,4 @@
-import "../mongo-db/Database.ts";
+import "../mongo-db";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { Scalar } from "@scalar/hono-api-reference";

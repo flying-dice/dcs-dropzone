@@ -12,8 +12,8 @@ const logger = getLogger("ApplicationConfig");
 const configSchema = z.object({
 	nodeEnv: z.enum(["development", "production", "test"]),
 	port: z.number().int().min(1).max(65535),
-	mongoUri: z.string().meta({ redact: true }),
-	userCookieSecret: z.string().meta({ redact: true }),
+	mongoUri: z.string(),
+	userCookieSecret: z.string(),
 	userCookieName: z.string(),
 	userCookieMaxAge: z.number().int(),
 	homepageUrl: z.url(),
