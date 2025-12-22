@@ -10,6 +10,7 @@ export type EnableReleaseCommand = {
 	releaseId: string;
 	db: BunSQLiteDatabase;
 	pathService: PathService;
+	onCreateSymlink?: (src: string, dest: string) => void;
 };
 
 export type EnableReleaseResult = void;
@@ -31,11 +32,13 @@ export default async function (command: EnableReleaseCommand): Promise<EnableRel
 		const destAbs = pathService.getAbsoluteSymbolicLinkDestPath(link.destRoot, link.dest);
 
 		const type = getSymlinkType(srcAbs);
-		logger.debug(`Creating symlink from ${srcAbs} to ${destAbs} with type ${type}`);
+		logger.info(`Creating symlink from ${srcAbs} to ${destAbs} with type ${type}`);
 		ensureSymlinkSync(srcAbs, destAbs, type);
 		db.update(T_MOD_RELEASE_SYMBOLIC_LINKS)
 			.set({ installedPath: destAbs })
 			.where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.id, link.id))
 			.run();
+
+		command.onCreateSymlink?.(srcAbs, destAbs);
 	}
 }

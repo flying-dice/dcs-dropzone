@@ -3,6 +3,8 @@ import { getLogger } from "log4js";
 import { SymbolicLinkDestRoot } from "webapp";
 import applicationConfig from "./ApplicationConfig.ts";
 import { db } from "./database";
+import AllDaemonReleases from "./observables/AllDaemonReleases.ts";
+import getAllDaemonReleases from "./queries/GetAllDaemonReleases.ts";
 import getDaemonInstanceId from "./queries/GetDaemonInstanceId.ts";
 import { DownloadQueue } from "./queues/DownloadQueue.ts";
 import { ExtractQueue } from "./queues/ExtractQueue.ts";
@@ -37,6 +39,11 @@ const extractQueue = new ExtractQueue({
 });
 
 logger.debug("Services initialized");
+
+AllDaemonReleases.$.next(getAllDaemonReleases({ db: _db }));
+setInterval(() => {
+	AllDaemonReleases.$.next(getAllDaemonReleases({ db: _db }));
+}, 1000);
 
 const server = createServer({
 	daemonInstanceId,

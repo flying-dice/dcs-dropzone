@@ -4,6 +4,7 @@ import { serve } from "bun";
 import { getLogger } from "log4js";
 import Application from "./Application.ts";
 import appConfig from "./ApplicationConfig.ts";
+import { startTui } from "./tui";
 
 const logger = getLogger("index");
 
@@ -19,3 +20,7 @@ const server = serve({
 });
 
 logger.info(`🚀 Server running at ${server.url}`);
+
+await startTui(async () => {
+	await server.stop();
+});

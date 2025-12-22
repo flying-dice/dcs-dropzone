@@ -79,6 +79,7 @@ router.delete(
 			releaseId,
 			disableReleaseHandler: disableRelease,
 		});
+
 		return c.json(null, StatusCodes.OK);
 	},
 );
