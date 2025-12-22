@@ -50,4 +50,6 @@ export default {
 	server,
 	downloadQueue,
 	extractQueue,
+	db: _db,
+	pathService,
 };

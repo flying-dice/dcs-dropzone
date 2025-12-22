@@ -11,8 +11,8 @@ import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx
 export const userModFormValues = z.object({
 	name: z.string().min(2, { message: "Name should have at least 2 letters" }),
 	category: z.enum(ModDataCategory),
-	description: z.string().min(10, { message: "Short Description should have at least 10 letters" }).max(100, {
-		message: "Short Description should have at most 100 letters",
+	description: z.string().min(10, { message: "Short Description should have at least 10 letters" }).max(200, {
+		message: "Short Description should have at most 200 letters",
 	}),
 	content: z.string().min(20, {
 		message: "Detailed Description should have at least 20 letters",
