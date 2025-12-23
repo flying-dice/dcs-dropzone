@@ -8,7 +8,6 @@ import {
 	Flex,
 	Grid,
 	GridCol,
-	Group,
 	Stack,
 	Tabs,
 	Text,
@@ -20,7 +19,6 @@ import {
 	ModReleaseMissionScriptDataRunOn,
 	type UserData,
 } from "../../_autogen/api.ts";
-import { MaintainersAvatars } from "../../components/MaintainersAvatars.tsx";
 import { Markdown } from "../../components/Markdown.tsx";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
