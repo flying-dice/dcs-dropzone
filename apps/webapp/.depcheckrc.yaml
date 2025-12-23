@@ -1,6 +1,6 @@
 ignores:
-    - bun:*
-    - "@fontsource/inter"
-    - drizzle-kit
-    - mongodb
-    - bun
+  - bun
+  - bun:*
+  - "@fontsource/inter"
+  - drizzle-kit
+  - mongodb
