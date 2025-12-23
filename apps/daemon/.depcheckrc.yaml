@@ -1,0 +1,5 @@
+ignores:
+  - bun
+  - bun:*
+  - ringbufferjs
+  - "@types/ringbufferjs"

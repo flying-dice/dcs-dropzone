@@ -1,16 +1,5 @@
 import { mergeWith } from "lodash";
-import {
-	type AppenderFunction,
-	type AppenderModule,
-	addLayout,
-	type Config,
-	type Configuration,
-	configure,
-	getLogger,
-	type LayoutsParam,
-	type Levels,
-	type LoggingEvent,
-} from "log4js";
+import { type AppenderModule, addLayout, type Configuration, configure, getLogger, type LoggingEvent } from "log4js";
 import RingBuffer from "ringbufferjs";
 import { BehaviorSubject } from "rxjs";
 
@@ -27,12 +16,10 @@ export function clearRecentLoggingEvents() {
 }
 
 const recentAppender: AppenderModule = {
-	configure:
-		(config?: Config, layouts?: LayoutsParam, findAppender?: () => AppenderFunction, levels?: Levels) =>
-		(loggingEvent: LoggingEvent) => {
-			const s = recentLoggingEvents.enq({ ...loggingEvent, id: crypto.randomUUID() });
-			recentLoggingEvent$.next(recentLoggingEvents.peekN(s));
-		},
+	configure: () => (loggingEvent: LoggingEvent) => {
+		const s = recentLoggingEvents.enq({ ...loggingEvent, id: crypto.randomUUID() });
+		recentLoggingEvent$.next(recentLoggingEvents.peekN(s));
+	},
 };
 
 addLayout("json", (_) => {
