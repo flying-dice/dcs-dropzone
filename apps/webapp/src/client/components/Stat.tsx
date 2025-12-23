@@ -11,7 +11,7 @@ export type StatProps = {
 };
 export function Stat(props: StatProps) {
 	return (
-		<Group gap={0} align="center">
+		<Group gap={0} align="center" wrap={"nowrap"}>
 			<ThemeIcon variant={"subtle"} c={props.iconColor || "dimmed"}>
 				<props.icon size={"0.75em"} />
 			</ThemeIcon>
@@ -19,7 +19,7 @@ export function Stat(props: StatProps) {
 				.when(
 					(stat) => typeof stat === "number" || typeof stat === "string",
 					(stat) => (
-						<Text size={"sm"} c={props.statColor || "dimmed"} fz={14}>
+						<Text size={"sm"} c={props.statColor || "dimmed"} fz={14} style={{ whiteSpace: "nowrap" }} truncate>
 							{stat}
 						</Text>
 					),

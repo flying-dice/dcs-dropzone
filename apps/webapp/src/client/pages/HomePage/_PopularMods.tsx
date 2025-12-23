@@ -37,7 +37,7 @@ export function _PopularMods() {
 								downloads={mod.downloadsCount}
 								isDownloaded={false}
 								variant={breakpoint.isXs ? "grid" : "list"}
-								onClick={() => nav(`/mods/${mod.id}`)}
+								onClick={() => nav(`/mods/${mod.id}/latest`)}
 							/>
 						)),
 				)

@@ -42,7 +42,7 @@ export function _ModsList(props: { page: number; size: number; filters: Record<s
 										summary={mod.description || ""}
 										downloads={mod.downloadsCount}
 										variant={breakpoint.isXs ? "grid" : "list"}
-										onClick={() => nav(mod.id)}
+										onClick={() => nav(`${mod.id}/latest`)}
 									/>
 								))}
 						</Stack>
