@@ -9,13 +9,14 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"tsc": "tsc --noEmit",
-		"check": "bun run biome && bun run tsc",
+		"check": "bun run biome && bun run tsc && bunx depcheck",
 		"test": "bun test"
 	},
-	"dependencies": {
-		"zod": "^4.1.13",
-		"hono": "^4.10.7",
-		"hono-openapi": "^1.1.2",
-		"http-status-codes": "^2.3.0"
+	"peerDependencies": {
+		"zod": ">=4",
+		"hono": ">=4",
+		"hono-openapi": ">=1",
+		"http-status-codes": ">=2",
+		"log4js": ">=6"
 	}
 }
