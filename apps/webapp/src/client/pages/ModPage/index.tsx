@@ -2,16 +2,20 @@ import { Alert, AppShell, Container, Skeleton, useComputedColorScheme } from "@m
 import { StatusCodes } from "http-status-codes";
 import { useParams } from "react-router-dom";
 import { match } from "ts-pattern";
-import { useGetLatestModReleaseById, useGetModById } from "../../_autogen/api.ts";
+import { useGetModById, useGetModReleaseById } from "../../_autogen/api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _Page } from "./page.tsx";
 
 export function ModPage() {
 	const { t } = useAppTranslation();
 	const colorScheme = useComputedColorScheme();
-	const params = useParams<{ modId: string }>();
-	const mod = useGetModById(params.modId || "undefined");
-	const latestRelease = useGetLatestModReleaseById(params.modId || "undefined");
+	const params = useParams<{ modId: string; releaseId: string }>();
+	const mod = useGetModById(params.modId || "-");
+	const latestReleaseId = mod.data?.status === StatusCodes.OK ? mod.data.data.mod.latestReleaseId : undefined;
+	const latestRelease = useGetModReleaseById(
+		params.modId || "-",
+		params.releaseId === "latest" ? latestReleaseId || "-" : params.releaseId || "-",
+	);
 
 	return match(mod.data)
 		.when(
@@ -24,7 +28,7 @@ export function ModPage() {
 				<_Page
 					mod={res.data.mod}
 					maintainers={res.data.maintainers}
-					latestRelease={latestRelease.data?.status === StatusCodes.OK ? latestRelease.data?.data : undefined}
+					release={latestRelease.data?.status === StatusCodes.OK ? latestRelease.data?.data : undefined}
 				/>
 			),
 		)

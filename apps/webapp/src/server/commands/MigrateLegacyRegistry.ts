@@ -142,8 +142,20 @@ export default async function (command: MigrateLegacyRegistryCommand) {
 				mod_id: modDocument.id,
 				version: release.version,
 			}).exec();
+
 			if (!releaseDocument) {
 				throw new Error("Failed to retrieve or create mod release document");
+			}
+
+			const latestRelease = await ModRelease.findOne({
+				mod_id: modDocument.id,
+				version: registryEntry.data.latest,
+			}).exec();
+
+			if (!latestRelease) {
+				logger.warn("Failed to find latest release to update mod document");
+			} else {
+				await Mod.updateOne({ id: modDocument.id }, { latestReleaseId: latestRelease.id }).exec();
 			}
 
 			logger.debug(

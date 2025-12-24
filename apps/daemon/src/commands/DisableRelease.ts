@@ -16,6 +16,8 @@ const logger = getLogger("DisableReleaseCommand");
 export default async function (command: DisableReleaseCommand): Promise<DisableReleaseResult> {
 	const { releaseId, db } = command;
 
+	logger.info("Disabling Release");
+
 	const links = db
 		.select()
 		.from(T_MOD_RELEASE_SYMBOLIC_LINKS)

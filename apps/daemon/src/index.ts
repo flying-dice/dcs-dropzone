@@ -1,10 +1,10 @@
+import "./tui/index.tsx";
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
 import Application from "./Application.ts";
 import appConfig from "./ApplicationConfig.ts";
-
-console.info(`🌍 DCS Dropzone Daemon Starting...`);
+import { startTui } from "./tui";
 
 const logger = getLogger("index");
 
@@ -20,3 +20,12 @@ const server = serve({
 });
 
 logger.info(`🚀 Server running at ${server.url}`);
+
+await startTui(async () => {
+	logger.info("TUI destroyed, exiting...");
+	process.exit();
+});
+
+process.on("exit", (code) => {
+	logger.info(`Process exiting with code: ${code}`);
+});

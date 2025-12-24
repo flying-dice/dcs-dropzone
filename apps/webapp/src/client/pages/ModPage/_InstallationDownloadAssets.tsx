@@ -14,7 +14,7 @@ export function _InstallationDownloadAssets(props: _InstallationDownloadAssetsPr
 			<Stack>
 				<Text fw={"bold"}>{t("DOWNLOAD_ASSETS")}</Text>
 				<Text size={"sm"} c={"dimmed"}>
-					{t("DOWNLOAD_ASSETS_DESC")}
+					{t(props.assets.length > 0 ? "DOWNLOAD_ASSETS_DESC" : "DOWNLOAD_ASSETS_DESC_EMPTY")}
 				</Text>
 				{props.assets.map((asset) => (
 					<AssetListItem key={asset.name} name={asset.name} urls={asset.urls} isArchive={asset.isArchive} />

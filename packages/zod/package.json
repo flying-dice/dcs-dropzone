@@ -9,14 +9,10 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"tsc": "tsc --noEmit",
-		"check": "bun run biome && bun run tsc",
+		"check": "bun run biome && bun run tsc && bunx depcheck",
 		"test": "bun test"
 	},
-	"dependencies": {
-		"zod": "^4.1.13",
-		"lodash": "^4.17.21"
-	},
-	"devDependencies": {
-		"@types/lodash": "^4.17.21"
+	"peerDependencies": {
+		"zod": ">=4"
 	}
 }

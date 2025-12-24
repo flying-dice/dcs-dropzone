@@ -1,6 +1,7 @@
 import {
 	AppShell,
 	Badge,
+	Box,
 	Card,
 	Container,
 	Divider,
@@ -24,13 +25,14 @@ import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Installation } from "./_Installation.tsx";
+import { _Maintainers } from "./_Maintainers.tsx";
 import { _Releases } from "./_Releases.tsx";
 import { _Screenshots } from "./_Screenshots.tsx";
 
 type _PageProps = {
 	mod: ModData;
 	maintainers: UserData[];
-	latestRelease?: ModReleaseData;
+	release?: ModReleaseData;
 };
 
 export function _Page(props: _PageProps) {
@@ -38,7 +40,7 @@ export function _Page(props: _PageProps) {
 	const { isSm, isMd } = useBreakpoint();
 	const { t } = useAppTranslation();
 
-	const countScriptsBeforeSanitize = props.latestRelease?.missionScripts.filter(
+	const countScriptsBeforeSanitize = props.release?.missionScripts.filter(
 		(it) => it.runOn === ModReleaseMissionScriptDataRunOn.MISSION_START_BEFORE_SANITIZE,
 	).length;
 
@@ -52,8 +54,8 @@ export function _Page(props: _PageProps) {
 						</GridCol>
 						<GridCol span={isSm || isMd ? 12 : 4}>
 							<Stack>
-								<_BasicInfo mod={props.mod} maintainers={props.maintainers} latestRelease={props.latestRelease} />
-								{props.latestRelease && <ModReleaseDaemonControls mod={props.mod} release={props.latestRelease} />}
+								<_BasicInfo mod={props.mod} maintainers={props.maintainers} latestRelease={props.release} />
+								{props.release && <ModReleaseDaemonControls mod={props.mod} release={props.release} />}
 							</Stack>
 						</GridCol>
 					</Grid>
@@ -77,13 +79,13 @@ export function _Page(props: _PageProps) {
 							<Tabs.Tab py={"md"} value="description">
 								{t("DESCRIPTION")}
 							</Tabs.Tab>
-							<Tabs.Tab py={"md"} value="releases">
-								{t("RELEASES")}
+							<Tabs.Tab py={"md"} value="changelog" disabled={!props.release}>
+								{t("CHANGELOG")}
 							</Tabs.Tab>
 							<Tabs.Tab
 								py={"md"}
 								value="installation"
-								disabled={!props.latestRelease}
+								disabled={!props.release}
 								rightSection={
 									countScriptsBeforeSanitize ? <Badge color={"orange"}>{countScriptsBeforeSanitize}</Badge> : undefined
 								}
@@ -96,21 +98,44 @@ export function _Page(props: _PageProps) {
 				<Divider />
 				<Container size={"xl"} p={"md"}>
 					<Tabs.Panel value="description">
-						<Card radius={"md"} withBorder m={"md"}>
+						<Flex direction={isSm ? "column-reverse" : isMd ? "column-reverse" : "row"} gap={"md"}>
+							<Card radius={"md"} withBorder>
+								<Stack>
+									<Text fw={"bold"}>{t("DESCRIPTION")}</Text>
+									<Markdown content={props.mod.content} />
+								</Stack>
+							</Card>
+							<Box miw={isSm ? "100%" : isMd ? "100%" : 300} w={isSm ? "100%" : isMd ? "100%" : 300}>
+								<Stack>
+									<Card radius={"md"} withBorder>
+										<Stack>
+											<Text fw={"bold"}>{t("AUTHORS")}</Text>
+											<_Maintainers maintainers={props.maintainers} />
+										</Stack>
+									</Card>
+									<Card radius={"md"} withBorder>
+										<Stack>
+											<Text fw={"bold"}>{t("RELEASES")}</Text>
+											<_Releases mod={props.mod} activeRelease={props.release} />
+										</Stack>
+									</Card>
+								</Stack>
+							</Box>
+						</Flex>
+					</Tabs.Panel>
+					<Tabs.Panel value="changelog">
+						<Card radius={"md"} withBorder>
 							<Stack>
-								<Text fw={"bold"}>{t("DESCRIPTION")}</Text>
-								<Markdown content={props.mod.content} />
+								<Text fw={"bold"}>{t("CHANGELOG")}</Text>
+								<Markdown content={props.release?.changelog || ""} />
 							</Stack>
 						</Card>
 					</Tabs.Panel>
-					<Tabs.Panel value="releases">
-						<_Releases mod={props.mod} />
-					</Tabs.Panel>
 					<Tabs.Panel value="installation">
-						{props.latestRelease && (
+						{props.release && (
 							<_Installation
 								mod={props.mod}
-								latestRelease={props.latestRelease}
+								latestRelease={props.release}
 								countScriptsBeforeSanitize={countScriptsBeforeSanitize}
 							/>
 						)}

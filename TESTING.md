@@ -16,7 +16,7 @@ bun run dev
 
 This will run:
 
-```"AUTH_SERVICE_MOCK='{\"enabled\": true}' bun --hot src/index.ts"```
+```"AUTH_SERVICE_MOCK='{\"enabled\": true}' bun --hot src/App.tsx"```
 
 Features of this setup:
 - Set AUTH_SERVICE_MOCK to enable mock authentication

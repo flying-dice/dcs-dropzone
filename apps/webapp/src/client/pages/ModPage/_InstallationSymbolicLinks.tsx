@@ -14,7 +14,7 @@ export function _InstallationSymbolicLinks(props: _InstallationSymbolicLinksProp
 			<Stack>
 				<Text fw={"bold"}>{t("SYMLINK_CONFIGURATION")}</Text>
 				<Text size={"sm"} c={"dimmed"}>
-					{t("SYMLINK_CONFIGURATION_DESC")}
+					{t(props.symbolicLinks.length > 0 ? "SYMLINK_CONFIGURATION_DESC" : "SYMLINK_CONFIGURATION_DESC_EMPTY")}
 				</Text>
 				{props.symbolicLinks.map((symbolicLink) => (
 					<SymbolicLinkListItem

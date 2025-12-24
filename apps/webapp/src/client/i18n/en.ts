@@ -51,6 +51,7 @@ export default {
 		CATEGORIES: "CATEGORIES",
 		CATEGORY: "Category",
 		AUTHOR: "Author",
+		AUTHORS: "Authors",
 		TAGS: "Tags",
 		ALL: "All",
 		SEARCH_TERM: "Search Term",
@@ -85,6 +86,7 @@ export default {
 		CONFIRM_REMOVE_SCREENSHOT_TITLE: "Confirm Remove Screenshot",
 		CREATE_NEW_MOD: "Create New Mod",
 		CREATE_NEW_RELEASE: "Create New Release",
+		CHANGELOG: "Changelog",
 		DARK: "Dark",
 		DASHBOARD: "Dashboard",
 		DELETE: "Delete",
@@ -255,11 +257,13 @@ export default {
 		UPDATED_AT_DISTANCE: "Updated {{distance}} ago",
 		DOWNLOAD_ASSETS: "Download Assets",
 		DOWNLOAD_ASSETS_DESC: "The following assets will be downloaded and installed:",
+		DOWNLOAD_ASSETS_DESC_EMPTY: "No assets configured for this mod.",
 		SYMLINK_CONFIGURATION: "Symlink Configuration",
 		SYMLINK_CONFIGURATION_DESC: "The following symlinks will be created during installation:",
+		SYMLINK_CONFIGURATION_DESC_EMPTY: "No symbolic links configured for this mod.",
 		MISSION_SCRIPTS: "Mission Scripts",
-		MISSION_SCRIPTS_DESC:
-			"The following scripts will run before DCS World's mission scripting environment is sanitized:",
+		MISSION_SCRIPTS_DESC: "The following scripts will run on mission start.",
+		MISSION_SCRIPTS_DESC_EMPTY: "No mission scripts configured for this mod.",
 		SCRIPT_EXECUTION_NOTICE_TITLE: "Script Execution Notice",
 		SCRIPT_EXECUTION_NOTICE_DESC_1:
 			"This mod includes {{countScriptsBeforeSanitize}} scripts that execute before DCS World’s scripting sandbox is applied.",
@@ -270,5 +274,8 @@ export default {
 
 		SANITIZE_HELP_TITLE: "Sanitization Help",
 		SANITIZE_HELP_DESC_MD: sandboxHelpMd,
+
+		VIEW_DETAILS: "View Details",
+		COUNT_DOWNLOADS: "{{count}} Downloads",
 	},
 };

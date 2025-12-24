@@ -35,7 +35,7 @@ export function _FeaturedMods() {
 											downloads={mod.downloadsCount}
 											isDownloaded={false}
 											variant={"grid"}
-											onClick={() => nav(`/mods/${mod.id}`)}
+											onClick={() => nav(`/mods/${mod.id}/latest`)}
 										/>
 									</Flex>
 								))}

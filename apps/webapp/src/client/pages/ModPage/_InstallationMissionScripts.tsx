@@ -12,9 +12,9 @@ export function _InstallationMissionScripts(props: _InstallationMissionScriptsPr
 	return (
 		<Card withBorder>
 			<Stack>
-				<Text fw={"bold"}>{t("SYMLINK_CONFIGURATION")}</Text>
+				<Text fw={"bold"}>{t("MISSION_SCRIPTS_TITLE")}</Text>
 				<Text size={"sm"} c={"dimmed"}>
-					{t("SYMLINK_CONFIGURATION_DESC")}
+					{t(props.missionScripts.length > 0 ? "MISSION_SCRIPTS_DESC" : "MISSION_SCRIPTS_DESC_EMPTY")}
 				</Text>
 				{props.missionScripts.map((missionScript) => (
 					<MissionScriptListItem
