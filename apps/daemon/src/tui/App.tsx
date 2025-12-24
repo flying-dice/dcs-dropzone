@@ -9,6 +9,7 @@ import removeRelease from "../commands/RemoveRelease.ts";
 import { clearRecentLoggingEvents, recentLoggingEvent$ } from "../log4js.ts";
 import AllDaemonReleases from "../observables/AllDaemonReleases.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
+import { Footer } from "./Footer.tsx";
 import { Header } from "./Header.tsx";
 import { keyPressedEvents } from "./KeyPressedEvents.ts";
 import { ModAndReleaseDataBox } from "./ModAndReleaseDataBox.tsx";
@@ -135,6 +136,7 @@ export function App() {
 
 				<RecentLoggingEvents events={_recentLoggingEvents} />
 			</box>
+			<Footer />
 		</box>
 	);
 }

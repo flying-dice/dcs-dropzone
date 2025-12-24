@@ -22,5 +22,10 @@ const server = serve({
 logger.info(`🚀 Server running at ${server.url}`);
 
 await startTui(async () => {
-	await server.stop();
+	logger.info("TUI destroyed, exiting...");
+	process.exit();
+});
+
+process.on("exit", (code) => {
+	logger.info(`Process exiting with code: ${code}`);
 });

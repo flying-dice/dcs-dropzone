@@ -6,7 +6,7 @@ export type RecentLoggingEventsProps = {
 };
 export function RecentLoggingEvents(props: RecentLoggingEventsProps) {
 	return (
-		<box height={20} borderStyle={"single"} title={"Logs (C to clear)"}>
+		<box height={15} border={["top"]} title={"Logs"}>
 			<scrollbox overflow={"scroll"} scrollX scrollY>
 				{props.events.map((event) => (
 					<RecentLoggingEventsItem key={event.id} event={event} />

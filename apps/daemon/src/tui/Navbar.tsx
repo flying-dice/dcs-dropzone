@@ -1,7 +1,7 @@
-import { TextAttributes } from "@opentui/core";
+import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import { Button } from "./Button.tsx";
 import { DownloadedReleaseStatusIcon } from "./DownloadedReleaseStatusIcon.tsx";
+import { NavbarItem } from "./NavbarItem.tsx";
 
 export type NavbarProps = {
 	selected?: ModAndReleaseData;
@@ -9,19 +9,15 @@ export type NavbarProps = {
 };
 export function Navbar(props: NavbarProps) {
 	return (
-		<box height={"100%"} width={40} maxWidth={40} border title={"Mods (↑↓)"}>
+		<box padding={1} height={"100%"} width={40} maxWidth={40} title={"Mods (↑↓)"}>
 			{props.releases.map((release) => (
-				<Button
-					height={4}
+				<NavbarItem
 					key={release.releaseId + release.overallPercentProgress + release.status}
 					active={props.selected?.releaseId === release.releaseId}
-				>
-					<box flexDirection={"row"}>
-						<DownloadedReleaseStatusIcon status={release.status} />
-						<text>{release.modName}</text>
-					</box>
-					<text attributes={TextAttributes.DIM}>{release.version}</text>
-				</Button>
+					label={`${release.modName} ${release.version} `}
+					dimmed={release.status === DownloadedReleaseStatus.DISABLED}
+					icon={<DownloadedReleaseStatusIcon status={release.status} />}
+				/>
 			))}
 		</box>
 	);

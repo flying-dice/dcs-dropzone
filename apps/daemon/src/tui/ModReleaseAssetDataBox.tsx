@@ -1,28 +1,45 @@
 import { TextAttributes } from "@opentui/core";
+import { match } from "ts-pattern";
+import { AssetStatus } from "../enums/AssetStatus.ts";
 import type { ModReleaseAssetData } from "../schemas/ModAndReleaseData.ts";
-import { KeyValueItem } from "./KeyValueItem.tsx";
-import { toPercentOrDash } from "./utils.ts";
+import { Group, Stack } from "./components.tsx";
 
 export type ModReleaseAssetDataBoxProps = { asset: ModReleaseAssetData };
 
 export function ModReleaseAssetDataBox(props: ModReleaseAssetDataBoxProps) {
-	const downloadProgress = toPercentOrDash(props.asset.statusData?.downloadPercentProgress);
-	const extractProgress = toPercentOrDash(props.asset.statusData?.extractPercentProgress);
-
 	return (
-		<box marginLeft={1} title={props.asset.name} flexDirection={"column"} borderStyle={"rounded"} borderColor={"gray"}>
-			<KeyValueItem label={"Download Progress"} value={downloadProgress} />
-			<KeyValueItem label={"Extract Progress"} value={props.asset.isArchive ? extractProgress : "N/A"} />
-			<KeyValueItem label={"Status"} value={props.asset.statusData?.status || "-"} />
+		<Stack gap={0}>
+			<text attributes={TextAttributes.UNDERLINE}>{props.asset.name}</text>
+			<box paddingLeft={1}>
+				<Group>
+					<text attributes={TextAttributes.BOLD}>Status:</text>
+					{match(props.asset.statusData)
+						.when(
+							(it) => it?.status === AssetStatus.COMPLETED,
+							() => <text>Completed</text>,
+						)
+						.when(
+							(it) => it?.status === AssetStatus.ERROR,
+							() => <text>Error</text>,
+						)
+						.when(
+							(it) => it?.status === AssetStatus.IN_PROGRESS,
+							(it) => <text>{it?.overallPercentProgress}%</text>,
+						)
+						.otherwise(() => (
+							<text>Pending</text>
+						))}
+				</Group>
 
-			<box flexDirection={"column"}>
-				<text attributes={TextAttributes.BOLD}>URLs:</text>
-				{props.asset.urls.map((url) => (
-					<text key={url} marginLeft={2} attributes={TextAttributes.ITALIC}>
-						- {url}
-					</text>
-				))}
+				<box flexDirection={"column"}>
+					<text attributes={TextAttributes.BOLD}>URLs:</text>
+					{props.asset.urls.map((url) => (
+						<text key={url} marginLeft={2} attributes={TextAttributes.ITALIC}>
+							- {url}
+						</text>
+					))}
+				</box>
 			</box>
-		</box>
+		</Stack>
 	);
 }

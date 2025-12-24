@@ -3,12 +3,9 @@ import { Colors } from "./theme.ts";
 
 export function Header() {
 	return (
-		<box height={1} flexDirection={"row"} justifyContent={"space-between"}>
-			<text attributes={TextAttributes.BOLD} fg={Colors.PRIMARY}>
+		<box title={"Dropzone"} height={1} flexDirection={"row"} backgroundColor={Colors.PRIMARY}>
+			<text attributes={TextAttributes.BOLD} fg={Colors.DARK}>
 				Dropzone Daemon
-			</text>
-			<text attributes={TextAttributes.DIM}>
-				↑/↓: Navigate Mods | E: Enable | D: Disable | R: Remove | C: Clear Logs
 			</text>
 		</box>
 	);

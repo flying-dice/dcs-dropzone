@@ -3,8 +3,8 @@ import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 export const DownloadedReleaseStatusEmoji: Record<DownloadedReleaseStatus, string> = {
 	[DownloadedReleaseStatus.PENDING]: "⏸️",
 	[DownloadedReleaseStatus.IN_PROGRESS]: "⬇️",
-	[DownloadedReleaseStatus.DISABLED]: "❌",
-	[DownloadedReleaseStatus.ENABLED]: "✔️",
+	[DownloadedReleaseStatus.DISABLED]: "⭕",
+	[DownloadedReleaseStatus.ENABLED]: "🟢",
 	[DownloadedReleaseStatus.ERROR]: "⚠️",
 };
 
