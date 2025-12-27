@@ -7,6 +7,7 @@ import { T_MOD_RELEASE_SYMBOLIC_LINKS } from "../database/schema.ts";
 export type DisableReleaseCommand = {
 	releaseId: string;
 	db: BunSQLiteDatabase;
+	regenerateMissionScriptFilesHandler: () => Promise<void>;
 };
 
 export type DisableReleaseResult = void;
@@ -14,7 +15,7 @@ export type DisableReleaseResult = void;
 const logger = getLogger("DisableReleaseCommand");
 
 export default async function (command: DisableReleaseCommand): Promise<DisableReleaseResult> {
-	const { releaseId, db } = command;
+	const { releaseId, db, regenerateMissionScriptFilesHandler } = command;
 
 	logger.info("Disabling Release");
 
@@ -37,4 +38,6 @@ export default async function (command: DisableReleaseCommand): Promise<DisableR
 			}
 		}
 	}
+
+	await regenerateMissionScriptFilesHandler();
 }

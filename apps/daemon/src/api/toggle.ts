@@ -3,8 +3,10 @@ import { Hono } from "hono";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import disableRelease from "../commands/DisableRelease.ts";
-import enableRelease from "../commands/EnableRelease.ts";
+import Application from "../Application.ts";
+import disableRelease from "../services/DisableRelease.ts";
+import enableRelease from "../services/EnableRelease.ts";
+import regenerateMissionScriptingFiles from "../services/RegenerateMissionScriptingFiles.ts";
 import type { AppContext } from "../middleware/appContext.ts";
 import { ErrorData } from "../schemas/ErrorData.ts";
 import { OkData } from "../schemas/OkData.ts";
@@ -22,7 +24,13 @@ router.post(
 	validator("param", z.object({ releaseId: z.string() })),
 	async (c) => {
 		const { releaseId } = c.req.valid("param");
-		await enableRelease({ releaseId, db: c.var.db, pathService: c.var.pathService });
+		await enableRelease({
+			releaseId,
+			db: c.var.db,
+			pathService: c.var.pathService,
+			regenerateMissionScriptFilesHandler: () =>
+				regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
+		});
 		return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 	},
 );
@@ -41,6 +49,8 @@ router.post(
 		await disableRelease({
 			releaseId,
 			db: c.var.db,
+			regenerateMissionScriptFilesHandler: () =>
+				regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
 		});
 		return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 	},

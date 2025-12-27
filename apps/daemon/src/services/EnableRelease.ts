@@ -2,15 +2,16 @@ import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { ensureSymlinkSync } from "fs-extra";
 import { getLogger } from "log4js";
-import { T_MOD_RELEASE_SYMBOLIC_LINKS } from "../database/schema.ts";
+import { T_MOD_RELEASE_MISSION_SCRIPTS, T_MOD_RELEASE_SYMBOLIC_LINKS } from "../database/schema.ts";
 import { getSymlinkType } from "../functions/getSymlinkType.ts";
-import type { PathService } from "../services/PathService.ts";
+import type { PathService } from "./PathService.ts";
 
 export type EnableReleaseCommand = {
 	releaseId: string;
 	db: BunSQLiteDatabase;
 	pathService: PathService;
 	onCreateSymlink?: (src: string, dest: string) => void;
+	regenerateMissionScriptFilesHandler: () => Promise<void>;
 };
 
 export type EnableReleaseResult = void;
@@ -18,7 +19,7 @@ export type EnableReleaseResult = void;
 const logger = getLogger("EnableReleaseCommand");
 
 export default async function (command: EnableReleaseCommand): Promise<EnableReleaseResult> {
-	const { releaseId, db, pathService } = command;
+	const { releaseId, db, pathService, regenerateMissionScriptFilesHandler, onCreateSymlink } = command;
 
 	const links = db
 		.select()
@@ -28,7 +29,6 @@ export default async function (command: EnableReleaseCommand): Promise<EnableRel
 
 	for (const link of links) {
 		const srcAbs = pathService.getAbsoluteReleasePath(releaseId, link.src);
-
 		const destAbs = pathService.getAbsoluteSymbolicLinkDestPath(link.destRoot, link.dest);
 
 		const type = getSymlinkType(srcAbs);
@@ -39,6 +39,8 @@ export default async function (command: EnableReleaseCommand): Promise<EnableRel
 			.where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.id, link.id))
 			.run();
 
-		command.onCreateSymlink?.(srcAbs, destAbs);
+		onCreateSymlink?.(srcAbs, destAbs);
 	}
+
+	await regenerateMissionScriptFilesHandler();
 }

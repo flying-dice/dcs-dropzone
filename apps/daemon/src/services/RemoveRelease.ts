@@ -10,13 +10,12 @@ import {
 } from "../database/schema.ts";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ExtractQueue } from "../queues/ExtractQueue.ts";
-import type { PathService } from "../services/PathService.ts";
-import type { DisableReleaseCommand, DisableReleaseResult } from "./DisableRelease.ts";
+import type { PathService } from "./PathService.ts";
 
 export type RemoveReleaseCommand = {
 	releaseId: string;
 	db: BunSQLiteDatabase;
-	disableReleaseHandler: (command: DisableReleaseCommand) => DisableReleaseResult;
+	disableReleaseHandler: (releaseId: string) => void;
 	downloadQueue: DownloadQueue;
 	extractQueue: ExtractQueue;
 	pathService: PathService;
@@ -31,7 +30,7 @@ export default async function (command: RemoveReleaseCommand): Promise<RemoveRel
 	logger.info(`Removing releaseId: ${releaseId}`);
 
 	// Disable the release if its enabled
-	disableReleaseHandler({ releaseId, db });
+	disableReleaseHandler(releaseId);
 
 	// Cancel any pending jobs in the queues
 	downloadQueue.cancelJobsForRelease(releaseId);

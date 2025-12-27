@@ -1,4 +1,5 @@
-import { Checkbox, Progress, Table, Text, Tooltip } from "@mantine/core";
+import { Anchor, Checkbox, Progress, Table, Text, Tooltip } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { GetLatestModReleaseById404Error, type ModReleaseData } from "../../_autogen/api.ts";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
@@ -15,6 +16,7 @@ export type DownloadedModsTableRowProps = {
 	latestError?: GetLatestModReleaseById404Error | string;
 };
 export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
+	const nav = useNavigate();
 	const { t } = useAppTranslation();
 	const isLatest = props.latest ? props.latest.versionHash === props.mod.versionHash : undefined;
 
@@ -26,7 +28,17 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 					checked={props.mod.status === ModAndReleaseDataStatus.ENABLED}
 				/>
 			</Table.Th>
-			<Table.Td>{props.mod.modName}</Table.Td>
+			<Table.Td>
+				<Anchor
+					size={"sm"}
+					onClick={(e) => {
+						e.preventDefault();
+						nav(`/mods/${props.mod.modId}/${props.mod.releaseId}`);
+					}}
+				>
+					{props.mod.modName}
+				</Anchor>
+			</Table.Td>
 			<Table.Td>
 				<Tooltip label={isLatest ? t("UP_TO_DATE") : t("OUT_OF_DATE")}>
 					<Text size={"sm"} c={isLatest ? "green" : "orange"} fw={isLatest ? "normal" : "bold"}>

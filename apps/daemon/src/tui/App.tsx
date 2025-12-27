@@ -3,9 +3,10 @@ import { getLogger } from "log4js";
 import { useMemo, useState } from "react";
 import { match } from "ts-pattern";
 import Application from "../Application.ts";
-import disableRelease from "../commands/DisableRelease.ts";
-import enableRelease from "../commands/EnableRelease.ts";
-import removeRelease from "../commands/RemoveRelease.ts";
+import disableRelease from "../services/DisableRelease.ts";
+import enableRelease from "../services/EnableRelease.ts";
+import regenerateMissionScriptingFiles from "../services/RegenerateMissionScriptingFiles.ts";
+import removeRelease from "../services/RemoveRelease.ts";
 import { clearRecentLoggingEvents, recentLoggingEvent$ } from "../log4js.ts";
 import AllDaemonReleases from "../observables/AllDaemonReleases.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
@@ -41,6 +42,8 @@ export function App() {
 			await disableRelease({
 				releaseId: selectedId,
 				db: Application.db,
+				regenerateMissionScriptFilesHandler: () =>
+					regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
 			});
 			logger.info(`Disabled release: ${readableName}`);
 		} catch (err) {
@@ -60,6 +63,8 @@ export function App() {
 				onCreateSymlink(path: string, dest: string) {
 					logger.info("Created symlink", { path, dest });
 				},
+				regenerateMissionScriptFilesHandler: () =>
+					regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
 			});
 			logger.info(`Enabled release: ${readableName}`);
 		} catch (err) {
@@ -76,7 +81,13 @@ export function App() {
 				releaseId: selectedId,
 				db: Application.db,
 				pathService: Application.pathService,
-				disableReleaseHandler: disableRelease,
+				disableReleaseHandler: (releaseId) =>
+					disableRelease({
+						releaseId,
+						db: Application.db,
+						regenerateMissionScriptFilesHandler: () =>
+							regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
+					}),
 				extractQueue: Application.extractQueue,
 				downloadQueue: Application.downloadQueue,
 			});

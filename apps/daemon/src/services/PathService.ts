@@ -26,12 +26,8 @@ export class PathService {
 		return p;
 	}
 
-	getModsDir(): string {
-		return this.dropzoneModsFolder;
-	}
-
 	getReleaseDir(releaseId: string): string {
-		return join(this.getModsDir(), releaseId);
+		return join(this.dropzoneModsFolder, releaseId);
 	}
 
 	getAbsoluteReleasePath(releaseId: string, path: string): string {

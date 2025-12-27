@@ -4,12 +4,14 @@ import { SymbolicLinkDestRoot } from "webapp";
 import applicationConfig from "./ApplicationConfig.ts";
 import { db } from "./database";
 import AllDaemonReleases from "./observables/AllDaemonReleases.ts";
-import getAllDaemonReleases from "./queries/GetAllDaemonReleases.ts";
-import getDaemonInstanceId from "./queries/GetDaemonInstanceId.ts";
 import { DownloadQueue } from "./queues/DownloadQueue.ts";
 import { ExtractQueue } from "./queues/ExtractQueue.ts";
 import { createServer } from "./Server.ts";
+import { createAddRelease } from "./services/AddRelease.ts";
+import getAllDaemonReleases from "./services/GetAllDaemonReleases.ts";
+import getDaemonInstanceId from "./services/GetDaemonInstanceId.ts";
 import { PathService } from "./services/PathService.ts";
+import resolveReleaseDir from "./services/ResolveReleaseDir.ts";
 
 const logger = getLogger("Application");
 
@@ -45,12 +47,22 @@ setInterval(() => {
 	AllDaemonReleases.$.next(getAllDaemonReleases({ db: _db }));
 }, 1000);
 
+const addRelease = createAddRelease({
+	db: _db,
+	extractQueue,
+	pathService,
+	downloadQueue,
+});
+const _resolveReleaseDir = resolveReleaseDir({ dropzoneModsFolder: applicationConfig.app.mods_dir });
+
 const server = createServer({
 	daemonInstanceId,
 	downloadQueue,
 	extractQueue,
 	pathService,
 	db: _db,
+	resolveReleaseDir: _resolveReleaseDir,
+	addRelease,
 });
 
 export default {
@@ -59,4 +71,6 @@ export default {
 	extractQueue,
 	db: _db,
 	pathService,
+	resolveReleaseDir: _resolveReleaseDir,
+	addRelease,
 };
