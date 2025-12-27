@@ -1,46 +1,40 @@
-import { eq } from "drizzle-orm";
-import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import { ensureSymlinkSync } from "fs-extra";
-import { getLogger } from "log4js";
-import { T_MOD_RELEASE_MISSION_SCRIPTS, T_MOD_RELEASE_SYMBOLIC_LINKS } from "../database/schema.ts";
-import { getSymlinkType } from "../functions/getSymlinkType.ts";
-import type { PathService } from "./PathService.ts";
+import {ensureSymlinkSync} from "fs-extra";
+import {getLogger} from "log4js";
+import {getSymlinkType} from "../functions/getSymlinkType.ts";
+import type {PathService} from "./PathService.ts";
+import type {SetInstalledPathForLinkId} from "../repository/SetInstalledPathForLinkId.ts";
+import type {GetSymbolicLinksForReleaseId} from "../repository/GetSymbolicLinksForReleaseId.ts";
 
-export type EnableReleaseCommand = {
-	releaseId: string;
-	db: BunSQLiteDatabase;
-	pathService: PathService;
-	onCreateSymlink?: (src: string, dest: string) => void;
-	regenerateMissionScriptFilesHandler: () => Promise<void>;
-};
 
-export type EnableReleaseResult = void;
+const logger = getLogger("EnableRelease");
 
-const logger = getLogger("EnableReleaseCommand");
+export class EnableRelease {
+	constructor(
+		protected deps: {
+			regenerateMissionScriptFilesHandler: () => Promise<void>;
+            setInstalledPathForLinkId: SetInstalledPathForLinkId
+            getSymbolicLinksForReleaseId: GetSymbolicLinksForReleaseId
+			pathService: PathService;
+            onCreateSymlink?: (src: string, dest: string) => void;
+		},
+	) {}
 
-export default async function (command: EnableReleaseCommand): Promise<EnableReleaseResult> {
-	const { releaseId, db, pathService, regenerateMissionScriptFilesHandler, onCreateSymlink } = command;
+    async execute(releaseId: string): Promise<void> {
 
-	const links = db
-		.select()
-		.from(T_MOD_RELEASE_SYMBOLIC_LINKS)
-		.where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.releaseId, releaseId))
-		.all();
+        const links = this.deps.getSymbolicLinksForReleaseId.execute(releaseId);
+        for (const link of links) {
+            const srcAbs = this.deps.pathService.getAbsoluteReleasePath(releaseId, link.src);
+            const destAbs = this.deps.pathService.getAbsoluteSymbolicLinkDestPath(link.destRoot, link.dest);
 
-	for (const link of links) {
-		const srcAbs = pathService.getAbsoluteReleasePath(releaseId, link.src);
-		const destAbs = pathService.getAbsoluteSymbolicLinkDestPath(link.destRoot, link.dest);
+            const type = getSymlinkType(srcAbs);
+            logger.info(`Creating symlink from ${srcAbs} to ${destAbs} with type ${type}`);
+            ensureSymlinkSync(srcAbs, destAbs, type);
 
-		const type = getSymlinkType(srcAbs);
-		logger.info(`Creating symlink from ${srcAbs} to ${destAbs} with type ${type}`);
-		ensureSymlinkSync(srcAbs, destAbs, type);
-		db.update(T_MOD_RELEASE_SYMBOLIC_LINKS)
-			.set({ installedPath: destAbs })
-			.where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.id, link.id))
-			.run();
+            this.deps.setInstalledPathForLinkId.execute(link.id, destAbs);
 
-		onCreateSymlink?.(srcAbs, destAbs);
-	}
+            this.deps.onCreateSymlink?.(srcAbs, destAbs);
+        }
 
-	await regenerateMissionScriptFilesHandler();
+        await this.deps.regenerateMissionScriptFilesHandler();
+    }
 }

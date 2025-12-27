@@ -1,17 +1,23 @@
-import { resolve } from "node:path";
-import { getLogger } from "log4js";
-import { SymbolicLinkDestRoot } from "webapp";
+import {resolve} from "node:path";
+import {getLogger} from "log4js";
+import {SymbolicLinkDestRoot} from "webapp";
 import applicationConfig from "./ApplicationConfig.ts";
-import { db } from "./database";
+import {db} from "./database";
 import AllDaemonReleases from "./observables/AllDaemonReleases.ts";
-import { DownloadQueue } from "./queues/DownloadQueue.ts";
-import { ExtractQueue } from "./queues/ExtractQueue.ts";
-import { createServer } from "./Server.ts";
-import { createAddRelease } from "./services/AddRelease.ts";
+import {DownloadQueue} from "./queues/DownloadQueue.ts";
+import {ExtractQueue} from "./queues/ExtractQueue.ts";
+import {DrizzleGetReleaseAssetsForReleaseId} from "./repository/impl/DrizzleGetReleaseAssetsForReleaseId.ts";
+import {DrizzleGetSymbolicLinksForReleaseId} from "./repository/impl/DrizzleGetSymbolicLinksForReleaseId.ts";
+import {DrizzleSaveModAndReleaseData} from "./repository/impl/DrizzleSaveModAndReleaseData.ts";
+import {DrizzleSetInstalledPathForLinkId} from "./repository/impl/DrizzleSetInstalledPathToNullForLinkId.ts";
+import {AddRelease} from "./services/AddRelease.ts";
+import {DisableRelease} from "./services/DisableRelease.ts";
 import getAllDaemonReleases from "./services/GetAllDaemonReleases.ts";
 import getDaemonInstanceId from "./services/GetDaemonInstanceId.ts";
-import { PathService } from "./services/PathService.ts";
-import resolveReleaseDir from "./services/ResolveReleaseDir.ts";
+import {PathService} from "./services/PathService.ts";
+import regenerateMissionScriptingFiles from "./services/RegenerateMissionScriptingFiles.ts";
+import {ResolveReleaseDir} from "./services/ResolveReleaseDir.ts";
+import {EnableRelease} from "./services/EnableRelease.ts";
 
 const logger = getLogger("Application");
 
@@ -47,30 +53,44 @@ setInterval(() => {
 	AllDaemonReleases.$.next(getAllDaemonReleases({ db: _db }));
 }, 1000);
 
-const addRelease = createAddRelease({
-	db: _db,
-	extractQueue,
-	pathService,
-	downloadQueue,
-});
-const _resolveReleaseDir = resolveReleaseDir({ dropzoneModsFolder: applicationConfig.app.mods_dir });
+const getReleaseAssetsForReleaseId = new DrizzleGetReleaseAssetsForReleaseId({ db: _db });
+const saveModAndReleaseData = new DrizzleSaveModAndReleaseData({ db: _db });
+const getSymbolicLinksForReleaseId = new DrizzleGetSymbolicLinksForReleaseId({ db: _db });
+const setInstalledPathForLinkId = new DrizzleSetInstalledPathForLinkId({ db: _db });
 
-const server = createServer({
-	daemonInstanceId,
-	downloadQueue,
+const regenerateMissionScriptFilesHandler = () => regenerateMissionScriptingFiles({ db: _db, pathService });
+
+const resolveReleaseDir = new ResolveReleaseDir({ dropzoneModsFolder: applicationConfig.app.mods_dir });
+
+const addRelease = new AddRelease({
+	saveModAndReleaseData,
+	getReleaseAssetsForReleaseId,
 	extractQueue,
-	pathService,
-	db: _db,
-	resolveReleaseDir: _resolveReleaseDir,
-	addRelease,
+	downloadQueue,
+	resolveReleaseDir,
+});
+
+const disableRelease = new DisableRelease({
+	getSymbolicLinksForReleaseId,
+    setInstalledPathForLinkId,
+	regenerateMissionScriptFilesHandler,
+});
+
+const enableRelease = new EnableRelease({
+    regenerateMissionScriptFilesHandler,
+    setInstalledPathForLinkId,
+    getSymbolicLinksForReleaseId,
+    pathService,
 });
 
 export default {
-	server,
+	daemonInstanceId,
 	downloadQueue,
 	extractQueue,
 	db: _db,
 	pathService,
-	resolveReleaseDir: _resolveReleaseDir,
+	resolveReleaseDir,
 	addRelease,
+	disableRelease,
+    enableRelease
 };

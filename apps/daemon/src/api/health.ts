@@ -2,9 +2,9 @@ import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import type { AppContext } from "../middleware/appContext.ts";
+import Application from "../Application.ts";
 
-const router = new Hono<AppContext>();
+const router = new Hono();
 
 router.get(
 	"/",
@@ -45,10 +45,10 @@ router.get(
 	}),
 	async (c) => {
 		try {
-			return c.json({ status: "UP", daemonInstanceId: c.var.daemonInstanceId }, StatusCodes.OK);
+			return c.json({ status: "UP", daemonInstanceId: Application.daemonInstanceId }, StatusCodes.OK);
 		} catch (error) {
 			return c.json(
-				{ status: "DOWN", daemonInstanceId: c.var.daemonInstanceId, error: String(error) },
+				{ status: "DOWN", daemonInstanceId: Application.daemonInstanceId, error: String(error) },
 				StatusCodes.SERVICE_UNAVAILABLE,
 			);
 		}
