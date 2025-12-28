@@ -20,7 +20,7 @@ This will run:
 
 Features of this setup:
 - Set AUTH_SERVICE_MOCK to enable mock authentication
-- Start the server on `http://localhost:3000`
+- Start the app on `http://localhost:3000`
 - Use an in-memory MongoDB (no external database needed)
 - Use mock authentication (no GitHub OAuth needed)
 - Automatically create a mock user in the database on login
@@ -83,8 +83,8 @@ Screenshots should show:
 ### Important Notes
 
 - **Mock User**: When `AUTH_DISABLED=true`, a mock user with ID `mock-user-123` is automatically created
-- **In-Memory DB**: Data is lost when the server stops
-- **Hot Reload**: The dev server has hot reload which may interfere with Playwright clicks
+- **In-Memory DB**: Data is lost when the app stops
+- **Hot Reload**: The dev app has hot reload which may interfere with Playwright clicks
 - **Console Errors**: Some errors (Monaco editor, daemon connection) are expected and can be ignored
 
 ### Best Practices
@@ -104,7 +104,7 @@ Screenshots should show:
 - **Solution**: Hard refresh the page or navigate directly to the URL
 
 **Problem**: Form submission fails
-- **Solution**: Check server logs for errors, verify API endpoints are working
+- **Solution**: Check app logs for errors, verify API endpoints are working
 
 **Problem**: Port 3000 already in use
 - **Solution**: Kill existing process: `lsof -ti:3000 | xargs kill -9`
@@ -146,17 +146,17 @@ This user:
 For automated testing in CI/CD:
 
 ```yaml
-- name: Start test server
+- name: Start test app
   run: |
     cd apps/webapp
     AUTH_DISABLED=true bun run dev &
-    sleep 5  # Wait for server to start
+    sleep 5  # Wait for app to start
 
 - name: Run Playwright tests
   run: |
     # Your Playwright test commands here
     
-- name: Stop server
+- name: Stop app
   run: |
     lsof -ti:3000 | xargs kill -9
 ```

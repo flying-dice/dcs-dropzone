@@ -5,5 +5,5 @@
  * @returns {string} - The converted Unix-style path.
  */
 export function posixpath(path: string): string {
-  return path.replace(/\\/g, '/')
+	return path.replace(/\\/g, "/");
 }

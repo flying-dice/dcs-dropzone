@@ -1,40 +1,37 @@
-import {ensureSymlinkSync} from "fs-extra";
-import {getLogger} from "log4js";
-import {getSymlinkType} from "../functions/getSymlinkType.ts";
-import type {PathService} from "./PathService.ts";
-import type {SetInstalledPathForLinkId} from "../repository/SetInstalledPathForLinkId.ts";
-import type {GetSymbolicLinksForReleaseId} from "../repository/GetSymbolicLinksForReleaseId.ts";
-
-
-const logger = getLogger("EnableRelease");
+import type { GetSymbolicLinksForReleaseId } from "../repository/GetSymbolicLinksForReleaseId.ts";
+import type { SetInstalledPathForLinkId } from "../repository/SetInstalledPathForLinkId.ts";
+import type { _EnsureSymlink } from "./_EnsureSymlink.ts";
+import type { _ResolveReleasePath } from "./_ResolveReleasePath.ts";
+import type { _ResolveSymbolicLinkPath } from "./_ResolveSymbolicLinkPath.ts";
+import type { RegenerateMissionScriptingFiles } from "./RegenerateMissionScriptingFiles.ts";
 
 export class EnableRelease {
 	constructor(
 		protected deps: {
-			regenerateMissionScriptFilesHandler: () => Promise<void>;
-            setInstalledPathForLinkId: SetInstalledPathForLinkId
-            getSymbolicLinksForReleaseId: GetSymbolicLinksForReleaseId
-			pathService: PathService;
-            onCreateSymlink?: (src: string, dest: string) => void;
+			regenerateMissionScriptingFiles: RegenerateMissionScriptingFiles;
+			setInstalledPathForLinkId: SetInstalledPathForLinkId;
+			getSymbolicLinksForReleaseId: GetSymbolicLinksForReleaseId;
+			resolveReleasePath: _ResolveReleasePath;
+			resolveSymbolicLinkPath: _ResolveSymbolicLinkPath;
+			onCreateSymlink?: (src: string, dest: string) => void;
+			ensureSymlink: _EnsureSymlink;
 		},
 	) {}
 
-    async execute(releaseId: string): Promise<void> {
+	execute(releaseId: string): void {
+		const links = this.deps.getSymbolicLinksForReleaseId.execute(releaseId);
 
-        const links = this.deps.getSymbolicLinksForReleaseId.execute(releaseId);
-        for (const link of links) {
-            const srcAbs = this.deps.pathService.getAbsoluteReleasePath(releaseId, link.src);
-            const destAbs = this.deps.pathService.getAbsoluteSymbolicLinkDestPath(link.destRoot, link.dest);
+		for (const link of links) {
+			const srcAbs = this.deps.resolveReleasePath.execute(releaseId, link.src);
+			const destAbs = this.deps.resolveSymbolicLinkPath.execute(link.destRoot, link.dest);
 
-            const type = getSymlinkType(srcAbs);
-            logger.info(`Creating symlink from ${srcAbs} to ${destAbs} with type ${type}`);
-            ensureSymlinkSync(srcAbs, destAbs, type);
+			this.deps.ensureSymlink.execute(srcAbs, destAbs);
 
-            this.deps.setInstalledPathForLinkId.execute(link.id, destAbs);
+			this.deps.setInstalledPathForLinkId.execute(link.id, destAbs);
 
-            this.deps.onCreateSymlink?.(srcAbs, destAbs);
-        }
+			this.deps.onCreateSymlink?.(srcAbs, destAbs);
+		}
 
-        await this.deps.regenerateMissionScriptFilesHandler();
-    }
+		this.deps.regenerateMissionScriptingFiles.execute();
+	}
 }

@@ -1,20 +1,22 @@
-import {rmSync} from "fs-extra";
-import {getLogger} from "log4js";
-import type {GetSymbolicLinksForReleaseId} from "../repository/GetSymbolicLinksForReleaseId.ts";
-import type {SetInstalledPathForLinkId} from "../repository/SetInstalledPathForLinkId.ts";
+import { getLogger } from "log4js";
+import type { GetSymbolicLinksForReleaseId } from "../repository/GetSymbolicLinksForReleaseId.ts";
+import type { SetInstalledPathForLinkId } from "../repository/SetInstalledPathForLinkId.ts";
+import type { _RemoveDir } from "./_RemoveDir.ts";
+import type { RegenerateMissionScriptingFiles } from "./RegenerateMissionScriptingFiles.ts";
 
 const logger = getLogger("DisableRelease");
 
 export class DisableRelease {
 	constructor(
 		protected deps: {
-			regenerateMissionScriptFilesHandler: () => Promise<void>;
-            setInstalledPathForLinkId: SetInstalledPathForLinkId;
+			regenerateMissionScriptingFiles: RegenerateMissionScriptingFiles;
+			setInstalledPathForLinkId: SetInstalledPathForLinkId;
 			getSymbolicLinksForReleaseId: GetSymbolicLinksForReleaseId;
+			removeDir: _RemoveDir;
 		},
 	) {}
 
-	async execute(releaseId: string): Promise<void> {
+	execute(releaseId: string) {
 		logger.info("Disabling Release");
 
 		const links = this.deps.getSymbolicLinksForReleaseId.execute(releaseId);
@@ -22,7 +24,7 @@ export class DisableRelease {
 		for (const link of links) {
 			if (link.installedPath) {
 				try {
-					rmSync(link.installedPath, { force: true, recursive: true });
+					this.deps.removeDir.execute(link.installedPath);
 					this.deps.setInstalledPathForLinkId.execute(link.id, null);
 				} catch (err) {
 					logger.error(`Failed to remove symbolic link at ${link.installedPath}: ${err}`);
@@ -30,6 +32,6 @@ export class DisableRelease {
 			}
 		}
 
-		await this.deps.regenerateMissionScriptFilesHandler();
+		this.deps.regenerateMissionScriptingFiles.execute();
 	}
 }

@@ -15,7 +15,7 @@ const logger = getLogger("jsonErrorTransformer");
  *
  * - If the error is an instance of `HTTPException`, it returns a JSON response
  *   with the error's status code and message.
- * - For other errors, it defaults to an internal server error (500) with the error message.
+ * - For other errors, it defaults to an internal app error (500) with the error message.
  */
 export const jsonErrorTransformer: ErrorHandler = (error, c) => {
 	logger.error(`Error occurred: ${error.message}`, { error });

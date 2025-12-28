@@ -23,10 +23,10 @@ import type {
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 /**
- * The health status of the server.
+ * The health status of the app.
  */
 export const HealthValue = {
-	/** The health status of the server. */
+	/** The health status of the app. */
 	status: "UP",
 } as const;
 export type Health = typeof HealthValue;
@@ -248,7 +248,7 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 /**
- * Check the health of the server.
+ * Check the health of the app.
  * @summary Health Check
  */
 export type getApiHealthResponse200 = {

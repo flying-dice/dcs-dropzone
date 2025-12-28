@@ -2,14 +2,12 @@ import { useKeyboard } from "@opentui/react";
 import { getLogger } from "log4js";
 import { useMemo, useState } from "react";
 import { match } from "ts-pattern";
-import Application from "../Application.ts";
-import disableRelease from "../services/DisableRelease.ts";
-import enableRelease from "../services/EnableRelease.ts";
-import regenerateMissionScriptingFiles from "../services/RegenerateMissionScriptingFiles.ts";
-import removeRelease from "../services/RemoveRelease.ts";
 import { clearRecentLoggingEvents, recentLoggingEvent$ } from "../log4js.ts";
 import AllDaemonReleases from "../observables/AllDaemonReleases.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
+import type { DisableRelease } from "../services/DisableRelease.ts";
+import type { EnableRelease } from "../services/EnableRelease.ts";
+import type { RemoveRelease } from "../services/RemoveRelease.ts";
 import { Footer } from "./Footer.tsx";
 import { Header } from "./Header.tsx";
 import { keyPressedEvents } from "./KeyPressedEvents.ts";
@@ -22,7 +20,11 @@ import { getNext, getPrevious } from "./utils.ts";
 
 const logger = getLogger("tui");
 
-export function App() {
+export function App(props: {
+	enableRelease: EnableRelease;
+	disableRelease: DisableRelease;
+	removeRelease: RemoveRelease;
+}) {
 	const _recentLoggingEvents = useObservable(recentLoggingEvent$, recentLoggingEvent$.value);
 
 	const _releases = useObservable(AllDaemonReleases.$, AllDaemonReleases.$.value);
@@ -35,16 +37,12 @@ export function App() {
 
 	const handleDisable = async () => {
 		if (!selectedId) return;
+		if (!selected) return;
 		const readableName = `${selected?.modName} v${selected?.version}`;
 
 		try {
 			logger.info(`Disabling release: ${readableName}`);
-			await disableRelease({
-				releaseId: selectedId,
-				db: Application.db,
-				regenerateMissionScriptFilesHandler: () =>
-					regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
-			});
+			props.disableRelease.execute(selected.releaseId);
 			logger.info(`Disabled release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error disabling release ${readableName}: ${err}`);
@@ -56,16 +54,7 @@ export function App() {
 		const readableName = `${selected?.modName} v${selected?.version}`;
 		try {
 			logger.info(`Enabling release: ${readableName}`);
-			await enableRelease({
-				releaseId: selectedId,
-				db: Application.db,
-				pathService: Application.pathService,
-				onCreateSymlink(path: string, dest: string) {
-					logger.info("Created symlink", { path, dest });
-				},
-				regenerateMissionScriptFilesHandler: () =>
-					regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
-			});
+			props.enableRelease.execute(selectedId);
 			logger.info(`Enabled release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error enabling release ${readableName}`, err);
@@ -77,20 +66,7 @@ export function App() {
 		const readableName = `${selected?.modName} v${selected?.version}`;
 		try {
 			logger.info(`Removing release: ${readableName}`);
-			await removeRelease({
-				releaseId: selectedId,
-				db: Application.db,
-				pathService: Application.pathService,
-				disableReleaseHandler: (releaseId) =>
-					disableRelease({
-						releaseId,
-						db: Application.db,
-						regenerateMissionScriptFilesHandler: () =>
-							regenerateMissionScriptingFiles({ pathService: Application.pathService, db: Application.db }),
-					}),
-				extractQueue: Application.extractQueue,
-				downloadQueue: Application.downloadQueue,
-			});
+			props.removeRelease.execute(selectedId);
 			logger.info(`Removed release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error removing release ${readableName}: ${err}`);

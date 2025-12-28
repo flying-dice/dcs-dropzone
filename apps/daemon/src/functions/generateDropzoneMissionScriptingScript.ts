@@ -33,7 +33,7 @@ dofileifexist([[${symlinkPath}]])
  * @param {{id: string, path: string}[]} paths - A list of paths to remove.
  * @returns {string} The generated uninstaller script.
  */
-export async function generateDropzoneMissionScriptingScript(paths: { id: string; path: string }[]): Promise<string> {
+export function generateDropzoneMissionScriptingScript(paths: { id: string; path: string }[]): string {
 	const content: string[] = [];
 
 	// eslint-disable-next-line prefer-const

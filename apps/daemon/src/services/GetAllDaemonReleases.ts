@@ -1,70 +1,33 @@
-import { eq } from "drizzle-orm";
-import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import {
-	T_DOWNLOAD_QUEUE,
-	T_EXTRACT_QUEUE,
-	T_MOD_RELEASE_ASSETS,
-	T_MOD_RELEASE_MISSION_SCRIPTS,
-	T_MOD_RELEASE_SYMBOLIC_LINKS,
-	T_MOD_RELEASES,
-} from "../database/schema.ts";
 import type { AssetStatus } from "../enums/AssetStatus.ts";
 import { inferAssetStatusFromJobs } from "../functions/inferAssetStatusFromJobs.ts";
 import { inferReleaseStatusFromAssets } from "../functions/inferReleaseStatusFromAssets.ts";
 import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
+import type { GetAllReleases } from "../repository/GetAllReleases.ts";
+import type { GetDownloadJobsForReleaseAssetId } from "../repository/GetDownloadJobsForReleaseAssetId.ts";
+import type { GetExtractJobsForReleaseAssetId } from "../repository/GetExtractJobsForReleaseAssetId.ts";
+import type { GetMissionScriptsForReleaseId } from "../repository/GetMissionScriptsForReleaseId.ts";
+import type { GetReleaseAssetsForReleaseId } from "../repository/GetReleaseAssetsForReleaseId.ts";
+import type { GetSymbolicLinksForReleaseId } from "../repository/GetSymbolicLinksForReleaseId.ts";
 import { ModAndReleaseData, type ModReleaseAssetStatusData } from "../schemas/ModAndReleaseData.ts";
 
-export type GetAllDaemonReleasesQuery = {
-	db: BunSQLiteDatabase;
-};
-export type GetAllDaemonReleasesResult = ModAndReleaseData[];
+export class GetAllDaemonReleases {
+	constructor(
+		protected deps: {
+			getDownloadJobsForReleaseAssetId: GetDownloadJobsForReleaseAssetId;
+			getExtractJobsForReleaseAssetId: GetExtractJobsForReleaseAssetId;
+			getReleaseAssetsForReleaseId: GetReleaseAssetsForReleaseId;
+			getAllReleases: GetAllReleases;
+			getSymbolicLinksForReleaseId: GetSymbolicLinksForReleaseId;
+			getMissionScriptsForReleaseId: GetMissionScriptsForReleaseId;
+		},
+	) {}
 
-function getJobDataForAsset(
-	db: BunSQLiteDatabase,
-	releaseAsset: typeof T_MOD_RELEASE_ASSETS.$inferSelect,
-): ModReleaseAssetStatusData {
-	const downloadJobs = db
-		.select()
-		.from(T_DOWNLOAD_QUEUE)
-		.where(eq(T_DOWNLOAD_QUEUE.releaseAssetId, releaseAsset.id))
-		.all();
-	const extractJobs = db
-		.select()
-		.from(T_EXTRACT_QUEUE)
-		.where(eq(T_EXTRACT_QUEUE.releaseAssetId, releaseAsset.id))
-		.all();
+	execute(): ModAndReleaseData[] {
+		const releases: ModAndReleaseData[] = [];
 
-	const downloadPercentProgress = totalPercentProgress(downloadJobs.map((it) => it.progressPercent));
-
-	const extractPercentProgress = totalPercentProgress(extractJobs.map((it) => it.progressPercent));
-
-	const overallPercentProgress = totalPercentProgress([
-		...downloadJobs.map((it) => it.progressPercent),
-		...extractJobs.map((it) => it.progressPercent),
-	]);
-
-	const status: AssetStatus = inferAssetStatusFromJobs(downloadJobs, extractJobs);
-
-	return {
-		downloadPercentProgress,
-		extractPercentProgress,
-		overallPercentProgress,
-		status,
-	};
-}
-
-export default function (query: GetAllDaemonReleasesQuery): GetAllDaemonReleasesResult {
-	const { db } = query;
-	const releases: ModAndReleaseData[] = [];
-
-	for (const release of db.select().from(T_MOD_RELEASES).all()) {
-		const assets = db
-			.select()
-			.from(T_MOD_RELEASE_ASSETS)
-			.where(eq(T_MOD_RELEASE_ASSETS.releaseId, release.releaseId))
-			.all()
-			.map((asset) => {
-				const statusData = getJobDataForAsset(db, asset);
+		for (const release of this.deps.getAllReleases.execute()) {
+			const assets = this.deps.getReleaseAssetsForReleaseId.execute(release.releaseId).map((asset) => {
+				const statusData = this.getJobDataForAsset(asset.id);
 
 				return {
 					...asset,
@@ -72,30 +35,45 @@ export default function (query: GetAllDaemonReleasesQuery): GetAllDaemonReleases
 				};
 			});
 
-		const symbolicLinks = db
-			.select()
-			.from(T_MOD_RELEASE_SYMBOLIC_LINKS)
-			.where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.releaseId, release.releaseId))
-			.all();
+			const symbolicLinks = this.deps.getSymbolicLinksForReleaseId.execute(release.releaseId);
+			const missionScripts = this.deps.getMissionScriptsForReleaseId.execute(release.releaseId);
 
-		const missionScripts = db
-			.select()
-			.from(T_MOD_RELEASE_MISSION_SCRIPTS)
-			.where(eq(T_MOD_RELEASE_MISSION_SCRIPTS.releaseId, release.releaseId))
-			.all();
-
-		releases.push({
-			...release,
-			assets,
-			symbolicLinks,
-			missionScripts,
-			status: inferReleaseStatusFromAssets(
-				assets.map((it) => it.statusData.status),
+			releases.push({
+				...release,
+				assets,
 				symbolicLinks,
-			),
-			overallPercentProgress: totalPercentProgress(assets.flatMap((it) => it.statusData.overallPercentProgress)),
-		});
+				missionScripts,
+				status: inferReleaseStatusFromAssets(
+					assets.map((it) => it.statusData.status),
+					symbolicLinks,
+				),
+				overallPercentProgress: totalPercentProgress(assets.flatMap((it) => it.statusData.overallPercentProgress)),
+			});
+		}
+
+		return ModAndReleaseData.array().parse(releases);
 	}
 
-	return ModAndReleaseData.array().parse(releases);
+	private getJobDataForAsset(releaseAssetId: string): ModReleaseAssetStatusData {
+		const downloadJobs = this.deps.getDownloadJobsForReleaseAssetId.execute(releaseAssetId);
+		const extractJobs = this.deps.getExtractJobsForReleaseAssetId.execute(releaseAssetId);
+
+		const downloadPercentProgress = totalPercentProgress(downloadJobs.map((it) => it.progressPercent));
+
+		const extractPercentProgress = totalPercentProgress(extractJobs.map((it) => it.progressPercent));
+
+		const overallPercentProgress = totalPercentProgress([
+			...downloadJobs.map((it) => it.progressPercent),
+			...extractJobs.map((it) => it.progressPercent),
+		]);
+
+		const status: AssetStatus = inferAssetStatusFromJobs(downloadJobs, extractJobs);
+
+		return {
+			downloadPercentProgress,
+			extractPercentProgress,
+			overallPercentProgress,
+			status,
+		};
+	}
 }

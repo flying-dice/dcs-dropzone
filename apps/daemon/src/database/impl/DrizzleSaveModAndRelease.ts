@@ -1,14 +1,14 @@
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
+import type { SaveModAndRelease } from "../../repository/SaveModAndRelease.ts";
+import type { ModAndReleaseData } from "../../schemas/ModAndReleaseData.ts";
 import {
 	T_MOD_RELEASE_ASSETS,
 	T_MOD_RELEASE_MISSION_SCRIPTS,
 	T_MOD_RELEASE_SYMBOLIC_LINKS,
 	T_MOD_RELEASES,
-} from "../../database/schema.ts";
-import type { ModAndReleaseData } from "../../schemas/ModAndReleaseData.ts";
-import type { SaveModAndReleaseData } from "../SaveModAndReleaseData.ts";
+} from "../schema.ts";
 
-export class DrizzleSaveModAndReleaseData implements SaveModAndReleaseData {
+export class DrizzleSaveModAndRelease implements SaveModAndRelease {
 	constructor(
 		protected deps: {
 			db: BunSQLiteDatabase;

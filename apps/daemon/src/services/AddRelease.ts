@@ -1,35 +1,36 @@
-import { mkdir } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { getLogger } from "log4js";
 import type { DownloadQueue } from "../queues/DownloadQueue.ts";
 import type { ExtractQueue } from "../queues/ExtractQueue.ts";
 import type { GetReleaseAssetsForReleaseId } from "../repository/GetReleaseAssetsForReleaseId.ts";
-import type { SaveModAndReleaseData } from "../repository/SaveModAndReleaseData.ts";
+import type { SaveModAndRelease } from "../repository/SaveModAndRelease.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import type { ResolveReleaseDir } from "./ResolveReleaseDir.ts";
+import type { _EnsureDir } from "./_EnsureDir.ts";
+import type { _ResolveReleasePath } from "./_ResolveReleasePath.ts";
 
 const logger = getLogger("AddRelease");
 
 export class AddRelease {
 	constructor(
 		protected deps: {
-			saveModAndReleaseData: SaveModAndReleaseData;
+			saveModAndReleaseData: SaveModAndRelease;
 			getReleaseAssetsForReleaseId: GetReleaseAssetsForReleaseId;
-			resolveReleaseDir: ResolveReleaseDir;
+			resolveReleasePath: _ResolveReleasePath;
 			downloadQueue: DownloadQueue;
 			extractQueue: ExtractQueue;
+			ensureDir: _EnsureDir;
 		},
 	) {}
 
-	async execute(data: ModAndReleaseData): Promise<void> {
+	execute(data: ModAndReleaseData) {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
 		// Insert release and related data in a transaction
 		this.deps.saveModAndReleaseData.execute(data);
 
 		// Prepare release folder and queues
-		const releaseFolder = this.deps.resolveReleaseDir.execute(data.releaseId);
-		await mkdir(releaseFolder, { recursive: true });
+		const releaseFolder = this.deps.resolveReleasePath.execute(data.releaseId);
+		this.deps.ensureDir.execute(releaseFolder);
 
 		// Enqueue download and extract jobs for each asset
 		const assets = this.deps.getReleaseAssetsForReleaseId.execute(data.releaseId);

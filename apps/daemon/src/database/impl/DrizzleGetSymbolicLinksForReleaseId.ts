@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import { T_MOD_RELEASE_SYMBOLIC_LINKS } from "../../database/schema.ts";
-import type { GetSymbolicLinksForReleaseId } from "../GetSymbolicLinksForReleaseId.ts";
+import type { GetSymbolicLinksForReleaseId } from "../../repository/GetSymbolicLinksForReleaseId.ts";
+import { T_MOD_RELEASE_SYMBOLIC_LINKS } from "../schema.ts";
 
 export class DrizzleGetSymbolicLinksForReleaseId implements GetSymbolicLinksForReleaseId {
 	constructor(

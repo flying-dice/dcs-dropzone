@@ -9,7 +9,7 @@ This project uses a monorepo structure organized with Bun workspaces:
 ```
 dcs-dropzone/
 ├── apps/                    # Applications
-│   ├── webapp/             # Web application (frontend + server)
+│   ├── webapp/             # Web application (frontend + app)
 │   └── daemon/             # Daemon service for downloads & installations
 ├── packages/               # Shared packages
 │   ├── hono/              # Shared Hono utilities and middleware
@@ -20,12 +20,12 @@ dcs-dropzone/
 
 ### Apps
 
-- **webapp**: The web application that provides the UI for browsing and managing mods. Built with React, Hono server, and MongoDB.
+- **webapp**: The web application that provides the UI for browsing and managing mods. Built with React, Hono app, and MongoDB.
 - **daemon**: The daemon service that runs locally to handle downloading, extracting, and installing mods into your DCS World installation.
 
 ### Packages
 
-- **@packages/hono**: Shared Hono utilities, middleware, and server components used across applications.
+- **@packages/hono**: Shared Hono utilities, middleware, and app components used across applications.
 - **@packages/zod**: Shared Zod schemas for data validation and type safety across the monorepo.
 
 ## 🚀 Getting Started
@@ -107,7 +107,7 @@ bun run test
 ```bash
 # Work on webapp
 cd apps/webapp
-bun run dev          # Start dev server
+bun run dev          # Start dev app
 bun run check        # Lint and type-check
 bun run test         # Run tests
 
