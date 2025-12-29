@@ -2,13 +2,6 @@ import { describe, expect, it } from "bun:test";
 import { TestAttributesRepository } from "./TestAttributesRepository.ts";
 
 describe("TestAttributesRepository", () => {
-	it("implements AttributesRepository interface", () => {
-		const repo = new TestAttributesRepository();
-		expect(repo).toBeDefined();
-		expect(typeof repo.getDaemonInstanceId).toBe("function");
-		expect(typeof repo.saveDaemonInstanceId).toBe("function");
-	});
-
 	describe("getDaemonInstanceId", () => {
 		it("returns undefined initially", () => {
 			const repo = new TestAttributesRepository();

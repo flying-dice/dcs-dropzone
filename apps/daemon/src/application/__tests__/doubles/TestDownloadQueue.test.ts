@@ -3,15 +3,6 @@ import { DownloadJobStatus } from "../../enums/DownloadJobStatus.ts";
 import { TestDownloadQueue } from "./TestDownloadQueue.ts";
 
 describe("TestDownloadQueue", () => {
-	it("implements DownloadQueue interface", () => {
-		const queue = new TestDownloadQueue();
-		expect(queue).toBeDefined();
-		expect(typeof queue.pushJob).toBe("function");
-		expect(typeof queue.getJobsForReleaseAssetId).toBe("function");
-		expect(typeof queue.getJobsForReleaseId).toBe("function");
-		expect(typeof queue.cancelJobsForRelease).toBe("function");
-	});
-
 	describe("pushJob", () => {
 		it("tracks pushed jobs", () => {
 			const queue = new TestDownloadQueue();

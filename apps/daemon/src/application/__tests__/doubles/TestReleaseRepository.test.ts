@@ -4,19 +4,6 @@ import type { ModAndReleaseData } from "../../schemas/ModAndReleaseData.ts";
 import { TestReleaseRepository } from "./TestReleaseRepository.ts";
 
 describe("TestReleaseRepository", () => {
-	it("implements ReleaseRepository interface", () => {
-		const repo = new TestReleaseRepository();
-		expect(repo).toBeDefined();
-		expect(typeof repo.saveRelease).toBe("function");
-		expect(typeof repo.deleteRelease).toBe("function");
-		expect(typeof repo.getAllReleases).toBe("function");
-		expect(typeof repo.getReleaseAssetsForRelease).toBe("function");
-		expect(typeof repo.getSymbolicLinksForRelease).toBe("function");
-		expect(typeof repo.getMissionScriptsForRelease).toBe("function");
-		expect(typeof repo.getMissionScriptsByRunOn).toBe("function");
-		expect(typeof repo.setInstalledPathForSymbolicLink).toBe("function");
-	});
-
 	describe("saveRelease", () => {
 		it("tracks saved releases", () => {
 			const repo = new TestReleaseRepository();

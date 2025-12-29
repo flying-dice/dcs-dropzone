@@ -3,15 +3,6 @@ import { ExtractJobStatus } from "../../enums/ExtractJobStatus.ts";
 import { TestExtractQueue } from "./TestExtractQueue.ts";
 
 describe("TestExtractQueue", () => {
-	it("implements ExtractQueue interface", () => {
-		const queue = new TestExtractQueue();
-		expect(queue).toBeDefined();
-		expect(typeof queue.pushJob).toBe("function");
-		expect(typeof queue.getJobsForReleaseAssetId).toBe("function");
-		expect(typeof queue.getJobsForReleaseId).toBe("function");
-		expect(typeof queue.cancelJobsForRelease).toBe("function");
-	});
-
 	describe("pushJob", () => {
 		it("tracks pushed jobs", () => {
 			const queue = new TestExtractQueue();

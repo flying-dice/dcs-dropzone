@@ -2,16 +2,6 @@ import { describe, expect, it } from "bun:test";
 import { TestFileSystem } from "./TestFileSystem.ts";
 
 describe("TestFileSystem", () => {
-	it("implements FileSystem interface", () => {
-		const fs = new TestFileSystem();
-		expect(fs).toBeDefined();
-		expect(typeof fs.ensureDir).toBe("function");
-		expect(typeof fs.ensureSymlink).toBe("function");
-		expect(typeof fs.removeDir).toBe("function");
-		expect(typeof fs.writeFile).toBe("function");
-		expect(typeof fs.resolve).toBe("function");
-	});
-
 	describe("ensureDir", () => {
 		it("tracks ensured directories", () => {
 			const fs = new TestFileSystem();
