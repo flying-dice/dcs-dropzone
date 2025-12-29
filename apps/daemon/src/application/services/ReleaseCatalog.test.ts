@@ -4,7 +4,6 @@ import {
 	TestExtractQueue,
 	TestFileSystem,
 	TestMissionScriptingFilesManager,
-	TestPathResolver,
 	TestReleaseRepository,
 } from "../__tests__/doubles/index.ts";
 import { AssetStatus } from "../enums/AssetStatus.ts";
@@ -12,6 +11,7 @@ import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
 import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
+import { PathResolver } from "./PathResolver.ts";
 import { ReleaseCatalog } from "./ReleaseCatalog.ts";
 import { ReleaseToggle } from "./ReleaseToggle.ts";
 
@@ -19,7 +19,12 @@ describe("ReleaseCatalog", () => {
 	describe("add", () => {
 		it("adds a release with assets and queues download jobs", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -71,7 +76,12 @@ describe("ReleaseCatalog", () => {
 
 		it("creates extract jobs for archive assets", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -123,7 +133,12 @@ describe("ReleaseCatalog", () => {
 	describe("remove", () => {
 		it("removes release by disabling, canceling jobs, and deleting files", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -182,7 +197,12 @@ describe("ReleaseCatalog", () => {
 	describe("getAllReleasesWithStatus", () => {
 		it("returns releases with computed status", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -245,7 +265,12 @@ describe("ReleaseCatalog", () => {
 
 		it("computes IN_PROGRESS status correctly", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();

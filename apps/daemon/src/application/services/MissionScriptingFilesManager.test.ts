@@ -1,13 +1,19 @@
 import { describe, expect, it } from "bun:test";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import { TestFileSystem, TestPathResolver, TestReleaseRepository } from "../__tests__/doubles/index.ts";
+import { TestFileSystem, TestReleaseRepository } from "../__tests__/doubles/index.ts";
 import { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
+import { PathResolver } from "./PathResolver.ts";
 
 describe("MissionScriptingFilesManager", () => {
 	it("rebuilds mission scripting files with before and after sanitize scripts", () => {
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
-		const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+		const pathResolver = new PathResolver({
+			dropzoneModsFolder: "/dropzone/mods",
+			dcsInstallDir: "/dcs/install",
+			dcsWorkingDir: "/dcs/working",
+			fileSystem,
+		});
 
 		// Setup test data
 		releaseRepository.saveRelease({
@@ -66,7 +72,12 @@ describe("MissionScriptingFilesManager", () => {
 	it("generates scripts with correct paths", () => {
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
-		const pathResolver = new TestPathResolver("/dropzone/mods", "/working", "/working", fileSystem);
+		const pathResolver = new PathResolver({
+			dropzoneModsFolder: "/dropzone/mods",
+			dcsInstallDir: "/working",
+			dcsWorkingDir: "/working",
+			fileSystem,
+		});
 
 		releaseRepository.saveRelease({
 			releaseId: "release-1",
@@ -104,7 +115,12 @@ describe("MissionScriptingFilesManager", () => {
 	it("handles empty scripts list", () => {
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
-		const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs", "/dcs", fileSystem);
+		const pathResolver = new PathResolver({
+			dropzoneModsFolder: "/dropzone/mods",
+			dcsInstallDir: "/dcs",
+			dcsWorkingDir: "/dcs",
+			fileSystem,
+		});
 
 		const manager = new MissionScriptingFilesManager({
 			fileSystem,

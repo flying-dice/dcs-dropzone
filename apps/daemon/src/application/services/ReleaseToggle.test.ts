@@ -5,18 +5,23 @@ import {
 	TestExtractQueue,
 	TestFileSystem,
 	TestMissionScriptingFilesManager,
-	TestPathResolver,
 	TestReleaseRepository,
 } from "../__tests__/doubles/index.ts";
 import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
 import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
+import { PathResolver } from "./PathResolver.ts";
 import { ReleaseToggle } from "./ReleaseToggle.ts";
 
 describe("ReleaseToggle", () => {
 	describe("enable", () => {
 		it("enables release by creating symlinks and rebuilding mission scripts", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -68,7 +73,12 @@ describe("ReleaseToggle", () => {
 
 		it("throws error when download jobs are not completed", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -97,7 +107,12 @@ describe("ReleaseToggle", () => {
 
 		it("throws error when extract jobs are not completed", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -125,7 +140,12 @@ describe("ReleaseToggle", () => {
 
 		it("calls onCreateSymlink callback when provided", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -180,7 +200,12 @@ describe("ReleaseToggle", () => {
 	describe("disable", () => {
 		it("disables release by removing symlinks and rebuilding mission scripts", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -233,7 +258,12 @@ describe("ReleaseToggle", () => {
 
 		it("skips symlinks without installed paths", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
@@ -285,7 +315,12 @@ describe("ReleaseToggle", () => {
 				throw new Error("Failed to remove");
 			};
 
-			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const pathResolver = new PathResolver({
+				dropzoneModsFolder: "/dropzone/mods",
+				dcsInstallDir: "/dcs/install",
+				dcsWorkingDir: "/dcs/working",
+				fileSystem,
+			});
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
