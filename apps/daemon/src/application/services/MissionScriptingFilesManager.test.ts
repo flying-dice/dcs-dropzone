@@ -1,10 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import {
-	TestFileSystem,
-	TestPathResolver,
-	TestReleaseRepository,
-} from "../__tests__/doubles/index.ts";
+import { TestFileSystem, TestPathResolver, TestReleaseRepository } from "../__tests__/doubles/index.ts";
 import { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
 
 describe("MissionScriptingFilesManager", () => {

@@ -1,9 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { AssetStatus } from "../enums/AssetStatus.ts";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
 import {
 	TestDownloadQueue,
 	TestExtractQueue,
@@ -12,6 +7,11 @@ import {
 	TestPathResolver,
 	TestReleaseRepository,
 } from "../__tests__/doubles/index.ts";
+import { AssetStatus } from "../enums/AssetStatus.ts";
+import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
+import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
+import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
+import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
 import { ReleaseCatalog } from "./ReleaseCatalog.ts";
 import { ReleaseToggle } from "./ReleaseToggle.ts";
 

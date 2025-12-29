@@ -1,6 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { Application } from "./Application.ts";
-import type { UUIDGenerator } from "./services/UUIDGenerator.ts";
 import {
 	TestAttributesRepository,
 	TestDownloadQueue,
@@ -8,6 +6,8 @@ import {
 	TestFileSystem,
 	TestReleaseRepository,
 } from "./__tests__/doubles/index.ts";
+import { Application } from "./Application.ts";
+import type { UUIDGenerator } from "./services/UUIDGenerator.ts";
 
 describe("Application", () => {
 	it("creates application and initializes daemon instance ID from existing ID", () => {

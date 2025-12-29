@@ -1,4 +1,3 @@
-import type { SymbolicLinkDestRoot } from "webapp";
 import type { FileSystem } from "../../services/FileSystem.ts";
 import { PathResolver } from "../../services/PathResolver.ts";
 

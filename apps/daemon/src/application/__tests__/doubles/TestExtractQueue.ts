@@ -1,5 +1,5 @@
-import type { ExtractQueue } from "../../services/ExtractQueue.ts";
 import { ExtractJobStatus } from "../../enums/ExtractJobStatus.ts";
+import type { ExtractQueue } from "../../services/ExtractQueue.ts";
 
 export class TestExtractQueue implements ExtractQueue {
 	public pushedJobs: Array<{

@@ -1,5 +1,3 @@
-import { MissionScriptingFilesManager } from "../../services/MissionScriptingFilesManager.ts";
-
 export class TestMissionScriptingFilesManager {
 	public rebuildCount = 0;
 

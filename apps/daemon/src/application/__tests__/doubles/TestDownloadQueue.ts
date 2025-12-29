@@ -1,5 +1,5 @@
-import type { DownloadQueue } from "../../services/DownloadQueue.ts";
 import { DownloadJobStatus } from "../../enums/DownloadJobStatus.ts";
+import type { DownloadQueue } from "../../services/DownloadQueue.ts";
 
 export class TestDownloadQueue implements DownloadQueue {
 	public pushedJobs: Array<{

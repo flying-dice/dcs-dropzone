@@ -1,7 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import { SymbolicLinkDestRoot } from "webapp";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
 import {
 	TestDownloadQueue,
 	TestExtractQueue,
@@ -10,6 +8,8 @@ import {
 	TestPathResolver,
 	TestReleaseRepository,
 } from "../__tests__/doubles/index.ts";
+import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
+import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
 import { ReleaseToggle } from "./ReleaseToggle.ts";
 
 describe("ReleaseToggle", () => {
