@@ -1,14 +1,15 @@
-import { DownloadJobStatus } from "../../enums/DownloadJobStatus.ts";
-import type { DownloadQueue } from "../../services/DownloadQueue.ts";
-import type { DownloadJob } from "../../services/types.ts";
+import { ExtractJobStatus } from "../../enums/ExtractJobStatus.ts";
+import type { ExtractQueue } from "../ExtractQueue.ts";
+import type { ExtractJob } from "../types.ts";
 
-export class TestDownloadQueue implements DownloadQueue {
+export class TestExtractQueue implements ExtractQueue {
 	public pushedJobs: Array<{
 		releaseId: string;
 		assetId: string;
 		jobId: string;
-		url: string;
+		archivePath: string;
 		destination: string;
+		downloadJobIds: string[];
 	}> = [];
 	public canceledReleases: string[] = [];
 
@@ -18,20 +19,25 @@ export class TestDownloadQueue implements DownloadQueue {
 			id: string;
 			releaseId: string;
 			assetId: string;
-			url: string;
-			status: DownloadJobStatus;
+			status: ExtractJobStatus;
 			progressPercent: number;
 		}>
 	> = new Map();
 
-	pushJob(releaseId: string, assetId: string, jobId: string, url: string, destination: string): void {
-		this.pushedJobs.push({ releaseId, assetId, jobId, url, destination });
+	pushJob(
+		releaseId: string,
+		assetId: string,
+		jobId: string,
+		archivePath: string,
+		destination: string,
+		downloadJobIds: string[],
+	): void {
+		this.pushedJobs.push({ releaseId, assetId, jobId, archivePath, destination, downloadJobIds });
 		const job = {
 			id: jobId,
 			releaseId,
 			assetId,
-			url,
-			status: DownloadJobStatus.PENDING,
+			status: ExtractJobStatus.PENDING,
 			progressPercent: 0,
 		};
 		const existing = this.jobs.get(assetId) || [];
@@ -39,11 +45,12 @@ export class TestDownloadQueue implements DownloadQueue {
 		this.jobs.set(assetId, existing);
 	}
 
-	getJobsForReleaseAssetId(releaseAssetId: string): DownloadJob[] {
+	getJobsForReleaseAssetId(releaseAssetId: string): ExtractJob[] {
 		const jobs = this.jobs.get(releaseAssetId) || [];
 		return jobs.map((job) => ({
 			...job,
 			releaseAssetId: job.assetId,
+			archivePath: "/archive",
 			targetDirectory: "/dest",
 			attempt: 0,
 			nextAttemptAfter: new Date(),
@@ -51,14 +58,15 @@ export class TestDownloadQueue implements DownloadQueue {
 		}));
 	}
 
-	getJobsForReleaseId(releaseId: string): DownloadJob[] {
-		const result: DownloadJob[] = [];
+	getJobsForReleaseId(releaseId: string): ExtractJob[] {
+		const result: ExtractJob[] = [];
 		for (const jobs of this.jobs.values()) {
 			for (const job of jobs) {
 				if (job.releaseId === releaseId) {
 					result.push({
 						...job,
 						releaseAssetId: job.assetId,
+						archivePath: "/archive",
 						targetDirectory: "/dest",
 						attempt: 0,
 						nextAttemptAfter: new Date(),
@@ -80,7 +88,7 @@ export class TestDownloadQueue implements DownloadQueue {
 		}
 	}
 
-	setJobStatus(assetId: string, jobId: string, status: DownloadJobStatus, progressPercent = 0): void {
+	setJobStatus(assetId: string, jobId: string, status: ExtractJobStatus, progressPercent = 0): void {
 		const jobs = this.jobs.get(assetId);
 		if (jobs) {
 			const job = jobs.find((j) => j.id === jobId);

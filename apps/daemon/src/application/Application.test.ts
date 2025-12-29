@@ -1,11 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import {
-	TestAttributesRepository,
-	TestDownloadQueue,
-	TestExtractQueue,
-	TestFileSystem,
-	TestReleaseRepository,
-} from "./__tests__/doubles/index.ts";
+import { TestAttributesRepository } from "./repository/impl/TestAttributesRepository.ts";
+import { TestDownloadQueue } from "./services/impl/TestDownloadQueue.ts";
+import { TestExtractQueue } from "./services/impl/TestExtractQueue.ts";
+import { TestFileSystem } from "./services/impl/TestFileSystem.ts";
+import { TestReleaseRepository } from "./repository/impl/TestReleaseRepository.ts";
 import { Application } from "./Application.ts";
 import type { UUIDGenerator } from "./services/UUIDGenerator.ts";
 

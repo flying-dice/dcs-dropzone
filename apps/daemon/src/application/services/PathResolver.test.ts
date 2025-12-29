@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { SymbolicLinkDestRoot } from "webapp";
-import { TestFileSystem } from "../__tests__/doubles/index.ts";
+import { TestFileSystem } from "./impl/TestFileSystem.ts";
 import { PathResolver } from "./PathResolver.ts";
 
 describe("PathResolver", () => {

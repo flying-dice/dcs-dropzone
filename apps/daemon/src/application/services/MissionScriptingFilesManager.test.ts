@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import { TestFileSystem, TestReleaseRepository } from "../__tests__/doubles/index.ts";
+import { TestFileSystem } from "./impl/TestFileSystem.ts";
+import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
 import { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
 import { PathResolver } from "./PathResolver.ts";
 

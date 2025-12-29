@@ -1,12 +1,12 @@
 import type { MissionScriptRunOn } from "webapp";
-import type { ReleaseRepository } from "../../repository/ReleaseRepository.ts";
+import type { ReleaseRepository } from "../ReleaseRepository.ts";
 import type {
 	MissionScript,
 	MissionScriptByRunOn,
 	ReleaseAsset,
 	ReleaseInfo,
 	SymbolicLink,
-} from "../../repository/types.ts";
+} from "../types.ts";
 import type { ModAndReleaseData } from "../../schemas/ModAndReleaseData.ts";
 
 export class TestReleaseRepository implements ReleaseRepository {

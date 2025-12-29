@@ -1,4 +1,4 @@
-import type { FileSystem } from "../../services/FileSystem.ts";
+import type { FileSystem } from "../FileSystem.ts";
 
 export class TestFileSystem implements FileSystem {
 	public ensuredDirs: string[] = [];

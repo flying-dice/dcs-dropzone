@@ -1,4 +1,4 @@
-import type { AttributesRepository } from "../../repository/AttributesRepository.ts";
+import type { AttributesRepository } from "../AttributesRepository.ts";
 
 export class TestAttributesRepository implements AttributesRepository {
 	private daemonInstanceId: string | undefined;

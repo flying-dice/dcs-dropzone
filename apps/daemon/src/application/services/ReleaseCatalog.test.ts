@@ -1,11 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import {
-	TestDownloadQueue,
-	TestExtractQueue,
-	TestFileSystem,
-	TestMissionScriptingFilesManager,
-	TestReleaseRepository,
-} from "../__tests__/doubles/index.ts";
+import { TestDownloadQueue } from "./impl/TestDownloadQueue.ts";
+import { TestExtractQueue } from "./impl/TestExtractQueue.ts";
+import { TestFileSystem } from "./impl/TestFileSystem.ts";
+import { TestMissionScriptingFilesManager } from "./impl/TestMissionScriptingFilesManager.ts";
+import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
 import { AssetStatus } from "../enums/AssetStatus.ts";
 import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
