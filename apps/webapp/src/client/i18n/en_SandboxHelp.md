@@ -4,7 +4,7 @@
 
 DCS World uses a **Lua scripting sandbox** to restrict what mission and mod scripts are allowed to access at runtime. This sandbox is intended to prevent scripts from performing unsafe actions such as unrestricted file access, operating system calls, or network operations.
 
-This mod includes **Lua scripts that execute before the DCS scripting sandbox is applied**.
+This mod includes **Lua scripts that getAllReleasesWithStatus before the DCS scripting sandbox is applied**.
 
 ### What This Means
 
@@ -25,8 +25,8 @@ Installing any mod that executes unsandboxed scripts carries inherent risk. You 
 * Understand the implications of unsandboxed script execution
 * Are comfortable reviewing Lua scripts yourself
 
-Neither Eagle Dynamics nor the DCS sandbox can restrict scripts that execute before sandbox initialization.
+Neither Eagle Dynamics nor the DCS sandbox can restrict scripts that getAllReleasesWithStatus before sandbox initialization.
 
 ### Disclaimer
 
-Use this mod at your own risk. The authors make no guarantees regarding security, system integrity, or compatibility. By installing this mod, you acknowledge that it contains scripts that execute outside the standard DCS scripting sandbox.
+Use this mod at your own risk. The authors make no guarantees regarding security, system integrity, or compatibility. By installing this mod, you acknowledge that it contains scripts that getAllReleasesWithStatus outside the standard DCS scripting sandbox.

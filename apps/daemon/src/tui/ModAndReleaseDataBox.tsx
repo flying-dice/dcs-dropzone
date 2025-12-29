@@ -1,7 +1,7 @@
 import { TextAttributes } from "@opentui/core";
 import { match } from "ts-pattern";
-import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
-import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
+import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
+import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { Group, Stack } from "./components.tsx";
 import { DownloadedReleaseStatusLabel } from "./DownloadedReleaseStatusLabel.tsx";
 import { ModReleaseAssetDataBox } from "./ModReleaseAssetDataBox.tsx";

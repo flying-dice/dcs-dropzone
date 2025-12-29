@@ -1,4 +1,4 @@
-import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
+import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
 import { DownloadedReleaseStatusIcon } from "./DownloadedReleaseStatusIcon.tsx";
 
 export const DownloadedReleaseStatusColor: Record<DownloadedReleaseStatus, string> = {

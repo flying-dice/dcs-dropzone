@@ -1,7 +1,7 @@
 import { TextAttributes } from "@opentui/core";
 import { match } from "ts-pattern";
-import { AssetStatus } from "../enums/AssetStatus.ts";
-import type { ModReleaseAssetData } from "../schemas/ModAndReleaseData.ts";
+import { AssetStatus } from "../application/enums/AssetStatus.ts";
+import type { ModReleaseAssetData } from "../application/schemas/ModAndReleaseData.ts";
 import { Group, Stack } from "./components.tsx";
 
 export type ModReleaseAssetDataBoxProps = { asset: ModReleaseAssetData };

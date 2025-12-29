@@ -1,4 +1,4 @@
-import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
+import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
 
 export const DownloadedReleaseStatusEmoji: Record<DownloadedReleaseStatus, string> = {
 	[DownloadedReleaseStatus.PENDING]: "⏸️",

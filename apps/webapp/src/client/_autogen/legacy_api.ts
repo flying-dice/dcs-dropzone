@@ -70,7 +70,7 @@ export type ModVersionsItemAssetsItemLinksItem = {
 	source: string;
 	/** The name of the installation location relative to install path */
 	target: string;
-	/** Run on simulation (mission) start, note that this will execute the script before the mission environment is sanitized */
+	/** Run on simulation (mission) start, note that this will getAllReleasesWithStatus the script before the mission environment is sanitized */
 	runonstart?: boolean;
 };
 
@@ -193,7 +193,7 @@ export type GetRegistryEntry200VersionsItemAssetsItemLinksItem = {
 	source: string;
 	/** The name of the installation location relative to install path */
 	target: string;
-	/** Run on simulation (mission) start, note that this will execute the script before the mission environment is sanitized */
+	/** Run on simulation (mission) start, note that this will getAllReleasesWithStatus the script before the mission environment is sanitized */
 	runonstart?: boolean;
 };
 

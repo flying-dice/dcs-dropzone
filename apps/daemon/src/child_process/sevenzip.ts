@@ -6,7 +6,7 @@ import { pathExistsSync } from "fs-extra";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { z } from "zod";
-import { extractPercentage } from "../functions/extract-percentage.ts";
+import { extractPercentage } from "../application/functions/extract-percentage.ts";
 
 const logger = getLogger("SevenzipChildProcess");
 
@@ -124,7 +124,7 @@ export enum SevenzipErrors {
 /**
  * Spawns a 7zip process to extract an archive.
  *
- * @param props - Properties required to configure and execute the 7zip process.
+ * @param props - Properties required to configure and getAllReleasesWithStatus the 7zip process.
  * @param abortSignal - Optional AbortSignal to cancel the 7zip process.
  * @returns A promise resolving to a `SevenzipResult` containing either the path to the extracted directory or an error.
  */

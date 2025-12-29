@@ -5,7 +5,7 @@ import { mkdirSync, pathExistsSync } from "fs-extra";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { z } from "zod";
-import { extractPercentage } from "../functions/extract-percentage.ts";
+import { extractPercentage } from "../application/functions/extract-percentage.ts";
 
 const logger = getLogger("WgetChildProcess");
 
@@ -116,7 +116,7 @@ export enum WgetErrors {
 /**
  * Spawns a wget process to download a file from a given URL.
  *
- * @param props - Properties required to configure and execute the wget process.
+ * @param props - Properties required to configure and getAllReleasesWithStatus the wget process.
  * @param abortSignal - Optional AbortSignal to cancel the wget process.
  * @returns A promise resolving to a `WgetResult` containing either the path to the downloaded file or an error.
  */

@@ -1,5 +1,5 @@
-import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
-import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
+import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
+import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { DownloadedReleaseStatusIcon } from "./DownloadedReleaseStatusIcon.tsx";
 import { NavbarItem } from "./NavbarItem.tsx";
 

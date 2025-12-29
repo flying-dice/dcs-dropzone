@@ -1,5 +1,5 @@
 import { TextAttributes } from "@opentui/core";
-import type { ModReleaseMissionScriptData } from "../schemas/ModAndReleaseData.ts";
+import type { ModReleaseMissionScriptData } from "../application/schemas/ModAndReleaseData.ts";
 import { Stack } from "./components.tsx";
 import { KeyValueItem } from "./KeyValueItem.tsx";
 

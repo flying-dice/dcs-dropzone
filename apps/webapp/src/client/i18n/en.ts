@@ -266,7 +266,7 @@ export default {
 		MISSION_SCRIPTS_DESC_EMPTY: "No mission scripts configured for this mod.",
 		SCRIPT_EXECUTION_NOTICE_TITLE: "Script Execution Notice",
 		SCRIPT_EXECUTION_NOTICE_DESC_1:
-			"This mod includes {{countScriptsBeforeSanitize}} scripts that execute before DCS World’s scripting sandbox is applied.",
+			"This mod includes {{countScriptsBeforeSanitize}} scripts that getAllReleasesWithStatus before DCS World’s scripting sandbox is applied.",
 		SCRIPT_EXECUTION_NOTICE_DESC_2:
 			"As a result, these scripts may have broader access than standard sandboxed scripts.",
 		SCRIPT_EXECUTION_NOTICE_DESC_3: "Please ensure you trust the source before installing.",

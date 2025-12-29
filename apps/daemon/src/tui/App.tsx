@@ -2,12 +2,10 @@ import { useKeyboard } from "@opentui/react";
 import { getLogger } from "log4js";
 import { useMemo, useState } from "react";
 import { match } from "ts-pattern";
+import type { Application } from "../application/Application.ts";
+import AllDaemonReleases from "../application/observables/AllDaemonReleases.ts";
+import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { clearRecentLoggingEvents, recentLoggingEvent$ } from "../log4js.ts";
-import AllDaemonReleases from "../observables/AllDaemonReleases.ts";
-import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import type { DisableRelease } from "../services/DisableRelease.ts";
-import type { EnableRelease } from "../services/EnableRelease.ts";
-import type { RemoveRelease } from "../services/RemoveRelease.ts";
 import { Footer } from "./Footer.tsx";
 import { Header } from "./Header.tsx";
 import { keyPressedEvents } from "./KeyPressedEvents.ts";
@@ -20,11 +18,7 @@ import { getNext, getPrevious } from "./utils.ts";
 
 const logger = getLogger("tui");
 
-export function App(props: {
-	enableRelease: EnableRelease;
-	disableRelease: DisableRelease;
-	removeRelease: RemoveRelease;
-}) {
+export function App(props: { app: Application }) {
 	const _recentLoggingEvents = useObservable(recentLoggingEvent$, recentLoggingEvent$.value);
 
 	const _releases = useObservable(AllDaemonReleases.$, AllDaemonReleases.$.value);
@@ -42,7 +36,7 @@ export function App(props: {
 
 		try {
 			logger.info(`Disabling release: ${readableName}`);
-			props.disableRelease.execute(selected.releaseId);
+			props.app.releaseToggleService.disable(selected.releaseId);
 			logger.info(`Disabled release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error disabling release ${readableName}: ${err}`);
@@ -54,7 +48,7 @@ export function App(props: {
 		const readableName = `${selected?.modName} v${selected?.version}`;
 		try {
 			logger.info(`Enabling release: ${readableName}`);
-			props.enableRelease.execute(selectedId);
+			props.app.releaseToggleService.enable(selectedId);
 			logger.info(`Enabled release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error enabling release ${readableName}`, err);
@@ -66,7 +60,7 @@ export function App(props: {
 		const readableName = `${selected?.modName} v${selected?.version}`;
 		try {
 			logger.info(`Removing release: ${readableName}`);
-			props.removeRelease.execute(selectedId);
+			props.app.releaseCatalog.remove(selectedId);
 			logger.info(`Removed release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error removing release ${readableName}: ${err}`);

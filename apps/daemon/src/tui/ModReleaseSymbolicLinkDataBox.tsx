@@ -1,5 +1,5 @@
 import { TextAttributes } from "@opentui/core";
-import type { ModReleaseSymbolicLinkData } from "../schemas/ModAndReleaseData.ts";
+import type { ModReleaseSymbolicLinkData } from "../application/schemas/ModAndReleaseData.ts";
 import { Stack } from "./components.tsx";
 import { KeyValueItem } from "./KeyValueItem.tsx";
 
