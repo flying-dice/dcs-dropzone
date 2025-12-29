@@ -1,2 +1,5 @@
-export { MissionScriptingFilesManagerImpl as MissionScriptingFilesManager } from "./impl/MissionScriptingFilesManagerImpl.ts";
-export type { IMissionScriptingFilesManager } from "./IMissionScriptingFilesManager.ts";
+export interface MissionScriptingFilesManager {
+	rebuild(): void;
+}
+
+export { BaseMissionScriptingFilesManager } from "./impl/BaseMissionScriptingFilesManager.ts";

@@ -1,2 +1,6 @@
-export { ReleaseToggleImpl as ReleaseToggle } from "./impl/ReleaseToggleImpl.ts";
-export type { IReleaseToggle } from "./IReleaseToggle.ts";
+export interface ReleaseToggle {
+	enable(releaseId: string): void;
+	disable(releaseId: string): void;
+}
+
+export { BaseReleaseToggle } from "./impl/BaseReleaseToggle.ts";

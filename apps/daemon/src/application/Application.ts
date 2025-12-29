@@ -4,10 +4,12 @@ import type { ReleaseRepository } from "./repository/ReleaseRepository.ts";
 import type { DownloadQueue } from "./services/DownloadQueue.ts";
 import type { ExtractQueue } from "./services/ExtractQueue.ts";
 import type { FileSystem } from "./services/FileSystem.ts";
-import { MissionScriptingFilesManager } from "./services/MissionScriptingFilesManager.ts";
-import { PathResolver } from "./services/PathResolver.ts";
-import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
-import { ReleaseToggle } from "./services/ReleaseToggle.ts";
+import { BaseMissionScriptingFilesManager } from "./services/MissionScriptingFilesManager.ts";
+import { BasePathResolver } from "./services/PathResolver.ts";
+import type { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
+import { BaseReleaseCatalog } from "./services/ReleaseCatalog.ts";
+import type { ReleaseToggle } from "./services/ReleaseToggle.ts";
+import { BaseReleaseToggle } from "./services/ReleaseToggle.ts";
 import type { UUIDGenerator } from "./services/UUIDGenerator.ts";
 
 type Deps = {
@@ -35,20 +37,20 @@ export class Application {
 			this.deps.attributesRepository.getDaemonInstanceId() ??
 			this.deps.attributesRepository.saveDaemonInstanceId(this.deps.generateUuid());
 
-		const pathResolver = new PathResolver({ ...deps });
+		const pathResolver = new BasePathResolver({ ...deps });
 
-		const missionScriptingFilesManager = new MissionScriptingFilesManager({
+		const missionScriptingFilesManager = new BaseMissionScriptingFilesManager({
 			...this.deps,
 			pathResolver,
 		});
 
-		this.releaseToggleService = new ReleaseToggle({
+		this.releaseToggleService = new BaseReleaseToggle({
 			...this.deps,
 			pathResolver,
 			missionScriptingFilesManager,
 		});
 
-		this.releaseCatalog = new ReleaseCatalog({
+		this.releaseCatalog = new BaseReleaseCatalog({
 			...this.deps,
 			pathResolver,
 			releaseToggleService: this.releaseToggleService,

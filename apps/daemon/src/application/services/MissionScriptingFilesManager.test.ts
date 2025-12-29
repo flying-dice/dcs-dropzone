@@ -1,15 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import { TestFileSystem } from "./impl/TestFileSystem.ts";
 import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
-import { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import { PathResolver } from "./PathResolver.ts";
+import { TestFileSystem } from "./impl/TestFileSystem.ts";
+import { BaseMissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
+import { BasePathResolver } from "./PathResolver.ts";
 
 describe("MissionScriptingFilesManager", () => {
 	it("rebuilds mission scripting files with before and after sanitize scripts", () => {
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
-		const pathResolver = new PathResolver({
+		const pathResolver = new BasePathResolver({
 			dropzoneModsFolder: "/dropzone/mods",
 			dcsInstallDir: "/dcs/install",
 			dcsWorkingDir: "/dcs/working",
@@ -57,7 +57,7 @@ describe("MissionScriptingFilesManager", () => {
 			],
 		});
 
-		const manager = new MissionScriptingFilesManager({
+		const manager = new BaseMissionScriptingFilesManager({
 			fileSystem,
 			releaseRepository,
 			pathResolver,
@@ -73,7 +73,7 @@ describe("MissionScriptingFilesManager", () => {
 	it("generates scripts with correct paths", () => {
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
-		const pathResolver = new PathResolver({
+		const pathResolver = new BasePathResolver({
 			dropzoneModsFolder: "/dropzone/mods",
 			dcsInstallDir: "/working",
 			dcsWorkingDir: "/working",
@@ -100,7 +100,7 @@ describe("MissionScriptingFilesManager", () => {
 			],
 		});
 
-		const manager = new MissionScriptingFilesManager({
+		const manager = new BaseMissionScriptingFilesManager({
 			fileSystem,
 			releaseRepository,
 			pathResolver,
@@ -116,14 +116,14 @@ describe("MissionScriptingFilesManager", () => {
 	it("handles empty scripts list", () => {
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
-		const pathResolver = new PathResolver({
+		const pathResolver = new BasePathResolver({
 			dropzoneModsFolder: "/dropzone/mods",
 			dcsInstallDir: "/dcs",
 			dcsWorkingDir: "/dcs",
 			fileSystem,
 		});
 
-		const manager = new MissionScriptingFilesManager({
+		const manager = new BaseMissionScriptingFilesManager({
 			fileSystem,
 			releaseRepository,
 			pathResolver,

@@ -1,6 +1,6 @@
 import type { SymbolicLinkDestRoot } from "webapp";
 import type { FileSystem } from "../FileSystem.ts";
-import type { IPathResolver } from "../IPathResolver.ts";
+import type { PathResolver } from "../PathResolver.ts";
 
 type Deps = {
 	dropzoneModsFolder: string;
@@ -9,7 +9,7 @@ type Deps = {
 	fileSystem: FileSystem;
 };
 
-export class PathResolverImpl implements IPathResolver {
+export class BasePathResolver implements PathResolver {
 	private readonly dcsPaths: Record<SymbolicLinkDestRoot, string>;
 
 	constructor(protected deps: Deps) {

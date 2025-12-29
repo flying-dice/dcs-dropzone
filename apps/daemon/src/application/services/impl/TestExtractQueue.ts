@@ -1,6 +1,5 @@
 import { ExtractJobStatus } from "../../enums/ExtractJobStatus.ts";
-import type { ExtractQueue } from "../ExtractQueue.ts";
-import type { ExtractJob } from "../types.ts";
+import type { ExtractJob, ExtractQueue } from "../ExtractQueue.ts";
 
 export class TestExtractQueue implements ExtractQueue {
 	public pushedJobs: Array<{
@@ -88,13 +87,14 @@ export class TestExtractQueue implements ExtractQueue {
 		}
 	}
 
-	setJobStatus(assetId: string, jobId: string, status: ExtractJobStatus, progressPercent = 0): void {
-		const jobs = this.jobs.get(assetId);
-		if (jobs) {
+	setJobStatus(jobId: string, status: ExtractJobStatus, progressPercent = 0): void {
+		// Find the job across all assets
+		for (const jobs of this.jobs.values()) {
 			const job = jobs.find((j) => j.id === jobId);
 			if (job) {
 				job.status = status;
 				job.progressPercent = progressPercent;
+				return;
 			}
 		}
 	}

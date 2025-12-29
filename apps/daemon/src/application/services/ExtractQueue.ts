@@ -1,4 +1,20 @@
-import type { ExtractJob } from "./types.ts";
+import type { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
+
+/**
+ * Extract job information
+ */
+export type ExtractJob = {
+	id: string;
+	releaseId: string;
+	releaseAssetId: string;
+	archivePath: string;
+	targetDirectory: string;
+	status: ExtractJobStatus;
+	progressPercent: number;
+	attempt: number;
+	nextAttemptAfter: Date;
+	createdAt: Date;
+};
 
 export interface ExtractQueue {
 	pushJob(
@@ -15,4 +31,6 @@ export interface ExtractQueue {
 	getJobsForReleaseId(releaseId: string): ExtractJob[];
 
 	getJobsForReleaseAssetId(releaseAssetId: string): ExtractJob[];
+
+	setJobStatus(jobId: string, status: ExtractJobStatus, progressPercent?: number): void;
 }

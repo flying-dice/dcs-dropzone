@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import { SymbolicLinkDestRoot } from "webapp";
 import { TestFileSystem } from "./impl/TestFileSystem.ts";
-import { PathResolver } from "./PathResolver.ts";
+import { BasePathResolver } from "./PathResolver.ts";
 
 describe("PathResolver", () => {
 	describe("resolveReleasePath", () => {
 		it("resolves release path without additional path", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -19,7 +19,7 @@ describe("PathResolver", () => {
 
 		it("resolves release path with additional path", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -31,7 +31,7 @@ describe("PathResolver", () => {
 
 		it("resolves release path with nested additional path", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -45,7 +45,7 @@ describe("PathResolver", () => {
 	describe("resolveSymbolicLinkPath", () => {
 		it("resolves DCS_INSTALL_DIR root path without additional path", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -57,7 +57,7 @@ describe("PathResolver", () => {
 
 		it("resolves DCS_INSTALL_DIR root path with additional path", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -69,7 +69,7 @@ describe("PathResolver", () => {
 
 		it("resolves DCS_WORKING_DIR root path without additional path", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -81,7 +81,7 @@ describe("PathResolver", () => {
 
 		it("resolves DCS_WORKING_DIR root path with additional path", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -93,7 +93,7 @@ describe("PathResolver", () => {
 
 		it("resolves nested path with DCS_WORKING_DIR", () => {
 			const fileSystem = new TestFileSystem();
-			const resolver = new PathResolver({
+			const resolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",

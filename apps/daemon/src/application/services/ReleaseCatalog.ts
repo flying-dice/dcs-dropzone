@@ -1,2 +1,9 @@
-export { ReleaseCatalogImpl as ReleaseCatalog } from "./impl/ReleaseCatalogImpl.ts";
-export type { IReleaseCatalog } from "./IReleaseCatalog.ts";
+import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
+
+export interface ReleaseCatalog {
+	add(data: ModAndReleaseData): void;
+	remove(releaseId: string): void;
+	getAllReleasesWithStatus(): ModAndReleaseData[];
+}
+
+export { BaseReleaseCatalog } from "./impl/BaseReleaseCatalog.ts";

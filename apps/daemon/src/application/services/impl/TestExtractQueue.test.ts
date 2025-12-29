@@ -125,7 +125,7 @@ describe("TestExtractQueue", () => {
 		it("updates job status and progress", () => {
 			const queue = new TestExtractQueue();
 			queue.pushJob("release-1", "asset-1", "job-1", "/archive.zip", "/dest", ["download-1"]);
-			queue.setJobStatus("asset-1", "job-1", ExtractJobStatus.IN_PROGRESS, 50);
+			queue.setJobStatus("job-1", ExtractJobStatus.IN_PROGRESS, 50);
 
 			const jobs = queue.getJobsForReleaseAssetId("asset-1");
 			expect(jobs[0]?.status).toBe(ExtractJobStatus.IN_PROGRESS);
@@ -135,14 +135,14 @@ describe("TestExtractQueue", () => {
 		it("does nothing for non-existent job", () => {
 			const queue = new TestExtractQueue();
 			expect(() => {
-				queue.setJobStatus("non-existent", "non-existent", ExtractJobStatus.COMPLETED, 100);
+				queue.setJobStatus("non-existent", ExtractJobStatus.COMPLETED, 100);
 			}).not.toThrow();
 		});
 
 		it("sets progress to 0 by default", () => {
 			const queue = new TestExtractQueue();
 			queue.pushJob("release-1", "asset-1", "job-1", "/archive.zip", "/dest", ["download-1"]);
-			queue.setJobStatus("asset-1", "job-1", ExtractJobStatus.COMPLETED);
+			queue.setJobStatus("job-1", ExtractJobStatus.COMPLETED);
 
 			const jobs = queue.getJobsForReleaseAssetId("asset-1");
 			expect(jobs[0]?.progressPercent).toBe(0);

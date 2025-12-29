@@ -1,20 +1,20 @@
 import { describe, expect, it } from "bun:test";
 import { SymbolicLinkDestRoot } from "webapp";
+import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
+import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
+import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
 import { TestDownloadQueue } from "./impl/TestDownloadQueue.ts";
 import { TestExtractQueue } from "./impl/TestExtractQueue.ts";
 import { TestFileSystem } from "./impl/TestFileSystem.ts";
 import { TestMissionScriptingFilesManager } from "./impl/TestMissionScriptingFilesManager.ts";
-import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import { PathResolver } from "./PathResolver.ts";
-import { ReleaseToggle } from "./ReleaseToggle.ts";
+import { BasePathResolver } from "./PathResolver.ts";
+import { BaseReleaseToggle } from "./ReleaseToggle.ts";
 
 describe("ReleaseToggle", () => {
 	describe("enable", () => {
 		it("enables release by creating symlinks and rebuilding mission scripts", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new PathResolver({
+			const pathResolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -47,12 +47,12 @@ describe("ReleaseToggle", () => {
 
 			// Set jobs as completed
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("asset-1", "extract-1", ExtractJobStatus.COMPLETED, 100);
+			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
 
-			const releaseToggle = new ReleaseToggle({
+			const releaseToggle = new BaseReleaseToggle({
 				fileSystem,
 				pathResolver,
 				releaseRepository,
@@ -71,7 +71,7 @@ describe("ReleaseToggle", () => {
 
 		it("throws error when download jobs are not completed", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new PathResolver({
+			const pathResolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -84,12 +84,12 @@ describe("ReleaseToggle", () => {
 
 			// Set download job as in progress
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.IN_PROGRESS, 50);
+			downloadQueue.setJobStatus("job-1", DownloadJobStatus.IN_PROGRESS, 50);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("asset-1", "extract-1", ExtractJobStatus.COMPLETED, 100);
+			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
 
-			const releaseToggle = new ReleaseToggle({
+			const releaseToggle = new BaseReleaseToggle({
 				fileSystem,
 				pathResolver,
 				releaseRepository,
@@ -105,7 +105,7 @@ describe("ReleaseToggle", () => {
 
 		it("throws error when extract jobs are not completed", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new PathResolver({
+			const pathResolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -117,12 +117,12 @@ describe("ReleaseToggle", () => {
 			const missionScriptingManager = new TestMissionScriptingFilesManager();
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("asset-1", "extract-1", ExtractJobStatus.PENDING, 0);
+			extractQueue.setJobStatus("extract-1", ExtractJobStatus.PENDING, 0);
 
-			const releaseToggle = new ReleaseToggle({
+			const releaseToggle = new BaseReleaseToggle({
 				fileSystem,
 				pathResolver,
 				releaseRepository,
@@ -138,7 +138,7 @@ describe("ReleaseToggle", () => {
 
 		it("calls onCreateSymlink callback when provided", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new PathResolver({
+			const pathResolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -170,12 +170,12 @@ describe("ReleaseToggle", () => {
 			});
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("asset-1", "extract-1", ExtractJobStatus.COMPLETED, 100);
+			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
 
-			const releaseToggle = new ReleaseToggle({
+			const releaseToggle = new BaseReleaseToggle({
 				fileSystem,
 				pathResolver,
 				releaseRepository,
@@ -198,7 +198,7 @@ describe("ReleaseToggle", () => {
 	describe("disable", () => {
 		it("disables release by removing symlinks and rebuilding mission scripts", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new PathResolver({
+			const pathResolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -233,12 +233,12 @@ describe("ReleaseToggle", () => {
 			releaseRepository.setInstalledPathForSymbolicLink(links[0]!.id, "/installed/path");
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("asset-1", "extract-1", ExtractJobStatus.COMPLETED, 100);
+			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
 
-			const releaseToggle = new ReleaseToggle({
+			const releaseToggle = new BaseReleaseToggle({
 				fileSystem,
 				pathResolver,
 				releaseRepository,
@@ -256,7 +256,7 @@ describe("ReleaseToggle", () => {
 
 		it("skips symlinks without installed paths", () => {
 			const fileSystem = new TestFileSystem();
-			const pathResolver = new PathResolver({
+			const pathResolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -287,12 +287,12 @@ describe("ReleaseToggle", () => {
 			});
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("asset-1", "extract-1", ExtractJobStatus.COMPLETED, 100);
+			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
 
-			const releaseToggle = new ReleaseToggle({
+			const releaseToggle = new BaseReleaseToggle({
 				fileSystem,
 				pathResolver,
 				releaseRepository,
@@ -313,7 +313,7 @@ describe("ReleaseToggle", () => {
 				throw new Error("Failed to remove");
 			};
 
-			const pathResolver = new PathResolver({
+			const pathResolver = new BasePathResolver({
 				dropzoneModsFolder: "/dropzone/mods",
 				dcsInstallDir: "/dcs/install",
 				dcsWorkingDir: "/dcs/working",
@@ -347,12 +347,12 @@ describe("ReleaseToggle", () => {
 			releaseRepository.setInstalledPathForSymbolicLink(links[0]!.id, "/installed/path");
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("asset-1", "extract-1", ExtractJobStatus.COMPLETED, 100);
+			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
 
-			const releaseToggle = new ReleaseToggle({
+			const releaseToggle = new BaseReleaseToggle({
 				fileSystem,
 				pathResolver,
 				releaseRepository,

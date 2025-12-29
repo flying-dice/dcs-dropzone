@@ -5,15 +5,15 @@ import type { ReleaseRepository } from "../../repository/ReleaseRepository.ts";
 import type { DownloadQueue } from "../DownloadQueue.ts";
 import type { ExtractQueue } from "../ExtractQueue.ts";
 import type { FileSystem } from "../FileSystem.ts";
-import type { IMissionScriptingFilesManager } from "../IMissionScriptingFilesManager.ts";
-import type { IPathResolver } from "../IPathResolver.ts";
-import type { IReleaseToggle } from "../IReleaseToggle.ts";
+import type { MissionScriptingFilesManager } from "../MissionScriptingFilesManager.ts";
+import type { PathResolver } from "../PathResolver.ts";
+import type { ReleaseToggle } from "../ReleaseToggle.ts";
 
 const logger = getLogger("ReleaseToggle");
 
 type Deps = {
-	missionScriptingFilesManager: IMissionScriptingFilesManager;
-	pathResolver: IPathResolver;
+	missionScriptingFilesManager: MissionScriptingFilesManager;
+	pathResolver: PathResolver;
 	onCreateSymlink?: (src: string, dest: string) => void;
 	releaseRepository: ReleaseRepository;
 	fileSystem: FileSystem;
@@ -21,7 +21,7 @@ type Deps = {
 	extractQueue: ExtractQueue;
 };
 
-export class ReleaseToggleImpl implements IReleaseToggle {
+export class BaseReleaseToggle implements ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
 	enable(releaseId: string): void {

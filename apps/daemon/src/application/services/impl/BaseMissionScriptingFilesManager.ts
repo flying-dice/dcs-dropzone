@@ -3,17 +3,17 @@ import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import { generateDropzoneMissionScriptingScript } from "../../functions/generateDropzoneMissionScriptingScript.ts";
 import type { ReleaseRepository } from "../../repository/ReleaseRepository.ts";
 import type { FileSystem } from "../FileSystem.ts";
-import type { IPathResolver } from "../IPathResolver.ts";
-import type { IMissionScriptingFilesManager } from "../IMissionScriptingFilesManager.ts";
+import type { MissionScriptingFilesManager } from "../MissionScriptingFilesManager.ts";
+import type { PathResolver } from "../PathResolver.ts";
 
 const logger = getLogger("RegenerateMissionScriptingFiles");
 
-export class MissionScriptingFilesManagerImpl implements IMissionScriptingFilesManager {
+export class BaseMissionScriptingFilesManager implements MissionScriptingFilesManager {
 	constructor(
 		protected deps: {
 			fileSystem: FileSystem;
 			releaseRepository: ReleaseRepository;
-			pathResolver: IPathResolver;
+			pathResolver: PathResolver;
 		},
 	) {}
 

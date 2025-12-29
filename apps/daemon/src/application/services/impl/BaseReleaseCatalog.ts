@@ -9,22 +9,22 @@ import { ModAndReleaseData, type ModReleaseAssetStatusData } from "../../schemas
 import type { DownloadQueue } from "../DownloadQueue.ts";
 import type { ExtractQueue } from "../ExtractQueue.ts";
 import type { FileSystem } from "../FileSystem.ts";
-import type { IPathResolver } from "../IPathResolver.ts";
-import type { IReleaseToggle } from "../IReleaseToggle.ts";
-import type { IReleaseCatalog } from "../IReleaseCatalog.ts";
+import type { PathResolver } from "../PathResolver.ts";
+import type { ReleaseCatalog } from "../ReleaseCatalog.ts";
+import type { ReleaseToggle } from "../ReleaseToggle.ts";
 
 const logger = getLogger("ReleaseCatalog");
 
 type Deps = {
-	releaseToggleService: IReleaseToggle;
-	pathResolver: IPathResolver;
+	releaseToggleService: ReleaseToggle;
+	pathResolver: PathResolver;
 	downloadQueue: DownloadQueue;
 	extractQueue: ExtractQueue;
 	releaseRepository: ReleaseRepository;
 	fileSystem: FileSystem;
 };
 
-export class ReleaseCatalogImpl implements IReleaseCatalog {
+export class BaseReleaseCatalog implements ReleaseCatalog {
 	constructor(protected deps: Deps) {}
 
 	add(data: ModAndReleaseData) {

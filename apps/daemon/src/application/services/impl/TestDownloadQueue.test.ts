@@ -124,7 +124,7 @@ describe("TestDownloadQueue", () => {
 		it("updates job status and progress", () => {
 			const queue = new TestDownloadQueue();
 			queue.pushJob("release-1", "asset-1", "job-1", "http://example.com/file", "/dest");
-			queue.setJobStatus("asset-1", "job-1", DownloadJobStatus.IN_PROGRESS, 50);
+			queue.setJobStatus("job-1", DownloadJobStatus.IN_PROGRESS, 50);
 
 			const jobs = queue.getJobsForReleaseAssetId("asset-1");
 			expect(jobs[0]?.status).toBe(DownloadJobStatus.IN_PROGRESS);
@@ -134,14 +134,14 @@ describe("TestDownloadQueue", () => {
 		it("does nothing for non-existent job", () => {
 			const queue = new TestDownloadQueue();
 			expect(() => {
-				queue.setJobStatus("non-existent", "non-existent", DownloadJobStatus.COMPLETED, 100);
+				queue.setJobStatus("non-existent", DownloadJobStatus.COMPLETED, 100);
 			}).not.toThrow();
 		});
 
 		it("sets progress to 0 by default", () => {
 			const queue = new TestDownloadQueue();
 			queue.pushJob("release-1", "asset-1", "job-1", "http://example.com/file", "/dest");
-			queue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED);
+			queue.setJobStatus("job-1", DownloadJobStatus.COMPLETED);
 
 			const jobs = queue.getJobsForReleaseAssetId("asset-1");
 			expect(jobs[0]?.progressPercent).toBe(0);
