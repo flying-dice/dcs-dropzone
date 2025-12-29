@@ -1,5 +1,12 @@
-import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
+import type { MissionScriptRunOn } from "webapp";
 import type { ReleaseRepository } from "../../repository/ReleaseRepository.ts";
+import type {
+	MissionScript,
+	MissionScriptByRunOn,
+	ReleaseAsset,
+	ReleaseInfo,
+	SymbolicLink,
+} from "../../repository/types.ts";
 import type { ModAndReleaseData } from "../../schemas/ModAndReleaseData.ts";
 
 export class TestReleaseRepository implements ReleaseRepository {
@@ -8,35 +15,9 @@ export class TestReleaseRepository implements ReleaseRepository {
 	public symbolicLinkPaths: Map<string, string | null> = new Map();
 
 	private releases: Map<string, ModAndReleaseData> = new Map();
-	private assets: Map<
-		string,
-		Array<{ id: string; releaseId: string; name: string; isArchive: boolean; urls: string[] }>
-	> = new Map();
-	private symbolicLinks: Map<
-		string,
-		Array<{
-			id: string;
-			releaseId: string;
-			name: string;
-			src: string;
-			dest: string;
-			destRoot: SymbolicLinkDestRoot;
-			installedPath: string | null;
-		}>
-	> = new Map();
-	private missionScripts: Map<
-		string,
-		Array<{
-			id: string;
-			releaseId: string;
-			name: string;
-			purpose: string;
-			path: string;
-			root: SymbolicLinkDestRoot;
-			runOn: MissionScriptRunOn;
-			installedPath: string | null;
-		}>
-	> = new Map();
+	private assets: Map<string, ReleaseAsset[]> = new Map();
+	private symbolicLinks: Map<string, SymbolicLink[]> = new Map();
+	private missionScripts: Map<string, MissionScript[]> = new Map();
 
 	saveRelease(data: ModAndReleaseData): void {
 		this.savedReleases.push(data);
@@ -86,14 +67,7 @@ export class TestReleaseRepository implements ReleaseRepository {
 		this.missionScripts.delete(releaseId);
 	}
 
-	getAllReleases(): Array<{
-		releaseId: string;
-		modId: string;
-		modName: string;
-		version: string;
-		versionHash: string;
-		dependencies: string[];
-	}> {
+	getAllReleases(): ReleaseInfo[] {
 		return Array.from(this.releases.values()).map((r) => ({
 			releaseId: r.releaseId,
 			modId: r.modId,
@@ -104,10 +78,8 @@ export class TestReleaseRepository implements ReleaseRepository {
 		}));
 	}
 
-	getMissionScriptsByRunOn(
-		runOn: MissionScriptRunOn,
-	): Array<{ modName: string; modVersion: string; path: string; pathRoot: SymbolicLinkDestRoot }> {
-		const result: Array<{ modName: string; modVersion: string; path: string; pathRoot: SymbolicLinkDestRoot }> = [];
+	getMissionScriptsByRunOn(runOn: MissionScriptRunOn): MissionScriptByRunOn[] {
+		const result: MissionScriptByRunOn[] = [];
 		for (const release of this.releases.values()) {
 			const scripts = this.missionScripts.get(release.releaseId) || [];
 			for (const script of scripts) {
@@ -124,21 +96,11 @@ export class TestReleaseRepository implements ReleaseRepository {
 		return result;
 	}
 
-	getReleaseAssetsForRelease(
-		releaseId: string,
-	): Array<{ id: string; releaseId: string; name: string; isArchive: boolean; urls: string[] }> {
+	getReleaseAssetsForRelease(releaseId: string): ReleaseAsset[] {
 		return this.assets.get(releaseId) || [];
 	}
 
-	getSymbolicLinksForRelease(releaseId: string): Array<{
-		id: string;
-		releaseId: string;
-		name: string;
-		src: string;
-		dest: string;
-		destRoot: SymbolicLinkDestRoot;
-		installedPath: string | null;
-	}> {
+	getSymbolicLinksForRelease(releaseId: string): SymbolicLink[] {
 		return this.symbolicLinks.get(releaseId) || [];
 	}
 
@@ -153,16 +115,7 @@ export class TestReleaseRepository implements ReleaseRepository {
 		}
 	}
 
-	getMissionScriptsForRelease(releaseId: string): Array<{
-		id: string;
-		releaseId: string;
-		name: string;
-		purpose: string;
-		path: string;
-		root: SymbolicLinkDestRoot;
-		runOn: MissionScriptRunOn;
-		installedPath: string | null;
-	}> {
+	getMissionScriptsForRelease(releaseId: string): MissionScript[] {
 		return this.missionScripts.get(releaseId) || [];
 	}
 }

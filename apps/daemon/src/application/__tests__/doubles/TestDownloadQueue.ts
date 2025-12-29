@@ -1,5 +1,6 @@
 import { DownloadJobStatus } from "../../enums/DownloadJobStatus.ts";
 import type { DownloadQueue } from "../../services/DownloadQueue.ts";
+import type { DownloadJob } from "../../services/types.ts";
 
 export class TestDownloadQueue implements DownloadQueue {
 	public pushedJobs: Array<{
@@ -38,18 +39,7 @@ export class TestDownloadQueue implements DownloadQueue {
 		this.jobs.set(assetId, existing);
 	}
 
-	getJobsForReleaseAssetId(releaseAssetId: string): Array<{
-		id: string;
-		releaseId: string;
-		releaseAssetId: string;
-		url: string;
-		targetDirectory: string;
-		status: DownloadJobStatus;
-		progressPercent: number;
-		attempt: number;
-		nextAttemptAfter: Date;
-		createdAt: Date;
-	}> {
+	getJobsForReleaseAssetId(releaseAssetId: string): DownloadJob[] {
 		const jobs = this.jobs.get(releaseAssetId) || [];
 		return jobs.map((job) => ({
 			...job,
@@ -61,30 +51,8 @@ export class TestDownloadQueue implements DownloadQueue {
 		}));
 	}
 
-	getJobsForReleaseId(releaseId: string): Array<{
-		id: string;
-		releaseId: string;
-		releaseAssetId: string;
-		url: string;
-		targetDirectory: string;
-		status: DownloadJobStatus;
-		progressPercent: number;
-		attempt: number;
-		nextAttemptAfter: Date;
-		createdAt: Date;
-	}> {
-		const result: Array<{
-			id: string;
-			releaseId: string;
-			releaseAssetId: string;
-			url: string;
-			targetDirectory: string;
-			status: DownloadJobStatus;
-			progressPercent: number;
-			attempt: number;
-			nextAttemptAfter: Date;
-			createdAt: Date;
-		}> = [];
+	getJobsForReleaseId(releaseId: string): DownloadJob[] {
+		const result: DownloadJob[] = [];
 		for (const jobs of this.jobs.values()) {
 			for (const job of jobs) {
 				if (job.releaseId === releaseId) {
