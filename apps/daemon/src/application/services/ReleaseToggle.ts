@@ -1,4 +1,3 @@
-import { ok } from "node:assert";
 import { getLogger } from "log4js";
 import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
 import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";

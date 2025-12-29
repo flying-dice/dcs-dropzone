@@ -11,16 +11,12 @@ describe("MissionScriptingFilesManager", () => {
 
 		const mockFileSystem: FileSystem = {
 			resolve: (...paths: string[]) => paths.join("/"),
-			readFile: () => "",
 			writeFile: (path: string, content: string) => {
 				writtenFiles[path] = content;
 			},
 			ensureDir: () => {},
 			removeDir: () => {},
 			ensureSymlink: () => {},
-			exists: () => false,
-			readdir: () => [],
-			stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 		};
 
 		const mockReleaseRepository: ReleaseRepository = {
@@ -56,7 +52,7 @@ describe("MissionScriptingFilesManager", () => {
 			getMissionScriptsForRelease: () => [],
 		};
 
-		const mockPathResolver: PathResolver = {
+		const mockPathResolver = {
 			resolveReleasePath: () => "/release/path",
 			resolveSymbolicLinkPath: (root: SymbolicLinkDestRoot, path?: string) => {
 				if (root === SymbolicLinkDestRoot.DCS_WORKING_DIR) {
@@ -64,7 +60,7 @@ describe("MissionScriptingFilesManager", () => {
 				}
 				return path ? `/dcs/install/${path}` : "/dcs/install";
 			},
-		} as PathResolver;
+		} as unknown as PathResolver;
 
 		const manager = new MissionScriptingFilesManager({
 			fileSystem: mockFileSystem,
@@ -84,16 +80,12 @@ describe("MissionScriptingFilesManager", () => {
 
 		const mockFileSystem: FileSystem = {
 			resolve: (...paths: string[]) => paths.join("/"),
-			readFile: () => "",
 			writeFile: (path: string, content: string) => {
 				writtenFiles[path] = content;
 			},
 			ensureDir: () => {},
 			removeDir: () => {},
 			ensureSymlink: () => {},
-			exists: () => false,
-			readdir: () => [],
-			stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 		};
 
 		const mockReleaseRepository: ReleaseRepository = {
@@ -119,7 +111,7 @@ describe("MissionScriptingFilesManager", () => {
 			getMissionScriptsForRelease: () => [],
 		};
 
-		const mockPathResolver: PathResolver = {
+		const mockPathResolver = {
 			resolveReleasePath: () => "/release/path",
 			resolveSymbolicLinkPath: (root: SymbolicLinkDestRoot, path?: string) => {
 				if (root === SymbolicLinkDestRoot.DCS_WORKING_DIR) {
@@ -127,7 +119,7 @@ describe("MissionScriptingFilesManager", () => {
 				}
 				return "/install";
 			},
-		} as PathResolver;
+		} as unknown as PathResolver;
 
 		const manager = new MissionScriptingFilesManager({
 			fileSystem: mockFileSystem,
@@ -147,16 +139,12 @@ describe("MissionScriptingFilesManager", () => {
 
 		const mockFileSystem: FileSystem = {
 			resolve: (...paths: string[]) => paths.join("/"),
-			readFile: () => "",
 			writeFile: (path: string, content: string) => {
 				writtenFiles[path] = content;
 			},
 			ensureDir: () => {},
 			removeDir: () => {},
 			ensureSymlink: () => {},
-			exists: () => false,
-			readdir: () => [],
-			stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 		};
 
 		const mockReleaseRepository: ReleaseRepository = {
@@ -170,12 +158,12 @@ describe("MissionScriptingFilesManager", () => {
 			getMissionScriptsForRelease: () => [],
 		};
 
-		const mockPathResolver: PathResolver = {
+		const mockPathResolver = {
 			resolveReleasePath: () => "/release/path",
-			resolveSymbolicLinkPath: (root: SymbolicLinkDestRoot, path?: string) => {
+			resolveSymbolicLinkPath: (_root: SymbolicLinkDestRoot, path?: string) => {
 				return path ? `/dcs/${path}` : "/dcs";
 			},
-		} as PathResolver;
+		} as unknown as PathResolver;
 
 		const manager = new MissionScriptingFilesManager({
 			fileSystem: mockFileSystem,

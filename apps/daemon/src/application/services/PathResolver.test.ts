@@ -6,14 +6,10 @@ import { PathResolver } from "./PathResolver.ts";
 describe("PathResolver", () => {
 	const mockFileSystem: FileSystem = {
 		resolve: (...paths: string[]) => paths.join("/"),
-		readFile: () => "",
 		writeFile: () => {},
 		ensureDir: () => {},
 		removeDir: () => {},
 		ensureSymlink: () => {},
-		exists: () => false,
-		readdir: () => [],
-		stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 	};
 
 	const deps = {
@@ -70,10 +66,7 @@ describe("PathResolver", () => {
 
 		it("resolves nested path with DCS_WORKING_DIR", () => {
 			const resolver = new PathResolver(deps);
-			const result = resolver.resolveSymbolicLinkPath(
-				SymbolicLinkDestRoot.DCS_WORKING_DIR,
-				"Scripts/Hooks/custom.lua",
-			);
+			const result = resolver.resolveSymbolicLinkPath(SymbolicLinkDestRoot.DCS_WORKING_DIR, "Scripts/Hooks/custom.lua");
 			expect(result).toBe("/dcs/working/Scripts/Hooks/custom.lua");
 		});
 	});

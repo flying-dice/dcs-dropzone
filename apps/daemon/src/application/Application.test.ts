@@ -18,14 +18,10 @@ describe("Application", () => {
 
 		const mockFileSystem: FileSystem = {
 			resolve: (...paths: string[]) => paths.join("/"),
-			readFile: () => "",
 			writeFile: () => {},
 			ensureDir: () => {},
 			removeDir: () => {},
 			ensureSymlink: () => {},
-			exists: () => false,
-			readdir: () => [],
-			stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 		};
 
 		const mockReleaseRepository: ReleaseRepository = {
@@ -83,14 +79,10 @@ describe("Application", () => {
 
 		const mockFileSystem: FileSystem = {
 			resolve: (...paths: string[]) => paths.join("/"),
-			readFile: () => "",
 			writeFile: () => {},
 			ensureDir: () => {},
 			removeDir: () => {},
 			ensureSymlink: () => {},
-			exists: () => false,
-			readdir: () => [],
-			stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 		};
 
 		const mockReleaseRepository: ReleaseRepository = {
@@ -142,14 +134,10 @@ describe("Application", () => {
 
 		const mockFileSystem: FileSystem = {
 			resolve: (...paths: string[]) => paths.join("/"),
-			readFile: () => "",
 			writeFile: () => {},
 			ensureDir: () => {},
 			removeDir: () => {},
 			ensureSymlink: () => {},
-			exists: () => false,
-			readdir: () => [],
-			stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 		};
 
 		const mockReleaseRepository: ReleaseRepository = {
@@ -201,14 +189,10 @@ describe("Application", () => {
 
 		const mockFileSystem: FileSystem = {
 			resolve: (...paths: string[]) => paths.join("/"),
-			readFile: () => "",
 			writeFile: () => {},
 			ensureDir: () => {},
 			removeDir: () => {},
 			ensureSymlink: () => {},
-			exists: () => false,
-			readdir: () => [],
-			stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 		};
 
 		const mockReleaseRepository: ReleaseRepository = {

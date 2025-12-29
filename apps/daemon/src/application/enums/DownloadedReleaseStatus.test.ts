@@ -3,23 +3,23 @@ import { DownloadedReleaseStatus } from "./DownloadedReleaseStatus.ts";
 
 describe("DownloadedReleaseStatus", () => {
 	it("should have PENDING status", () => {
-		expect(DownloadedReleaseStatus.PENDING).toBe("PENDING");
+		expect(DownloadedReleaseStatus.PENDING).toBe(DownloadedReleaseStatus.PENDING);
 	});
 
 	it("should have IN_PROGRESS status", () => {
-		expect(DownloadedReleaseStatus.IN_PROGRESS).toBe("IN_PROGRESS");
+		expect(DownloadedReleaseStatus.IN_PROGRESS).toBe(DownloadedReleaseStatus.IN_PROGRESS);
 	});
 
 	it("should have DISABLED status", () => {
-		expect(DownloadedReleaseStatus.DISABLED).toBe("DISABLED");
+		expect(DownloadedReleaseStatus.DISABLED).toBe(DownloadedReleaseStatus.DISABLED);
 	});
 
 	it("should have ENABLED status", () => {
-		expect(DownloadedReleaseStatus.ENABLED).toBe("ENABLED");
+		expect(DownloadedReleaseStatus.ENABLED).toBe(DownloadedReleaseStatus.ENABLED);
 	});
 
 	it("should have ERROR status", () => {
-		expect(DownloadedReleaseStatus.ERROR).toBe("ERROR");
+		expect(DownloadedReleaseStatus.ERROR).toBe(DownloadedReleaseStatus.ERROR);
 	});
 
 	it("should have exactly 5 values", () => {

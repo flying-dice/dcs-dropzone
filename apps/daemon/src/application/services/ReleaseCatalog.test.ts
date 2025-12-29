@@ -1,8 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { SymbolicLinkDestRoot } from "webapp";
 import { AssetStatus } from "../enums/AssetStatus.ts";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
 import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
+import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
 import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
 import type { ReleaseRepository } from "../repository/ReleaseRepository.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
@@ -24,19 +23,15 @@ describe("ReleaseCatalog", () => {
 					ensuredDirs.push(dir);
 				},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				removeDir: () => {},
 				ensureSymlink: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
-			const mockPathResolver: PathResolver = {
+			const mockPathResolver = {
 				resolveReleasePath: (releaseId: string) => `/releases/${releaseId}`,
 				resolveSymbolicLinkPath: () => "/dcs",
-			} as PathResolver;
+			} as unknown as PathResolver;
 
 			const mockReleaseRepository: ReleaseRepository = {
 				saveRelease: () => {},
@@ -108,19 +103,15 @@ describe("ReleaseCatalog", () => {
 			const mockFileSystem: FileSystem = {
 				ensureDir: () => {},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				removeDir: () => {},
 				ensureSymlink: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
-			const mockPathResolver: PathResolver = {
+			const mockPathResolver = {
 				resolveReleasePath: (releaseId: string) => `/releases/${releaseId}`,
 				resolveSymbolicLinkPath: () => "/dcs",
-			} as PathResolver;
+			} as unknown as PathResolver;
 
 			const mockReleaseRepository: ReleaseRepository = {
 				saveRelease: () => {},
@@ -198,19 +189,15 @@ describe("ReleaseCatalog", () => {
 					removedDirs.push(dir);
 				},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				ensureDir: () => {},
 				ensureSymlink: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
-			const mockPathResolver: PathResolver = {
+			const mockPathResolver = {
 				resolveReleasePath: (releaseId: string) => `/releases/${releaseId}`,
 				resolveSymbolicLinkPath: () => "/dcs",
-			} as PathResolver;
+			} as unknown as PathResolver;
 
 			const mockReleaseRepository: ReleaseRepository = {
 				deleteRelease: (releaseId: string) => {
@@ -274,14 +261,10 @@ describe("ReleaseCatalog", () => {
 		it("returns releases with computed status", () => {
 			const mockFileSystem: FileSystem = {
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				ensureDir: () => {},
 				removeDir: () => {},
 				ensureSymlink: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
 			const mockReleaseRepository: ReleaseRepository = {

@@ -21,19 +21,15 @@ describe("ReleaseToggle", () => {
 					createdSymlinks.push({ src, dest });
 				},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				ensureDir: () => {},
 				removeDir: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
-			const mockPathResolver: PathResolver = {
+			const mockPathResolver = {
 				resolveReleasePath: (releaseId: string, path?: string) => `/releases/${releaseId}/${path || ""}`,
 				resolveSymbolicLinkPath: (root: SymbolicLinkDestRoot, path?: string) => `/dcs/${root}/${path || ""}`,
-			} as PathResolver;
+			} as unknown as PathResolver;
 
 			const mockReleaseRepository: ReleaseRepository = {
 				getSymbolicLinksForRelease: () => [
@@ -139,19 +135,15 @@ describe("ReleaseToggle", () => {
 			const mockFileSystem: FileSystem = {
 				ensureSymlink: () => {},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				ensureDir: () => {},
 				removeDir: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
-			const mockPathResolver: PathResolver = {
+			const mockPathResolver = {
 				resolveReleasePath: (releaseId: string, path?: string) => `/releases/${releaseId}/${path || ""}`,
 				resolveSymbolicLinkPath: (root: SymbolicLinkDestRoot, path?: string) => `/dcs/${root}/${path || ""}`,
-			} as PathResolver;
+			} as unknown as PathResolver;
 
 			const mockReleaseRepository: ReleaseRepository = {
 				getSymbolicLinksForRelease: () => [
@@ -212,13 +204,9 @@ describe("ReleaseToggle", () => {
 					removedPaths.push(path);
 				},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				ensureDir: () => {},
 				ensureSymlink: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
 			const mockReleaseRepository: ReleaseRepository = {
@@ -280,13 +268,9 @@ describe("ReleaseToggle", () => {
 					removedPaths.push(path);
 				},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				ensureDir: () => {},
 				ensureSymlink: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
 			const mockReleaseRepository: ReleaseRepository = {
@@ -338,13 +322,9 @@ describe("ReleaseToggle", () => {
 					throw new Error("Failed to remove");
 				},
 				resolve: (...paths: string[]) => paths.join("/"),
-				readFile: () => "",
 				writeFile: () => {},
 				ensureDir: () => {},
 				ensureSymlink: () => {},
-				exists: () => false,
-				readdir: () => [],
-				stat: () => ({ isDirectory: () => false, isFile: () => false } as any),
 			};
 
 			const mockReleaseRepository: ReleaseRepository = {
