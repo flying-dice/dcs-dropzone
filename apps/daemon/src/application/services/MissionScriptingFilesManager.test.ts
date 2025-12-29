@@ -1,181 +1,126 @@
 import { describe, expect, it } from "bun:test";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import type { ReleaseRepository } from "../repository/ReleaseRepository.ts";
-import type { FileSystem } from "./FileSystem.ts";
+import {
+	TestFileSystem,
+	TestPathResolver,
+	TestReleaseRepository,
+} from "../__tests__/doubles/index.ts";
 import { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import type { PathResolver } from "./PathResolver.ts";
 
 describe("MissionScriptingFilesManager", () => {
 	it("rebuilds mission scripting files with before and after sanitize scripts", () => {
-		const writtenFiles: Record<string, string> = {};
+		const fileSystem = new TestFileSystem();
+		const releaseRepository = new TestReleaseRepository();
+		const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
 
-		const mockFileSystem: FileSystem = {
-			resolve: (...paths: string[]) => paths.join("/"),
-			writeFile: (path: string, content: string) => {
-				writtenFiles[path] = content;
-			},
-			ensureDir: () => {},
-			removeDir: () => {},
-			ensureSymlink: () => {},
-		};
+		// Setup test data
+		releaseRepository.saveRelease({
+			releaseId: "release-1",
+			modId: "mod-1",
+			modName: "mod1",
+			version: "1.0.0",
+			versionHash: "hash1",
+			dependencies: [],
+			assets: [],
+			symbolicLinks: [],
+			missionScripts: [
+				{
+					name: "Before Script",
+					purpose: "Test",
+					path: "scripts/before.lua",
+					root: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+					runOn: MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
+				},
+			],
+		});
 
-		const mockReleaseRepository: ReleaseRepository = {
-			getMissionScriptsByRunOn: (runOn: MissionScriptRunOn) => {
-				if (runOn === MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE) {
-					return [
-						{
-							modName: "mod1",
-							modVersion: "1.0.0",
-							path: "scripts/before.lua",
-							pathRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
-						},
-					];
-				}
-				if (runOn === MissionScriptRunOn.MISSION_START_AFTER_SANITIZE) {
-					return [
-						{
-							modName: "mod2",
-							modVersion: "2.0.0",
-							path: "scripts/after.lua",
-							pathRoot: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
-						},
-					];
-				}
-				return [];
-			},
-			saveRelease: () => {},
-			deleteRelease: () => {},
-			getAllReleases: () => [],
-			getReleaseAssetsForRelease: () => [],
-			getSymbolicLinksForRelease: () => [],
-			setInstalledPathForSymbolicLink: () => {},
-			getMissionScriptsForRelease: () => [],
-		};
-
-		const mockPathResolver = {
-			resolveReleasePath: () => "/release/path",
-			resolveSymbolicLinkPath: (root: SymbolicLinkDestRoot, path?: string) => {
-				if (root === SymbolicLinkDestRoot.DCS_WORKING_DIR) {
-					return path ? `/dcs/working/${path}` : "/dcs/working";
-				}
-				return path ? `/dcs/install/${path}` : "/dcs/install";
-			},
-		} as unknown as PathResolver;
+		releaseRepository.saveRelease({
+			releaseId: "release-2",
+			modId: "mod-2",
+			modName: "mod2",
+			version: "2.0.0",
+			versionHash: "hash2",
+			dependencies: [],
+			assets: [],
+			symbolicLinks: [],
+			missionScripts: [
+				{
+					name: "After Script",
+					purpose: "Test",
+					path: "scripts/after.lua",
+					root: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
+					runOn: MissionScriptRunOn.MISSION_START_AFTER_SANITIZE,
+				},
+			],
+		});
 
 		const manager = new MissionScriptingFilesManager({
-			fileSystem: mockFileSystem,
-			releaseRepository: mockReleaseRepository,
-			pathResolver: mockPathResolver,
+			fileSystem,
+			releaseRepository,
+			pathResolver,
 		});
 
 		manager.rebuild();
 
-		expect(Object.keys(writtenFiles).length).toBe(2);
-		expect(writtenFiles["/dcs/working/Scripts/DropzoneMissionScriptsBeforeSanitize.lua"]).toBeDefined();
-		expect(writtenFiles["/dcs/working/Scripts/DropzoneMissionScriptsAfterSanitize.lua"]).toBeDefined();
+		expect(fileSystem.writtenFiles.size).toBe(2);
+		expect(fileSystem.writtenFiles.has("/dcs/working/Scripts/DropzoneMissionScriptsBeforeSanitize.lua")).toBe(true);
+		expect(fileSystem.writtenFiles.has("/dcs/working/Scripts/DropzoneMissionScriptsAfterSanitize.lua")).toBe(true);
 	});
 
 	it("generates scripts with correct paths", () => {
-		const writtenFiles: Record<string, string> = {};
+		const fileSystem = new TestFileSystem();
+		const releaseRepository = new TestReleaseRepository();
+		const pathResolver = new TestPathResolver("/dropzone/mods", "/working", "/working", fileSystem);
 
-		const mockFileSystem: FileSystem = {
-			resolve: (...paths: string[]) => paths.join("/"),
-			writeFile: (path: string, content: string) => {
-				writtenFiles[path] = content;
-			},
-			ensureDir: () => {},
-			removeDir: () => {},
-			ensureSymlink: () => {},
-		};
-
-		const mockReleaseRepository: ReleaseRepository = {
-			getMissionScriptsByRunOn: (runOn: MissionScriptRunOn) => {
-				if (runOn === MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE) {
-					return [
-						{
-							modName: "test-mod",
-							modVersion: "1.0.0",
-							path: "init.lua",
-							pathRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
-						},
-					];
-				}
-				return [];
-			},
-			saveRelease: () => {},
-			deleteRelease: () => {},
-			getAllReleases: () => [],
-			getReleaseAssetsForRelease: () => [],
-			getSymbolicLinksForRelease: () => [],
-			setInstalledPathForSymbolicLink: () => {},
-			getMissionScriptsForRelease: () => [],
-		};
-
-		const mockPathResolver = {
-			resolveReleasePath: () => "/release/path",
-			resolveSymbolicLinkPath: (root: SymbolicLinkDestRoot, path?: string) => {
-				if (root === SymbolicLinkDestRoot.DCS_WORKING_DIR) {
-					return path ? `/working/${path}` : "/working";
-				}
-				return "/install";
-			},
-		} as unknown as PathResolver;
+		releaseRepository.saveRelease({
+			releaseId: "release-1",
+			modId: "mod-1",
+			modName: "test-mod",
+			version: "1.0.0",
+			versionHash: "hash1",
+			dependencies: [],
+			assets: [],
+			symbolicLinks: [],
+			missionScripts: [
+				{
+					name: "Test Script",
+					purpose: "Test",
+					path: "init.lua",
+					root: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+					runOn: MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
+				},
+			],
+		});
 
 		const manager = new MissionScriptingFilesManager({
-			fileSystem: mockFileSystem,
-			releaseRepository: mockReleaseRepository,
-			pathResolver: mockPathResolver,
+			fileSystem,
+			releaseRepository,
+			pathResolver,
 		});
 
 		manager.rebuild();
 
-		const beforeContent = writtenFiles["/working/Scripts/DropzoneMissionScriptsBeforeSanitize.lua"];
+		const beforeContent = fileSystem.writtenFiles.get("/working/Scripts/DropzoneMissionScriptsBeforeSanitize.lua");
 		expect(beforeContent).toContain("/working/init.lua");
 		expect(beforeContent).toContain("test-mod-1.0.0");
 	});
 
 	it("handles empty scripts list", () => {
-		const writtenFiles: Record<string, string> = {};
-
-		const mockFileSystem: FileSystem = {
-			resolve: (...paths: string[]) => paths.join("/"),
-			writeFile: (path: string, content: string) => {
-				writtenFiles[path] = content;
-			},
-			ensureDir: () => {},
-			removeDir: () => {},
-			ensureSymlink: () => {},
-		};
-
-		const mockReleaseRepository: ReleaseRepository = {
-			getMissionScriptsByRunOn: () => [],
-			saveRelease: () => {},
-			deleteRelease: () => {},
-			getAllReleases: () => [],
-			getReleaseAssetsForRelease: () => [],
-			getSymbolicLinksForRelease: () => [],
-			setInstalledPathForSymbolicLink: () => {},
-			getMissionScriptsForRelease: () => [],
-		};
-
-		const mockPathResolver = {
-			resolveReleasePath: () => "/release/path",
-			resolveSymbolicLinkPath: (_root: SymbolicLinkDestRoot, path?: string) => {
-				return path ? `/dcs/${path}` : "/dcs";
-			},
-		} as unknown as PathResolver;
+		const fileSystem = new TestFileSystem();
+		const releaseRepository = new TestReleaseRepository();
+		const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs", "/dcs", fileSystem);
 
 		const manager = new MissionScriptingFilesManager({
-			fileSystem: mockFileSystem,
-			releaseRepository: mockReleaseRepository,
-			pathResolver: mockPathResolver,
+			fileSystem,
+			releaseRepository,
+			pathResolver,
 		});
 
 		manager.rebuild();
 
-		expect(Object.keys(writtenFiles).length).toBe(2);
+		expect(fileSystem.writtenFiles.size).toBe(2);
 		// Both files should still be written even if empty
-		expect(writtenFiles["/dcs/Scripts/DropzoneMissionScriptsBeforeSanitize.lua"]).toBeDefined();
-		expect(writtenFiles["/dcs/Scripts/DropzoneMissionScriptsAfterSanitize.lua"]).toBeDefined();
+		expect(fileSystem.writtenFiles.has("/dcs/Scripts/DropzoneMissionScriptsBeforeSanitize.lua")).toBe(true);
+		expect(fileSystem.writtenFiles.has("/dcs/Scripts/DropzoneMissionScriptsAfterSanitize.lua")).toBe(true);
 	});
 });

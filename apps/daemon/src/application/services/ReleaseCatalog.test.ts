@@ -1,80 +1,98 @@
 import { describe, expect, it } from "bun:test";
 import { AssetStatus } from "../enums/AssetStatus.ts";
-import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
+import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import type { ReleaseRepository } from "../repository/ReleaseRepository.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import type { DownloadQueue } from "./DownloadQueue.ts";
-import type { ExtractQueue } from "./ExtractQueue.ts";
-import type { FileSystem } from "./FileSystem.ts";
-import type { PathResolver } from "./PathResolver.ts";
+import {
+	TestDownloadQueue,
+	TestExtractQueue,
+	TestFileSystem,
+	TestMissionScriptingFilesManager,
+	TestPathResolver,
+	TestReleaseRepository,
+} from "../__tests__/doubles/index.ts";
 import { ReleaseCatalog } from "./ReleaseCatalog.ts";
-import type { ReleaseToggle } from "./ReleaseToggle.ts";
+import { ReleaseToggle } from "./ReleaseToggle.ts";
 
 describe("ReleaseCatalog", () => {
 	describe("add", () => {
 		it("adds a release with assets and queues download jobs", () => {
-			const pushedDownloadJobs: Array<{ releaseId: string; assetId: string; url: string }> = [];
-			const ensuredDirs: string[] = [];
+			const fileSystem = new TestFileSystem();
+			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const releaseRepository = new TestReleaseRepository();
+			const downloadQueue = new TestDownloadQueue();
+			const extractQueue = new TestExtractQueue();
+			const missionScriptingManager = new TestMissionScriptingFilesManager();
 
-			const mockFileSystem: FileSystem = {
-				ensureDir: (dir: string) => {
-					ensuredDirs.push(dir);
-				},
-				resolve: (...paths: string[]) => paths.join("/"),
-				writeFile: () => {},
-				removeDir: () => {},
-				ensureSymlink: () => {},
-			};
+			const releaseToggleService = new ReleaseToggle({
+				fileSystem,
+				pathResolver,
+				releaseRepository,
+				downloadQueue,
+				extractQueue,
+				missionScriptingFilesManager: missionScriptingManager as any,
+			});
 
-			const mockPathResolver = {
-				resolveReleasePath: (releaseId: string) => `/releases/${releaseId}`,
-				resolveSymbolicLinkPath: () => "/dcs",
-			} as unknown as PathResolver;
+			const catalog = new ReleaseCatalog({
+				releaseToggleService,
+				pathResolver,
+				downloadQueue,
+				extractQueue,
+				releaseRepository,
+				fileSystem,
+			});
 
-			const mockReleaseRepository: ReleaseRepository = {
-				saveRelease: () => {},
-				getReleaseAssetsForRelease: () => [
+			const releaseData: ModAndReleaseData = {
+				releaseId: "release-123",
+				modId: "mod-1",
+				modName: "Test Mod",
+				version: "1.0.0",
+				versionHash: "hash123",
+				dependencies: [],
+				assets: [
 					{
-						id: "asset1",
-						releaseId: "release-123",
 						name: "Asset 1",
 						urls: ["https://example.com/file1.zip"],
 						isArchive: false,
 					},
 				],
-				deleteRelease: () => {},
-				getAllReleases: () => [],
-				getSymbolicLinksForRelease: () => [],
-				setInstalledPathForSymbolicLink: () => {},
-				getMissionScriptsForRelease: () => [],
-				getMissionScriptsByRunOn: () => [],
+				symbolicLinks: [],
+				missionScripts: [],
 			};
 
-			const mockDownloadQueue: DownloadQueue = {
-				pushJob: (releaseId: string, assetId: string, _jobId: string, url: string) => {
-					pushedDownloadJobs.push({ releaseId, assetId, url });
-				},
-				getJobsForReleaseAssetId: () => [],
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
+			catalog.add(releaseData);
 
-			const mockExtractQueue: ExtractQueue = {
-				pushJob: () => {},
-				getJobsForReleaseAssetId: () => [],
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
+			expect(fileSystem.ensuredDirs.length).toBe(1);
+			expect(fileSystem.ensuredDirs[0]).toBe("/dropzone/mods/release-123");
+			expect(downloadQueue.pushedJobs.length).toBe(1);
+			expect(downloadQueue.pushedJobs[0]?.url).toBe("https://example.com/file1.zip");
+		});
+
+		it("creates extract jobs for archive assets", () => {
+			const fileSystem = new TestFileSystem();
+			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const releaseRepository = new TestReleaseRepository();
+			const downloadQueue = new TestDownloadQueue();
+			const extractQueue = new TestExtractQueue();
+			const missionScriptingManager = new TestMissionScriptingFilesManager();
+
+			const releaseToggleService = new ReleaseToggle({
+				fileSystem,
+				pathResolver,
+				releaseRepository,
+				downloadQueue,
+				extractQueue,
+				missionScriptingFilesManager: missionScriptingManager as any,
+			});
 
 			const catalog = new ReleaseCatalog({
-				releaseToggleService: {} as ReleaseToggle,
-				pathResolver: mockPathResolver,
-				downloadQueue: mockDownloadQueue,
-				extractQueue: mockExtractQueue,
-				releaseRepository: mockReleaseRepository,
-				fileSystem: mockFileSystem,
+				releaseToggleService,
+				pathResolver,
+				downloadQueue,
+				extractQueue,
+				releaseRepository,
+				fileSystem,
 			});
 
 			const releaseData: ModAndReleaseData = {
@@ -84,79 +102,52 @@ describe("ReleaseCatalog", () => {
 				version: "1.0.0",
 				versionHash: "hash123",
 				dependencies: [],
-				assets: [],
-				symbolicLinks: [],
-				missionScripts: [],
-			};
-
-			catalog.add(releaseData);
-
-			expect(ensuredDirs.length).toBe(1);
-			expect(ensuredDirs[0]).toBe("/releases/release-123");
-			expect(pushedDownloadJobs.length).toBe(1);
-			expect(pushedDownloadJobs[0]?.url).toBe("https://example.com/file1.zip");
-		});
-
-		it("creates extract jobs for archive assets", () => {
-			const pushedExtractJobs: Array<{ releaseId: string; assetId: string }> = [];
-
-			const mockFileSystem: FileSystem = {
-				ensureDir: () => {},
-				resolve: (...paths: string[]) => paths.join("/"),
-				writeFile: () => {},
-				removeDir: () => {},
-				ensureSymlink: () => {},
-			};
-
-			const mockPathResolver = {
-				resolveReleasePath: (releaseId: string) => `/releases/${releaseId}`,
-				resolveSymbolicLinkPath: () => "/dcs",
-			} as unknown as PathResolver;
-
-			const mockReleaseRepository: ReleaseRepository = {
-				saveRelease: () => {},
-				getReleaseAssetsForRelease: () => [
+				assets: [
 					{
-						id: "asset1",
-						releaseId: "release-123",
 						name: "Archive Asset",
 						urls: ["https://example.com/archive.zip"],
 						isArchive: true,
 					},
 				],
-				deleteRelease: () => {},
-				getAllReleases: () => [],
-				getSymbolicLinksForRelease: () => [],
-				setInstalledPathForSymbolicLink: () => {},
-				getMissionScriptsForRelease: () => [],
-				getMissionScriptsByRunOn: () => [],
+				symbolicLinks: [],
+				missionScripts: [],
 			};
 
-			const mockDownloadQueue: DownloadQueue = {
-				pushJob: () => {},
-				getJobsForReleaseAssetId: () => [],
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
+			catalog.add(releaseData);
 
-			const mockExtractQueue: ExtractQueue = {
-				pushJob: (releaseId: string, assetId: string) => {
-					pushedExtractJobs.push({ releaseId, assetId });
-				},
-				getJobsForReleaseAssetId: () => [],
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
+			expect(extractQueue.pushedJobs.length).toBe(1);
+			expect(extractQueue.pushedJobs[0]?.assetId).toContain("Archive Asset");
+		});
+	});
 
-			const catalog = new ReleaseCatalog({
-				releaseToggleService: {} as ReleaseToggle,
-				pathResolver: mockPathResolver,
-				downloadQueue: mockDownloadQueue,
-				extractQueue: mockExtractQueue,
-				releaseRepository: mockReleaseRepository,
-				fileSystem: mockFileSystem,
+	describe("remove", () => {
+		it("removes release by disabling, canceling jobs, and deleting files", () => {
+			const fileSystem = new TestFileSystem();
+			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const releaseRepository = new TestReleaseRepository();
+			const downloadQueue = new TestDownloadQueue();
+			const extractQueue = new TestExtractQueue();
+			const missionScriptingManager = new TestMissionScriptingFilesManager();
+
+			const releaseToggleService = new ReleaseToggle({
+				fileSystem,
+				pathResolver,
+				releaseRepository,
+				downloadQueue,
+				extractQueue,
+				missionScriptingFilesManager: missionScriptingManager as any,
 			});
 
+			const catalog = new ReleaseCatalog({
+				releaseToggleService,
+				pathResolver,
+				downloadQueue,
+				extractQueue,
+				releaseRepository,
+				fileSystem,
+			});
+
+			// Add a release first
 			const releaseData: ModAndReleaseData = {
 				releaseId: "release-123",
 				modId: "mod-1",
@@ -171,162 +162,77 @@ describe("ReleaseCatalog", () => {
 
 			catalog.add(releaseData);
 
-			expect(pushedExtractJobs.length).toBe(1);
-			expect(pushedExtractJobs[0]?.assetId).toBe("asset1");
-		});
-	});
-
-	describe("remove", () => {
-		it("removes release by disabling, canceling jobs, and deleting files", () => {
-			const disabledReleases: string[] = [];
-			const canceledDownloads: string[] = [];
-			const canceledExtracts: string[] = [];
-			const removedDirs: string[] = [];
-			const deletedReleases: string[] = [];
-
-			const mockFileSystem: FileSystem = {
-				removeDir: (dir: string) => {
-					removedDirs.push(dir);
-				},
-				resolve: (...paths: string[]) => paths.join("/"),
-				writeFile: () => {},
-				ensureDir: () => {},
-				ensureSymlink: () => {},
-			};
-
-			const mockPathResolver = {
-				resolveReleasePath: (releaseId: string) => `/releases/${releaseId}`,
-				resolveSymbolicLinkPath: () => "/dcs",
-			} as unknown as PathResolver;
-
-			const mockReleaseRepository: ReleaseRepository = {
-				deleteRelease: (releaseId: string) => {
-					deletedReleases.push(releaseId);
-				},
-				saveRelease: () => {},
-				getAllReleases: () => [],
-				getReleaseAssetsForRelease: () => [],
-				getSymbolicLinksForRelease: () => [],
-				setInstalledPathForSymbolicLink: () => {},
-				getMissionScriptsForRelease: () => [],
-				getMissionScriptsByRunOn: () => [],
-			};
-
-			const mockDownloadQueue: DownloadQueue = {
-				cancelJobsForRelease: (releaseId: string) => {
-					canceledDownloads.push(releaseId);
-				},
-				pushJob: () => {},
-				getJobsForReleaseAssetId: () => [],
-				getJobsForReleaseId: () => [],
-			} as any;
-
-			const mockExtractQueue: ExtractQueue = {
-				cancelJobsForRelease: (releaseId: string) => {
-					canceledExtracts.push(releaseId);
-				},
-				pushJob: () => {},
-				getJobsForReleaseAssetId: () => [],
-				getJobsForReleaseId: () => [],
-			} as any;
-
-			const mockReleaseToggle: ReleaseToggle = {
-				disable: (releaseId: string) => {
-					disabledReleases.push(releaseId);
-				},
-			} as any;
-
-			const catalog = new ReleaseCatalog({
-				releaseToggleService: mockReleaseToggle,
-				pathResolver: mockPathResolver,
-				downloadQueue: mockDownloadQueue,
-				extractQueue: mockExtractQueue,
-				releaseRepository: mockReleaseRepository,
-				fileSystem: mockFileSystem,
-			});
+			// Mark all jobs as completed so we can disable
+			for (const job of downloadQueue.pushedJobs) {
+				downloadQueue.setJobStatus(job.assetId, job.jobId, DownloadJobStatus.COMPLETED, 100);
+			}
+			for (const job of extractQueue.pushedJobs) {
+				extractQueue.setJobStatus(job.assetId, job.jobId, ExtractJobStatus.COMPLETED, 100);
+			}
 
 			catalog.remove("release-123");
 
-			expect(disabledReleases.length).toBe(1);
-			expect(disabledReleases[0]).toBe("release-123");
-			expect(canceledDownloads.length).toBe(1);
-			expect(canceledExtracts.length).toBe(1);
-			expect(removedDirs.length).toBe(1);
-			expect(removedDirs[0]).toBe("/releases/release-123");
-			expect(deletedReleases.length).toBe(1);
+			expect(downloadQueue.canceledReleases).toContain("release-123");
+			expect(extractQueue.canceledReleases).toContain("release-123");
+			expect(fileSystem.removedDirs).toContain("/dropzone/mods/release-123");
+			expect(releaseRepository.deletedReleases).toContain("release-123");
 		});
 	});
 
 	describe("getAllReleasesWithStatus", () => {
 		it("returns releases with computed status", () => {
-			const mockFileSystem: FileSystem = {
-				resolve: (...paths: string[]) => paths.join("/"),
-				writeFile: () => {},
-				ensureDir: () => {},
-				removeDir: () => {},
-				ensureSymlink: () => {},
-			};
+			const fileSystem = new TestFileSystem();
+			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const releaseRepository = new TestReleaseRepository();
+			const downloadQueue = new TestDownloadQueue();
+			const extractQueue = new TestExtractQueue();
+			const missionScriptingManager = new TestMissionScriptingFilesManager();
 
-			const mockReleaseRepository: ReleaseRepository = {
-				getAllReleases: () => [
+			const releaseToggleService = new ReleaseToggle({
+				fileSystem,
+				pathResolver,
+				releaseRepository,
+				downloadQueue,
+				extractQueue,
+				missionScriptingFilesManager: missionScriptingManager as any,
+			});
+
+			const catalog = new ReleaseCatalog({
+				releaseToggleService,
+				pathResolver,
+				downloadQueue,
+				extractQueue,
+				releaseRepository,
+				fileSystem,
+			});
+
+			const releaseData: ModAndReleaseData = {
+				releaseId: "release-123",
+				modId: "mod-1",
+				modName: "Test Mod",
+				version: "1.0.0",
+				versionHash: "hash123",
+				dependencies: [],
+				assets: [
 					{
-						releaseId: "release-123",
-						modId: "mod-1",
-						modName: "Test Mod",
-						version: "1.0.0",
-						versionHash: "hash123",
-						dependencies: [],
-					},
-				],
-				getReleaseAssetsForRelease: () => [
-					{
-						id: "asset1",
-						releaseId: "release-123",
 						name: "Asset 1",
 						urls: ["https://example.com/file.zip"],
 						isArchive: false,
 					},
 				],
-				getSymbolicLinksForRelease: () => [],
-				getMissionScriptsForRelease: () => [],
-				saveRelease: () => {},
-				deleteRelease: () => {},
-				setInstalledPathForSymbolicLink: () => {},
-				getMissionScriptsByRunOn: () => [],
+				symbolicLinks: [],
+				missionScripts: [],
 			};
 
-			const mockDownloadQueue: DownloadQueue = {
-				getJobsForReleaseAssetId: () => [
-					{
-						status: DownloadJobStatus.COMPLETED,
-						progressPercent: 100,
-					},
-				],
-				pushJob: () => {},
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
+			catalog.add(releaseData);
 
-			const mockExtractQueue: ExtractQueue = {
-				getJobsForReleaseAssetId: () => [
-					{
-						status: ExtractJobStatus.COMPLETED,
-						progressPercent: 100,
-					},
-				],
-				pushJob: () => {},
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
-
-			const catalog = new ReleaseCatalog({
-				releaseToggleService: {} as ReleaseToggle,
-				pathResolver: {} as PathResolver,
-				downloadQueue: mockDownloadQueue,
-				extractQueue: mockExtractQueue,
-				releaseRepository: mockReleaseRepository,
-				fileSystem: mockFileSystem,
-			});
+			// Set all jobs to completed
+			for (const job of downloadQueue.pushedJobs) {
+				downloadQueue.setJobStatus(job.assetId, job.jobId, DownloadJobStatus.COMPLETED, 100);
+			}
+			for (const job of extractQueue.pushedJobs) {
+				extractQueue.setJobStatus(job.assetId, job.jobId, ExtractJobStatus.COMPLETED, 100);
+			}
 
 			const releases = catalog.getAllReleasesWithStatus();
 
@@ -338,66 +244,55 @@ describe("ReleaseCatalog", () => {
 		});
 
 		it("computes IN_PROGRESS status correctly", () => {
-			const mockReleaseRepository: ReleaseRepository = {
-				getAllReleases: () => [
+			const fileSystem = new TestFileSystem();
+			const pathResolver = new TestPathResolver("/dropzone/mods", "/dcs/install", "/dcs/working", fileSystem);
+			const releaseRepository = new TestReleaseRepository();
+			const downloadQueue = new TestDownloadQueue();
+			const extractQueue = new TestExtractQueue();
+			const missionScriptingManager = new TestMissionScriptingFilesManager();
+
+			const releaseToggleService = new ReleaseToggle({
+				fileSystem,
+				pathResolver,
+				releaseRepository,
+				downloadQueue,
+				extractQueue,
+				missionScriptingFilesManager: missionScriptingManager as any,
+			});
+
+			const catalog = new ReleaseCatalog({
+				releaseToggleService,
+				pathResolver,
+				downloadQueue,
+				extractQueue,
+				releaseRepository,
+				fileSystem,
+			});
+
+			const releaseData: ModAndReleaseData = {
+				releaseId: "release-456",
+				modId: "mod-2",
+				modName: "Test Mod 2",
+				version: "2.0.0",
+				versionHash: "hash456",
+				dependencies: [],
+				assets: [
 					{
-						releaseId: "release-456",
-						modId: "mod-2",
-						modName: "Test Mod 2",
-						version: "2.0.0",
-						versionHash: "hash456",
-						dependencies: [],
-					},
-				],
-				getReleaseAssetsForRelease: () => [
-					{
-						id: "asset2",
-						releaseId: "release-456",
 						name: "Asset 2",
 						urls: ["https://example.com/file2.zip"],
 						isArchive: false,
 					},
 				],
-				getSymbolicLinksForRelease: () => [],
-				getMissionScriptsForRelease: () => [],
-				saveRelease: () => {},
-				deleteRelease: () => {},
-				setInstalledPathForSymbolicLink: () => {},
-				getMissionScriptsByRunOn: () => [],
+				symbolicLinks: [],
+				missionScripts: [],
 			};
 
-			const mockDownloadQueue: DownloadQueue = {
-				getJobsForReleaseAssetId: () => [
-					{
-						status: DownloadJobStatus.IN_PROGRESS,
-						progressPercent: 50,
-					},
-				],
-				pushJob: () => {},
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
+			catalog.add(releaseData);
 
-			const mockExtractQueue: ExtractQueue = {
-				getJobsForReleaseAssetId: () => [
-					{
-						status: ExtractJobStatus.PENDING,
-						progressPercent: 0,
-					},
-				],
-				pushJob: () => {},
-				getJobsForReleaseId: () => [],
-				cancelJobsForRelease: () => {},
-			} as any;
-
-			const catalog = new ReleaseCatalog({
-				releaseToggleService: {} as ReleaseToggle,
-				pathResolver: {} as PathResolver,
-				downloadQueue: mockDownloadQueue,
-				extractQueue: mockExtractQueue,
-				releaseRepository: mockReleaseRepository,
-				fileSystem: {} as FileSystem,
-			});
+			// Set download to in progress
+			for (const job of downloadQueue.pushedJobs) {
+				downloadQueue.setJobStatus(job.assetId, job.jobId, DownloadJobStatus.IN_PROGRESS, 50);
+			}
 
 			const releases = catalog.getAllReleasesWithStatus();
 
