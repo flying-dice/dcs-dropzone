@@ -123,4 +123,115 @@ describe("BaseReleaseToggle", () => {
 			expect(c.missionScriptingFilesManager.rebuild).toHaveBeenCalled();
 		});
 	});
+
+	describe("disable", () => {
+		it("should throw an error if download jobs are incomplete when disabling a release", () => {
+			const c = createTestContext();
+
+			const inProgressJob: DownloadJob = zocker(DownloadJob)
+				.supply(DownloadJob.shape.status, DownloadJobStatus.IN_PROGRESS)
+				.generate();
+
+			c.downloadQueue.getJobsForReleaseId.mockReturnValue([inProgressJob]);
+
+			const releaseId = faker.string.uuid();
+
+			const releaseToggle = c.build();
+
+			expect(() => releaseToggle.disable(releaseId)).toThrowError(
+				`Cannot enable release ${releaseId} because not all download jobs are completed.`,
+			);
+
+			expect(c.downloadQueue.getJobsForReleaseId).toHaveBeenCalledWith(releaseId);
+		});
+
+		it("should throw an error if extract jobs are incomplete when disabling a release", () => {
+			const c = createTestContext();
+
+			const completedJob: DownloadJob = zocker(DownloadJob)
+				.supply(DownloadJob.shape.status, DownloadJobStatus.COMPLETED)
+				.generate();
+
+			c.downloadQueue.getJobsForReleaseId.mockReturnValue([completedJob]);
+
+			const extractJob = zocker(ExtractJob).supply(ExtractJob.shape.status, ExtractJobStatus.IN_PROGRESS).generate();
+
+			c.extractQueue.getJobsForReleaseId.mockReturnValue([extractJob]);
+
+			const releaseId = faker.string.uuid();
+
+			const releaseToggle = c.build();
+
+			expect(() => releaseToggle.disable(releaseId)).toThrowError(
+				`Cannot enable release ${releaseId} because not all extract jobs are completed.`,
+			);
+
+			expect(c.downloadQueue.getJobsForReleaseId).toHaveBeenCalledWith(releaseId);
+			expect(c.extractQueue.getJobsForReleaseId).toHaveBeenCalledWith(releaseId);
+		});
+
+		it("should disable release and remove all symlinks when all jobs are completed", () => {
+			const c = createTestContext();
+
+			const completedDownloadJob: DownloadJob = zocker(DownloadJob)
+				.supply(DownloadJob.shape.status, DownloadJobStatus.COMPLETED)
+				.generate();
+
+			c.downloadQueue.getJobsForReleaseId.mockReturnValue([completedDownloadJob]);
+
+			const completedExtractJob: ExtractJob = zocker(ExtractJob)
+				.supply(ExtractJob.shape.status, ExtractJobStatus.COMPLETED)
+				.generate();
+
+			c.extractQueue.getJobsForReleaseId.mockReturnValue([completedExtractJob]);
+
+			const releaseId = faker.string.uuid();
+
+			const link: SymbolicLink = zocker(SymbolicLink)
+				.supply(SymbolicLink.shape.installedPath, faker.system.directoryPath())
+				.generate();
+
+			c.releaseRepository.getSymbolicLinksForRelease.mockReturnValue([link]);
+
+			const releaseToggle = c.build();
+
+			expect(() => releaseToggle.disable(releaseId)).not.toThrow();
+
+			expect(c.fileSystem.removeDir).toHaveBeenCalledWith(link.installedPath);
+			expect(c.releaseRepository.setInstalledPathForSymbolicLink).toHaveBeenCalledWith(link.id, null);
+
+			expect(c.missionScriptingFilesManager.rebuild).toHaveBeenCalled();
+		});
+
+		it("should skip removing symlinks if no installedPath is set", () => {
+			const c = createTestContext();
+
+			const completedDownloadJob: DownloadJob = zocker(DownloadJob)
+				.supply(DownloadJob.shape.status, DownloadJobStatus.COMPLETED)
+				.generate();
+
+			c.downloadQueue.getJobsForReleaseId.mockReturnValue([completedDownloadJob]);
+
+			const completedExtractJob: ExtractJob = zocker(ExtractJob)
+				.supply(ExtractJob.shape.status, ExtractJobStatus.COMPLETED)
+				.generate();
+
+			c.extractQueue.getJobsForReleaseId.mockReturnValue([completedExtractJob]);
+
+			const releaseId = faker.string.uuid();
+
+			const link: SymbolicLink = zocker(SymbolicLink).supply(SymbolicLink.shape.installedPath, null).generate();
+
+			c.releaseRepository.getSymbolicLinksForRelease.mockReturnValue([link]);
+
+			const releaseToggle = c.build();
+
+			expect(() => releaseToggle.disable(releaseId)).not.toThrow();
+
+			expect(c.fileSystem.removeDir).not.toHaveBeenCalled();
+			expect(c.releaseRepository.setInstalledPathForSymbolicLink).not.toHaveBeenCalledWith(link.id, null);
+
+			expect(c.missionScriptingFilesManager.rebuild).toHaveBeenCalled();
+		});
+	});
 });
