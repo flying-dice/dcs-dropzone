@@ -4,12 +4,12 @@ import type { ReleaseRepository } from "./repository/ReleaseRepository.ts";
 import type { DownloadQueue } from "./services/DownloadQueue.ts";
 import type { ExtractQueue } from "./services/ExtractQueue.ts";
 import type { FileSystem } from "./services/FileSystem.ts";
-import { BaseMissionScriptingFilesManager } from "./services/MissionScriptingFilesManager.ts";
-import { BasePathResolver } from "./services/PathResolver.ts";
+import { BaseMissionScriptingFilesManager } from "./services/impl/BaseMissionScriptingFilesManager.ts";
+import { BasePathResolver } from "./services/impl/BasePathResolver.ts";
+import { BaseReleaseCatalog } from "./services/impl/BaseReleaseCatalog.ts";
+import { BaseReleaseToggle } from "./services/impl/BaseReleaseToggle.ts";
 import type { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
-import { BaseReleaseCatalog } from "./services/ReleaseCatalog.ts";
 import type { ReleaseToggle } from "./services/ReleaseToggle.ts";
-import { BaseReleaseToggle } from "./services/ReleaseToggle.ts";
 import type { UUIDGenerator } from "./services/UUIDGenerator.ts";
 
 type Deps = {

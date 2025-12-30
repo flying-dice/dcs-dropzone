@@ -31,6 +31,4 @@ export interface ExtractQueue {
 	getJobsForReleaseId(releaseId: string): ExtractJob[];
 
 	getJobsForReleaseAssetId(releaseAssetId: string): ExtractJob[];
-
-	setJobStatus(jobId: string, status: ExtractJobStatus, progressPercent?: number): void;
 }

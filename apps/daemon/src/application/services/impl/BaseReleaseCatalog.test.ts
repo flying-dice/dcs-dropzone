@@ -1,17 +1,17 @@
 import { describe, expect, it } from "bun:test";
-import { AssetStatus } from "../enums/AssetStatus.ts";
-import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
-import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import { TestDownloadQueue } from "./impl/TestDownloadQueue.ts";
-import { TestExtractQueue } from "./impl/TestExtractQueue.ts";
-import { TestFileSystem } from "./impl/TestFileSystem.ts";
-import { TestMissionScriptingFilesManager } from "./impl/TestMissionScriptingFilesManager.ts";
-import { BasePathResolver } from "./PathResolver.ts";
-import { BaseReleaseCatalog } from "./ReleaseCatalog.ts";
-import { BaseReleaseToggle } from "./ReleaseToggle.ts";
+import { AssetStatus } from "../../enums/AssetStatus.ts";
+import { DownloadedReleaseStatus } from "../../enums/DownloadedReleaseStatus.ts";
+import { DownloadJobStatus } from "../../enums/DownloadJobStatus.ts";
+import { ExtractJobStatus } from "../../enums/ExtractJobStatus.ts";
+import { TestReleaseRepository } from "../../repository/impl/TestReleaseRepository.ts";
+import type { ModAndReleaseData } from "../../schemas/ModAndReleaseData.ts";
+import { BasePathResolver } from "./BasePathResolver.ts";
+import { BaseReleaseCatalog } from "./BaseReleaseCatalog.ts";
+import { BaseReleaseToggle } from "./BaseReleaseToggle.ts";
+import { TestDownloadQueue } from "./TestDownloadQueue.ts";
+import { TestExtractQueue } from "./TestExtractQueue.ts";
+import { TestFileSystem } from "./TestFileSystem.ts";
+import { TestMissionScriptingFilesManager } from "./TestMissionScriptingFilesManager.ts";
 
 describe("ReleaseCatalog", () => {
 	describe("add", () => {
@@ -180,7 +180,7 @@ describe("ReleaseCatalog", () => {
 				downloadQueue.setJobStatus(job.assetId, job.jobId, DownloadJobStatus.COMPLETED, 100);
 			}
 			for (const job of extractQueue.pushedJobs) {
-				extractQueue.setJobStatus(job.assetId, job.jobId, ExtractJobStatus.COMPLETED, 100);
+				extractQueue.setJobStatus(job.jobId, ExtractJobStatus.COMPLETED, 100);
 			}
 
 			catalog.remove("release-123");
@@ -249,7 +249,7 @@ describe("ReleaseCatalog", () => {
 				downloadQueue.setJobStatus(job.assetId, job.jobId, DownloadJobStatus.COMPLETED, 100);
 			}
 			for (const job of extractQueue.pushedJobs) {
-				extractQueue.setJobStatus(job.assetId, job.jobId, ExtractJobStatus.COMPLETED, 100);
+				extractQueue.setJobStatus(job.jobId, ExtractJobStatus.COMPLETED, 100);
 			}
 
 			const releases = catalog.getAllReleasesWithStatus();

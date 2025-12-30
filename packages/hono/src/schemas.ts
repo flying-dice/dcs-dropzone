@@ -16,3 +16,13 @@ export const ErrorData = z
 	});
 
 export type ErrorData = z.infer<typeof ErrorData>;
+
+export const OkData = z
+	.object({
+		ok: z.boolean().default(true),
+	})
+	.meta({
+		ref: "OkData",
+	});
+
+export type OkData = z.infer<typeof OkData>;

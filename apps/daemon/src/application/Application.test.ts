@@ -5,14 +5,14 @@ import { TestReleaseRepository } from "./repository/impl/TestReleaseRepository.t
 import { TestDownloadQueue } from "./services/impl/TestDownloadQueue.ts";
 import { TestExtractQueue } from "./services/impl/TestExtractQueue.ts";
 import { TestFileSystem } from "./services/impl/TestFileSystem.ts";
-import type { UUIDGenerator } from "./services/UUIDGenerator.ts";
+import { TestUUIDGenerator } from "./services/impl/TestUUIDGenerator.ts";
 
 describe("Application", () => {
 	it("creates application and initializes daemon instance ID from existing ID", () => {
 		const attributesRepository = new TestAttributesRepository();
 		attributesRepository.saveDaemonInstanceId("existing-id-123");
 
-		const generateUuid: UUIDGenerator = () => "new-uuid";
+		const generateUuid = TestUUIDGenerator();
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
 		const downloadQueue = new TestDownloadQueue();
@@ -35,7 +35,8 @@ describe("Application", () => {
 
 	it("creates application and generates new daemon instance ID when none exists", () => {
 		const attributesRepository = new TestAttributesRepository();
-		const generateUuid: UUIDGenerator = () => "generated-uuid-456";
+		const generateUuid = TestUUIDGenerator();
+		generateUuid.mockReturnValue("generated-uuid-456");
 		const fileSystem = new TestFileSystem();
 		const releaseRepository = new TestReleaseRepository();
 		const downloadQueue = new TestDownloadQueue();

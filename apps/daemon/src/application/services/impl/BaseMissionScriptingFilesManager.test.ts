@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
-import { TestFileSystem } from "./impl/TestFileSystem.ts";
-import { BaseMissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import { BasePathResolver } from "./PathResolver.ts";
+import { TestReleaseRepository } from "../../repository/impl/TestReleaseRepository.ts";
+import { BaseMissionScriptingFilesManager } from "./BaseMissionScriptingFilesManager.ts";
+import { BasePathResolver } from "./BasePathResolver.ts";
+import { TestFileSystem } from "./TestFileSystem.ts";
 
 describe("MissionScriptingFilesManager", () => {
 	it("rebuilds mission scripting files with before and after sanitize scripts", () => {

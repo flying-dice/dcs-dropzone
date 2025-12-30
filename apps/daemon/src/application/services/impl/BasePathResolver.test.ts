@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { SymbolicLinkDestRoot } from "webapp";
-import { TestFileSystem } from "./impl/TestFileSystem.ts";
-import { BasePathResolver } from "./PathResolver.ts";
+import { BasePathResolver } from "./BasePathResolver.ts";
+import { TestFileSystem } from "./TestFileSystem.ts";
 
 describe("PathResolver", () => {
 	describe("resolveReleasePath", () => {

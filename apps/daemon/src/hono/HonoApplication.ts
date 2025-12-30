@@ -1,6 +1,7 @@
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
+import { ErrorData, OkData } from "@packages/hono/schemas";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -10,8 +11,6 @@ import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
-import { ErrorData } from "./ErrorData.ts";
-import { OkData } from "./OkData.ts";
 
 type Env = {
 	Variables: {

@@ -5,5 +5,3 @@ export interface ReleaseCatalog {
 	remove(releaseId: string): void;
 	getAllReleasesWithStatus(): ModAndReleaseData[];
 }
-
-export { BaseReleaseCatalog } from "./impl/BaseReleaseCatalog.ts";

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "bun:test";
 import { SymbolicLinkDestRoot } from "webapp";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import { TestReleaseRepository } from "../repository/impl/TestReleaseRepository.ts";
-import { TestDownloadQueue } from "./impl/TestDownloadQueue.ts";
-import { TestExtractQueue } from "./impl/TestExtractQueue.ts";
-import { TestFileSystem } from "./impl/TestFileSystem.ts";
-import { TestMissionScriptingFilesManager } from "./impl/TestMissionScriptingFilesManager.ts";
-import { BasePathResolver } from "./PathResolver.ts";
-import { BaseReleaseToggle } from "./ReleaseToggle.ts";
+import { DownloadJobStatus } from "../../enums/DownloadJobStatus.ts";
+import { ExtractJobStatus } from "../../enums/ExtractJobStatus.ts";
+import { TestReleaseRepository } from "../../repository/impl/TestReleaseRepository.ts";
+import { BasePathResolver } from "./BasePathResolver.ts";
+import { BaseReleaseToggle } from "./BaseReleaseToggle.ts";
+import { TestDownloadQueue } from "./TestDownloadQueue.ts";
+import { TestExtractQueue } from "./TestExtractQueue.ts";
+import { TestFileSystem } from "./TestFileSystem.ts";
+import { TestMissionScriptingFilesManager } from "./TestMissionScriptingFilesManager.ts";
 
 describe("ReleaseToggle", () => {
 	describe("enable", () => {
@@ -47,7 +47,7 @@ describe("ReleaseToggle", () => {
 
 			// Set jobs as completed
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
 			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
@@ -84,7 +84,7 @@ describe("ReleaseToggle", () => {
 
 			// Set download job as in progress
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("job-1", DownloadJobStatus.IN_PROGRESS, 50);
+			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.IN_PROGRESS, 50);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
 			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
@@ -117,7 +117,7 @@ describe("ReleaseToggle", () => {
 			const missionScriptingManager = new TestMissionScriptingFilesManager();
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
 			extractQueue.setJobStatus("extract-1", ExtractJobStatus.PENDING, 0);
@@ -170,7 +170,7 @@ describe("ReleaseToggle", () => {
 			});
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
 			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
@@ -233,7 +233,7 @@ describe("ReleaseToggle", () => {
 			releaseRepository.setInstalledPathForSymbolicLink(links[0]!.id, "/installed/path");
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
 			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
@@ -287,7 +287,7 @@ describe("ReleaseToggle", () => {
 			});
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
 			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
@@ -347,7 +347,7 @@ describe("ReleaseToggle", () => {
 			releaseRepository.setInstalledPathForSymbolicLink(links[0]!.id, "/installed/path");
 
 			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("job-1", DownloadJobStatus.COMPLETED, 100);
+			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
 
 			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
 			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
