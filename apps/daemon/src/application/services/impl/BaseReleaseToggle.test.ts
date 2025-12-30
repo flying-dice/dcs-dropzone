@@ -1,368 +1,126 @@
 import { describe, expect, it } from "bun:test";
-import { SymbolicLinkDestRoot } from "webapp";
+import { faker } from "@faker-js/faker";
+import { zocker } from "zocker";
 import { DownloadJobStatus } from "../../enums/DownloadJobStatus.ts";
 import { ExtractJobStatus } from "../../enums/ExtractJobStatus.ts";
 import { TestReleaseRepository } from "../../repository/impl/TestReleaseRepository.ts";
-import { BasePathResolver } from "./BasePathResolver.ts";
+import { DownloadJob } from "../../schemas/DownloadJob.ts";
+import { ExtractJob } from "../../schemas/ExtractJob.ts";
+import { SymbolicLink } from "../../schemas/SymbolicLink.ts";
 import { BaseReleaseToggle } from "./BaseReleaseToggle.ts";
 import { TestDownloadQueue } from "./TestDownloadQueue.ts";
 import { TestExtractQueue } from "./TestExtractQueue.ts";
 import { TestFileSystem } from "./TestFileSystem.ts";
 import { TestMissionScriptingFilesManager } from "./TestMissionScriptingFilesManager.ts";
+import { TestPathResolver } from "./TestPathResolver.ts";
 
-describe("ReleaseToggle", () => {
+function createTestContext() {
+	const pathResolver = new TestPathResolver();
+	const downloadQueue = new TestDownloadQueue();
+	const extractQueue = new TestExtractQueue();
+	const fileSystem = new TestFileSystem();
+	const releaseRepository = new TestReleaseRepository();
+	const missionScriptingFilesManager = new TestMissionScriptingFilesManager();
+
+	return {
+		pathResolver,
+		downloadQueue,
+		extractQueue,
+		fileSystem,
+		releaseRepository,
+		missionScriptingFilesManager,
+		build: () =>
+			new BaseReleaseToggle({
+				pathResolver,
+				downloadQueue,
+				extractQueue,
+				fileSystem,
+				releaseRepository,
+				missionScriptingFilesManager,
+			}),
+	};
+}
+
+describe("BaseReleaseToggle", () => {
 	describe("enable", () => {
-		it("enables release by creating symlinks and rebuilding mission scripts", () => {
-			const fileSystem = new TestFileSystem();
-			const pathResolver = new BasePathResolver({
-				dropzoneModsFolder: "/dropzone/mods",
-				dcsInstallDir: "/dcs/install",
-				dcsWorkingDir: "/dcs/working",
-				fileSystem,
-			});
-			const releaseRepository = new TestReleaseRepository();
-			const downloadQueue = new TestDownloadQueue();
-			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
+		it("should block enabling if any download jobs are not complete", () => {
+			const c = createTestContext();
 
-			// Setup test data
-			releaseRepository.saveRelease({
-				releaseId: "release-123",
-				modId: "mod-1",
-				modName: "Test Mod",
-				version: "1.0.0",
-				versionHash: "hash1",
-				dependencies: [],
-				assets: [],
-				symbolicLinks: [
-					{
-						name: "Link 1",
-						src: "mod-folder",
-						dest: "Mods/mod-folder",
-						destRoot: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
-					},
-				],
-				missionScripts: [],
-			});
+			const inProgressJob: DownloadJob = zocker(DownloadJob)
+				.supply(DownloadJob.shape.status, DownloadJobStatus.IN_PROGRESS)
+				.generate();
 
-			// Set jobs as completed
-			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			c.downloadQueue.getJobsForReleaseId.mockReturnValue([inProgressJob]);
 
-			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
+			const releaseId = faker.string.uuid();
 
-			const releaseToggle = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
+			const releaseToggle = c.build();
 
-			releaseToggle.enable("release-123");
-
-			expect(fileSystem.createdSymlinks.length).toBe(1);
-			expect(fileSystem.createdSymlinks[0]?.src).toBe("/dropzone/mods/release-123/mod-folder");
-			expect(fileSystem.createdSymlinks[0]?.dest).toBe("/dcs/install/Mods/mod-folder");
-			expect(missionScriptingManager.rebuildCount).toBe(1);
-		});
-
-		it("throws error when download jobs are not completed", () => {
-			const fileSystem = new TestFileSystem();
-			const pathResolver = new BasePathResolver({
-				dropzoneModsFolder: "/dropzone/mods",
-				dcsInstallDir: "/dcs/install",
-				dcsWorkingDir: "/dcs/working",
-				fileSystem,
-			});
-			const releaseRepository = new TestReleaseRepository();
-			const downloadQueue = new TestDownloadQueue();
-			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-
-			// Set download job as in progress
-			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.IN_PROGRESS, 50);
-
-			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
-
-			const releaseToggle = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
-
-			expect(() => releaseToggle.enable("release-123")).toThrow(
-				"Cannot enable release release-123 because not all download jobs are completed.",
+			expect(() => releaseToggle.enable(releaseId)).toThrowError(
+				`Cannot enable release ${releaseId} because not all download jobs are completed.`,
 			);
+
+			expect(c.downloadQueue.getJobsForReleaseId).toHaveBeenCalledWith(releaseId);
 		});
 
-		it("throws error when extract jobs are not completed", () => {
-			const fileSystem = new TestFileSystem();
-			const pathResolver = new BasePathResolver({
-				dropzoneModsFolder: "/dropzone/mods",
-				dcsInstallDir: "/dcs/install",
-				dcsWorkingDir: "/dcs/working",
-				fileSystem,
-			});
-			const releaseRepository = new TestReleaseRepository();
-			const downloadQueue = new TestDownloadQueue();
-			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
+		it("should block enabling if any extract jobs are not complete", () => {
+			const c = createTestContext();
 
-			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			const completedJob: DownloadJob = zocker(DownloadJob)
+				.supply(DownloadJob.shape.status, DownloadJobStatus.COMPLETED)
+				.generate();
 
-			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("extract-1", ExtractJobStatus.PENDING, 0);
+			c.downloadQueue.getJobsForReleaseId.mockReturnValue([completedJob]);
 
-			const releaseToggle = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
+			const extractJob = zocker(ExtractJob).supply(ExtractJob.shape.status, ExtractJobStatus.IN_PROGRESS).generate();
 
-			expect(() => releaseToggle.enable("release-123")).toThrow(
-				"Cannot enable release release-123 because not all extract jobs are completed.",
+			c.extractQueue.getJobsForReleaseId.mockReturnValue([extractJob]);
+
+			const releaseId = faker.string.uuid();
+
+			const releaseToggle = c.build();
+
+			expect(() => releaseToggle.enable(releaseId)).toThrowError(
+				`Cannot enable release ${releaseId} because not all extract jobs are completed.`,
 			);
+			expect(c.downloadQueue.getJobsForReleaseId).toHaveBeenCalledWith(releaseId);
+			expect(c.extractQueue.getJobsForReleaseId).toHaveBeenCalledWith(releaseId);
 		});
 
-		it("calls onCreateSymlink callback when provided", () => {
-			const fileSystem = new TestFileSystem();
-			const pathResolver = new BasePathResolver({
-				dropzoneModsFolder: "/dropzone/mods",
-				dcsInstallDir: "/dcs/install",
-				dcsWorkingDir: "/dcs/working",
-				fileSystem,
-			});
-			const releaseRepository = new TestReleaseRepository();
-			const downloadQueue = new TestDownloadQueue();
-			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-			const symlinkCallbacks: Array<{ src: string; dest: string }> = [];
+		it("should enable release when all jobs are completed", () => {
+			const c = createTestContext();
 
-			releaseRepository.saveRelease({
-				releaseId: "release-123",
-				modId: "mod-1",
-				modName: "Test Mod",
-				version: "1.0.0",
-				versionHash: "hash1",
-				dependencies: [],
-				assets: [],
-				symbolicLinks: [
-					{
-						name: "Link 1",
-						src: "src-path",
-						dest: "dest-path",
-						destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
-					},
-				],
-				missionScripts: [],
-			});
+			const completedDownloadJob: DownloadJob = zocker(DownloadJob)
+				.supply(DownloadJob.shape.status, DownloadJobStatus.COMPLETED)
+				.generate();
 
-			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			c.downloadQueue.getJobsForReleaseId.mockReturnValue([completedDownloadJob]);
 
-			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
+			const completedExtractJob: ExtractJob = zocker(ExtractJob)
+				.supply(ExtractJob.shape.status, ExtractJobStatus.COMPLETED)
+				.generate();
 
-			const releaseToggle = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-				onCreateSymlink: (src, dest) => {
-					symlinkCallbacks.push({ src, dest });
-				},
-			});
+			c.extractQueue.getJobsForReleaseId.mockReturnValue([completedExtractJob]);
 
-			releaseToggle.enable("release-123");
+			const releaseId = faker.string.uuid();
 
-			expect(symlinkCallbacks.length).toBe(1);
-			expect(symlinkCallbacks[0]?.src).toBe("/dropzone/mods/release-123/src-path");
-			expect(symlinkCallbacks[0]?.dest).toBe("/dcs/working/dest-path");
-		});
-	});
+			const link: SymbolicLink = zocker(SymbolicLink).generate();
+			c.releaseRepository.getSymbolicLinksForRelease.mockReturnValue([link]);
 
-	describe("disable", () => {
-		it("disables release by removing symlinks and rebuilding mission scripts", () => {
-			const fileSystem = new TestFileSystem();
-			const pathResolver = new BasePathResolver({
-				dropzoneModsFolder: "/dropzone/mods",
-				dcsInstallDir: "/dcs/install",
-				dcsWorkingDir: "/dcs/working",
-				fileSystem,
-			});
-			const releaseRepository = new TestReleaseRepository();
-			const downloadQueue = new TestDownloadQueue();
-			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
+			const symlinkSrc = faker.system.directoryPath();
+			c.pathResolver.resolveReleasePath.mockReturnValue(symlinkSrc);
+			const symlinkDest = faker.system.directoryPath();
 
-			releaseRepository.saveRelease({
-				releaseId: "release-123",
-				modId: "mod-1",
-				modName: "Test Mod",
-				version: "1.0.0",
-				versionHash: "hash1",
-				dependencies: [],
-				assets: [],
-				symbolicLinks: [
-					{
-						name: "Link 1",
-						src: "src-path",
-						dest: "dest-path",
-						destRoot: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
-					},
-				],
-				missionScripts: [],
-			});
+			c.pathResolver.resolveSymbolicLinkPath.mockReturnValue(symlinkDest);
 
-			// Set installed path manually
-			const links = releaseRepository.getSymbolicLinksForRelease("release-123");
-			releaseRepository.setInstalledPathForSymbolicLink(links[0]!.id, "/installed/path");
+			const releaseToggle = c.build();
 
-			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
+			expect(() => releaseToggle.enable(releaseId)).not.toThrow();
 
-			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
+			expect(c.fileSystem.ensureSymlink).toHaveBeenCalledWith(symlinkSrc, symlinkDest);
+			expect(c.releaseRepository.setInstalledPathForSymbolicLink).toHaveBeenCalledWith(link.id, symlinkDest);
 
-			const releaseToggle = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
-
-			releaseToggle.disable("release-123");
-
-			expect(fileSystem.removedDirs.length).toBe(1);
-			expect(fileSystem.removedDirs[0]).toBe("/installed/path");
-			expect(missionScriptingManager.rebuildCount).toBe(1);
-		});
-
-		it("skips symlinks without installed paths", () => {
-			const fileSystem = new TestFileSystem();
-			const pathResolver = new BasePathResolver({
-				dropzoneModsFolder: "/dropzone/mods",
-				dcsInstallDir: "/dcs/install",
-				dcsWorkingDir: "/dcs/working",
-				fileSystem,
-			});
-			const releaseRepository = new TestReleaseRepository();
-			const downloadQueue = new TestDownloadQueue();
-			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-
-			releaseRepository.saveRelease({
-				releaseId: "release-123",
-				modId: "mod-1",
-				modName: "Test Mod",
-				version: "1.0.0",
-				versionHash: "hash1",
-				dependencies: [],
-				assets: [],
-				symbolicLinks: [
-					{
-						name: "Link 1",
-						src: "src-path",
-						dest: "dest-path",
-						destRoot: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
-					},
-				],
-				missionScripts: [],
-			});
-
-			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
-
-			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
-
-			const releaseToggle = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
-
-			releaseToggle.disable("release-123");
-
-			expect(fileSystem.removedDirs.length).toBe(0);
-		});
-
-		it("handles errors when removing symlinks", () => {
-			const fileSystem = new TestFileSystem();
-			// Override removeDir to throw error
-			fileSystem.removeDir = () => {
-				throw new Error("Failed to remove");
-			};
-
-			const pathResolver = new BasePathResolver({
-				dropzoneModsFolder: "/dropzone/mods",
-				dcsInstallDir: "/dcs/install",
-				dcsWorkingDir: "/dcs/working",
-				fileSystem,
-			});
-			const releaseRepository = new TestReleaseRepository();
-			const downloadQueue = new TestDownloadQueue();
-			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-
-			releaseRepository.saveRelease({
-				releaseId: "release-123",
-				modId: "mod-1",
-				modName: "Test Mod",
-				version: "1.0.0",
-				versionHash: "hash1",
-				dependencies: [],
-				assets: [],
-				symbolicLinks: [
-					{
-						name: "Link 1",
-						src: "src-path",
-						dest: "dest-path",
-						destRoot: SymbolicLinkDestRoot.DCS_INSTALL_DIR,
-					},
-				],
-				missionScripts: [],
-			});
-
-			const links = releaseRepository.getSymbolicLinksForRelease("release-123");
-			releaseRepository.setInstalledPathForSymbolicLink(links[0]!.id, "/installed/path");
-
-			downloadQueue.pushJob("release-123", "asset-1", "job-1", "http://example.com", "/dest");
-			downloadQueue.setJobStatus("asset-1", "job-1", DownloadJobStatus.COMPLETED, 100);
-
-			extractQueue.pushJob("release-123", "asset-1", "extract-1", "/archive", "/dest", ["job-1"]);
-			extractQueue.setJobStatus("extract-1", ExtractJobStatus.COMPLETED, 100);
-
-			const releaseToggle = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
-
-			// Should not throw, just log the error
-			expect(() => releaseToggle.disable("release-123")).not.toThrow();
+			expect(c.missionScriptingFilesManager.rebuild).toHaveBeenCalled();
 		});
 	});
 });

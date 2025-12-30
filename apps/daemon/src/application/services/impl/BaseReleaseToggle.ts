@@ -14,7 +14,6 @@ const logger = getLogger("ReleaseToggle");
 type Deps = {
 	missionScriptingFilesManager: MissionScriptingFilesManager;
 	pathResolver: PathResolver;
-	onCreateSymlink?: (src: string, dest: string) => void;
 	releaseRepository: ReleaseRepository;
 	fileSystem: FileSystem;
 	downloadQueue: DownloadQueue;
@@ -40,11 +39,6 @@ export class BaseReleaseToggle implements ReleaseToggle {
 
 			this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, destAbs);
 			logger.debug(`Stored installed symlink path for linkId ${link.id}: ${destAbs}`);
-
-			if (this.deps.onCreateSymlink) {
-				logger.trace(`Calling onCreateSymlink callback for ${srcAbs} -> ${destAbs}`);
-				this.deps.onCreateSymlink(srcAbs, destAbs);
-			}
 		}
 
 		logger.info(`Rebuilding mission scripting files after enabling release ${releaseId}`);
