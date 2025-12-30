@@ -12,6 +12,7 @@ import { TestDownloadQueue } from "./TestDownloadQueue.ts";
 import { TestExtractQueue } from "./TestExtractQueue.ts";
 import { TestFileSystem } from "./TestFileSystem.ts";
 import { TestMissionScriptingFilesManager } from "./TestMissionScriptingFilesManager.ts";
+import { TestReleaseToggle } from "./TestReleaseToggle.ts";
 
 describe("ReleaseCatalog", () => {
 	describe("add", () => {
@@ -83,16 +84,7 @@ describe("ReleaseCatalog", () => {
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-
-			const releaseToggleService = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
+			const releaseToggleService = new TestReleaseToggle();
 
 			const catalog = new BaseReleaseCatalog({
 				releaseToggleService,
@@ -140,16 +132,7 @@ describe("ReleaseCatalog", () => {
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-
-			const releaseToggleService = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
+			const releaseToggleService = new TestReleaseToggle();
 
 			const catalog = new BaseReleaseCatalog({
 				releaseToggleService,
@@ -185,6 +168,7 @@ describe("ReleaseCatalog", () => {
 
 			catalog.remove("release-123");
 
+			expect(releaseToggleService.mockDisable).toHaveBeenCalledWith("release-123");
 			expect(downloadQueue.canceledReleases).toContain("release-123");
 			expect(extractQueue.canceledReleases).toContain("release-123");
 			expect(fileSystem.removedDirs).toContain("/dropzone/mods/release-123");
@@ -204,16 +188,7 @@ describe("ReleaseCatalog", () => {
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-
-			const releaseToggleService = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
+			const releaseToggleService = new TestReleaseToggle();
 
 			const catalog = new BaseReleaseCatalog({
 				releaseToggleService,
@@ -272,16 +247,7 @@ describe("ReleaseCatalog", () => {
 			const releaseRepository = new TestReleaseRepository();
 			const downloadQueue = new TestDownloadQueue();
 			const extractQueue = new TestExtractQueue();
-			const missionScriptingManager = new TestMissionScriptingFilesManager();
-
-			const releaseToggleService = new BaseReleaseToggle({
-				fileSystem,
-				pathResolver,
-				releaseRepository,
-				downloadQueue,
-				extractQueue,
-				missionScriptingFilesManager: missionScriptingManager as any,
-			});
+			const releaseToggleService = new TestReleaseToggle();
 
 			const catalog = new BaseReleaseCatalog({
 				releaseToggleService,
