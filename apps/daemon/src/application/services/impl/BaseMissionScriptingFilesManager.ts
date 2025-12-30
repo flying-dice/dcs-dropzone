@@ -9,6 +9,11 @@ import type { PathResolver } from "../PathResolver.ts";
 const logger = getLogger("RegenerateMissionScriptingFiles");
 
 export class BaseMissionScriptingFilesManager implements MissionScriptingFilesManager {
+	public static readonly PATHS: Record<MissionScriptRunOn, string> = {
+		[MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE]: "Scripts/DropzoneMissionScriptsBeforeSanitize.lua",
+		[MissionScriptRunOn.MISSION_START_AFTER_SANITIZE]: "Scripts/DropzoneMissionScriptsAfterSanitize.lua",
+	};
+
 	constructor(
 		protected deps: {
 			fileSystem: FileSystem;
@@ -28,14 +33,17 @@ export class BaseMissionScriptingFilesManager implements MissionScriptingFilesMa
 
 		logger.debug(`Fetched ${beforeScripts.length} scripts to run before sanitize, generating file...`);
 
-		const beforeFile = generateDropzoneMissionScriptingScript(this.mapScriptsToPaths(beforeScripts));
+		const beforeFile = generateDropzoneMissionScriptingScript(
+			MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
+			this.mapScriptsToPaths(beforeScripts),
+		);
 
 		logger.debug("Writing before sanitize mission scripting file...");
 
 		this.deps.fileSystem.writeFile(
 			this.deps.pathResolver.resolveSymbolicLinkPath(
 				SymbolicLinkDestRoot.DCS_WORKING_DIR,
-				"Scripts/DropzoneMissionScriptsBeforeSanitize.lua",
+				BaseMissionScriptingFilesManager.PATHS.MISSION_START_BEFORE_SANITIZE,
 			),
 			beforeFile,
 		);
@@ -48,14 +56,17 @@ export class BaseMissionScriptingFilesManager implements MissionScriptingFilesMa
 
 		logger.debug(`Fetched ${afterScripts.length} scripts to run after sanitize, generating file...`);
 
-		const afterFile = generateDropzoneMissionScriptingScript(this.mapScriptsToPaths(afterScripts));
+		const afterFile = generateDropzoneMissionScriptingScript(
+			MissionScriptRunOn.MISSION_START_AFTER_SANITIZE,
+			this.mapScriptsToPaths(afterScripts),
+		);
 
 		logger.debug("Writing after sanitize mission scripting file...");
 
 		this.deps.fileSystem.writeFile(
 			this.deps.pathResolver.resolveSymbolicLinkPath(
 				SymbolicLinkDestRoot.DCS_WORKING_DIR,
-				"Scripts/DropzoneMissionScriptsAfterSanitize.lua",
+				BaseMissionScriptingFilesManager.PATHS.MISSION_START_AFTER_SANITIZE,
 			),
 			afterFile,
 		);
