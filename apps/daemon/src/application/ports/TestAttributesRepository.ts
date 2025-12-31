@@ -2,6 +2,6 @@ import { mock } from "bun:test";
 import type { AttributesRepository } from "./AttributesRepository.ts";
 
 export class TestAttributesRepository implements AttributesRepository {
-	getDaemonInstanceId = mock();
-	saveDaemonInstanceId = mock();
+	get = mock<AttributesRepository["get"]>();
+	save = mock<AttributesRepository["save"]>();
 }
