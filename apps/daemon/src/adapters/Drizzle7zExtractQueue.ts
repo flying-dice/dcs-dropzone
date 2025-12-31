@@ -5,7 +5,7 @@ import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
 import { ExtractJobStatus } from "../application/enums/ExtractJobStatus.ts";
-import type { ExtractQueue } from "../application/services/ExtractQueue.ts";
+import type { ExtractQueue } from "../application/ports/ExtractQueue.ts";
 import { spawnSevenzip } from "../child_process/sevenzip.ts";
 import { T_DOWNLOAD_QUEUE, T_EXTRACT_DOWNLOAD_JOIN, T_EXTRACT_QUEUE } from "../database/schema.ts";
 import type { DrizzleWgetDownloadQueue } from "./DrizzleWgetDownloadQueue.ts";

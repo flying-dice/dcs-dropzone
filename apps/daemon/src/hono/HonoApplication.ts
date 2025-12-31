@@ -80,7 +80,7 @@ export class HonoApplication extends Hono<Env> {
 			(c) => {
 				const modAndRelease = c.req.valid("json");
 
-				c.var.app.releaseCatalog.add(modAndRelease);
+				c.var.app.addRelease(modAndRelease);
 
 				return c.json(null, StatusCodes.OK);
 			},
@@ -98,7 +98,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			(c) => {
-				const subscriptions = c.var.app.releaseCatalog.getAllReleasesWithStatus();
+				const subscriptions = c.var.app.getAllReleasesWithStatus();
 
 				return c.json(subscriptions, StatusCodes.OK);
 			},
@@ -124,7 +124,7 @@ export class HonoApplication extends Hono<Env> {
 			(c) => {
 				const { releaseId } = c.req.valid("param");
 
-				c.var.app.releaseCatalog.remove(releaseId);
+				c.var.app.removeRelease(releaseId);
 
 				return c.json(null, StatusCodes.OK);
 			},
@@ -171,10 +171,10 @@ export class HonoApplication extends Hono<Env> {
 			}),
 			async (c) => {
 				try {
-					return c.json({ status: "UP", daemonInstanceId: c.var.app.daemonInstanceId }, StatusCodes.OK);
+					return c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId() }, StatusCodes.OK);
 				} catch (error) {
 					return c.json(
-						{ status: "DOWN", daemonInstanceId: c.var.app.daemonInstanceId, error: String(error) },
+						{ status: "DOWN", daemonInstanceId: c.var.app.getDaemonInstanceId(), error: String(error) },
 						StatusCodes.SERVICE_UNAVAILABLE,
 					);
 				}
@@ -194,7 +194,7 @@ export class HonoApplication extends Hono<Env> {
 			validator("param", z.object({ releaseId: z.string() })),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
-				c.var.app.releaseToggleService.enable(releaseId);
+				c.var.app.enableRelease(releaseId);
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
@@ -212,7 +212,7 @@ export class HonoApplication extends Hono<Env> {
 			validator("param", z.object({ releaseId: z.string() })),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
-				c.var.app.releaseToggleService.disable(releaseId);
+				c.var.app.disableRelease(releaseId);
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);

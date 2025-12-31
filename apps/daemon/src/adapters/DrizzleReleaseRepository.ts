@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import type { ReleaseRepository } from "../application/repository/ReleaseRepository.ts";
+import type { ReleaseRepository } from "../application/ports/ReleaseRepository.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import {
 	T_MOD_RELEASE_ASSETS,

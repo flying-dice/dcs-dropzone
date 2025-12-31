@@ -1,5 +1,5 @@
 import { mock } from "bun:test";
-import type { ExtractQueue } from "../ExtractQueue.ts";
+import type { ExtractQueue } from "./ExtractQueue.ts";
 
 export class TestExtractQueue implements ExtractQueue {
 	cancelJobsForRelease = mock<ExtractQueue["cancelJobsForRelease"]>();

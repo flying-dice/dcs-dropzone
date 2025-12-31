@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import type { AttributesRepository } from "../application/repository/AttributesRepository.ts";
+import type { AttributesRepository } from "../application/ports/AttributesRepository.ts";
 import { T_APP_ATTRIBUTES } from "../database/schema.ts";
 
 export class DrizzleAttributesRepository implements AttributesRepository {

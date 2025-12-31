@@ -1,5 +1,5 @@
 import { mock } from "bun:test";
-import type { DownloadQueue } from "../DownloadQueue.ts";
+import type { DownloadQueue } from "./DownloadQueue.ts";
 
 export class TestDownloadQueue implements DownloadQueue {
 	getJobsForReleaseId = mock<DownloadQueue["getJobsForReleaseId"]>();

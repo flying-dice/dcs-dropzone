@@ -1,5 +1,5 @@
 import { mock } from "bun:test";
-import type { FileSystem } from "../FileSystem.ts";
+import type { FileSystem } from "./FileSystem.ts";
 
 export class TestFileSystem implements FileSystem {
 	ensureDir = mock<FileSystem["ensureDir"]>();

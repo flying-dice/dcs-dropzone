@@ -21,7 +21,7 @@ const logger = getLogger("tui");
 export function App(props: { app: Application }) {
 	const _recentLoggingEvents = useObservable(recentLoggingEvent$, recentLoggingEvent$.value);
 
-	const _releases = useObservable(AllDaemonReleases.$, AllDaemonReleases.$.value);
+	const _releases = useObservable(props.app.release$, []);
 	const [selectedId, setSelectedId] = useState<string | null>(_releases[0]?.releaseId || null);
 
 	const selected: ModAndReleaseData | undefined = useMemo(
@@ -36,7 +36,7 @@ export function App(props: { app: Application }) {
 
 		try {
 			logger.info(`Disabling release: ${readableName}`);
-			props.app.releaseToggleService.disable(selected.releaseId);
+			props.app.disableRelease(selected.releaseId);
 			logger.info(`Disabled release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error disabling release ${readableName}: ${err}`);
@@ -48,7 +48,7 @@ export function App(props: { app: Application }) {
 		const readableName = `${selected?.modName} v${selected?.version}`;
 		try {
 			logger.info(`Enabling release: ${readableName}`);
-			props.app.releaseToggleService.enable(selectedId);
+			props.app.enableRelease(selectedId);
 			logger.info(`Enabled release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error enabling release ${readableName}`, err);
@@ -60,7 +60,7 @@ export function App(props: { app: Application }) {
 		const readableName = `${selected?.modName} v${selected?.version}`;
 		try {
 			logger.info(`Removing release: ${readableName}`);
-			props.app.releaseCatalog.remove(selectedId);
+			props.app.removeRelease(selectedId);
 			logger.info(`Removed release: ${readableName}`);
 		} catch (err) {
 			logger.error(`Error removing release ${readableName}: ${err}`);

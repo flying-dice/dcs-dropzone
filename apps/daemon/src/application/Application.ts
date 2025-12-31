@@ -1,16 +1,15 @@
-import AllDaemonReleases from "./observables/AllDaemonReleases.ts";
-import type { AttributesRepository } from "./repository/AttributesRepository.ts";
-import type { ReleaseRepository } from "./repository/ReleaseRepository.ts";
-import type { DownloadQueue } from "./services/DownloadQueue.ts";
-import type { ExtractQueue } from "./services/ExtractQueue.ts";
-import type { FileSystem } from "./services/FileSystem.ts";
-import { BaseMissionScriptingFilesManager } from "./services/impl/BaseMissionScriptingFilesManager.ts";
-import { BasePathResolver } from "./services/impl/BasePathResolver.ts";
-import { BaseReleaseCatalog } from "./services/impl/BaseReleaseCatalog.ts";
-import { BaseReleaseToggle } from "./services/impl/BaseReleaseToggle.ts";
-import type { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
-import type { ReleaseToggle } from "./services/ReleaseToggle.ts";
-import type { UUIDGenerator } from "./services/UUIDGenerator.ts";
+import { BehaviorSubject, type Observable } from "rxjs";
+import type { AttributesRepository } from "./ports/AttributesRepository.ts";
+import type { DownloadQueue } from "./ports/DownloadQueue.ts";
+import type { ExtractQueue } from "./ports/ExtractQueue.ts";
+import type { FileSystem } from "./ports/FileSystem.ts";
+import type { ReleaseRepository } from "./ports/ReleaseRepository.ts";
+import type { UUIDGenerator } from "./ports/UUIDGenerator.ts";
+import type { ModAndReleaseData } from "./schemas/ModAndReleaseData.ts";
+import { MissionScriptingFilesManager } from "./services/MissionScriptingFilesManager.ts";
+import { PathResolver } from "./services/PathResolver.ts";
+import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
+import { ReleaseToggle } from "./services/ReleaseToggle.ts";
 
 type Deps = {
 	downloadQueue: DownloadQueue;
@@ -28,35 +27,73 @@ type Deps = {
 };
 
 export class Application {
-	public readonly releaseToggleService: ReleaseToggle;
-	public readonly releaseCatalog: ReleaseCatalog;
-	public readonly daemonInstanceId: string;
+	private readonly daemonInstanceId: string;
+	private readonly releaseToggleService: ReleaseToggle;
+	private readonly releaseCatalog: ReleaseCatalog;
+
+	private _release$ = new BehaviorSubject<ModAndReleaseData[]>([]);
+
+	get release$(): Observable<ModAndReleaseData[]> {
+		return this._release$.asObservable();
+	}
 
 	constructor(protected deps: Deps) {
 		this.daemonInstanceId =
 			this.deps.attributesRepository.getDaemonInstanceId() ??
 			this.deps.attributesRepository.saveDaemonInstanceId(this.deps.generateUuid());
 
-		const pathResolver = new BasePathResolver({ ...deps });
+		const pathResolver = new PathResolver({ ...deps });
 
-		const missionScriptingFilesManager = new BaseMissionScriptingFilesManager({
+		const missionScriptingFilesManager = new MissionScriptingFilesManager({
 			...this.deps,
 			pathResolver,
 		});
 
-		this.releaseToggleService = new BaseReleaseToggle({
+		this.releaseToggleService = new ReleaseToggle({
 			...this.deps,
 			pathResolver,
 			missionScriptingFilesManager,
 		});
 
-		this.releaseCatalog = new BaseReleaseCatalog({
+		this.releaseCatalog = new ReleaseCatalog({
 			...this.deps,
 			pathResolver,
-			releaseToggleService: this.releaseToggleService,
 		});
 
-		AllDaemonReleases.$.next(this.releaseCatalog.getAllReleasesWithStatus());
-		setInterval(() => AllDaemonReleases.$.next(this.releaseCatalog.getAllReleasesWithStatus()), 1000);
+		this.updateReleasesObservable();
+		setInterval(() => this.updateReleasesObservable(), 1000);
+	}
+
+	public getDaemonInstanceId(): string {
+		return this.daemonInstanceId;
+	}
+
+	public enableRelease(releaseId: string): void {
+		this.releaseToggleService.enable(releaseId);
+		this.updateReleasesObservable();
+	}
+
+	public disableRelease(releaseId: string): void {
+		this.releaseToggleService.disable(releaseId);
+		this.updateReleasesObservable();
+	}
+
+	public addRelease(data: ModAndReleaseData): void {
+		this.releaseCatalog.add(data);
+		this.updateReleasesObservable();
+	}
+
+	public removeRelease(releaseId: string): void {
+		this.releaseToggleService.disable(releaseId);
+		this.releaseCatalog.remove(releaseId);
+		this.updateReleasesObservable();
+	}
+
+	public getAllReleasesWithStatus() {
+		return this.releaseCatalog.getAllReleasesWithStatus();
+	}
+
+	private updateReleasesObservable() {
+		this._release$.next(this.releaseCatalog.getAllReleasesWithStatus());
 	}
 }
