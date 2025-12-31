@@ -11,7 +11,7 @@ import {
 } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { getLogger } from "log4js";
-import type { FileSystem } from "../application/services/FileSystem.ts";
+import type { FileSystem } from "../application/ports/FileSystem.ts";
 
 const logger = getLogger("LocalFileSystemService");
 

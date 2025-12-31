@@ -4,7 +4,7 @@ import { and, asc, eq, lte } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
-import type { DownloadQueue } from "../application/services/DownloadQueue.ts";
+import type { DownloadQueue } from "../application/ports/DownloadQueue.ts";
 import { spawnWget } from "../child_process/wget.ts";
 import { T_DOWNLOAD_QUEUE } from "../database/schema.ts";
 

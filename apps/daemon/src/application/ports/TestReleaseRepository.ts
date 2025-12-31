@@ -1,5 +1,5 @@
 import { mock } from "bun:test";
-import type { ReleaseRepository } from "../ReleaseRepository.ts";
+import type { ReleaseRepository } from "./ReleaseRepository.ts";
 
 export class TestReleaseRepository implements ReleaseRepository {
 	getAllReleases = mock();
