@@ -5,7 +5,7 @@ import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { PathResolver } from "./PathResolver.ts";
 
-const logger = getLogger("RegenerateMissionScriptingFiles");
+const logger = getLogger("MissionScriptingFilesManager");
 
 export class MissionScriptingFilesManager {
 	public static readonly PATHS: Record<MissionScriptRunOn, string> = {
