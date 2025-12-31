@@ -1,4 +1,4 @@
 export interface AttributesRepository {
-	getDaemonInstanceId(): string | undefined;
-	saveDaemonInstanceId(instanceId: string): string;
+	get(key: string): string | undefined;
+	save(key: string, value: string): string;
 }

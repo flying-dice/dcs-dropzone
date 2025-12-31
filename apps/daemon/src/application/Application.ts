@@ -27,6 +27,8 @@ type Deps = {
 };
 
 export class Application {
+	private static readonly DAEMON_INSTANCE_ID_KEY = "daemon_instance_id";
+
 	private readonly daemonInstanceId: string;
 	private readonly releaseToggleService: ReleaseToggle;
 	private readonly releaseCatalog: ReleaseCatalog;
@@ -39,8 +41,8 @@ export class Application {
 
 	constructor(protected deps: Deps) {
 		this.daemonInstanceId =
-			this.deps.attributesRepository.getDaemonInstanceId() ??
-			this.deps.attributesRepository.saveDaemonInstanceId(this.deps.generateUuid());
+			this.deps.attributesRepository.get(Application.DAEMON_INSTANCE_ID_KEY) ??
+			this.deps.attributesRepository.save(Application.DAEMON_INSTANCE_ID_KEY, this.deps.generateUuid());
 
 		const pathResolver = new PathResolver({ ...deps });
 
