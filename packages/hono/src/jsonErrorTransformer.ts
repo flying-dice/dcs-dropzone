@@ -1,8 +1,8 @@
-import { ErrorData } from "daemon/src/schemas/ErrorData.ts";
 import type { ErrorHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
+import { ErrorData } from "./schemas.ts";
 
 const logger = getLogger("jsonErrorTransformer");
 

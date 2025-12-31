@@ -1,48 +1,25 @@
-import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
+import type { MissionScriptRunOn } from "webapp";
+import type { MissionScript } from "../schemas/MissionScript.ts";
+import type { MissionScriptByRunOn } from "../schemas/MissionScriptByRunOn.ts";
 import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
+import type { ReleaseAsset } from "../schemas/ReleaseAsset.ts";
+import type { ReleaseInfo } from "../schemas/ReleaseInfo.ts";
+import type { SymbolicLink } from "../schemas/SymbolicLink.ts";
 
 export interface ReleaseRepository {
 	saveRelease(data: ModAndReleaseData): void;
 
 	deleteRelease(releaseId: string): void;
 
-	getAllReleases(): {
-		releaseId: string;
-		modId: string;
-		modName: string;
-		version: string;
-		versionHash: string;
-		dependencies: string[];
-	}[];
+	getAllReleases(): ReleaseInfo[];
 
-	getMissionScriptsByRunOn(
-		runOn: MissionScriptRunOn,
-	): { modName: string; modVersion: string; path: string; pathRoot: SymbolicLinkDestRoot }[];
+	getMissionScriptsByRunOn(runOn: MissionScriptRunOn): MissionScriptByRunOn[];
 
-	getReleaseAssetsForRelease(
-		releaseId: string,
-	): { id: string; releaseId: string; name: string; isArchive: boolean; urls: string[] }[];
+	getReleaseAssetsForRelease(releaseId: string): ReleaseAsset[];
 
-	getSymbolicLinksForRelease(releaseId: string): {
-		id: string;
-		releaseId: string;
-		name: string;
-		src: string;
-		dest: string;
-		destRoot: SymbolicLinkDestRoot;
-		installedPath: string | null;
-	}[];
+	getSymbolicLinksForRelease(releaseId: string): SymbolicLink[];
 
 	setInstalledPathForSymbolicLink(symbolicLinkId: string, installedPath: string | null): void;
 
-	getMissionScriptsForRelease(releaseId: string): {
-		id: string;
-		releaseId: string;
-		name: string;
-		purpose: string;
-		path: string;
-		root: SymbolicLinkDestRoot;
-		runOn: MissionScriptRunOn;
-		installedPath: string | null;
-	}[];
+	getMissionScriptsForRelease(releaseId: string): MissionScript[];
 }
