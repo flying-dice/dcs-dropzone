@@ -1,4 +1,5 @@
 import { BehaviorSubject, type Observable } from "rxjs";
+import type { SymbolicLinkDestRoot } from "webapp";
 import type { AttributesRepository } from "./ports/AttributesRepository.ts";
 import type { DownloadQueue } from "./ports/DownloadQueue.ts";
 import type { ExtractQueue } from "./ports/ExtractQueue.ts";
@@ -22,8 +23,7 @@ type Deps = {
 	fileSystem: FileSystem;
 
 	dropzoneModsFolder: string;
-	dcsInstallDir: string;
-	dcsWorkingDir: string;
+	dcsPaths: Record<SymbolicLinkDestRoot, string>;
 };
 
 export class Application {

@@ -39,8 +39,10 @@ const fileSystem = new LocalFileSystem();
 
 logger.debug("Creating Application instance...");
 const app = new Application({
-	dcsInstallDir: applicationConfig.dcs.dcs_install_dir,
-	dcsWorkingDir: applicationConfig.dcs.dcs_working_dir,
+	dcsPaths: {
+		DCS_INSTALL_DIR: applicationConfig.dcs.dcs_install_dir,
+		DCS_WORKING_DIR: applicationConfig.dcs.dcs_working_dir,
+	},
 	dropzoneModsFolder: applicationConfig.app.mods_dir,
 	generateUuid: () => crypto.randomUUID(),
 	attributesRepository,
