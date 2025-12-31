@@ -8,10 +8,13 @@ import type { PathResolver } from "./PathResolver.ts";
 const logger = getLogger("MissionScriptingFilesManager");
 
 export class MissionScriptingFilesManager {
-	public static readonly PATHS: Record<MissionScriptRunOn, string> = {
+	private static readonly PATHS: Record<MissionScriptRunOn, string> = {
 		[MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE]: "Scripts/DropzoneMissionScriptsBeforeSanitize.lua",
 		[MissionScriptRunOn.MISSION_START_AFTER_SANITIZE]: "Scripts/DropzoneMissionScriptsAfterSanitize.lua",
 	};
+
+	private readonly beforeAbsPath: string;
+	private readonly afterAbsPath: string;
 
 	constructor(
 		protected deps: {
@@ -19,7 +22,17 @@ export class MissionScriptingFilesManager {
 			releaseRepository: ReleaseRepository;
 			pathResolver: PathResolver;
 		},
-	) {}
+	) {
+		this.beforeAbsPath = this.deps.pathResolver.resolveSymbolicLinkPath(
+			SymbolicLinkDestRoot.DCS_WORKING_DIR,
+			MissionScriptingFilesManager.PATHS.MISSION_START_BEFORE_SANITIZE,
+		);
+
+		this.afterAbsPath = this.deps.pathResolver.resolveSymbolicLinkPath(
+			SymbolicLinkDestRoot.DCS_WORKING_DIR,
+			MissionScriptingFilesManager.PATHS.MISSION_START_AFTER_SANITIZE,
+		);
+	}
 
 	rebuild() {
 		logger.info("Regenerating Dropzone Mission Scripting Files");
@@ -39,13 +52,7 @@ export class MissionScriptingFilesManager {
 
 		logger.debug("Writing before sanitize mission scripting file...");
 
-		this.deps.fileSystem.writeFile(
-			this.deps.pathResolver.resolveSymbolicLinkPath(
-				SymbolicLinkDestRoot.DCS_WORKING_DIR,
-				MissionScriptingFilesManager.PATHS.MISSION_START_BEFORE_SANITIZE,
-			),
-			beforeFile,
-		);
+		this.deps.fileSystem.writeFile(this.beforeAbsPath, beforeFile);
 
 		logger.debug("Fetching mission scripts to run after sanitize");
 
@@ -62,13 +69,7 @@ export class MissionScriptingFilesManager {
 
 		logger.debug("Writing after sanitize mission scripting file...");
 
-		this.deps.fileSystem.writeFile(
-			this.deps.pathResolver.resolveSymbolicLinkPath(
-				SymbolicLinkDestRoot.DCS_WORKING_DIR,
-				MissionScriptingFilesManager.PATHS.MISSION_START_AFTER_SANITIZE,
-			),
-			afterFile,
-		);
+		this.deps.fileSystem.writeFile(this.afterAbsPath, afterFile);
 
 		logger.info("Regenerated Dropzone Mission Scripting Files");
 	}
