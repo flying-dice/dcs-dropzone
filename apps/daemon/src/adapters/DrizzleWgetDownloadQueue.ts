@@ -35,7 +35,14 @@ export class DrizzleWgetDownloadQueue implements DownloadQueue {
 		}, 1000);
 	}
 
-	pushJob(releaseId: string, releaseAssetId: string, id: string, url: string, targetDirectory: string): void {
+	pushJob(
+		id: string,
+		releaseId: string,
+		releaseAssetId: string,
+		urlId: string,
+		url: string,
+		targetDirectory: string,
+	): void {
 		logger.debug(`[${id}] - Pushing new download job to queue: ${url} -> ${targetDirectory}`);
 		this.db
 			.insert(T_DOWNLOAD_QUEUE)
@@ -47,6 +54,7 @@ export class DrizzleWgetDownloadQueue implements DownloadQueue {
 				nextAttemptAfter: new Date(),
 				releaseAssetId,
 				releaseId,
+				urlId,
 			})
 			.returning()
 			.get();
@@ -172,33 +180,11 @@ export class DrizzleWgetDownloadQueue implements DownloadQueue {
 		this.active = null;
 	}
 
-	getJobsForReleaseId(releaseId: string): {
-		id: string;
-		releaseId: string;
-		releaseAssetId: string;
-		url: string;
-		targetDirectory: string;
-		status: DownloadJobStatus;
-		progressPercent: number;
-		attempt: number;
-		nextAttemptAfter: Date;
-		createdAt: Date;
-	}[] {
+	getJobsForReleaseId(releaseId: string): DownloadJob[] {
 		return this.db.select().from(T_DOWNLOAD_QUEUE).where(eq(T_DOWNLOAD_QUEUE.releaseId, releaseId)).all();
 	}
 
-	getJobsForReleaseAssetId(releaseAssetId: string): {
-		id: string;
-		releaseId: string;
-		releaseAssetId: string;
-		url: string;
-		targetDirectory: string;
-		status: DownloadJobStatus;
-		progressPercent: number;
-		attempt: number;
-		nextAttemptAfter: Date;
-		createdAt: Date;
-	}[] {
+	getJobsForReleaseAssetId(releaseAssetId: string): DownloadJob[] {
 		return this.db.select().from(T_DOWNLOAD_QUEUE).where(eq(T_DOWNLOAD_QUEUE.releaseAssetId, releaseAssetId)).all();
 	}
 }

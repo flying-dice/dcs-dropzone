@@ -17,17 +17,17 @@ import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
 import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 
 export const userModReleaseFormValues = z.object({
-	id: z.uuid(),
+	id: z.string(),
 	version: z.string(),
 	visibility: z.enum(ModReleaseDataVisibility),
 	changelog: z.string(),
 	assets: z
 		.object({
-			id: z.uuid(),
+			id: z.string(),
 			name: z.string(),
 			urls: z
 				.object({
-					id: z.uuid(),
+					id: z.string(),
 					url: z.url(),
 				})
 				.array(),
@@ -36,7 +36,7 @@ export const userModReleaseFormValues = z.object({
 		.array(),
 	symbolicLinks: z
 		.object({
-			id: z.uuid(),
+			id: z.string(),
 			name: z.string().min(1, "Name is required"),
 			src: z.string().min(1, "Source path is required"),
 			dest: z.string().min(1, "Destination path is required"),
@@ -46,7 +46,7 @@ export const userModReleaseFormValues = z.object({
 		.default([]),
 	missionScripts: z
 		.object({
-			id: z.uuid(),
+			id: z.string(),
 			name: z.string().min(1, "Name is required"),
 			purpose: z.string().min(1, "Purpose is required"),
 			path: z.string().min(1, "Path is required"),

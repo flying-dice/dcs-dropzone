@@ -42,26 +42,32 @@ export class ReleaseCatalog {
 
 			const downloadJobIds: string[] = [];
 
-			for (const [idx, url] of asset.urls.entries()) {
-				const downloadJobId = this.makeDownloadJobId(asset.id, idx);
-				logger.debug(`Pushing download job for URL: ${url}`);
-				this.deps.downloadQueue.pushJob(data.releaseId, asset.id, downloadJobId, url, releaseFolder);
-				downloadJobIds.push(downloadJobId);
+			for (const url of asset.urls) {
+				logger.debug(`Pushing download job for URL: ${url.url}`);
+				this.deps.downloadQueue.pushJob(
+					this.generateDownloadJobId(url.id),
+					data.releaseId,
+					asset.id,
+					url.id,
+					url.url,
+					releaseFolder,
+				);
+				downloadJobIds.push(url.id);
 			}
 
 			// If the asset is an archive, create an extract job that depends on all download jobs
 			if (asset.isArchive && asset.urls.length > 0) {
 				// For multipart archives, the first file is typically the main archive
-				const firstUrl = asset.urls[0] as string;
-				const archivePath = join(releaseFolder, decodeURIComponent(basename(firstUrl)));
+				const firstUrl = asset.urls[0]?.url;
+				const archivePath = join(releaseFolder, decodeURIComponent(basename(firstUrl!)));
 
 				logger.debug(
 					`Pushing extract job for archive: ${archivePath} with ${downloadJobIds.length} download dependencies`,
 				);
 				this.deps.extractQueue.pushJob(
+					this.generateExtractJobId(asset.id),
 					data.releaseId,
 					asset.id,
-					this.makeExtractJobId(asset.id),
 					archivePath,
 					releaseFolder,
 					downloadJobIds,
@@ -144,11 +150,11 @@ export class ReleaseCatalog {
 		};
 	}
 
-	private makeDownloadJobId(releaseAssetId: string, urlIndex: number): string {
-		return `download:${releaseAssetId}:${urlIndex}`;
+	private generateExtractJobId(assetId: string): string {
+		return `extract:${assetId}`;
 	}
 
-	private makeExtractJobId(releaseAssetId: string): string {
-		return `extract:${releaseAssetId}`;
+	private generateDownloadJobId(urlId: string): string {
+		return `download:${urlId}`;
 	}
 }

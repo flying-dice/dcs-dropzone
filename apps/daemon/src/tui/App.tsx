@@ -3,7 +3,6 @@ import { getLogger } from "log4js";
 import { useMemo, useState } from "react";
 import { match } from "ts-pattern";
 import type { Application } from "../application/Application.ts";
-import AllDaemonReleases from "../application/observables/AllDaemonReleases.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { clearRecentLoggingEvents, recentLoggingEvent$ } from "../log4js.ts";
 import { Footer } from "./Footer.tsx";

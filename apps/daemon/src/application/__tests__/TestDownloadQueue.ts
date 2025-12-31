@@ -5,11 +5,19 @@ import type { DownloadJob } from "../schemas/DownloadJob.ts";
 export class TestDownloadQueue implements DownloadQueue {
 	private readonly jobs = new Map<string, DownloadJob>();
 
-	pushJob(releaseId: string, releaseAssetId: string, id: string, url: string, targetDirectory: string): void {
+	pushJob(
+		id: string,
+		releaseId: string,
+		releaseAssetId: string,
+		urlId: string,
+		url: string,
+		targetDirectory: string,
+	): void {
 		const job: DownloadJob = {
 			id,
 			releaseId,
 			releaseAssetId,
+			urlId,
 			url,
 			targetDirectory,
 			status: DownloadJobStatus.PENDING,

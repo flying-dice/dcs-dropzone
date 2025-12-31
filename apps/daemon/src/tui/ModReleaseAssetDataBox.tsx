@@ -34,8 +34,8 @@ export function ModReleaseAssetDataBox(props: ModReleaseAssetDataBoxProps) {
 				<box flexDirection={"column"}>
 					<text attributes={TextAttributes.BOLD}>URLs:</text>
 					{props.asset.urls.map((url) => (
-						<text key={url} marginLeft={2} attributes={TextAttributes.ITALIC}>
-							- {url}
+						<text key={url.id} marginLeft={2} attributes={TextAttributes.ITALIC}>
+							- {url.url}
 						</text>
 					))}
 				</box>

@@ -22,7 +22,7 @@ const configSchema = z.object({
 	}),
 	app: z.object({
 		mods_dir: z.string().min(1, "Mods directory is required"),
-		daemonInstanceIdKey: z.string().min(1, "Daemon Instance ID Key is required").default("daemon_instance_id"),
+		tui_enabled: z.boolean().default(true),
 	}),
 });
 

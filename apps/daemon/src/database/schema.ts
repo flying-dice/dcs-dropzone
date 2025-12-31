@@ -24,7 +24,7 @@ export const T_MOD_RELEASE_ASSETS = sqliteTable("MOD_RELEASE_ASSETS", {
 		.references(() => T_MOD_RELEASES.releaseId),
 	name: text("name").notNull(),
 	isArchive: int("is_archive", { mode: "boolean" }).notNull(),
-	urls: text("urls", { mode: "json" }).$type<string[]>().notNull(),
+	urls: text("urls", { mode: "json" }).$type<{ id: string; url: string }[]>().notNull(),
 });
 
 export const T_MOD_RELEASE_SYMBOLIC_LINKS = sqliteTable("MOD_RELEASE_SYMBOLIC_LINKS", {
@@ -60,6 +60,7 @@ export const T_DOWNLOAD_QUEUE = sqliteTable("DOWNLOAD_QUEUE", {
 	releaseAssetId: text("release_asset_id")
 		.notNull()
 		.references(() => T_MOD_RELEASE_ASSETS.id),
+	urlId: text("url_id").notNull(),
 	url: text("url").notNull(),
 	targetDirectory: text("target_directory").notNull(),
 	status: text("status").notNull().$type<DownloadJobStatus>().default(DownloadJobStatus.PENDING),

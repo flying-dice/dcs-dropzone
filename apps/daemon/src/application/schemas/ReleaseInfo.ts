@@ -6,7 +6,7 @@ export const ReleaseInfo = z.object({
 	modName: z.string(),
 	version: z.string(),
 	versionHash: z.string(),
-	dependencies: z.array(z.string()),
+	dependencies: z.string().array(),
 });
 
 export type ReleaseInfo = z.infer<typeof ReleaseInfo>;

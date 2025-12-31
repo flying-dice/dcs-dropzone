@@ -12,7 +12,7 @@ import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTran
 import type { UserModReleaseForm } from "./form.ts";
 
 const missionScriptFormSchema = z.object({
-	id: z.uuid(),
+	id: z.string(),
 	name: z.string().min(1, "Name is required"),
 	purpose: z.string().min(1, "Purpose is required"),
 	path: z.string().min(1, "Path is required"),

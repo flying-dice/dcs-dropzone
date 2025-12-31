@@ -5,7 +5,12 @@ export const ReleaseAsset = z.object({
 	releaseId: z.string(),
 	name: z.string(),
 	isArchive: z.boolean(),
-	urls: z.array(z.string()),
+	urls: z
+		.object({
+			id: z.string(),
+			url: z.url(),
+		})
+		.array(),
 });
 
 export type ReleaseAsset = z.infer<typeof ReleaseAsset>;

@@ -15,7 +15,7 @@ sevenzip = "binaries/7za.exe"                                                  #
 # =======================================
 # Server Configuration
 # =======================================
-[hono]
+[server]
 host = "127.0.0.1"                                                              # Address to bind the HTTP hono
 port = 3001                                                                     # Port to listen on
 
@@ -24,6 +24,7 @@ port = 3001                                                                     
 # =======================================
 [app]
 mods_dir = "./mods"                                                             # Path to application working directory
+tui_enabled = true                                                              # Enable Terminal User Interface (TUI)
 
 # =======================================
 # Database Configuration

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "92d397d9-7767-4fff-ad2f-28a35956d215",
+  "id": "e41e7161-a4f3-4077-80d8-fd47271d88e1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "APP_ATTRIBUTES": {
@@ -47,6 +47,13 @@
         },
         "release_asset_id": {
           "name": "release_asset_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "url_id": {
+          "name": "url_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

@@ -20,11 +20,11 @@ export type ModReleaseAssetStatusData = z.infer<typeof ModReleaseAssetStatusData
 
 export const ModReleaseAssetData = z
 	.object({
-		id: z.uuid(),
+		id: z.string(),
 		name: z.string().min(1, "Asset name is required"),
 		urls: z
 			.object({
-				id: z.uuid(),
+				id: z.string(),
 				url: z.string().url("Invalid URL format"),
 			})
 			.array(),
@@ -41,7 +41,7 @@ export type ModReleaseAssetData = z.infer<typeof ModReleaseAssetData>;
 
 export const ModReleaseSymbolicLinkData = z
 	.object({
-		id: z.uuid(),
+		id: z.string(),
 		name: z.string().min(1, "Asset name is required"),
 		src: z.string().min(1, "Source path is required"),
 		dest: z.string().min(1, "Destination path is required"),
@@ -57,7 +57,7 @@ export type ModReleaseSymbolicLinkData = z.infer<typeof ModReleaseSymbolicLinkDa
 
 export const ModReleaseMissionScriptData = z
 	.object({
-		id: z.uuid(),
+		id: z.string(),
 		name: z.string().min(1, "Mission Script Name required"),
 		purpose: z.string().min(1, "Mission Script Purpose required"),
 		path: z.string().min(1, "Path is required"),

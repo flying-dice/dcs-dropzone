@@ -15,7 +15,6 @@
 		"postdrizzle": "bun drizzle-migration.setup.ts"
 	},
 	"dependencies": {
-		"@faker-js/faker": "^10.1.0",
 		"@hono/standard-validator": "^0.2.1",
 		"@opentui/core": "^0.1.63",
 		"@opentui/react": "^0.1.63",
@@ -38,7 +37,6 @@
 		"rxjs": "^7.8.2",
 		"ts-pattern": "^5.9.0",
 		"webapp": "workspace:*",
-		"zocker": "^3.0.0",
 		"zod": "^4.2.1"
 	},
 	"devDependencies": {

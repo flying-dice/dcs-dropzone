@@ -44,13 +44,21 @@ export interface ModReleaseAssetStatusData {
 	status: ModReleaseAssetStatusDataStatus;
 }
 
+export type ModReleaseAssetDataUrlsItem = {
+	/** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+	id: string;
+	url: string;
+};
+
 /**
  * Data representation of a mod release asset.
  */
 export interface ModReleaseAssetData {
+	/** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+	id: string;
 	/** @minLength 1 */
 	name: string;
-	urls: string[];
+	urls: ModReleaseAssetDataUrlsItem[];
 	isArchive: boolean;
 	statusData?: ModReleaseAssetStatusData;
 }
@@ -68,6 +76,8 @@ export const ModReleaseSymbolicLinkDataDestRoot = {
  * Data representation of a symbolic link configuration.
  */
 export interface ModReleaseSymbolicLinkData {
+	/** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+	id: string;
 	/** @minLength 1 */
 	name: string;
 	/** @minLength 1 */
@@ -99,6 +109,8 @@ export const ModReleaseMissionScriptDataRunOn = {
  * Data representation of a mission script configuration.
  */
 export interface ModReleaseMissionScriptData {
+	/** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+	id: string;
 	/** @minLength 1 */
 	name: string;
 	/** @minLength 1 */
@@ -167,127 +179,6 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-/**
- * Checks the daemon service health by performing a lightweight database operation.
- * @summary Daemon health check
- */
-export type getDaemonHealthResponse200 = {
-	data: GetDaemonHealth200;
-	status: 200;
-};
-
-export type getDaemonHealthResponse503 = {
-	data: GetDaemonHealth503;
-	status: 503;
-};
-
-export type getDaemonHealthResponseSuccess = getDaemonHealthResponse200 & {
-	headers: Headers;
-};
-export type getDaemonHealthResponseError = getDaemonHealthResponse503 & {
-	headers: Headers;
-};
-
-export type getDaemonHealthResponse = getDaemonHealthResponseSuccess | getDaemonHealthResponseError;
-
-export const getGetDaemonHealthUrl = () => {
-	return `/api/health`;
-};
-
-export const getDaemonHealth = async (options?: RequestInit): Promise<getDaemonHealthResponse> => {
-	return daemonFetch<getDaemonHealthResponse>(getGetDaemonHealthUrl(), {
-		...options,
-		method: "GET",
-	});
-};
-
-export const getGetDaemonHealthQueryKey = () => {
-	return [`/api/health`] as const;
-};
-
-export const getGetDaemonHealthQueryOptions = <
-	TData = Awaited<ReturnType<typeof getDaemonHealth>>,
-	TError = GetDaemonHealth503,
->(options?: {
-	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
-	request?: SecondParameter<typeof daemonFetch>;
-}) => {
-	const { query: queryOptions, request: requestOptions } = options ?? {};
-
-	const queryKey = queryOptions?.queryKey ?? getGetDaemonHealthQueryKey();
-
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getDaemonHealth>>> = ({ signal }) =>
-		getDaemonHealth({ signal, ...requestOptions });
-
-	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-		Awaited<ReturnType<typeof getDaemonHealth>>,
-		TError,
-		TData
-	> & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetDaemonHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getDaemonHealth>>>;
-export type GetDaemonHealthQueryError = GetDaemonHealth503;
-
-export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
-	options: {
-		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>> &
-			Pick<
-				DefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getDaemonHealth>>,
-					TError,
-					Awaited<ReturnType<typeof getDaemonHealth>>
-				>,
-				"initialData"
-			>;
-		request?: SecondParameter<typeof daemonFetch>;
-	},
-	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
-	options?: {
-		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>> &
-			Pick<
-				UndefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getDaemonHealth>>,
-					TError,
-					Awaited<ReturnType<typeof getDaemonHealth>>
-				>,
-				"initialData"
-			>;
-		request?: SecondParameter<typeof daemonFetch>;
-	},
-	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
-	options?: {
-		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
-		request?: SecondParameter<typeof daemonFetch>;
-	},
-	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-/**
- * @summary Daemon health check
- */
-
-export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
-	options?: {
-		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
-		request?: SecondParameter<typeof daemonFetch>;
-	},
-	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-	const queryOptions = getGetDaemonHealthQueryOptions(options);
-
-	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData, TError>;
-	};
-
-	query.queryKey = queryOptions.queryKey;
-
-	return query;
-}
 
 export type addReleaseToDaemonResponse200 = {
 	data: void;
@@ -552,6 +443,127 @@ export const useRemoveReleaseFromDaemon = <TError = unknown, TContext = unknown>
 
 	return useMutation(mutationOptions, queryClient);
 };
+
+/**
+ * Checks the daemon service health by performing a lightweight database operation.
+ * @summary Daemon health check
+ */
+export type getDaemonHealthResponse200 = {
+	data: GetDaemonHealth200;
+	status: 200;
+};
+
+export type getDaemonHealthResponse503 = {
+	data: GetDaemonHealth503;
+	status: 503;
+};
+
+export type getDaemonHealthResponseSuccess = getDaemonHealthResponse200 & {
+	headers: Headers;
+};
+export type getDaemonHealthResponseError = getDaemonHealthResponse503 & {
+	headers: Headers;
+};
+
+export type getDaemonHealthResponse = getDaemonHealthResponseSuccess | getDaemonHealthResponseError;
+
+export const getGetDaemonHealthUrl = () => {
+	return `/api/health`;
+};
+
+export const getDaemonHealth = async (options?: RequestInit): Promise<getDaemonHealthResponse> => {
+	return daemonFetch<getDaemonHealthResponse>(getGetDaemonHealthUrl(), {
+		...options,
+		method: "GET",
+	});
+};
+
+export const getGetDaemonHealthQueryKey = () => {
+	return [`/api/health`] as const;
+};
+
+export const getGetDaemonHealthQueryOptions = <
+	TData = Awaited<ReturnType<typeof getDaemonHealth>>,
+	TError = GetDaemonHealth503,
+>(options?: {
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
+	request?: SecondParameter<typeof daemonFetch>;
+}) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetDaemonHealthQueryKey();
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getDaemonHealth>>> = ({ signal }) =>
+		getDaemonHealth({ signal, ...requestOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getDaemonHealth>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetDaemonHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getDaemonHealth>>>;
+export type GetDaemonHealthQueryError = GetDaemonHealth503;
+
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options: {
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getDaemonHealth>>,
+					TError,
+					Awaited<ReturnType<typeof getDaemonHealth>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof daemonFetch>;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getDaemonHealth>>,
+					TError,
+					Awaited<ReturnType<typeof getDaemonHealth>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof daemonFetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
+		request?: SecondParameter<typeof daemonFetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Daemon health check
+ */
+
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
+		request?: SecondParameter<typeof daemonFetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getGetDaemonHealthQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
 
 /**
  * @summary Enable a release by creating its symbolic links

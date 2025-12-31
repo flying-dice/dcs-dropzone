@@ -23,13 +23,15 @@ describe("Application.addRelease", () => {
 			versionHash: Date.now().toString(),
 			assets: [
 				{
+					id: "test-release-id__asset-1",
 					name: "Test Asset",
-					urls: ["http://example.com/asset.zip"],
+					urls: [{ id: "test-release-id__asset-1__url-1", url: "http://example.com/asset.zip" }],
 					isArchive: true,
 				},
 			],
 			symbolicLinks: [
 				{
+					id: "symbolic-link-1",
 					name: "Test Script",
 					src: "TestMod/Scripts/test.lua",
 					dest: "Scripts/test.lua",
@@ -38,6 +40,7 @@ describe("Application.addRelease", () => {
 			],
 			missionScripts: [
 				{
+					id: "mission-script-1",
 					name: "Test Mission Script",
 					purpose: "Testing mission script",
 					path: "Scripts/test.lua",
@@ -68,16 +71,16 @@ describe("Application.addRelease", () => {
 
 		expect(assetsForRelease.length).toEqual(modAndReleaseData.assets.length);
 		expect(assetsForRelease[0]).toEqual({
-			id: "test-release-id:0",
+			id: "test-release-id__asset-1",
 			releaseId: "test-release-id",
 			name: "Test Asset",
 			isArchive: true,
-			urls: ["http://example.com/asset.zip"],
+			urls: [{ id: "test-release-id__asset-1__url-1", url: "http://example.com/asset.zip" }],
 		});
 
 		expect(symbolicLinksForRelease.length).toEqual(modAndReleaseData.symbolicLinks.length);
 		expect(symbolicLinksForRelease[0]).toEqual({
-			id: "test-release-id:0",
+			id: "symbolic-link-1",
 			releaseId: "test-release-id",
 			name: "Test Script",
 			src: "TestMod/Scripts/test.lua",
@@ -88,7 +91,7 @@ describe("Application.addRelease", () => {
 
 		expect(missionScriptsForRelease.length).toEqual(modAndReleaseData.missionScripts.length);
 		expect(missionScriptsForRelease[0]).toEqual({
-			id: "test-release-id:0",
+			id: "mission-script-1",
 			releaseId: "test-release-id",
 			name: "Test Mission Script",
 			purpose: "Testing mission script",
@@ -100,9 +103,10 @@ describe("Application.addRelease", () => {
 
 		expect(downloadJobs.length).toEqual(1);
 		expect(downloadJobs[0]).toEqual({
-			id: "download:test-release-id:0:0",
+			id: "download:test-release-id__asset-1__url-1",
 			releaseId: "test-release-id",
-			releaseAssetId: "test-release-id:0",
+			releaseAssetId: "test-release-id__asset-1",
+			urlId: "test-release-id__asset-1__url-1",
 			url: "http://example.com/asset.zip", // Download From
 			targetDirectory: "mods/test-release-id", // Download To
 			status: DownloadJobStatus.PENDING,
@@ -114,9 +118,9 @@ describe("Application.addRelease", () => {
 
 		expect(extractJobs.length).toEqual(1);
 		expect(extractJobs[0]).toEqual({
-			id: "extract:test-release-id:0",
+			id: "extract:test-release-id__asset-1",
 			releaseId: "test-release-id",
-			releaseAssetId: "test-release-id:0",
+			releaseAssetId: "test-release-id__asset-1",
 			archivePath: "mods/test-release-id/asset.zip", // Path to archive from download job
 			targetDirectory: "mods/test-release-id", // Extract to
 			status: ExtractJobStatus.PENDING,

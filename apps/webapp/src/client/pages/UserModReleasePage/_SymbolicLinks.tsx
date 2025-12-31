@@ -12,7 +12,7 @@ import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTran
 import type { UserModReleaseForm } from "./form.ts";
 
 const symbolicLinkFormSchema = z.object({
-	id: z.uuid(),
+	id: z.string(),
 	name: z.string().min(1, "Name is required"),
 	src: z.string().min(1, "Source path is required"),
 	dest: z.string().min(1, "Destination path is required"),

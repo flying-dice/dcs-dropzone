@@ -69,7 +69,7 @@ const bunServer = serve({
 
 logger.info(`🚀 Server running at ${bunServer.url}`);
 
-if (process.stdin.isTTY) {
+if (applicationConfig.app.tui_enabled) {
 	logger.info("Starting TUI...");
 	await startTui(app, async () => {
 		logger.info("TUI destroyed, exiting...");

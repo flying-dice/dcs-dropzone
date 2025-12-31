@@ -7,9 +7,9 @@ export class TestExtractQueue implements ExtractQueue {
 	private readonly dependencies: Map<string, string[]> = new Map();
 
 	pushJob(
+		id: string,
 		releaseId: string,
 		releaseAssetId: string,
-		id: string,
 		archivePath: string,
 		targetDirectory: string,
 		downloadJobIds: string[],

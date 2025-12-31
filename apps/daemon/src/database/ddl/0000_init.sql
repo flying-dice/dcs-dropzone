@@ -7,6 +7,7 @@ CREATE TABLE `DOWNLOAD_QUEUE` (
 	`id` text PRIMARY KEY NOT NULL,
 	`release_id` text NOT NULL,
 	`release_asset_id` text NOT NULL,
+	`url_id` text NOT NULL,
 	`url` text NOT NULL,
 	`target_directory` text NOT NULL,
 	`status` text DEFAULT 'PENDING' NOT NULL,

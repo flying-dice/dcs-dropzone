@@ -5,6 +5,7 @@ export const DownloadJob = z.object({
 	id: z.string(),
 	releaseId: z.string(),
 	releaseAssetId: z.string(),
+	urlId: z.string(),
 	url: z.string(),
 	targetDirectory: z.string(),
 	status: z.enum(DownloadJobStatus),

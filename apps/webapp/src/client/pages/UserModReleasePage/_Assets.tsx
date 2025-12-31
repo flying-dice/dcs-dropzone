@@ -12,11 +12,11 @@ import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 const assetFormSchema = z.object({
-	id: z.uuid(),
+	id: z.string(),
 	name: z.string().min(1, "Asset name is required"),
 	urls: z
 		.object({
-			id: z.uuid(),
+			id: z.string(),
 			url: z.url("Invalid URL format"),
 		})
 		.array()

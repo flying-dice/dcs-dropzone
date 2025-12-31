@@ -39,9 +39,9 @@ export class Drizzle7zExtractQueue implements ExtractQueue {
 	}
 
 	pushJob(
+		id: string,
 		releaseId: string,
 		releaseAssetId: string,
-		id: string,
 		archivePath: string,
 		targetDirectory: string,
 		downloadJobIds: string[],

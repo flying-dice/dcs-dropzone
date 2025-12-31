@@ -20,15 +20,15 @@ export function createTestApplicationContext() {
 	const dcsInstallDir = "C:/Program Files/Eagle Dynamics/DCS World";
 
 	return {
-        attributesRepository,
-        releaseRepository,
-        downloadQueue,
-        extractQueue,
-        fileSystem,
-        generateUuid,
-        dropzoneModsFolder,
-        dcsWorkingDir,
-        dcsInstallDir,
+		attributesRepository,
+		releaseRepository,
+		downloadQueue,
+		extractQueue,
+		fileSystem,
+		generateUuid,
+		dropzoneModsFolder,
+		dcsWorkingDir,
+		dcsInstallDir,
 		build: () =>
 			new Application({
 				attributesRepository,

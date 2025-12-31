@@ -1,7 +1,14 @@
 import type { DownloadJob } from "../schemas/DownloadJob.ts";
 
 export interface DownloadQueue {
-	pushJob(releaseId: string, releaseAssetId: string, id: string, url: string, targetDirectory: string): void;
+	pushJob(
+		id: string,
+		releaseId: string,
+		releaseAssetId: string,
+		urlId: string,
+		url: string,
+		targetDirectory: string,
+	): void;
 
 	cancelJobsForRelease(releaseId: string): void;
 

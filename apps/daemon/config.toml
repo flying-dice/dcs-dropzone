@@ -20,7 +20,7 @@ sevenzip = "binaries/7za.exe"                                                  #
 # =======================================
 # Server Configuration
 # =======================================
-[app]
+[server]
 host = "0.0.0.0"                                                                # Address to bind the HTTP hono
 port = 3001                                                                     # Port to listen on
 
@@ -29,6 +29,7 @@ port = 3001                                                                     
 # =======================================
 [app]
 mods_dir = "./._app_working_dir/mods"                                              # Path to application working directory
+tui_enabled = false                                                                 # Enable TUI interface
 
 # =======================================
 # Database Configuration

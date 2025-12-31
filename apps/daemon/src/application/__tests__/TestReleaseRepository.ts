@@ -37,10 +37,9 @@ export class TestReleaseRepository implements ReleaseRepository {
 
 		for (const releaseData of this.releases.values()) {
 			if (releaseData.releaseId === releaseId) {
-				for (const [idx, releaseAsset] of releaseData.assets.entries()) {
-					const releaseAssetId = this.getReleaseAssetId(releaseData.releaseId, idx);
+				for (const releaseAsset of releaseData.assets) {
 					releaseAssets.push({
-						id: releaseAssetId,
+						id: releaseAsset.id,
 						releaseId: releaseData.releaseId,
 						name: releaseAsset.name,
 						isArchive: releaseAsset.isArchive,
@@ -58,16 +57,15 @@ export class TestReleaseRepository implements ReleaseRepository {
 
 		for (const releaseData of this.releases.values()) {
 			if (releaseData.releaseId === releaseId) {
-				for (const [idx, symbolicLink] of releaseData.symbolicLinks.entries()) {
-					const symbolicLinkId = this.getSymbolicLinkId(releaseData.releaseId, idx);
+				for (const symbolicLink of releaseData.symbolicLinks) {
 					symbolicLinks.push({
-						id: symbolicLinkId,
+						id: symbolicLink.id,
 						releaseId: releaseData.releaseId,
 						name: symbolicLink.name,
 						src: symbolicLink.src,
 						dest: symbolicLink.dest,
 						destRoot: symbolicLink.destRoot,
-						installedPath: this.installedPaths.get(symbolicLinkId) ?? null,
+						installedPath: this.installedPaths.get(symbolicLink.id) ?? null,
 					});
 				}
 			}
@@ -85,17 +83,16 @@ export class TestReleaseRepository implements ReleaseRepository {
 
 		for (const releaseData of this.releases.values()) {
 			if (releaseData.releaseId === releaseId) {
-				for (const [idx, missionScript] of releaseData.missionScripts.entries()) {
-					const symbolicLinkId = this.getSymbolicLinkId(releaseData.releaseId, idx);
+				for (const missionScript of releaseData.missionScripts) {
 					missionScripts.push({
-						id: `${releaseData.releaseId}:${idx}`,
+						id: missionScript.id,
 						releaseId: releaseData.releaseId,
 						name: missionScript.name,
 						purpose: missionScript.purpose,
 						path: missionScript.path,
 						root: missionScript.root,
 						runOn: missionScript.runOn,
-						installedPath: this.installedPaths.get(symbolicLinkId) ?? null,
+						installedPath: this.installedPaths.get(missionScript.id) ?? null,
 					});
 				}
 			}
@@ -125,13 +122,5 @@ export class TestReleaseRepository implements ReleaseRepository {
 
 	deleteRelease(releaseId: string) {
 		this.releases.delete(releaseId);
-	}
-
-	private getSymbolicLinkId(releaseId: string, idx: number): string {
-		return `${releaseId}:${idx}`;
-	}
-
-	private getReleaseAssetId(releaseId: string, idx: number): string {
-		return `${releaseId}:${idx}`;
 	}
 }
