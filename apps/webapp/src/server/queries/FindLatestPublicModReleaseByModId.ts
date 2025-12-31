@@ -42,7 +42,7 @@ export default async function (
 
 	const release = await ModRelease.findOne({
 		id: mod.latestReleaseId,
-		mod_id: modId,
+		modId,
 		visibility: { $in: [ModVisibility.PUBLIC, ModVisibility.UNLISTED] },
 	})
 		.lean()

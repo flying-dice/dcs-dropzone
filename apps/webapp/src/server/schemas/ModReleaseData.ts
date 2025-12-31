@@ -6,8 +6,14 @@ import { SymbolicLinkDestRoot } from "../enums/SymbolicLinkDestRoot.ts";
 // Asset schema
 export const ModReleaseAssetData = z
 	.object({
+		id: z.uuid(),
 		name: z.string().min(1, "Asset name is required"),
-		urls: z.url().array(),
+		urls: z
+			.object({
+				id: z.uuid(),
+				url: z.url(),
+			})
+			.array(),
 		isArchive: z.boolean(),
 	})
 	.meta({
@@ -21,6 +27,7 @@ export type ModReleaseAssetData = z.infer<typeof ModReleaseAssetData>;
 // Symbolic link schema
 export const ModReleaseSymbolicLinkData = z
 	.object({
+		id: z.uuid(),
 		name: z.string().min(1, "Asset name is required"),
 		src: z.string().min(1, "Source path is required"),
 		dest: z.string().min(1, "Destination path is required"),
@@ -37,6 +44,7 @@ export type ModReleaseSymbolicLinkData = z.infer<typeof ModReleaseSymbolicLinkDa
 // Mission script schema
 export const ModReleaseMissionScriptData = z
 	.object({
+		id: z.uuid(),
 		name: z.string().min(1, "Mission Script Name required"),
 		purpose: z.string().min(1, "Mission Script Purpose required"),
 		path: z.string().min(1, "Path is required"),
@@ -55,7 +63,7 @@ export type ModReleaseMissionScriptData = z.infer<typeof ModReleaseMissionScript
 export const ModReleaseData = z
 	.object({
 		id: z.string(),
-		mod_id: z.string(),
+		modId: z.string(),
 		version: z.string(),
 		versionHash: z.string(),
 		changelog: z.string(),

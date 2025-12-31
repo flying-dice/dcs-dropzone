@@ -12,8 +12,15 @@ import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 const assetFormSchema = z.object({
+	id: z.uuid(),
 	name: z.string().min(1, "Asset name is required"),
-	urls: z.url().array().min(1, "At least one URL is required"),
+	urls: z
+		.object({
+			id: z.uuid(),
+			url: z.url("Invalid URL format"),
+		})
+		.array()
+		.min(1, "At least one URL is required"),
 	isArchive: z.boolean(),
 });
 type AssetFormValues = z.infer<typeof assetFormSchema>;
@@ -26,6 +33,7 @@ function _AssetForm(props: {
 	const { t } = useAppTranslation();
 	const form = useForm<AssetFormValues>({
 		initialValues: props.defaultValues || {
+			id: crypto.randomUUID(),
 			name: "",
 			urls: [],
 			isArchive: false,
@@ -54,7 +62,7 @@ function _AssetForm(props: {
 						<Button
 							size={"xs"}
 							variant={"subtle"}
-							onClick={() => form.setFieldValue("urls", [...form.values.urls, ""])}
+							onClick={() => form.insertListItem("urls", { id: crypto.randomUUID(), url: "" })}
 						>
 							{t("ADD_URL")}
 						</Button>
@@ -67,25 +75,22 @@ function _AssetForm(props: {
 						/>
 					)}
 					{form.errors.urls && <Alert color="red">{form.errors.urls}</Alert>}
-					{form.values.urls.map((_, i) => (
+					{form.values.urls.map((url, i) => (
 						<TextInput
-							// biome-ignore lint/suspicious/noArrayIndexKey: In this case, using the index as key is acceptable because the order of URLs is not expected to change.
-							key={`asset-url-${i}`}
+							key={url.id}
 							name={`urls[${i}]`}
 							rightSection={
 								<ActionIcon
 									variant={"subtle"}
 									color={"red"}
 									onClick={() => {
-										const newUrls = [...form.values.urls];
-										newUrls.splice(i, 1);
-										form.setFieldValue("urls", newUrls);
+										form.removeListItem("urls", i);
 									}}
 								>
 									<FaTrash />
 								</ActionIcon>
 							}
-							{...form.getInputProps(`urls.${i}`)}
+							{...form.getInputProps(`urls.${i}.url`)}
 						/>
 					))}
 				</Stack>
@@ -174,7 +179,7 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 				{props.form.values.assets.length === 0 && <_NoAssets />}
 				{props.form.values.assets.map((it) => (
 					<AssetListItem
-						key={it.name}
+						key={it.id}
 						name={it.name}
 						urls={it.urls}
 						isArchive={it.isArchive}

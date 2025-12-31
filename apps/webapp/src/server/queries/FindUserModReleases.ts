@@ -24,7 +24,7 @@ export default async function (query: FindUserModReleasesQuery): Promise<FindUse
 		return err("NotFound");
 	}
 
-	const releases = await ModRelease.find({ mod_id: modId }).sort({ createdAt: -1 }).lean().exec();
+	const releases = await ModRelease.find({ modId }).sort({ createdAt: -1 }).lean().exec();
 
 	return ok(ModReleaseData.array().parse(releases));
 }

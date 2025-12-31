@@ -13,7 +13,7 @@ const colors: Record<ModReleaseAssetStatusDataStatus, MantineColor> = {
 
 export type AssetListItemProps = {
 	name: string;
-	urls: string[];
+	urls: { id: string; url: string }[];
 	isArchive: boolean;
 	onClick?: () => void;
 	progressPercent?: number;
@@ -47,8 +47,8 @@ export function AssetListItem(props: AssetListItemProps) {
 							{t("ASSET_URLS_LABEL")}:
 						</Text>
 						{props.urls.map((url) => (
-							<Text size={"xs"} key={url}>
-								- {url}
+							<Text size={"xs"} key={url.id}>
+								- {url.url}
 							</Text>
 						))}
 					</Stack>

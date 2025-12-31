@@ -37,7 +37,7 @@ describe("UpdateRelease", () => {
 		});
 		await ModRelease.create({
 			id: "r1",
-			mod_id: "m1",
+			modId: "m1",
 			version: "1.0.0",
 			versionHash: objectHash(Date.now()),
 			changelog: "old",
@@ -51,7 +51,7 @@ describe("UpdateRelease", () => {
 			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },
 			updateData: {
 				id: "r1",
-				mod_id: "m1",
+				modId: "m1",
 				version: "1.0.1",
 				changelog: "new",
 				assets: [],
@@ -73,7 +73,7 @@ describe("UpdateRelease", () => {
 			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },
 			updateData: {
 				id: "r1",
-				mod_id: "missing",
+				modId: "missing",
 				version: "1.0.1",
 				changelog: "c",
 				assets: [],
@@ -106,7 +106,7 @@ describe("UpdateRelease", () => {
 			user: { id: "u1", username: "u", name: "U", avatarUrl: "", profileUrl: "" },
 			updateData: {
 				id: "missing",
-				mod_id: "m1",
+				modId: "m1",
 				version: "1.0.1",
 				changelog: "c",
 				assets: [],

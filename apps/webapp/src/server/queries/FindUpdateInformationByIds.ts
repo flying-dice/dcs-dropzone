@@ -19,7 +19,7 @@ export default async function (query: FindUpdateInformationByIdsQuery): Promise<
 
 	for (const modId of modIds) {
 		const latestRelease = await ModRelease.findOne({
-			mod_id: modId,
+			modId: modId,
 			visibility: ModVisibility.PUBLIC,
 		})
 			.sort({ createdAt: -1 })
@@ -28,7 +28,7 @@ export default async function (query: FindUpdateInformationByIdsQuery): Promise<
 
 		if (latestRelease) {
 			modsAndLatestReleases.push({
-				mod_id: modId,
+				modId: modId,
 				id: latestRelease.id,
 				version: latestRelease.version,
 				createdAt: latestRelease.createdAt.toString(),

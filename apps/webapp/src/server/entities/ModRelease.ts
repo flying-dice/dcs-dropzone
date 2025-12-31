@@ -5,7 +5,7 @@ import { MongoMigration } from "../infrastructure/mongo-db/MongoMigration.ts";
 const schema = new Schema(
 	{
 		id: { type: String, required: true, unique: true },
-		mod_id: { type: String, required: true },
+		modId: { type: String, required: true },
 		version: { type: String, required: true },
 		versionHash: { type: String, required: true },
 		changelog: { type: String, required: true },

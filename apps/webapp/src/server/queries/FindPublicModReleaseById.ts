@@ -26,7 +26,7 @@ export default async function (query: FindPublicModReleaseByIdQuery): Promise<Fi
 
 	const release = await ModRelease.findOne({
 		id: releaseId,
-		mod_id: modId,
+		modId,
 		visibility: { $in: [ModVisibility.PUBLIC, ModVisibility.UNLISTED] },
 	})
 		.lean()

@@ -24,7 +24,7 @@ export default async function (command: CreateReleaseCommand): Promise<CreateRel
 	const id = crypto.randomUUID();
 	const releaseData: ModReleaseData = {
 		id,
-		mod_id: modId,
+		modId,
 		version: createData.version,
 		versionHash: objectHash(Date.now()),
 		changelog: "Describe changes since last version...",

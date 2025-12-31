@@ -43,7 +43,7 @@ export class ReleaseCatalog {
 			const downloadJobIds: string[] = [];
 
 			for (const [idx, url] of asset.urls.entries()) {
-				const downloadJobId = `${asset.id}:${idx}`;
+				const downloadJobId = this.makeDownloadJobId(asset.id, idx);
 				logger.debug(`Pushing download job for URL: ${url}`);
 				this.deps.downloadQueue.pushJob(data.releaseId, asset.id, downloadJobId, url, releaseFolder);
 				downloadJobIds.push(downloadJobId);
@@ -61,7 +61,7 @@ export class ReleaseCatalog {
 				this.deps.extractQueue.pushJob(
 					data.releaseId,
 					asset.id,
-					`extract:${asset.id}`,
+					this.makeExtractJobId(asset.id),
 					archivePath,
 					releaseFolder,
 					downloadJobIds,
@@ -142,5 +142,13 @@ export class ReleaseCatalog {
 			overallPercentProgress,
 			status,
 		};
+	}
+
+	private makeDownloadJobId(releaseAssetId: string, urlIndex: number): string {
+		return `download:${releaseAssetId}:${urlIndex}`;
+	}
+
+	private makeExtractJobId(releaseAssetId: string): string {
+		return `extract:${releaseAssetId}`;
 	}
 }

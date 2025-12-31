@@ -90,22 +90,29 @@ export default async function (command: MigrateLegacyRegistryCommand) {
 
 		for (const version of registryEntry.data.versions) {
 			const existingRelease = await ModRelease.findOne({
-				mod_id: modDocument.id,
+				modId: modDocument.id,
 				version: version.version,
 			}).lean();
 
 			const releaseId = existingRelease ? existingRelease.id : crypto.randomUUID();
 
-			const release: ModReleaseData = ModReleaseData.parse({
+			let release: ModReleaseData = {
 				id: releaseId,
 				version: version.version,
 				versionHash: objectHash(Date.now()),
-				mod_id: modDocument.id,
+				modId: modDocument.id,
 				changelog: version.name,
 				visibility: ModVisibility.PUBLIC,
+				downloadsCount: 0,
 				assets: version.assets.map((assets) => ({
+					id: crypto.randomUUID(),
 					name: decodeURIComponent(basename(assets.remoteSource).replace(extname(assets.remoteSource), "")),
-					urls: [assets.remoteSource],
+					urls: [
+						{
+							id: crypto.randomUUID(),
+							url: assets.remoteSource,
+						},
+					],
 					isArchive: assets.remoteSource.match(/\.(zip|rar|7z|tar\.gz|tar\.bz2|tar\.xz)$/i) !== null,
 				})),
 				symbolicLinks: version.assets.flatMap((assets) =>
@@ -113,6 +120,7 @@ export default async function (command: MigrateLegacyRegistryCommand) {
 						const legacyTarget = convertLegacyPath(link.target);
 
 						return {
+							id: crypto.randomUUID(),
 							name: basename(link.source),
 							src: link.source,
 							dest: legacyTarget.path,
@@ -126,20 +134,23 @@ export default async function (command: MigrateLegacyRegistryCommand) {
 						.map(
 							(link): ModReleaseMissionScriptData => ({
 								...convertLegacyPath(link.target),
+								id: crypto.randomUUID(),
 								name: basename(link.source),
 								purpose: "Unknown",
 								runOn: MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
 							}),
 						),
 				),
-			});
+			};
 
-			await ModRelease.findOneAndUpdate({ mod_id: modDocument.id, version: release.version }, release, {
+			release = ModReleaseData.parse(release);
+
+			await ModRelease.findOneAndUpdate({ modId: modDocument.id, version: release.version }, release, {
 				upsert: true,
 			});
 
 			const releaseDocument = await ModRelease.findOne({
-				mod_id: modDocument.id,
+				modId: modDocument.id,
 				version: release.version,
 			}).exec();
 
@@ -148,7 +159,7 @@ export default async function (command: MigrateLegacyRegistryCommand) {
 			}
 
 			const latestRelease = await ModRelease.findOne({
-				mod_id: modDocument.id,
+				modId: modDocument.id,
 				version: registryEntry.data.latest,
 			}).exec();
 

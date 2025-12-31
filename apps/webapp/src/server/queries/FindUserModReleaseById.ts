@@ -21,7 +21,7 @@ export default async function (query: FindUserModReleaseByIdQuery): Promise<Find
 
 	const release = await ModRelease.findOne({
 		id: releaseId,
-		mod_id: modId,
+		modId,
 	})
 		.lean()
 		.exec();

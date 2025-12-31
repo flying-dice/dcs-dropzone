@@ -19,16 +19,16 @@ export default async function (command: UpdateReleaseCommand): Promise<UpdateRel
 	const { updateData, user } = command;
 	logger.debug({ userId: user.id, updateData }, "updateRelease start");
 
-	if (!(await Mod.exists({ id: updateData.mod_id, maintainers: user.id }))) {
+	if (!(await Mod.exists({ id: updateData.modId, maintainers: user.id }))) {
 		logger.warn(
-			{ userId: user.id, modId: updateData.mod_id },
+			{ userId: user.id, modId: updateData.modId },
 			"User attempted to update release for a mod they do not own",
 		);
 		return err("ModNotFound");
 	}
 
 	const release = await ModRelease.findOneAndUpdate(
-		{ id: updateData.id, mod_id: updateData.mod_id },
+		{ id: updateData.id, modId: updateData.modId },
 		{
 			version: updateData.version,
 			versionHash: objectHash(Date.now()),

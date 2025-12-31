@@ -3,7 +3,7 @@ import { ModReleaseData } from "./ModReleaseData.ts";
 
 export const ModLatestReleaseData = ModReleaseData.pick({
 	id: true,
-	mod_id: true,
+	modId: true,
 	version: true,
 	createdAt: true,
 }).meta({

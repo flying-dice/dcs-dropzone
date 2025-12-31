@@ -25,7 +25,7 @@ export default async function (command: DeleteReleaseCommand): Promise<DeleteRel
 
 	const result = await ModRelease.findOneAndDelete({
 		id: releaseId,
-		mod_id: modId,
+		modId: modId,
 	}).exec();
 
 	if (!result) {

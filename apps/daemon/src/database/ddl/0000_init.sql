@@ -46,6 +46,7 @@ CREATE TABLE `MOD_RELEASES` (
 	`mod_id` text NOT NULL,
 	`mod_name` text NOT NULL,
 	`version` text NOT NULL,
+	`version_hash` text NOT NULL,
 	`dependencies` text NOT NULL
 );
 --> statement-breakpoint

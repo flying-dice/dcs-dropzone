@@ -45,7 +45,7 @@ describe("CreateRelease", () => {
 		const value = result._unsafeUnwrap();
 		expect(value).toMatchObject({
 			id: expect.any(String),
-			mod_id: "mod-1",
+			modId: "mod-1",
 			version: "1.0.0",
 			changelog: "Describe changes since last version...",
 			assets: [],

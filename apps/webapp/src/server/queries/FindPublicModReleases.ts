@@ -26,7 +26,7 @@ export default async function (query: FindPublicModReleasesQuery): Promise<FindP
 	}
 
 	const releases = await ModRelease.find({
-		mod_id: modId,
+		modId,
 		visibility: ModVisibility.PUBLIC,
 	})
 		.sort({ createdAt: -1 })

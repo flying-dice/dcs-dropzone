@@ -192,7 +192,7 @@ router.put(
 			releaseId: z.string(),
 		}),
 	),
-	validator("json", ModReleaseData.omit({ id: true, mod_id: true, versionHash: true })),
+	validator("json", ModReleaseData.omit({ id: true, modId: true, versionHash: true })),
 	async (c) => {
 		const { id, releaseId } = c.req.valid("param");
 		const updates = c.req.valid("json");
@@ -204,7 +204,7 @@ router.put(
 			user,
 			updateData: {
 				id: releaseId,
-				mod_id: id,
+				modId: id,
 				...updates,
 			},
 		});

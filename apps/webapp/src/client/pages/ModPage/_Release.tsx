@@ -18,7 +18,7 @@ export function _Release(props: _ReleaseProps) {
 		<Alert
 			p={"xs"}
 			style={{ cursor: "pointer" }}
-			onClick={() => nav(`/mods/${props.release.mod_id}/${props.release.id}`)}
+			onClick={() => nav(`/mods/${props.release.modId}/${props.release.id}`)}
 			variant={props.active ? "light" : "default"}
 		>
 			<Stack gap={"xs"}>

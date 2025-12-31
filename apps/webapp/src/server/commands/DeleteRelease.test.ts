@@ -37,7 +37,7 @@ describe("DeleteRelease", () => {
 		});
 		await ModRelease.create({
 			id: "r1",
-			mod_id: "m1",
+			modId: "m1",
 			version: "1.0.0",
 			versionHash: objectHash(Date.now()),
 			changelog: "c",
