@@ -1,19 +1,35 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, test } from "bun:test";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import { Application } from "../Application.ts";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import { createTestApplicationContext } from "./createTestApplicationContext.ts";
+import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
+import { ExtractJobStatus } from "../application/enums/ExtractJobStatus.ts";
+import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+import { TestApplication } from "./TestApplication.ts";
 
-describe("Application.addRelease", () => {
+const testFolder = mkdtempSync(join(tmpdir(), "dcs-dropzone__"));
+
+const cases = [
+	{ label: "TestApplication", app: new TestApplication() },
+	{
+		label: "Application",
+		app: new Application({
+			databaseUrl: ":memory:",
+			wgetExecutablePath: "bin/wget.exe",
+			sevenzipExecutablePath: "bin/7za.exe",
+			dropzoneModsFolder: join(testFolder, "dcs-dropzone", "mods"),
+			dcsPaths: {
+				DCS_WORKING_DIR: join(testFolder, "dcs-dropzone", "dcs", "working"),
+				DCS_INSTALL_DIR: join(testFolder, "dcs-dropzone", "dcs", "install"),
+			},
+		}),
+	},
+];
+
+describe.each(cases)("$label addRelease", ({ app }) => {
 	it("should add the release, assets, symlinks, mission scripts to the repository and create jobs", () => {
-		const c = createTestApplicationContext();
-
-		const app = c.build();
-
-		expect(app).toBeInstanceOf(Application);
-
 		const modAndReleaseData: ModAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -52,12 +68,14 @@ describe("Application.addRelease", () => {
 
 		app.addRelease(modAndReleaseData);
 
-		const allReleases = c.releaseRepository.getAllReleases();
-		const assetsForRelease = c.releaseRepository.getReleaseAssetsForRelease(modAndReleaseData.releaseId);
-		const symbolicLinksForRelease = c.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
-		const missionScriptsForRelease = c.releaseRepository.getMissionScriptsForRelease(modAndReleaseData.releaseId);
-		const downloadJobs = c.downloadQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
-		const extractJobs = c.extractQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
+		const allReleases = app.deps.releaseRepository.getAllReleases();
+		const assetsForRelease = app.deps.releaseRepository.getReleaseAssetsForRelease(modAndReleaseData.releaseId);
+		const symbolicLinksForRelease = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
+		const missionScriptsForRelease = app.deps.releaseRepository.getMissionScriptsForRelease(
+			modAndReleaseData.releaseId,
+		);
+		const downloadJobs = app.deps.downloadQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
+		const extractJobs = app.deps.extractQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
 
 		expect(allReleases.length).toEqual(1);
 		expect(allReleases[0]).toEqual({
@@ -108,7 +126,7 @@ describe("Application.addRelease", () => {
 			releaseAssetId: "test-release-id__asset-1",
 			urlId: "test-release-id__asset-1__url-1",
 			url: "http://example.com/asset.zip", // Download From
-			targetDirectory: "mods/test-release-id", // Download To
+			targetDirectory: expect.stringMatching(/mods\/test-release-id$/), // Download To
 			status: DownloadJobStatus.PENDING,
 			attempt: 0,
 			progressPercent: 0,
@@ -121,8 +139,8 @@ describe("Application.addRelease", () => {
 			id: "extract:test-release-id__asset-1",
 			releaseId: "test-release-id",
 			releaseAssetId: "test-release-id__asset-1",
-			archivePath: "mods/test-release-id/asset.zip", // Path to archive from download job
-			targetDirectory: "mods/test-release-id", // Extract to
+			archivePath: expect.stringMatching(/mods\/test-release-id\/asset\.zip$/), // Path to archive from a download job
+			targetDirectory: expect.stringMatching(/mods\/test-release-id$/), // Extract to
 			status: ExtractJobStatus.PENDING,
 			attempt: 0,
 			progressPercent: 0,

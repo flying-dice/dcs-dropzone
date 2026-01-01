@@ -4,10 +4,10 @@ const OUT_DIR = "./dist/daemon";
 const BUN_NAME = "appd";
 
 const ASSETS: [string, string][] = [
-	["binaries/wget.exe", ".bin/wget.exe"],
-	["binaries/7za.exe", ".bin/7za.exe"],
-	["binaries/7za.dll", ".bin/7za.dll"],
-	["binaries/7zxa.dll", ".bin/7zxa.dll"],
+	["bin/wget.exe", ".bin/wget.exe"],
+	["bin/7za.exe", ".bin/7za.exe"],
+	["bin/7za.dll", ".bin/7za.dll"],
+	["bin/7zxa.dll", ".bin/7zxa.dll"],
 	["config.dist.toml", "config.toml"],
 ];
 

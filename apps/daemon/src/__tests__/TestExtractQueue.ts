@@ -1,6 +1,6 @@
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import type { ExtractQueue } from "../ports/ExtractQueue.ts";
-import type { ExtractJob } from "../schemas/ExtractJob.ts";
+import { ExtractJobStatus } from "../application/enums/ExtractJobStatus.ts";
+import type { ExtractQueue } from "../application/ports/ExtractQueue.ts";
+import type { ExtractJob } from "../application/schemas/ExtractJob.ts";
 
 export class TestExtractQueue implements ExtractQueue {
 	private readonly jobs = new Map<string, ExtractJob>();

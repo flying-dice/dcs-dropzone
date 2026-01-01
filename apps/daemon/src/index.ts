@@ -2,54 +2,24 @@ import "./tui/index.tsx";
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import { Drizzle7zExtractQueue } from "./adapters/Drizzle7zExtractQueue.ts";
-import { DrizzleAttributesRepository } from "./adapters/DrizzleAttributesRepository.ts";
-import { DrizzleReleaseRepository } from "./adapters/DrizzleReleaseRepository.ts";
-import { DrizzleWgetDownloadQueue } from "./adapters/DrizzleWgetDownloadQueue.ts";
-import { LocalFileSystem } from "./adapters/LocalFileSystem.ts";
-import { Application } from "./application/Application.ts";
+import { Application } from "./Application.ts";
 import appConfig from "./config.ts";
 import applicationConfig from "./config.ts";
-import Database from "./database";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { startTui } from "./tui";
 
 const logger = getLogger("bootstrap");
 
-logger.debug("Bootstrapping application...");
-logger.debug("Creating database and Repositories...");
-const db = Database(applicationConfig.database);
-const attributesRepository = new DrizzleAttributesRepository({ db });
-const releaseRepository = new DrizzleReleaseRepository({ db });
-
-logger.debug("Creating Download and Extract Queues...");
-const downloadQueue = new DrizzleWgetDownloadQueue({
-	db,
-	wgetExecutablePath: applicationConfig.binaries.wget,
-});
-
-const extractQueue = new Drizzle7zExtractQueue({
-	db,
-	downloadQueue,
-	sevenzipExecutablePath: applicationConfig.binaries.sevenzip,
-});
-
-logger.debug("Creating file system service...");
-const fileSystem = new LocalFileSystem();
-
 logger.debug("Creating Application instance...");
 const app = new Application({
+	databaseUrl: appConfig.database.url,
+	wgetExecutablePath: appConfig.binaries.wget,
+	sevenzipExecutablePath: appConfig.binaries.sevenzip,
+	dropzoneModsFolder: appConfig.app.mods_dir,
 	dcsPaths: {
-		DCS_INSTALL_DIR: applicationConfig.dcs.dcs_install_dir,
-		DCS_WORKING_DIR: applicationConfig.dcs.dcs_working_dir,
+		DCS_WORKING_DIR: appConfig.dcs.dcs_working_dir,
+		DCS_INSTALL_DIR: appConfig.dcs.dcs_install_dir,
 	},
-	dropzoneModsFolder: applicationConfig.app.mods_dir,
-	generateUuid: () => crypto.randomUUID(),
-	attributesRepository,
-	releaseRepository,
-	downloadQueue,
-	extractQueue,
-	fileSystem,
 });
 
 logger.debug("Creating Hono application wrapper...");

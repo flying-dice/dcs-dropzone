@@ -9,8 +9,8 @@ dcs_install_dir = "C:/Program Files/Eagle Dynamics/DCS World"                  #
 # Third Party Binaries Configuration
 # =======================================
 [binaries]
-wget = "binaries/wget.exe"                                                     # Path to download the winget binary
-sevenzip = "binaries/7za.exe"                                                  # Path to 7zip executable
+wget = "bin/wget.exe"                                                     # Path to download the winget binary
+sevenzip = "bin/7za.exe"                                                  # Path to 7zip executable
 
 # =======================================
 # Server Configuration

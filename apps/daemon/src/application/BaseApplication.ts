@@ -26,7 +26,7 @@ type Deps = {
 	dcsPaths: Record<SymbolicLinkDestRoot, string>;
 };
 
-export class Application {
+export abstract class BaseApplication {
 	private static readonly DAEMON_INSTANCE_ID_KEY = "daemon_instance_id";
 
 	private readonly daemonInstanceId: string;
@@ -39,10 +39,10 @@ export class Application {
 		return this._release$.asObservable();
 	}
 
-	constructor(protected deps: Deps) {
+	protected constructor(public readonly deps: Deps) {
 		this.daemonInstanceId =
-			this.deps.attributesRepository.get(Application.DAEMON_INSTANCE_ID_KEY) ??
-			this.deps.attributesRepository.save(Application.DAEMON_INSTANCE_ID_KEY, this.deps.generateUuid());
+			this.deps.attributesRepository.get(BaseApplication.DAEMON_INSTANCE_ID_KEY) ??
+			this.deps.attributesRepository.save(BaseApplication.DAEMON_INSTANCE_ID_KEY, this.deps.generateUuid());
 
 		const pathResolver = new PathResolver({ ...deps });
 

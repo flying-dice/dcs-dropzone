@@ -1,6 +1,6 @@
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import type { DownloadQueue } from "../ports/DownloadQueue.ts";
-import type { DownloadJob } from "../schemas/DownloadJob.ts";
+import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
+import type { DownloadQueue } from "../application/ports/DownloadQueue.ts";
+import type { DownloadJob } from "../application/schemas/DownloadJob.ts";
 
 export class TestDownloadQueue implements DownloadQueue {
 	private readonly jobs = new Map<string, DownloadJob>();

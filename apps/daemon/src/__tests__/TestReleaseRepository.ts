@@ -1,11 +1,11 @@
 import type { MissionScriptRunOn } from "webapp";
-import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
-import type { MissionScript } from "../schemas/MissionScript.ts";
-import type { MissionScriptByRunOn } from "../schemas/MissionScriptByRunOn.ts";
-import type { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import type { ReleaseAsset } from "../schemas/ReleaseAsset.ts";
-import type { ReleaseInfo } from "../schemas/ReleaseInfo.ts";
-import type { SymbolicLink } from "../schemas/SymbolicLink.ts";
+import type { ReleaseRepository } from "../application/ports/ReleaseRepository.ts";
+import type { MissionScript } from "../application/schemas/MissionScript.ts";
+import type { MissionScriptByRunOn } from "../application/schemas/MissionScriptByRunOn.ts";
+import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+import type { ReleaseAsset } from "../application/schemas/ReleaseAsset.ts";
+import type { ReleaseInfo } from "../application/schemas/ReleaseInfo.ts";
+import type { SymbolicLink } from "../application/schemas/SymbolicLink.ts";
 
 export class TestReleaseRepository implements ReleaseRepository {
 	private releases = new Map<string, ModAndReleaseData>();

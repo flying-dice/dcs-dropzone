@@ -81,8 +81,8 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 					trx
 						.insert(T_MOD_RELEASE_ASSETS)
 						.values(
-							data.assets.map((asset, idx) => ({
-								id: `${data.releaseId}:${idx}`,
+							data.assets.map((asset) => ({
+								id: asset.id,
 								releaseId: data.releaseId,
 								name: asset.name,
 								isArchive: asset.isArchive,
@@ -97,7 +97,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 						.insert(T_MOD_RELEASE_SYMBOLIC_LINKS)
 						.values(
 							data.symbolicLinks.map((link, idx) => ({
-								id: `${data.releaseId}:${idx}`,
+								id: link.id,
 								releaseId: data.releaseId,
 								name: link.name,
 								src: link.src,
@@ -113,7 +113,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 						.insert(T_MOD_RELEASE_MISSION_SCRIPTS)
 						.values(
 							data.missionScripts.map((script, idx) => ({
-								id: `${data.releaseId}:${idx}`,
+								id: script.id,
 								releaseId: data.releaseId,
 								name: script.name,
 								purpose: script.purpose,

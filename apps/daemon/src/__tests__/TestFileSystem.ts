@@ -1,4 +1,4 @@
-import type { FileSystem } from "../ports/FileSystem.ts";
+import type { FileSystem } from "../application/ports/FileSystem.ts";
 
 export class TestFileSystem implements FileSystem {
 	private readonly files = new Map<string, string>();

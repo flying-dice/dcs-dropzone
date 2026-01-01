@@ -5,10 +5,10 @@ import { ddlExports } from "./db-ddl.ts";
 
 const logger = getLogger("db");
 
-export default (deps: { url: string }) => {
+export default (databaseUrl: string) => {
 	logger.debug("Compiling migrations...");
 
-	const appDatabase = AppDatabase.withMigrations(deps.url, ddlExports);
+	const appDatabase = AppDatabase.withMigrations(databaseUrl, ddlExports);
 
 	return drizzle({
 		client: appDatabase.getDatabase(),
