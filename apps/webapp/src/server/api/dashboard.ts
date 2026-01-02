@@ -15,7 +15,7 @@ router.get(
 	describeJsonRoute({
 		operationId: "getServerMetrics",
 		summary: "Get Server Metrics",
-		description: "Retrieves the app metrics.",
+		description: "Retrieves the build metrics.",
 		tags: ["Dashboard"],
 		responses: {
 			[StatusCodes.OK]: ServerMetricsData,

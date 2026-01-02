@@ -10,7 +10,7 @@
 		"biome": "biome check --write",
 		"tsc": "tsc --noEmit",
 		"check": "bun run biome && bun run tsc && bunx depcheck",
-		"test": "bun test"
+		"tests": "bun test"
 	},
 	"peerDependencies": {
 		"zod": ">=4",

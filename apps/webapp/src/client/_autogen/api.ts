@@ -3173,7 +3173,7 @@ export const useRegisterModReleaseDownloadById = <TError = ErrorData, TContext =
 };
 
 /**
- * Retrieves the app metrics.
+ * Retrieves the build metrics.
  * @summary Get Server Metrics
  */
 export type getServerMetricsResponse200 = {

@@ -9,17 +9,17 @@ import { requestId } from "hono/request-id";
 import { describeRoute, openAPIRouteHandler, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import type { BaseApplication } from "../application/BaseApplication.ts";
+import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 
 type Env = {
 	Variables: {
-		app: BaseApplication;
+		app: Application;
 	};
 };
 
 export class HonoApplication extends Hono<Env> {
-	constructor(app: BaseApplication) {
+	constructor(app: Application) {
 		super();
 
 		this.use("*", (c, next) => {

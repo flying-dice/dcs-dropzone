@@ -5,6 +5,24 @@ import type { DownloadJob } from "../application/schemas/DownloadJob.ts";
 export class TestDownloadQueue implements DownloadQueue {
 	private readonly jobs = new Map<string, DownloadJob>();
 
+	constructor() {
+		setInterval(() => {
+			for (const [id, job] of this.jobs) {
+				if (job.status === DownloadJobStatus.PENDING) {
+					job.status = DownloadJobStatus.IN_PROGRESS;
+					job.attempt += 1;
+					job.progressPercent = 0;
+				} else if (job.status === DownloadJobStatus.IN_PROGRESS) {
+					job.progressPercent = Math.min(100, job.progressPercent + 50);
+					if (job.progressPercent >= 100) {
+						job.status = DownloadJobStatus.COMPLETED;
+					}
+				}
+				this.jobs.set(id, job);
+			}
+		}, 500);
+	}
+
 	pushJob(
 		id: string,
 		releaseId: string,

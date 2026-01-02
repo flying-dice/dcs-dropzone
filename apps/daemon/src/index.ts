@@ -2,16 +2,16 @@ import "./tui/index.tsx";
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import { Application } from "./Application.ts";
 import appConfig from "./config.ts";
 import applicationConfig from "./config.ts";
 import { HonoApplication } from "./hono/HonoApplication.ts";
+import { ProdApplication } from "./ProdApplication.ts";
 import { startTui } from "./tui";
 
 const logger = getLogger("bootstrap");
 
-logger.debug("Creating Application instance...");
-const app = new Application({
+logger.debug("Creating ProdApplication instance...");
+const app = new ProdApplication({
 	databaseUrl: appConfig.database.url,
 	wgetExecutablePath: appConfig.binaries.wget,
 	sevenzipExecutablePath: appConfig.binaries.sevenzip,

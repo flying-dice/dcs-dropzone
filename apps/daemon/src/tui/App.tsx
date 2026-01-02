@@ -2,7 +2,7 @@ import { useKeyboard } from "@opentui/react";
 import { getLogger } from "log4js";
 import { useMemo, useState } from "react";
 import { match } from "ts-pattern";
-import type { BaseApplication } from "../application/BaseApplication.ts";
+import type { Application } from "../application/Application.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { clearRecentLoggingEvents, recentLoggingEvent$ } from "../log4js.ts";
 import { Footer } from "./Footer.tsx";
@@ -17,7 +17,7 @@ import { getNext, getPrevious } from "./utils.ts";
 
 const logger = getLogger("tui");
 
-export function App(props: { app: BaseApplication }) {
+export function App(props: { app: Application }) {
 	const _recentLoggingEvents = useObservable(recentLoggingEvent$, recentLoggingEvent$.value);
 
 	const _releases = useObservable(props.app.release$, []);

@@ -44,15 +44,10 @@ export class ReleaseCatalog {
 
 			for (const url of asset.urls) {
 				logger.debug(`Pushing download job for URL: ${url.url}`);
-				this.deps.downloadQueue.pushJob(
-					this.generateDownloadJobId(url.id),
-					data.releaseId,
-					asset.id,
-					url.id,
-					url.url,
-					releaseFolder,
-				);
-				downloadJobIds.push(url.id);
+				const downloadJobId = this.generateDownloadJobId(url.id);
+				this.deps.downloadQueue.pushJob(downloadJobId, data.releaseId, asset.id, url.id, url.url, releaseFolder);
+
+				downloadJobIds.push(downloadJobId);
 			}
 
 			// If the asset is an archive, create an extract job that depends on all download jobs

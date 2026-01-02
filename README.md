@@ -9,7 +9,7 @@ This project uses a monorepo structure organized with Bun workspaces:
 ```
 dcs-dropzone/
 ├── apps/                    # Applications
-│   ├── webapp/             # Web application (frontend + app)
+│   ├── webapp/             # Web application (frontend + build)
 │   └── daemon/             # Daemon service for downloads & installations
 ├── packages/               # Shared packages
 │   ├── hono/              # Shared Hono utilities and middleware
@@ -20,12 +20,12 @@ dcs-dropzone/
 
 ### Apps
 
-- **webapp**: The web application that provides the UI for browsing and managing mods. Built with React, Hono app, and MongoDB.
+- **webapp**: The web application that provides the UI for browsing and managing mods. Built with React, Hono build, and MongoDB.
 - **daemon**: The daemon service that runs locally to handle downloading, extracting, and installing mods into your DCS World installation.
 
 ### Packages
 
-- **@packages/hono**: Shared Hono utilities, middleware, and app components used across applications.
+- **@packages/hono**: Shared Hono utilities, middleware, and build components used across applications.
 - **@packages/zod**: Shared Zod schemas for data validation and type safety across the monorepo.
 
 ## 🚀 Getting Started
@@ -80,7 +80,7 @@ This will install dependencies for the root workspace and all apps and packages.
 
 ### Running Development Servers
 
-Each app can be run independently:
+Each build can be run independently:
 
 ```bash
 # Web application (runs on default port)
@@ -107,7 +107,7 @@ bun run test
 ```bash
 # Work on webapp
 cd apps/webapp
-bun run dev          # Start dev app
+bun run dev          # Start dev build
 bun run check        # Lint and type-check
 bun run test         # Run tests
 
@@ -141,7 +141,7 @@ bun run build
 # Run all tests across the monorepo
 bun run test
 
-# Run tests for a specific app/package
+# Run tests for a specific build/package
 cd apps/webapp
 bun test
 ```
@@ -154,7 +154,7 @@ The monorepo uses Biome for linting and formatting:
 # Check and fix all workspaces
 bun run check
 
-# Check a specific app/package
+# Check a specific build/package
 cd apps/webapp
 bun run check
 ```
@@ -187,7 +187,7 @@ Contributions are welcome! This project uses a monorepo structure with Bun works
 **For App-Specific Changes** (e.g., webapp or daemon):
 - Work in the relevant `apps/` directory
 - Test changes locally with `bun run dev`
-- Run `bun run check` and `bun test` in the app directory
+- Run `bun run check` and `bun test` in the build directory
 
 **For Shared Package Changes** (e.g., hono or zod packages):
 - Work in the relevant `packages/` directory
@@ -196,7 +196,7 @@ Contributions are welcome! This project uses a monorepo structure with Bun works
 
 **Adding Dependencies**:
 - Shared dependencies: Add to root `package.json`
-- App-specific dependencies: Add to the app's `package.json`
+- App-specific dependencies: Add to the build's `package.json`
 - Package-specific dependencies: Add to the package's `package.json`
 
 ### Submitting Changes

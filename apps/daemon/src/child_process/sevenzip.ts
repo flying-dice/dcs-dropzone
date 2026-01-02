@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
-import { statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { pathExistsSync } from "fs-extra";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
@@ -92,6 +92,11 @@ const SpawnSevenzipProps = z
 				});
 			}
 		} catch (e) {
+			const parentDir = dirname(it.archivePath);
+			if (existsSync(parentDir) && statSync(parentDir).isDirectory()) {
+				const children = readdirSync(dirname(it.archivePath));
+				logger.error(`Directory contents of ${dirname(it.archivePath)} [${children.join(", ")}]`);
+			}
 			ctx.addIssue({
 				code: "custom",
 				message: `Failed to validate archive path: ${it.archivePath} - ${e}`,

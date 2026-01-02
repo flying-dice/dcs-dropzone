@@ -6,6 +6,24 @@ export class TestExtractQueue implements ExtractQueue {
 	private readonly jobs = new Map<string, ExtractJob>();
 	private readonly dependencies: Map<string, string[]> = new Map();
 
+	constructor() {
+		setInterval(() => {
+			for (const [id, job] of this.jobs) {
+				if (job.status === ExtractJobStatus.PENDING) {
+					job.status = ExtractJobStatus.IN_PROGRESS;
+					job.attempt += 1;
+					job.progressPercent = 0;
+				} else if (job.status === ExtractJobStatus.IN_PROGRESS) {
+					job.progressPercent = Math.min(100, job.progressPercent + 50);
+					if (job.progressPercent >= 100) {
+						job.status = ExtractJobStatus.COMPLETED;
+					}
+				}
+				this.jobs.set(id, job);
+			}
+		}, 500);
+	}
+
 	pushJob(
 		id: string,
 		releaseId: string,

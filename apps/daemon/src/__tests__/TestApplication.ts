@@ -1,4 +1,4 @@
-import { BaseApplication } from "../application/BaseApplication.ts";
+import { Application } from "../application/Application.ts";
 import { TestAttributesRepository } from "./TestAttributesRepository.ts";
 import { TestDownloadQueue } from "./TestDownloadQueue.ts";
 import { TestExtractQueue } from "./TestExtractQueue.ts";
@@ -6,7 +6,7 @@ import { TestFileSystem } from "./TestFileSystem.ts";
 import { TestReleaseRepository } from "./TestReleaseRepository.ts";
 import { TestUUIDGenerator } from "./TestUUIDGenerator.ts";
 
-export class TestApplication extends BaseApplication {
+export class TestApplication extends Application {
 	constructor() {
 		const downloadQueue = new TestDownloadQueue();
 		const extractQueue = new TestExtractQueue();

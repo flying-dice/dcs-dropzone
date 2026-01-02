@@ -96,7 +96,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 					trx
 						.insert(T_MOD_RELEASE_SYMBOLIC_LINKS)
 						.values(
-							data.symbolicLinks.map((link, idx) => ({
+							data.symbolicLinks.map((link) => ({
 								id: link.id,
 								releaseId: data.releaseId,
 								name: link.name,
@@ -112,7 +112,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 					trx
 						.insert(T_MOD_RELEASE_MISSION_SCRIPTS)
 						.values(
-							data.missionScripts.map((script, idx) => ({
+							data.missionScripts.map((script) => ({
 								id: script.id,
 								releaseId: data.releaseId,
 								name: script.name,

@@ -11,7 +11,7 @@ const logger = getLogger("Database");
 const mongoUrl = new MongoUrl(applicationConfig.mongoUri);
 
 if (mongoUrl.isMemoryDatabase()) {
-	logger.info(mongoUrl.toObject(), "Starting in-memory MongoDB app...");
+	logger.info(mongoUrl.toObject(), "Starting in-memory MongoDB build...");
 
 	const mongod = await MongoMemoryServer.create({
 		instance: {

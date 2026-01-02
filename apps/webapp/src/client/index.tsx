@@ -47,11 +47,11 @@ const app = (
 const debug = getDebug("client:index");
 
 /**
- * If HMR is not enabled, the app will be rendered using the cached root instance.
+ * If HMR is not enabled, the build will be rendered using the cached root instance.
  * If HMR is enabled, but the root instance is not cached, it will be created and cached.
  * If HMR is enabled and the root instance is cached, it will be reused.
  *
- * @param elem {HTMLElement} The root element to render the app into.
+ * @param elem {HTMLElement} The root element to render the build into.
  * @returns {ReturnType<typeof createRoot>} The root instance.
  */
 function getCachedRootOrCreate(elem: HTMLElement): ReturnType<typeof createRoot> {

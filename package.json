@@ -8,7 +8,7 @@
 	],
 	"scripts": {
 		"check": "bun run --workspaces check",
-		"test": "bun run --workspaces test",
+		"tests": "bun run --workspaces tests",
 		"dev:webapp": "cd apps/webapp && bun run dev",
 		"dev:daemon": "cd apps/daemon && bun run dev"
 	}

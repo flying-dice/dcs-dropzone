@@ -11,7 +11,7 @@
 		"tsc": "tsc --noEmit",
 		"check": "bun run biome && bun run tsc && bunx depcheck",
 		"dev": "AUTH_SERVICE_MOCK='{\"enabled\": true}' bun --hot src/index.ts",
-		"test": "bun test",
+		"tests": "bun test",
 		"clientgen": "bun run --bun orval --config orval.config.cjs",
 		"build": "bun build ./src/index.ts --minify --sourcemap --compile --env='BUN_PUBLIC_*' --define:process.env.NODE_ENV='\"production\"' --outfile ./dist",
 		"start": "docker compose up"

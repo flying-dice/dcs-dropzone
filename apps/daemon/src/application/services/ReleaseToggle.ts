@@ -47,7 +47,6 @@ export class ReleaseToggle {
 
 	disable(releaseId: string): void {
 		logger.info(`Disabling Release ${releaseId}`);
-		this.ensureReleaseIsReady(releaseId);
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);

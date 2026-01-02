@@ -6,10 +6,10 @@ All changes to the application should be tested in a browser using Playwright be
 
 ### Running the App for Testing
 
-The app can be run without authentication or external dependencies:
+The build can be run without authentication or external dependencies:
 
 ```bash
-# Start the app with mock auth and in-memory database
+# Start the build with mock auth and in-memory database
 cd apps/webapp
 bun run dev
 ```
@@ -20,7 +20,7 @@ This will run:
 
 Features of this setup:
 - Set AUTH_SERVICE_MOCK to enable mock authentication
-- Start the app on `http://localhost:3000`
+- Start the build on `http://localhost:3000`
 - Use an in-memory MongoDB (no external database needed)
 - Use mock authentication (no GitHub OAuth needed)
 - Automatically create a mock user in the database on login
@@ -28,7 +28,7 @@ Features of this setup:
 ### Testing with Playwright
 
 Use Playwright to:
-1. Navigate to pages in the running app
+1. Navigate to pages in the running build
 2. Interact with UI elements (click, fill forms, etc.)
 3. Take screenshots to verify UI changes
 4. Verify functionality end-to-end
@@ -50,7 +50,7 @@ Screenshots should show:
 
 ### Example: Testing the Latest Release Feature
 
-1. **Start the app:**
+1. **Start the build:**
    ```bash
    bun run dev
    ```
@@ -83,8 +83,8 @@ Screenshots should show:
 ### Important Notes
 
 - **Mock User**: When `AUTH_DISABLED=true`, a mock user with ID `mock-user-123` is automatically created
-- **In-Memory DB**: Data is lost when the app stops
-- **Hot Reload**: The dev app has hot reload which may interfere with Playwright clicks
+- **In-Memory DB**: Data is lost when the build stops
+- **Hot Reload**: The dev build has hot reload which may interfere with Playwright clicks
 - **Console Errors**: Some errors (Monaco editor, daemon connection) are expected and can be ignored
 
 ### Best Practices
@@ -104,7 +104,7 @@ Screenshots should show:
 - **Solution**: Hard refresh the page or navigate directly to the URL
 
 **Problem**: Form submission fails
-- **Solution**: Check app logs for errors, verify API endpoints are working
+- **Solution**: Check build logs for errors, verify API endpoints are working
 
 **Problem**: Port 3000 already in use
 - **Solution**: Kill existing process: `lsof -ti:3000 | xargs kill -9`
@@ -146,17 +146,17 @@ This user:
 For automated testing in CI/CD:
 
 ```yaml
-- name: Start test app
+- name: Start test build
   run: |
     cd apps/webapp
     AUTH_DISABLED=true bun run dev &
-    sleep 5  # Wait for app to start
+    sleep 5  # Wait for build to start
 
 - name: Run Playwright tests
   run: |
     # Your Playwright test commands here
     
-- name: Stop app
+- name: Stop build
   run: |
     lsof -ti:3000 | xargs kill -9
 ```
