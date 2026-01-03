@@ -1,6 +1,6 @@
 // Core Queue implementation
 
-export type { ExponentialBackoffOptions } from "./adapters/index.ts";
+export type { ExponentialBackoffOptions } from "./adapters/ExponentialBackoff.ts";
 // Adapters (provided implementations)
 export { ExponentialBackoff, InMemoryJobRepo, InMemoryRunRepo } from "./adapters/index.ts";
 export { JobRun } from "./JobRun.ts";

@@ -501,6 +501,13 @@ const calculator = new ExponentialBackoff({
 
 **Formula:** `delay = min(baseDelayMs * (multiplier ^ (attempts - 1)), maxDelayMs)`
 
+For example, with the default values:
+- Attempt 1: 1000ms * (2^0) = 1 second
+- Attempt 2: 1000ms * (2^1) = 2 seconds
+- Attempt 3: 1000ms * (2^2) = 4 seconds
+- Attempt 4: 1000ms * (2^3) = 8 seconds
+- And so on, until maxDelayMs is reached
+
 ## Important Notes
 
 ### Single-Instance Only
@@ -609,8 +616,12 @@ describe("My Job Processor", () => {
     const jobId = await queue.add("test", { foo: "bar" });
     queue.start();
     
-    // Wait for completion
-    await waitForJobCompletion(jobId);
+    // Wait for completion (poll until job is completed)
+    while (true) {
+      const job = await queue.getJob(jobId);
+      if (job?.completedAt) break;
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
     
     queue.stop();
 
