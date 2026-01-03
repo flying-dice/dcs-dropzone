@@ -117,6 +117,14 @@
         "zod": ">=4",
       },
     },
+    "packages/queue": {
+      "name": "@packages/queue",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "log4js": "^6.9.1",
+        "neverthrow": "^8.2.0",
+      },
+    },
     "packages/zod": {
       "name": "@packages/zod",
       "version": "0.1.0",
@@ -427,6 +435,8 @@
     "@orval/zod": ["@orval/zod@8.0.0-rc.0", "", { "dependencies": { "@orval/core": "8.0.0-rc.0", "lodash.uniq": "^4.5.0", "openapi3-ts": "4.5.0" } }, "sha512-0fqjXDbrM6A+930qrzKQJ6fx/ixuGl8yplfdGkA2dGXqymWUPGmVyfNqGpPhhjBLgtmIQDoUpr+fASoEPuxxbA=="],
 
     "@packages/hono": ["@packages/hono@workspace:packages/hono"],
+
+    "@packages/queue": ["@packages/queue@workspace:packages/queue"],
 
     "@packages/zod": ["@packages/zod@workspace:packages/zod"],
 

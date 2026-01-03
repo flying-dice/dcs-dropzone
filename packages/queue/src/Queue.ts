@@ -1,20 +1,11 @@
-import type { Job } from "./Job.ts";
-import type { Processor } from "./Processor.ts";
-import type { ProcessorContext } from "./ProcessorContext.ts";
+import { getLogger } from "log4js";
+import { JobRun } from "./JobRun.ts";
 import type { ExponentCalculator } from "./ports/ExponentCalculator.ts";
 import type { JobRepo } from "./ports/JobRepo.ts";
 import type { RunRepo } from "./ports/RunRepo.ts";
-import type { Run } from "./Run.ts";
+import { type Job, type Processor, type Run, RunErrorCode, RunState } from "./types.ts";
 
-/**
- * Options for adding a job to the queue.
- */
-export type AddJob<TData = unknown> = {
-	queue: string;
-	name: string;
-	data: TData;
-	scheduledAt?: Date;
-};
+const logger = getLogger("Queue");
 
 type Deps = {
 	jobRepo: JobRepo;
@@ -23,8 +14,24 @@ type Deps = {
 };
 
 type Opts = {
+	/**
+	 * Job processors to register with the queue.
+	 *
+	 * Each processor is responsible for handling jobs of a specific type.
+	 *
+	 * During each polling interval, the queue will check for eligible jobs
+	 * for each registered processor and dispatch them accordingly.
+	 *
+	 * If no processors are registered, the queue will not process any jobs.
+	 */
 	processors: Processor[];
-	pollInterval?: number;
+
+	/**
+	 * Job execution polling interval in milliseconds.
+	 *
+	 * @default 1000
+	 */
+	pollIntervalMs?: number;
 };
 
 /**
@@ -35,176 +42,90 @@ type Opts = {
  * be used in environments where multiple instances may process the same jobs concurrently.
  */
 export class Queue {
-	private readonly processors: Map<string, Processor>;
+	private readonly processors: Processor[] = [];
 	private readonly pollInterval: number;
+	private readonly jobRuns: Map<string, JobRun> = new Map();
 
-	private isRunning = false;
-	private pollTimeout: ReturnType<typeof setTimeout> | null = null;
+	private intervalId?: NodeJS.Timeout;
+
+	get running(): boolean {
+		return !!this.intervalId;
+	}
 
 	constructor(
-		protected readonly deps: Deps,
+		public readonly deps: Deps,
 		options: Opts,
 	) {
-		this.pollInterval = options.pollInterval ?? 1000;
+		this.pollInterval = options.pollIntervalMs ?? 1000;
+		this.processors = [...options.processors];
+	}
 
-		this.processors = new Map();
-		for (const processor of options.processors) {
-			const key = this.processorKey(processor.queue, processor.name);
-			this.processors.set(key, processor);
+	start() {
+		this.intervalId = setInterval(() => this.runOnce(), this.pollInterval);
+	}
+
+	stop() {
+		if (this.intervalId) {
+			clearInterval(this.intervalId);
+			this.intervalId = undefined;
 		}
 	}
 
-	private processorKey(queue: string, name: string): string {
-		return `${queue}:${name}`;
+	async runOnce(): Promise<void> {
+		await this.reconcile();
+		for (const processor of this.processors) {
+			if (this.jobRuns.has(processor.name)) continue;
+			const job = await this.deps.jobRepo.findNextEligible(processor.name);
+			if (job) {
+				this.runJob(job, processor).then(
+					() => {
+						logger.info(`Job ${job.id} processed successfully.`);
+					},
+					(err) => {
+						logger.error(`Error processing job ${job.id}:`, err);
+					},
+				);
+			}
+		}
 	}
 
-	private getRegisteredQueues(): string[] {
-		const queues = new Set<string>();
-		for (const processor of this.processors.values()) {
-			queues.add(processor.queue);
+	async reconcile(): Promise<void> {
+		for (const run of await this.deps.runRepo.listRunning()) {
+			const jobRun = this.jobRuns.get(run.jobName);
+			if (!jobRun) {
+				logger.warn(`Run ${run.id} is marked as running but no active JobRun found for job ${run.jobName}.`);
+				await this.deps.runRepo.save({
+					...run,
+					state: RunState.Failed,
+					error: {
+						code: RunErrorCode.JobRunNotFound,
+						message: `No active JobRun found for job ${run.jobName}.`,
+					},
+				});
+				const attempts = await this.deps.jobRepo.incrementAttempts(run.jobId);
+				await this.deps.jobRepo.reschedule(run.jobId, attempts, this.deps.exponentCalculator.calculate(attempts));
+			}
 		}
-		return Array.from(queues);
 	}
 
 	/**
 	 * Add a job to the queue.
 	 */
-	async add<TData>(addJob: AddJob<TData>): Promise<Job<TData>> {
+	async add<TData>(name: string, data: TData, scheduledAt?: Date): Promise<string> {
 		const now = new Date();
+		const id = crypto.randomUUID();
 		const job: Job<TData> = {
-			id: crypto.randomUUID(),
-			queue: addJob.queue,
-			name: addJob.name,
-			data: addJob.data,
+			id,
+			name,
+			data,
 			createdAt: now,
-			scheduledAt: addJob.scheduledAt ?? now,
+			scheduledAt: scheduledAt ?? now,
 			attempts: 0,
 		};
 
-		return this.deps.jobRepo.create(job) as Promise<Job<TData>>;
+		await this.deps.jobRepo.save(job);
+		return id;
 	}
-
-	/**
-	 * Start processing jobs.
-	 */
-	start(): void {
-		if (this.isRunning) {
-			return;
-		}
-
-		this.isRunning = true;
-		this.poll();
-	}
-
-	/**
-	 * Stop processing jobs.
-	 */
-	stop(): void {
-		this.isRunning = false;
-		if (this.pollTimeout) {
-			clearTimeout(this.pollTimeout);
-			this.pollTimeout = null;
-		}
-	}
-
-	/**
-	 * Check if the queue is currently running.
-	 */
-	get running(): boolean {
-		return this.isRunning;
-	}
-
-	private async poll(): Promise<void> {
-		if (!this.isRunning) {
-			return;
-		}
-
-		try {
-			await this.processNext();
-		} catch (error) {
-			console.error("[Queue] Error in poll loop:", error);
-		}
-
-		if (this.isRunning) {
-			this.pollTimeout = setTimeout(() => this.poll(), this.pollInterval);
-		}
-	}
-
-	private async processNext(): Promise<void> {
-		const queues = this.getRegisteredQueues();
-		if (queues.length === 0) {
-			return;
-		}
-
-		const job = await this.deps.jobRepo.findNextEligible(queues);
-		if (!job) {
-			return;
-		}
-
-		const processor = this.processors.get(this.processorKey(job.queue, job.name));
-		if (!processor) {
-			console.warn(`[Queue] No processor for job ${job.queue}:${job.name}`);
-			return;
-		}
-
-		await this.executeJob(job, processor);
-	}
-
-	private async executeJob(job: Job, processor: Processor): Promise<void> {
-		const run: Run = {
-			id: crypto.randomUUID(),
-			jobId: job.id,
-			attempt: job.attempts + 1,
-			state: "running",
-			startedAt: new Date(),
-		};
-
-		await this.deps.runRepo.create(run);
-
-		const updatedJob: Job = {
-			...job,
-			attempts: job.attempts + 1,
-		};
-		await this.deps.jobRepo.update(updatedJob);
-
-		const ctx: ProcessorContext = {
-			updateProgress: async (progress: unknown) => {
-				await this.deps.jobRepo.updateProgress(job.id, progress, new Date());
-			},
-		};
-
-		try {
-			const result = await processor.process(updatedJob, ctx);
-
-			run.state = "success";
-			run.endedAt = new Date();
-			run.result = result;
-			await this.deps.runRepo.update(run);
-
-			// Re-fetch the job to get any progress updates made during execution
-			const currentJob = await this.deps.jobRepo.findById(job.id);
-			if (currentJob) {
-				currentJob.completedAt = new Date();
-				await this.deps.jobRepo.update(currentJob);
-			}
-		} catch (error) {
-			run.state = "failed";
-			run.endedAt = new Date();
-			run.error = error instanceof Error ? error.message : String(error);
-			await this.deps.runRepo.update(run);
-
-			// Re-fetch the job to get current state before rescheduling
-			const currentJob = await this.deps.jobRepo.findById(job.id);
-			if (currentJob) {
-				currentJob.scheduledAt = this.deps.exponentCalculator.calculate(currentJob.attempts);
-				await this.deps.jobRepo.update(currentJob);
-			}
-		}
-	}
-
-	// ============================================
-	// Inspection Helpers
-	// ============================================
 
 	/**
 	 * Get a job by ID.
@@ -260,5 +181,32 @@ export class Queue {
 	 */
 	async listFailedRuns(): Promise<Run[]> {
 		return this.deps.runRepo.listFailed();
+	}
+
+	private async runJob<TData, TResult>(job: Job<TData>, processor: Processor<TData, TResult>): Promise<void> {
+		const jobRun = new JobRun<TData, TResult>(job, processor);
+		await this.deps.runRepo.save(jobRun.run);
+		this.jobRuns.set(job.name, jobRun);
+
+		await jobRun.process({
+			onProgress: async (progress: number) => {
+				await this.deps.jobRepo.updateProgress(job.id, progress, new Date());
+			},
+			onSuccess: async () => {
+				await this.deps.jobRepo.incrementAttempts(job.id);
+				await this.deps.jobRepo.markCompleted(job.id, new Date());
+			},
+			onFailed: async () => {
+				const currentAttempts = await this.deps.jobRepo.incrementAttempts(job.id);
+				await this.deps.jobRepo.reschedule(
+					job.id,
+					currentAttempts,
+					this.deps.exponentCalculator.calculate(currentAttempts),
+				);
+			},
+		});
+		await this.deps.runRepo.save(jobRun.run);
+
+		this.jobRuns.delete(job.name);
 	}
 }

@@ -21,7 +21,7 @@ export default async function (command: UpdateModCommand): Promise<UpdateModResu
 	const mod = await Mod.findOneAndUpdate({ id: modId, maintainers: user.id }, updateData).exec();
 
 	if (!mod) {
-		logger.warn({ modId }, "User attempted to update mod but it was not found");
+		logger.warn({ modId }, "User attempted to save mod but it was not found");
 		return err("ModNotFound");
 	}
 

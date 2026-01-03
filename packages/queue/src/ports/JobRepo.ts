@@ -1,13 +1,13 @@
-import type { Job } from "../Job.ts";
+import type { Job } from "../types.ts";
 
 /**
  * Port for job persistence.
  */
 export type JobRepo = {
 	/**
-	 * Create a new job.
+	 * Save a job.
 	 */
-	create: (job: Job) => Promise<Job>;
+	save: (job: Job) => Promise<Job>;
 
 	/**
 	 * Find a job by ID.
@@ -17,18 +17,30 @@ export type JobRepo = {
 	/**
 	 * Find the next eligible job (completedAt IS NULL AND scheduledAt <= now),
 	 * ordered by earliest scheduledAt.
+	 *
+	 * It must not have an active run.
 	 */
-	findNextEligible: (queues: string[]) => Promise<Job | undefined>;
+	findNextEligible: (queues: string) => Promise<Job | undefined>;
 
 	/**
-	 * Update a job.
+	 * Update job progress (0-100).
 	 */
-	update: (job: Job) => Promise<Job>;
+	updateProgress: (id: string, progress: number, progressUpdatedAt: Date) => Promise<void>;
 
 	/**
-	 * Update job progress.
+	 * Mark a job as completed.
 	 */
-	updateProgress: (id: string, progress: unknown, progressUpdatedAt: Date) => Promise<void>;
+	markCompleted: (id: string, completedAt: Date) => Promise<void>;
+
+	/**
+	 * Increment the attempts count for a job.
+	 */
+	incrementAttempts: (id: string) => Promise<number>;
+
+	/**
+	 * Reschedule a job to a new scheduledAt date.
+	 */
+	reschedule: (id: string, attempt: number, scheduledAt: Date) => Promise<void>;
 
 	/**
 	 * List all jobs, optionally filtered by queue.

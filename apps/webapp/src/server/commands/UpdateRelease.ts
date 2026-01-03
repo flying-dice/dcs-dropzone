@@ -22,7 +22,7 @@ export default async function (command: UpdateReleaseCommand): Promise<UpdateRel
 	if (!(await Mod.exists({ id: updateData.modId, maintainers: user.id }))) {
 		logger.warn(
 			{ userId: user.id, modId: updateData.modId },
-			"User attempted to update release for a mod they do not own",
+			"User attempted to save release for a mod they do not own",
 		);
 		return err("ModNotFound");
 	}
@@ -41,7 +41,7 @@ export default async function (command: UpdateReleaseCommand): Promise<UpdateRel
 	).exec();
 
 	if (!release) {
-		logger.warn({ releaseId: updateData.id }, "User attempted to update release but it was not found");
+		logger.warn({ releaseId: updateData.id }, "User attempted to save release but it was not found");
 		return err("ReleaseNotFound");
 	}
 

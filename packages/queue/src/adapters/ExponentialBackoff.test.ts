@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { ExponentialBackoff } from "../adapters";
+import { ExponentialBackoff } from "./index.ts";
 
 describe("ExponentialBackoff", () => {
 	it("should calculate exponential delays", () => {

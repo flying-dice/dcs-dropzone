@@ -1,23 +1,18 @@
-import type { Run } from "../Run.ts";
+import type { Run } from "../types.ts";
 
 /**
  * Port for run persistence.
  */
 export type RunRepo = {
 	/**
-	 * Create a new run.
-	 */
-	create: (run: Run) => Promise<Run>;
-
-	/**
 	 * Find a run by ID.
 	 */
 	findById: (id: string) => Promise<Run | undefined>;
 
 	/**
-	 * Update a run.
+	 * Save a run.
 	 */
-	update: (run: Run) => Promise<Run>;
+	save: (run: Run) => Promise<Run>;
 
 	/**
 	 * Get the latest run for a job.
@@ -33,4 +28,14 @@ export type RunRepo = {
 	 * List all failed runs.
 	 */
 	listFailed: () => Promise<Run[]>;
+
+	/**
+	 * List all runs with state='running'.
+	 */
+	listRunning: () => Promise<Run[]>;
+
+	/**
+	 * List all runs with state='success'.
+	 */
+	listSuccess: () => Promise<Run[]>;
 };

@@ -1,5 +1,5 @@
-import type { Run } from "../Run.ts";
-import type { RunRepo } from "../types.ts";
+import type { RunRepo } from "../ports/RunRepo.ts";
+import { type Run, RunState } from "../types.ts";
 
 /**
  * In-memory implementation of RunRepo for testing and development.
@@ -7,9 +7,16 @@ import type { RunRepo } from "../types.ts";
 export class InMemoryRunRepo implements RunRepo {
 	private runs: Map<string, Run> = new Map();
 
-	async create(run: Run): Promise<Run> {
+	/**
+	 * Clear all runs. Useful for testing.
+	 */
+	clear(): void {
+		this.runs.clear();
+	}
+
+	async save(run: Run): Promise<Run> {
 		this.runs.set(run.id, { ...run });
-		return { ...run };
+		return this.runs.get(run.id)!;
 	}
 
 	async findById(id: string): Promise<Run | undefined> {
@@ -17,45 +24,30 @@ export class InMemoryRunRepo implements RunRepo {
 		return run ? { ...run } : undefined;
 	}
 
-	async update(run: Run): Promise<Run> {
-		if (!this.runs.has(run.id)) {
-			throw new Error(`Run ${run.id} not found`);
-		}
-		this.runs.set(run.id, { ...run });
-		return { ...run };
-	}
-
 	async findLatestByJobId(jobId: string): Promise<Run | undefined> {
-		let latest: Run | undefined;
-
-		for (const run of this.runs.values()) {
-			if (run.jobId === jobId) {
-				if (!latest || run.attempt > latest.attempt) {
-					latest = run;
-				}
-			}
-		}
-
-		return latest ? { ...latest } : undefined;
+		const runsForJob = this.getSortedByStartedAt((run) => run.jobId === jobId);
+		return runsForJob.length > 0 ? runsForJob[runsForJob.length - 1] : undefined;
 	}
 
 	async listByJobId(jobId: string): Promise<Run[]> {
-		return Array.from(this.runs.values())
-			.filter((r) => r.jobId === jobId)
-			.sort((a, b) => a.attempt - b.attempt)
-			.map((r) => ({ ...r }));
+		return this.getSortedByStartedAt((run) => run.jobId === jobId);
 	}
 
 	async listFailed(): Promise<Run[]> {
-		return Array.from(this.runs.values())
-			.filter((r) => r.state === "failed")
-			.map((r) => ({ ...r }));
+		return this.getSortedByStartedAt((run) => run.state === RunState.Failed);
 	}
 
-	/**
-	 * Clear all runs. Useful for testing.
-	 */
-	clear(): void {
-		this.runs.clear();
+	async listRunning(): Promise<Run[]> {
+		return this.getSortedByStartedAt((run) => run.state === RunState.Running);
+	}
+
+	async listSuccess(): Promise<Run[]> {
+		return this.getSortedByStartedAt((run) => run.state === RunState.Success);
+	}
+
+	private getSortedByStartedAt(filter?: (run: Run) => boolean): Run[] {
+		return Array.from(this.runs.values())
+			.filter(filter ?? (() => true))
+			.sort((a, b) => a.startedAt.getTime() - b.startedAt.getTime());
 	}
 }

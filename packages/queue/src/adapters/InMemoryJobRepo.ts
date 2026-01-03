@@ -1,5 +1,6 @@
-import type { Job } from "../Job.ts";
-import type { JobRepo } from "../types.ts";
+import type { JobRepo } from "../ports/JobRepo.ts";
+import type { RunRepo } from "../ports/RunRepo.ts";
+import { type Job, RunState } from "../types.ts";
 
 /**
  * In-memory implementation of JobRepo for testing and development.
@@ -7,9 +8,44 @@ import type { JobRepo } from "../types.ts";
 export class InMemoryJobRepo implements JobRepo {
 	private jobs: Map<string, Job> = new Map();
 
-	async create(job: Job): Promise<Job> {
+	constructor(protected readonly runRepo: RunRepo) {}
+
+	/**
+	 * Clear all jobs. Useful for testing.
+	 */
+	clear(): void {
+		this.jobs.clear();
+	}
+
+	async markCompleted(id: string, completedAt: Date): Promise<void> {
+		const job = this.jobs.get(id);
+		if (!job) {
+			throw new Error(`Job ${id} not found`);
+		}
+		job.completedAt = completedAt;
+	}
+
+	async incrementAttempts(id: string): Promise<number> {
+		const job = this.jobs.get(id);
+		if (!job) {
+			throw new Error(`Job ${id} not found`);
+		}
+		job.attempts += 1;
+		return job.attempts;
+	}
+
+	async reschedule(id: string, attempt: number, scheduledAt: Date): Promise<void> {
+		const job = this.jobs.get(id);
+		if (!job) {
+			throw new Error(`Job ${id} not found`);
+		}
+		job.attempts = attempt;
+		job.scheduledAt = scheduledAt;
+	}
+
+	async save(job: Job): Promise<Job> {
 		this.jobs.set(job.id, { ...job });
-		return { ...job };
+		return this.jobs.get(job.id)!;
 	}
 
 	async findById(id: string): Promise<Job | undefined> {
@@ -17,32 +53,27 @@ export class InMemoryJobRepo implements JobRepo {
 		return job ? { ...job } : undefined;
 	}
 
-	async findNextEligible(queues: string[]): Promise<Job | undefined> {
+	async findNextEligible(name: string): Promise<Job | undefined> {
 		const now = new Date();
-		const queueSet = new Set(queues);
 
-		let eligible: Job | undefined;
+		const eligible: Job[] = this.jobs
+			.values()
+			.filter((it) => it.name === name && it.completedAt === undefined && it.scheduledAt <= now)
+			.toArray()
+			.sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime())
+			.filter((job) => this.runRepo.findLatestByJobId(job.id).then((run) => run?.state !== RunState.Running));
 
-		for (const job of this.jobs.values()) {
-			if (queueSet.has(job.queue) && job.completedAt === undefined && job.scheduledAt <= now) {
-				if (!eligible || job.scheduledAt < eligible.scheduledAt) {
-					eligible = job;
-				}
-			}
+		if (eligible.length > 0) {
+			console.log(
+				`Eligible jobs for processor ${name}:`,
+				eligible.map((j) => j.id),
+			);
+
+			return { ...eligible[0] } as Job;
 		}
-
-		return eligible ? { ...eligible } : undefined;
 	}
 
-	async update(job: Job): Promise<Job> {
-		if (!this.jobs.has(job.id)) {
-			throw new Error(`Job ${job.id} not found`);
-		}
-		this.jobs.set(job.id, { ...job });
-		return { ...job };
-	}
-
-	async updateProgress(id: string, progress: unknown, progressUpdatedAt: Date): Promise<void> {
+	async updateProgress(id: string, progress: number, progressUpdatedAt: Date): Promise<void> {
 		const job = this.jobs.get(id);
 		if (!job) {
 			throw new Error(`Job ${id} not found`);
@@ -51,34 +82,21 @@ export class InMemoryJobRepo implements JobRepo {
 		job.progressUpdatedAt = progressUpdatedAt;
 	}
 
-	async list(queue?: string): Promise<Job[]> {
-		const jobs = Array.from(this.jobs.values());
-		if (queue) {
-			return jobs.filter((j) => j.queue === queue).map((j) => ({ ...j }));
-		}
-		return jobs.map((j) => ({ ...j }));
+	async list(name?: string): Promise<Job[]> {
+		return this.getJobsSortedByScheduledAt((job) => (name ? job.name === name : true));
 	}
 
-	async listPending(queue?: string): Promise<Job[]> {
-		const jobs = Array.from(this.jobs.values()).filter((j) => j.completedAt === undefined);
-		if (queue) {
-			return jobs.filter((j) => j.queue === queue).map((j) => ({ ...j }));
-		}
-		return jobs.map((j) => ({ ...j }));
+	async listPending(name?: string): Promise<Job[]> {
+		return this.getJobsSortedByScheduledAt((job) => (name ? job.name === name : true) && job.completedAt === undefined);
 	}
 
-	async listCompleted(queue?: string): Promise<Job[]> {
-		const jobs = Array.from(this.jobs.values()).filter((j) => j.completedAt !== undefined);
-		if (queue) {
-			return jobs.filter((j) => j.queue === queue).map((j) => ({ ...j }));
-		}
-		return jobs.map((j) => ({ ...j }));
+	async listCompleted(name?: string): Promise<Job[]> {
+		return this.getJobsSortedByScheduledAt((job) => (name ? job.name === name : true) && job.completedAt !== undefined);
 	}
 
-	/**
-	 * Clear all jobs. Useful for testing.
-	 */
-	clear(): void {
-		this.jobs.clear();
+	private getJobsSortedByScheduledAt(filter?: (job: Job) => boolean): Job[] {
+		return Array.from(this.jobs.values().filter(filter ? filter : () => true)).sort(
+			(a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime(),
+		);
 	}
 }
