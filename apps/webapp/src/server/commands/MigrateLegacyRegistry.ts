@@ -164,7 +164,7 @@ export default async function (command: MigrateLegacyRegistryCommand) {
 			}).exec();
 
 			if (!latestRelease) {
-				logger.warn("Failed to find latest release to update mod document");
+				logger.warn("Failed to find latest release to save mod document");
 			} else {
 				await Mod.updateOne({ id: modDocument.id }, { latestReleaseId: latestRelease.id }).exec();
 			}

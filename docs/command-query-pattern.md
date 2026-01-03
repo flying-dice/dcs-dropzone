@@ -5,7 +5,7 @@ This document explains how the hono-side code under `apps/webapp/src/build/hono`
 **Note:** This pattern is used in the **webapp** application (`apps/webapp`). The daemon service (`apps/daemon`) uses a different architecture focused on queue management and system operations.
 
 ## Why commands and queries?
-- Commands perform state changes (create/update/delete). They must be explicit about side effects and validations.
+- Commands perform state changes (create/save/delete). They must be explicit about side effects and validations.
 - Queries read data and return DTOs. They must be side‑effect‑free and cache‑friendly.
 
 This separation avoids “god” services that just proxy between HTTP and the ORM.

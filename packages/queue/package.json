@@ -1,0 +1,19 @@
+{
+	"name": "@packages/queue",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"biome": "biome check --write",
+		"tsc": "tsc --noEmit",
+		"check": "bun run biome && bun run tsc && bunx depcheck",
+		"tests": "bun test --coverage"
+	},
+	"peerDependencies": {
+		"neverthrow": "^8.2.0",
+		"log4js": "^6.9.1"
+	}
+}
