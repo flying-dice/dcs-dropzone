@@ -13,6 +13,7 @@ dcs-dropzone/
 │   └── daemon/             # Daemon service for downloads & installations
 ├── packages/               # Shared packages
 │   ├── hono/              # Shared Hono utilities and middleware
+│   ├── queue/             # Job queue library
 │   └── zod/               # Shared Zod schemas for validation
 ├── docs/                   # Technical documentation
 └── package.json           # Root workspace configuration
@@ -26,6 +27,7 @@ dcs-dropzone/
 ### Packages
 
 - **@packages/hono**: Shared Hono utilities, middleware, and build components used across applications.
+- **@packages/queue**: Lightweight job queue library for single-instance applications with pluggable storage.
 - **@packages/zod**: Shared Zod schemas for data validation and type safety across the monorepo.
 
 ## 🚀 Getting Started
