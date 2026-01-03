@@ -1,4 +1,4 @@
-import type { RunRepo } from "../ports/RunRepo.ts";
+import type { RunRepo } from "../ports";
 import { type Run, RunState } from "../types.ts";
 
 /**

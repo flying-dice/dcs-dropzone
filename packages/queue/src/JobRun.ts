@@ -1,3 +1,4 @@
+import * as assert from "node:assert";
 import { type Job, type Processor, type ProcessorContext, type Run, RunErrorCode, RunState } from "./types.ts";
 
 export class JobRun<TData = any, TResult = any> {
@@ -8,6 +9,7 @@ export class JobRun<TData = any, TResult = any> {
 
 	constructor(job: Job<TData>, processor: Processor<TData, TResult>) {
 		this.initialJob = job;
+
 		this.run = {
 			id: crypto.randomUUID(),
 			jobId: job.id,
@@ -25,31 +27,45 @@ export class JobRun<TData = any, TResult = any> {
 		onSuccess: () => void;
 		onFailed: () => void;
 	}): Promise<void> {
-		const ctx: ProcessorContext = {
-			updateProgress: props.onProgress,
-			abortSignal: this.abortController.signal,
-		};
+		try {
+			const ctx: ProcessorContext = {
+				updateProgress: props.onProgress,
+				abortSignal: this.abortController.signal,
+			};
 
-		const res = await this.processor.process(this.initialJob.data, ctx);
+			const res = await this.processor.process(this.initialJob.data, ctx);
 
-		res.match(
-			(result) => {
-				this.run.state = RunState.Success;
-				this.run.endedAt = new Date();
-				this.run.result = result;
+			assert.ok(
+				typeof res === "object" && ["isOk", "isErr", "match"].every((it) => it in res),
+				`Processor returned an invalid value, expected type 'Result' but received type '${typeof res}'`,
+			);
 
-				props.onSuccess();
-			},
-			(message) => {
-				this.run.state = RunState.Failed;
-				this.run.endedAt = new Date();
-				this.run.error = {
-					code: RunErrorCode.ProcessorError,
-					message,
-				};
+			res.match(
+				(result) => {
+					this.run.state = RunState.Success;
+					this.run.endedAt = new Date();
+					this.run.result = result;
 
-				props.onFailed();
-			},
-		);
+					props.onSuccess();
+				},
+				(message) => {
+					this.run.state = RunState.Failed;
+					this.run.endedAt = new Date();
+					this.run.error = {
+						code: RunErrorCode.ProcessorError,
+						message,
+					};
+
+					props.onFailed();
+				},
+			);
+		} catch (error) {
+			this.run.state = RunState.Failed;
+			this.run.endedAt = new Date();
+			this.run.error = {
+				code: RunErrorCode.ProcessorException,
+				message: error instanceof Error ? error.message : String(error),
+			};
+		}
 	}
 }

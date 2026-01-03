@@ -1,5 +1,4 @@
-import type { JobRepo } from "../ports/JobRepo.ts";
-import type { RunRepo } from "../ports/RunRepo.ts";
+import type { JobRepo, RunRepo } from "../ports";
 import { type Job, RunState } from "../types.ts";
 
 /**

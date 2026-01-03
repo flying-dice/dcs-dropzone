@@ -56,7 +56,39 @@ export enum RunState {
 }
 
 export enum RunErrorCode {
+	/**
+	 * Error Code used when the processor fails during execution.
+	 *
+	 * This indicates that the job processing encountered an error
+	 * that was anticipated or handled by the processor logic.
+	 *
+	 * The Processor returned an Err result with a specific error message.
+	 */
 	ProcessorError = "PROCESSOR_ERROR",
+
+	/**
+	 * Error Code used when there is an unexpected exception
+	 * during job processing.
+	 *
+	 * This indicates that the job processing encountered an unhandled
+	 * exception or error that was not anticipated by the processor logic.
+	 *
+	 * This could be due to runtime errors, bugs in the processor code,
+	 * or other unforeseen issues that caused the job to fail.
+	 */
+	ProcessorException = "PROCESSOR_EXCEPTION",
+
+	/**
+	 * Error Code used when a job run is found to be missing
+	 * during reconciliation.
+	 *
+	 * This indicates that a job run was expected to exist
+	 * but could not be found in the system.
+	 *
+	 * This mostly happens when the system is restarted
+	 * and there are runs marked as Running, but no active
+	 * JobRun instance is found for them.
+	 */
 	JobRunNotFound = "JOB_RUN_NOT_FOUND",
 }
 

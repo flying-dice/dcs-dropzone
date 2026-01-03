@@ -1,10 +1,33 @@
+import "./log4js.ts";
 import { describe, expect, it } from "bun:test";
-import assert from "node:assert";
-import { err, ok } from "neverthrow";
-import { ExponentialBackoff } from "../adapters";
-import { RunErrorCode, RunState } from "../types.ts";
-import { createProcessor, createTestQueue } from "./fixtures.ts";
+import { err, ok, type Result } from "neverthrow";
+import { ExponentialBackoff, InMemoryJobRepo, InMemoryRunRepo } from "../adapters";
+import { Queue } from "../Queue.ts";
+import { type Processor, RunErrorCode, RunState } from "../types.ts";
 import { delay, waitForAllJobsCompleted, waitForJobCompletion } from "./utils.ts";
+
+export function createTestQueue(
+	options: Partial<{
+		jobRepo: InMemoryJobRepo;
+		runRepo: InMemoryRunRepo;
+		exponentCalculator: ExponentialBackoff;
+		pollInterval: number;
+	}> & {
+		processors?: Processor[];
+	} = {},
+): Queue {
+	const runRepo = options.runRepo ?? new InMemoryRunRepo();
+	const jobRepo = options.jobRepo ?? new InMemoryJobRepo(runRepo);
+	const exponentCalculator = options.exponentCalculator ?? new ExponentialBackoff({ baseDelayMs: 10 });
+
+	return new Queue(
+		{ jobRepo, runRepo, exponentCalculator },
+		{
+			processors: options.processors ?? [],
+			pollIntervalMs: options.pollInterval ?? 10,
+		},
+	);
+}
 
 describe("Queue", () => {
 	describe("add", () => {
@@ -46,13 +69,13 @@ describe("Queue", () => {
 			type JobData = { value: number };
 			let processedData: JobData | undefined;
 
-			const processor = createProcessor<JobData, string>({
+			const processor: Processor<JobData, string> = {
 				name: "test",
 				process: async (data) => {
 					processedData = data;
 					return ok("done");
 				},
-			});
+			};
 
 			const queue = createTestQueue({ processors: [processor] });
 
@@ -93,13 +116,13 @@ describe("Queue", () => {
 		it("should not execute a job scheduled in the future", async () => {
 			let processed = false;
 
-			const processor = createProcessor({
+			const processor: Processor<undefined, string> = {
 				name: "test",
 				process: async () => {
 					processed = true;
 					return ok("done");
 				},
-			});
+			};
 
 			const queue = createTestQueue({ processors: [processor] });
 
@@ -126,13 +149,13 @@ describe("Queue", () => {
 		it("should process jobs in scheduledAt order", async () => {
 			const processedOrder: string[] = [];
 
-			const processor = createProcessor<string, string>({
+			const processor: Processor<string, string> = {
 				name: "test",
 				process: async (payload) => {
 					processedOrder.push(payload);
 					return ok(payload);
 				},
-			});
+			};
 
 			const queue = createTestQueue({ processors: [processor] });
 
@@ -151,6 +174,61 @@ describe("Queue", () => {
 			expect(allRuns.length).toBe(3);
 			expect(allRuns.map((it) => it.result)).toEqual(["first", "second", "third"]);
 		});
+
+		it("should fail if return value is not a result", async () => {
+			enum Action {
+				ReturnString,
+				ReturnUndefined,
+				ReturnOk,
+			}
+
+			let _action: Action = Action.ReturnString;
+
+			const processor: Processor = {
+				name: "test",
+				process: async () => {
+					switch (_action) {
+						case Action.ReturnString:
+							_action = Action.ReturnUndefined;
+							return "done" as unknown as Result<string, string>;
+						case Action.ReturnUndefined:
+							_action = Action.ReturnOk;
+							return undefined as unknown as Result<string, string>;
+						case Action.ReturnOk:
+							return ok("done");
+					}
+				},
+			};
+
+			const queue = createTestQueue({ processors: [processor] });
+			const jobId = await queue.add("test", {});
+
+			queue.start();
+			await waitForJobCompletion(queue, jobId);
+			queue.stop();
+
+			const runs = await queue.getJobRuns(jobId);
+			expect(runs.length).toBe(3);
+
+			expect(runs[0]).toMatchObject({
+				state: RunState.Failed,
+				error: {
+					code: RunErrorCode.ProcessorException,
+					message: "Processor returned an invalid value, expected type 'Result' but received type 'string'",
+				},
+			});
+			expect(runs[1]).toMatchObject({
+				state: RunState.Failed,
+				error: {
+					code: RunErrorCode.ProcessorException,
+					message: "Processor returned an invalid value, expected type 'Result' but received type 'undefined'",
+				},
+			});
+			expect(runs[2]).toMatchObject({
+				state: RunState.Success,
+				result: "done",
+			});
+		});
 	});
 
 	describe("retry behavior", () => {
@@ -158,7 +236,7 @@ describe("Queue", () => {
 			const failCount = 2;
 			let attempts = 0;
 
-			const processor = createProcessor({
+			const processor: Processor = {
 				name: "test",
 				process: async () => {
 					attempts++;
@@ -167,7 +245,7 @@ describe("Queue", () => {
 					}
 					return ok("success");
 				},
-			});
+			};
 
 			const queue = createTestQueue({
 				processors: [processor],
@@ -217,12 +295,12 @@ describe("Queue", () => {
 			});
 		});
 		it("should store error message on failed run", async () => {
-			const processor = createProcessor({
+			const processor: Processor = {
 				name: "test",
 				process: async () => {
 					return err("Something went wrong");
 				},
-			});
+			};
 
 			const queue = createTestQueue({
 				processors: [processor],
@@ -243,13 +321,44 @@ describe("Queue", () => {
 			});
 			expect(failedRuns[0]?.jobId).toBe(jobId);
 		});
+
+		it("should handle general exceptions in the processor", async () => {
+			let _throw = true;
+
+			const processor: Processor = {
+				name: "test",
+				process: async () => {
+					if (_throw) {
+						_throw = false;
+						throw new Error("Unexpected error");
+					}
+					return ok("done");
+				},
+			};
+
+			const queue = createTestQueue({ processors: [processor] });
+			const jobId = await queue.add("test", {});
+			queue.start();
+			await waitForJobCompletion(queue, jobId);
+			queue.stop();
+
+			const failedRuns = await queue.listFailedRuns();
+
+			expect(failedRuns.length).toBe(1);
+			expect(failedRuns[0]?.error).toEqual({
+				code: RunErrorCode.ProcessorException,
+				message: "Unexpected error",
+			});
+			expect(failedRuns[0]?.jobId).toBe(jobId);
+		});
 	});
+
 	describe("progress tracking", () => {
 		it("should save job progress during execution", async () => {
 			const progressUpdates: number[] = [];
 			const progressSteps = [25, 50, 75, 100];
 
-			const processor = createProcessor({
+			const processor: Processor = {
 				name: "test",
 				process: async (_job, ctx) => {
 					for (const step of progressSteps) {
@@ -258,7 +367,7 @@ describe("Queue", () => {
 					}
 					return ok("done");
 				},
-			});
+			};
 			const queue = createTestQueue({ processors: [processor] });
 
 			const jobId = await queue.add("test", {});
@@ -276,7 +385,7 @@ describe("Queue", () => {
 		it("should preserve progress across retries", async () => {
 			let attempt = 0;
 
-			const processor = createProcessor({
+			const processor: Processor = {
 				name: "test",
 				process: async (_job, ctx) => {
 					attempt++;
@@ -286,7 +395,7 @@ describe("Queue", () => {
 					}
 					return ok("success");
 				},
-			});
+			};
 
 			const queue = createTestQueue({
 				processors: [processor],
@@ -327,13 +436,13 @@ describe("Queue", () => {
 		it("should stop processing when stopped", async () => {
 			let processCount = 0;
 
-			const processor = createProcessor({
+			const processor: Processor = {
 				name: "test",
 				process: async () => {
 					processCount++;
 					return ok("done");
 				},
-			});
+			};
 
 			const queue = createTestQueue({ processors: [processor] });
 
@@ -354,21 +463,21 @@ describe("Queue", () => {
 		it("should dispatch to correct processor based on queue and name", async () => {
 			const results: string[] = [];
 
-			const processorA = createProcessor({
+			const processorA: Processor = {
 				name: "queueA",
 				process: async () => {
 					results.push("A");
 					return ok("A");
 				},
-			});
+			};
 
-			const processorB = createProcessor({
+			const processorB: Processor = {
 				name: "queueB",
 				process: async () => {
 					results.push("B");
 					return ok("B");
 				},
-			});
+			};
 
 			const queue = createTestQueue({ processors: [processorA, processorB] });
 
@@ -383,12 +492,12 @@ describe("Queue", () => {
 		});
 
 		it("should not process jobs without a matching processor", async () => {
-			const processor = createProcessor({
+			const processor: Processor = {
 				name: "test",
 				process: async () => {
 					return ok("done");
 				},
-			});
+			};
 			const queue = createTestQueue({ processors: [processor] });
 
 			const now = Date.now();
@@ -412,12 +521,12 @@ describe("Queue", () => {
 
 	describe("Reconciliation", () => {
 		it("should reconcile stuck runs when job-run is not found in memory", async () => {
-			const processor = createProcessor({
+			const processor: Processor = {
 				name: "test",
 				process: async () => {
 					return ok("done");
 				},
-			});
+			};
 
 			const queue = createTestQueue({ processors: [processor] });
 

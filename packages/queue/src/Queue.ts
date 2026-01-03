@@ -72,11 +72,22 @@ export class Queue {
 	}
 
 	async runOnce(): Promise<void> {
+		logger.trace("Running job queue iteration");
 		await this.reconcile();
+
+		logger.trace("Running job queue iteration");
 		for (const processor of this.processors) {
-			if (this.jobRuns.has(processor.name)) continue;
+			logger.trace(`Checking for eligible jobs for processor: ${processor.name}`);
+
+			if (this.jobRuns.has(processor.name)) {
+				logger.trace(`Processor ${processor.name} is already running a job. Skipping.`);
+				continue;
+			}
+
+			logger.trace("Looking for next eligible job");
 			const job = await this.deps.jobRepo.findNextEligible(processor.name);
 			if (job) {
+				logger.info(`Found eligible job ${job.id} for processor ${processor.name}. Dispatching for processing.`);
 				this.runJob(job, processor).then(
 					() => {
 						logger.info(`Job ${job.id} processed successfully.`);
@@ -85,25 +96,37 @@ export class Queue {
 						logger.error(`Error processing job ${job.id}:`, err);
 					},
 				);
+			} else {
+				logger.trace(`No eligible jobs found for processor ${processor.name}.`);
 			}
 		}
 	}
 
 	async reconcile(): Promise<void> {
-		for (const run of await this.deps.runRepo.listRunning()) {
+		logger.trace("Reconciling running jobs");
+		const running = await this.deps.runRepo.listRunning();
+		logger.trace(`Found ${running.length} running jobs to reconcile.`);
+		for (const run of running) {
+			logger.trace("Reconciling running job:", run.id);
 			const jobRun = this.jobRuns.get(run.jobName);
 			if (!jobRun) {
 				logger.warn(`Run ${run.id} is marked as running but no active JobRun found for job ${run.jobName}.`);
-				await this.deps.runRepo.save({
+				const newState = {
 					...run,
 					state: RunState.Failed,
 					error: {
 						code: RunErrorCode.JobRunNotFound,
 						message: `No active JobRun found for job ${run.jobName}.`,
 					},
-				});
+				};
+				logger.trace("Setting run state to Failed due to missing JobRun:", newState);
+				await this.deps.runRepo.save(newState);
+
+				logger.trace("Incrementing attempts and rescheduling job:", run.jobId);
 				const attempts = await this.deps.jobRepo.incrementAttempts(run.jobId);
 				await this.deps.jobRepo.reschedule(run.jobId, attempts, this.deps.exponentCalculator.calculate(attempts));
+			} else {
+				logger.trace(`Run ${run.id} has an active JobRun. No action needed.`);
 			}
 		}
 	}
@@ -184,19 +207,28 @@ export class Queue {
 	}
 
 	private async runJob<TData, TResult>(job: Job<TData>, processor: Processor<TData, TResult>): Promise<void> {
+		logger.trace(`Running job ${job.id}, creating JobRun instance.`);
 		const jobRun = new JobRun<TData, TResult>(job, processor);
-		await this.deps.runRepo.save(jobRun.run);
+
+		logger.trace("Setting active JobRun for job:", job.name);
 		this.jobRuns.set(job.name, jobRun);
 
+		logger.trace("Saving initial run state to repository.", jobRun.run);
+		await this.deps.runRepo.save(jobRun.run);
+
+		logger.trace(`Calling process on JobRun ${jobRun.run.id}`);
 		await jobRun.process({
 			onProgress: async (progress: number) => {
+				logger.trace("Updating job progress:", job.id, progress);
 				await this.deps.jobRepo.updateProgress(job.id, progress, new Date());
 			},
 			onSuccess: async () => {
+				logger.trace("OnSuccess called for job:", job.id);
 				await this.deps.jobRepo.incrementAttempts(job.id);
 				await this.deps.jobRepo.markCompleted(job.id, new Date());
 			},
 			onFailed: async () => {
+				logger.trace("OnFailed called for job:", job.id);
 				const currentAttempts = await this.deps.jobRepo.incrementAttempts(job.id);
 				await this.deps.jobRepo.reschedule(
 					job.id,
@@ -205,8 +237,11 @@ export class Queue {
 				);
 			},
 		});
-		await this.deps.runRepo.save(jobRun.run);
 
+		logger.trace("Clearing active JobRun for job:", job.name);
 		this.jobRuns.delete(job.name);
+
+		logger.trace("Saving final run state to repository.", jobRun.run);
+		await this.deps.runRepo.save(jobRun.run);
 	}
 }
