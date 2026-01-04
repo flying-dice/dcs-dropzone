@@ -1,3 +1,4 @@
+import type { JobErrorCode, JobState } from "@packages/queue";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
@@ -95,4 +96,20 @@ export const T_EXTRACT_DOWNLOAD_JOIN = sqliteTable("EXTRACT_DOWNLOAD_JOIN", {
 	downloadJobId: text("download_job_id")
 		.notNull()
 		.references(() => T_DOWNLOAD_QUEUE.id, { onDelete: "cascade" }),
+});
+
+export const T_JOBS = sqliteTable("JOBS", {
+	runId: text("run_id").primaryKey(),
+	jobId: text("job_id").notNull(),
+	processorName: text("processor_name").notNull(),
+	jobData: text("job_data", { mode: "json" }).$type<any>().notNull(),
+	state: text("state").$type<JobState>().notNull(),
+	createdAt: int("created_at", { mode: "timestamp" }).notNull(),
+	startedAt: int("started_at", { mode: "timestamp" }),
+	finishedAt: int("finished_at", { mode: "timestamp" }),
+	progress: int("progress"),
+	progressUpdatedAt: int("progress_updated_at", { mode: "timestamp" }),
+	result: text("result", { mode: "json" }).$type<any>(),
+	errorCode: text("error_code").$type<JobErrorCode>(),
+	errorMessage: text("error_message"),
 });

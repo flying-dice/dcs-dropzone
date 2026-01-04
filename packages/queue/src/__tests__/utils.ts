@@ -1,36 +1,89 @@
-import type { Job, Queue } from "../index.ts";
+import * as assert from "node:assert";
+import { InMemoryJobRecordRepository, type JobRecord, JobState, type Processor, Queue } from "../index.ts";
+
+export type TestContext = {
+	deps: { jobRecordRepository: InMemoryJobRecordRepository };
+	build: () => Queue;
+};
+
+export function createTestContext(
+	options: Partial<{
+		jobRecordRepository: InMemoryJobRecordRepository;
+		pollInterval: number;
+	}> & {
+		processors?: Processor[];
+	} = {},
+): TestContext {
+	const jobRecordRepository = options.jobRecordRepository ?? new InMemoryJobRecordRepository();
+
+	return {
+		deps: { jobRecordRepository },
+		build: () =>
+			new Queue(
+				{ jobRecordRepository },
+				{
+					processors: options.processors ?? [],
+					pollIntervalMs: options.pollInterval ?? 10,
+				},
+			),
+	};
+}
 
 /**
  * Wait for a job to be completed.
  */
-export async function waitForJobCompletion(queue: Queue, jobId: string, timeoutSeconds = 5): Promise<Job | undefined> {
+export async function waitForJobFinish(
+	c: TestContext,
+	jobId: string,
+	timeoutSeconds = 5,
+): Promise<JobRecord[] | undefined> {
 	const start = Date.now();
 	const timeoutMs = timeoutSeconds * 1000;
 
 	while (Date.now() - start < timeoutMs) {
-		const job = await queue.getJob(jobId);
-		if (job?.completedAt) {
-			return job;
+		const jobs = c.deps.jobRecordRepository.findAllByJobId(jobId);
+		assert.ok(jobs, `Jobs not found for Job ID ${jobId}`);
+		if (jobs.every((job) => job.finishedAt)) {
+			return jobs;
 		}
-		await new Promise((resolve) => setTimeout(resolve, 50));
+		await delay(50);
 	}
 
-	throw new Error(`Timeout waiting for job ${jobId} to complete`);
+	throw new Error(`Timeout waiting for job with run id ${jobId} to complete`);
+}
+
+export async function waitForJobRunFinish(
+	c: TestContext,
+	runId: string,
+	timeoutSeconds = 5,
+): Promise<JobRecord | undefined> {
+	const start = Date.now();
+	const timeoutMs = timeoutSeconds * 1000;
+
+	while (Date.now() - start < timeoutMs) {
+		const job = c.deps.jobRecordRepository.findByRunId(runId);
+		assert.ok(job, `Job not found for Run ID ${runId}`);
+		if (job.finishedAt) {
+			return job;
+		}
+		await delay(50);
+	}
+
+	throw new Error(`Timeout waiting for job with run id ${runId} to complete`);
 }
 
 /**
  * Wait for all pending jobs to be completed.
  */
-export async function waitForAllJobsCompleted(queue: Queue, timeoutSeconds = 5): Promise<void> {
+export async function waitForAllJobsFinish(c: TestContext, timeoutSeconds = 5): Promise<void> {
 	const start = Date.now();
 	const timeoutMs = timeoutSeconds * 1000;
 
 	while (Date.now() - start < timeoutMs) {
-		const pending = await queue.listPendingJobs();
-		if (pending.length === 0) {
+		if (c.deps.jobRecordRepository.findAllInState([JobState.Pending, JobState.Running]).length === 0) {
 			return;
 		}
-		await new Promise((resolve) => setTimeout(resolve, 50));
+		await delay(50);
 	}
 
 	throw new Error("Timeout waiting for all jobs to complete");

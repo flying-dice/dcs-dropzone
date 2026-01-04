@@ -1,31 +1,19 @@
 import * as assert from "node:assert";
-import { type Job, type Processor, type ProcessorContext, type Run, RunErrorCode, RunState } from "./types.ts";
+import { JobErrorCode, type JobRecord } from "./JobRecordRepository.ts";
+import type { Processor, ProcessorContext } from "./Processor.ts";
 
 export class JobRun<TData = any, TResult = any> {
-	private readonly processor: Processor<TData, TResult>;
-	private readonly initialJob: Job<TData>;
-	public readonly run: Run<TResult>;
 	private readonly abortController: AbortController = new AbortController();
 
-	constructor(job: Job<TData>, processor: Processor<TData, TResult>) {
-		this.initialJob = job;
-
-		this.run = {
-			id: crypto.randomUUID(),
-			jobId: job.id,
-			jobName: job.name,
-			attempt: job.attempts + 1,
-			state: RunState.Running,
-			startedAt: new Date(),
-		};
-
-		this.processor = processor;
-	}
+	constructor(
+		private readonly jobRecord: JobRecord<TData, TResult>,
+		private readonly processor: Processor<TData, TResult>,
+	) {}
 
 	async process(props: {
-		onProgress: (progress: number) => Promise<void>;
-		onSuccess: () => void;
-		onFailed: () => void;
+		onProgress: (progress: number) => void;
+		onSuccess: (res: TResult) => void;
+		onFailed: (code: JobErrorCode, message: string) => void;
 	}): Promise<void> {
 		try {
 			const ctx: ProcessorContext = {
@@ -33,7 +21,7 @@ export class JobRun<TData = any, TResult = any> {
 				abortSignal: this.abortController.signal,
 			};
 
-			const res = await this.processor.process(this.initialJob.data, ctx);
+			const res = await this.processor.process(this.jobRecord.jobData, ctx);
 
 			assert.ok(
 				typeof res === "object" && ["isOk", "isErr", "match"].every((it) => it in res),
@@ -41,31 +29,11 @@ export class JobRun<TData = any, TResult = any> {
 			);
 
 			res.match(
-				(result) => {
-					this.run.state = RunState.Success;
-					this.run.endedAt = new Date();
-					this.run.result = result;
-
-					props.onSuccess();
-				},
-				(message) => {
-					this.run.state = RunState.Failed;
-					this.run.endedAt = new Date();
-					this.run.error = {
-						code: RunErrorCode.ProcessorError,
-						message,
-					};
-
-					props.onFailed();
-				},
+				(result) => props.onSuccess(result),
+				(message) => props.onFailed(JobErrorCode.ProcessorError, message),
 			);
 		} catch (error) {
-			this.run.state = RunState.Failed;
-			this.run.endedAt = new Date();
-			this.run.error = {
-				code: RunErrorCode.ProcessorException,
-				message: error instanceof Error ? error.message : String(error),
-			};
+			props.onFailed(JobErrorCode.ProcessorException, String(error));
 		}
 	}
 }

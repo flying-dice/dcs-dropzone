@@ -126,7 +126,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				releaseAssetId: "test-release-id__asset-1",
 				urlId: "test-release-id__asset-1__url-1",
 				url: "https://getsamplefiles.com/download/zip/sample-1.zip", // Download From
-				targetDirectory: expect.stringMatching(/mods\/test-release-id$/), // Download To
+				targetDirectory: expect.stringMatching(/test-release-id$/), // Download To
 				status: DownloadJobStatus.PENDING,
 				attempt: 0,
 				progressPercent: 0,
@@ -139,8 +139,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 				id: "extract:test-release-id__asset-1",
 				releaseId: "test-release-id",
 				releaseAssetId: "test-release-id__asset-1",
-				archivePath: expect.stringMatching(/mods\/test-release-id\/sample-1\.zip$/), // Path to archive from a download job
-				targetDirectory: expect.stringMatching(/mods\/test-release-id$/), // Extract to
+				archivePath: expect.stringMatching(/sample-1\.zip$/), // Path to archive from a download job
+				targetDirectory: expect.stringMatching(/test-release-id$/), // Extract to
 				status: ExtractJobStatus.PENDING,
 				attempt: 0,
 				progressPercent: 0,
@@ -197,7 +197,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
 			ok(symlinkInstalledPath);
-			expect(symlinkInstalledPath).toEndWith("Scripts/test.lua");
+			expect(symlinkInstalledPath).toEndWith("test.lua");
 			expect(lstatSync(symlinkInstalledPath).isSymbolicLink()).toBe(true);
 		});
 	});

@@ -1,16 +1,16 @@
 import { getLogger } from "log4js";
+import { JobErrorCode, type JobRecord, type JobRecordRepository, JobState } from "./JobRecordRepository.ts";
 import { JobRun } from "./JobRun.ts";
-import type { ExponentCalculator } from "./ports/ExponentCalculator.ts";
-import type { JobRepo } from "./ports/JobRepo.ts";
-import type { RunRepo } from "./ports/RunRepo.ts";
-import { type Job, type Processor, type Run, RunErrorCode, RunState } from "./types.ts";
+import type { Processor } from "./Processor.ts";
+
+function humanizeJobRecord(jobRecord: JobRecord): string {
+	return `JobRecord { jobId: ${jobRecord.jobId}, runId: ${jobRecord.runId}, processorName: ${jobRecord.processorName}, progress: ${jobRecord.progress}, state: ${jobRecord.state} }`;
+}
 
 const logger = getLogger("Queue");
 
 type Deps = {
-	jobRepo: JobRepo;
-	runRepo: RunRepo;
-	exponentCalculator: ExponentCalculator;
+	jobRecordRepository: JobRecordRepository;
 };
 
 type Opts = {
@@ -44,7 +44,7 @@ type Opts = {
 export class Queue {
 	private readonly processors: Processor[] = [];
 	private readonly pollInterval: number;
-	private readonly jobRuns: Map<string, JobRun> = new Map();
+	private readonly jobRuns: Map<JobRecord["runId"], JobRun> = new Map();
 
 	private intervalId?: NodeJS.Timeout;
 
@@ -53,12 +53,35 @@ export class Queue {
 	}
 
 	constructor(
-		public readonly deps: Deps,
+		private readonly deps: Deps,
 		options: Opts,
 	) {
 		this.pollInterval = options.pollIntervalMs ?? 1000;
 		this.processors = [...options.processors];
 	}
+
+	// --- Public CRUD API ---
+
+	add<TData>(name: string, data: TData): JobRecord {
+		return this.deps.jobRecordRepository.create({
+			processorName: name,
+			jobData: data,
+		});
+	}
+
+	getByRunId(runId: JobRecord["runId"]): JobRecord | undefined {
+		return this.deps.jobRecordRepository.findByRunId(runId);
+	}
+
+	getAllByJobId(jobId: JobRecord["jobId"]): JobRecord[] {
+		return this.deps.jobRecordRepository.findAllByJobId(jobId);
+	}
+
+	getAllForProcessor(name: string): JobRecord[] {
+		return this.deps.jobRecordRepository.findAllForProcessor(name);
+	}
+
+	// --- Queue Management API ---
 
 	start() {
 		this.intervalId = setInterval(() => this.runOnce(), this.pollInterval);
@@ -71,9 +94,11 @@ export class Queue {
 		}
 	}
 
-	async runOnce(): Promise<void> {
+	// --- Private ---
+
+	private runOnce(): void {
 		logger.trace("Running job queue iteration");
-		await this.reconcile();
+		this.reconcile();
 
 		logger.trace("Running job queue iteration");
 		for (const processor of this.processors) {
@@ -85,163 +110,102 @@ export class Queue {
 			}
 
 			logger.trace("Looking for next eligible job");
-			const job = await this.deps.jobRepo.findNextEligible(processor.name);
-			if (job) {
-				logger.info(`Found eligible job ${job.id} for processor ${processor.name}. Dispatching for processing.`);
-				this.runJob(job, processor).then(
-					() => {
-						logger.info(`Job ${job.id} processed successfully.`);
-					},
-					(err) => {
-						logger.error(`Error processing job ${job.id}:`, err);
-					},
-				);
-			} else {
+			const jobs = this.deps.jobRecordRepository.findAllInState([JobState.Pending], {
+				processorName: processor.name,
+				limit: 1,
+			});
+
+			if (jobs.length === 0) {
 				logger.trace(`No eligible jobs found for processor ${processor.name}.`);
 			}
-		}
-	}
 
-	async reconcile(): Promise<void> {
-		logger.trace("Reconciling running jobs");
-		const running = await this.deps.runRepo.listRunning();
-		logger.trace(`Found ${running.length} running jobs to reconcile.`);
-		for (const run of running) {
-			logger.trace("Reconciling running job:", run.id);
-			const jobRun = this.jobRuns.get(run.jobName);
-			if (!jobRun) {
-				logger.warn(`Run ${run.id} is marked as running but no active JobRun found for job ${run.jobName}.`);
-				const newState = {
-					...run,
-					state: RunState.Failed,
-					error: {
-						code: RunErrorCode.JobRunNotFound,
-						message: `No active JobRun found for job ${run.jobName}.`,
+			for (const jobRecord of jobs) {
+				logger.info(`Found eligible job. Dispatching for processing: ${humanizeJobRecord(jobRecord)}`);
+				this.runJob(jobRecord, processor).then(
+					() => {
+						logger.info(`Job processed successfully: ${humanizeJobRecord(jobRecord)}`);
 					},
-				};
-				logger.trace("Setting run state to Failed due to missing JobRun:", newState);
-				await this.deps.runRepo.save(newState);
-
-				logger.trace("Incrementing attempts and rescheduling job:", run.jobId);
-				const attempts = await this.deps.jobRepo.incrementAttempts(run.jobId);
-				await this.deps.jobRepo.reschedule(run.jobId, attempts, this.deps.exponentCalculator.calculate(attempts));
-			} else {
-				logger.trace(`Run ${run.id} has an active JobRun. No action needed.`);
+					(err) => {
+						logger.error(`Error processing job: ${humanizeJobRecord(jobRecord)}:`, err);
+					},
+				);
 			}
 		}
 	}
 
-	/**
-	 * Add a job to the queue.
-	 */
-	async add<TData>(name: string, data: TData, scheduledAt?: Date): Promise<string> {
-		const now = new Date();
-		const id = crypto.randomUUID();
-		const job: Job<TData> = {
-			id,
-			name,
-			data,
-			createdAt: now,
-			scheduledAt: scheduledAt ?? now,
-			attempts: 0,
-		};
+	private reconcile(): void {
+		logger.trace("Reconciling running jobs");
+		const running = this.deps.jobRecordRepository.findAllInState([JobState.Running]);
+		logger.trace(`Found ${running.length} running jobs to reconcile.`);
+		for (const jobRecord of running) {
+			logger.trace(`Reconciling running Job: ${humanizeJobRecord(jobRecord)}`);
+			const jobRun = this.jobRuns.get(jobRecord.runId);
+			if (!jobRun) {
+				logger.warn(`Run is marked as running but no active JobRun found for job: ${humanizeJobRecord(jobRecord)}`);
 
-		await this.deps.jobRepo.save(job);
-		return id;
-	}
-
-	/**
-	 * Get a job by ID.
-	 */
-	async getJob(id: string): Promise<Job | undefined> {
-		return this.deps.jobRepo.findById(id);
-	}
-
-	/**
-	 * Get a run by ID.
-	 */
-	async getRun(id: string): Promise<Run | undefined> {
-		return this.deps.runRepo.findById(id);
-	}
-
-	/**
-	 * Get the latest run for a job.
-	 */
-	async getLatestRun(jobId: string): Promise<Run | undefined> {
-		return this.deps.runRepo.findLatestByJobId(jobId);
-	}
-
-	/**
-	 * Get all runs for a job.
-	 */
-	async getJobRuns(jobId: string): Promise<Run[]> {
-		return this.deps.runRepo.listByJobId(jobId);
-	}
-
-	/**
-	 * List all jobs, optionally filtered by queue.
-	 */
-	async listJobs(queue?: string): Promise<Job[]> {
-		return this.deps.jobRepo.list(queue);
-	}
-
-	/**
-	 * List pending jobs (not completed).
-	 */
-	async listPendingJobs(queue?: string): Promise<Job[]> {
-		return this.deps.jobRepo.listPending(queue);
-	}
-
-	/**
-	 * List completed jobs.
-	 */
-	async listCompletedJobs(queue?: string): Promise<Job[]> {
-		return this.deps.jobRepo.listCompleted(queue);
-	}
-
-	/**
-	 * List all failed runs (error log).
-	 */
-	async listFailedRuns(): Promise<Run[]> {
-		return this.deps.runRepo.listFailed();
-	}
-
-	private async runJob<TData, TResult>(job: Job<TData>, processor: Processor<TData, TResult>): Promise<void> {
-		logger.trace(`Running job ${job.id}, creating JobRun instance.`);
-		const jobRun = new JobRun<TData, TResult>(job, processor);
-
-		logger.trace("Setting active JobRun for job:", job.name);
-		this.jobRuns.set(job.name, jobRun);
-
-		logger.trace("Saving initial run state to repository.", jobRun.run);
-		await this.deps.runRepo.save(jobRun.run);
-
-		logger.trace(`Calling process on JobRun ${jobRun.run.id}`);
-		await jobRun.process({
-			onProgress: async (progress: number) => {
-				logger.trace("Updating job progress:", job.id, progress);
-				await this.deps.jobRepo.updateProgress(job.id, progress, new Date());
-			},
-			onSuccess: async () => {
-				logger.trace("OnSuccess called for job:", job.id);
-				await this.deps.jobRepo.incrementAttempts(job.id);
-				await this.deps.jobRepo.markCompleted(job.id, new Date());
-			},
-			onFailed: async () => {
-				logger.trace("OnFailed called for job:", job.id);
-				const currentAttempts = await this.deps.jobRepo.incrementAttempts(job.id);
-				await this.deps.jobRepo.reschedule(
-					job.id,
-					currentAttempts,
-					this.deps.exponentCalculator.calculate(currentAttempts),
+				logger.trace(`Marking job as failed for missing JobRun: ${humanizeJobRecord(jobRecord)}`);
+				this.deps.jobRecordRepository.markFailedForRunId(
+					jobRecord.runId,
+					JobErrorCode.JobRunNotFound,
+					"No active JobRun found for job",
 				);
+
+				this.deps.jobRecordRepository.create({
+					jobId: jobRecord.jobId,
+					processorName: jobRecord.processorName,
+					jobData: jobRecord.jobData,
+				});
+			} else {
+				logger.trace(`Run has an active JobRun. No action needed: ${humanizeJobRecord(jobRecord)}`);
+			}
+		}
+	}
+
+	private async runJob<TData, TResult>(
+		jobRecord: JobRecord<TData, TResult>,
+		processor: Processor<TData, TResult>,
+	): Promise<void> {
+		logger.trace(`Running job: ${humanizeJobRecord(jobRecord)}`);
+		const jobRun = new JobRun<TData, TResult>(jobRecord, processor);
+
+		logger.trace(`Setting active JobRun for job: ${humanizeJobRecord(jobRecord)}`);
+		this.jobRuns.set(jobRecord.runId, jobRun);
+
+		logger.trace(`Saving initial run state to repository: ${humanizeJobRecord(jobRecord)}`);
+		this.deps.jobRecordRepository.markRunningForRunId(jobRecord.runId);
+
+		logger.trace(`Calling process on JobRun for job: ${humanizeJobRecord(jobRecord)}`);
+		await jobRun.process({
+			onProgress: (progress: number) => {
+				logger.trace(`Updating job progress: ${humanizeJobRecord(jobRecord)}`);
+				this.deps.jobRecordRepository.updateProgressForRunId(jobRecord.runId, progress);
+			},
+			onSuccess: (result) => {
+				logger.trace(`OnSuccess called for job:${humanizeJobRecord(jobRecord)}`);
+				this.deps.jobRecordRepository.markSuccessForRunId(jobRecord.runId, result);
+			},
+			onFailed: (errorCode, errorMessage) => {
+				logger.trace(`OnFailed called for job ${humanizeJobRecord(jobRecord)}`);
+				this.deps.jobRecordRepository.markFailedForRunId(jobRecord.runId, errorCode, errorMessage);
+				this.reschedule(jobRecord.runId);
 			},
 		});
 
-		logger.trace("Clearing active JobRun for job:", job.name);
-		this.jobRuns.delete(job.name);
+		logger.trace(`Clearing active JobRun for job: ${humanizeJobRecord(jobRecord)}`);
+		this.jobRuns.delete(jobRecord.runId);
+	}
 
-		logger.trace("Saving final run state to repository.", jobRun.run);
-		await this.deps.runRepo.save(jobRun.run);
+	private reschedule(runId: JobRecord["runId"]) {
+		const jobRecord = this.deps.jobRecordRepository.findByRunId(runId);
+		if (!jobRecord) {
+			logger.warn("Cannot reschedule job. JobRecord not found for runId:", runId);
+			return;
+		}
+
+		this.deps.jobRecordRepository.create({
+			jobId: jobRecord.jobId,
+			processorName: jobRecord.processorName,
+			jobData: jobRecord.jobData,
+		});
 	}
 }

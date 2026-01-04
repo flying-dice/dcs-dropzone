@@ -1,66 +1,31 @@
 import "./log4js.ts";
 import { describe, expect, it } from "bun:test";
+import * as assert from "node:assert";
 import { err, ok, type Result } from "neverthrow";
-import { ExponentialBackoff, InMemoryJobRepo, InMemoryRunRepo } from "../adapters";
-import { Queue } from "../Queue.ts";
-import { type Processor, RunErrorCode, RunState } from "../types.ts";
-import { delay, waitForAllJobsCompleted, waitForJobCompletion } from "./utils.ts";
-
-export function createTestQueue(
-	options: Partial<{
-		jobRepo: InMemoryJobRepo;
-		runRepo: InMemoryRunRepo;
-		exponentCalculator: ExponentialBackoff;
-		pollInterval: number;
-	}> & {
-		processors?: Processor[];
-	} = {},
-): Queue {
-	const runRepo = options.runRepo ?? new InMemoryRunRepo();
-	const jobRepo = options.jobRepo ?? new InMemoryJobRepo(runRepo);
-	const exponentCalculator = options.exponentCalculator ?? new ExponentialBackoff({ baseDelayMs: 10 });
-
-	return new Queue(
-		{ jobRepo, runRepo, exponentCalculator },
-		{
-			processors: options.processors ?? [],
-			pollIntervalMs: options.pollInterval ?? 10,
-		},
-	);
-}
+import { JobErrorCode, JobState } from "../JobRecordRepository.ts";
+import type { Processor } from "../Processor.ts";
+import type { Queue } from "../Queue.ts";
+import { createTestContext, delay, waitForAllJobsFinish, waitForJobFinish, waitForJobRunFinish } from "./utils.ts";
 
 describe("Queue", () => {
 	describe("add", () => {
 		it("should add a job with default scheduledAt", async () => {
-			const queue = createTestQueue();
+			const c = createTestContext();
+			const queue: Queue = c.build();
 
-			await queue.add("test", { foo: "bar" });
+			queue.add("test", { foo: "bar" });
 
-			const jobs = await queue.listJobs("test");
+			const jobs = queue.getAllForProcessor("test");
 			expect(jobs.length).toBe(1);
 			const job = jobs[0]!;
 
-			expect(job.id).toBeDefined();
-			expect(job.name).toBe("test");
-			expect(job.data).toEqual({ foo: "bar" });
-			expect(job.attempts).toBe(0);
-			expect(job.createdAt).toBeInstanceOf(Date);
-			expect(job.scheduledAt).toEqual(job.createdAt);
-			expect(job.completedAt).toBeUndefined();
-		});
-
-		it("should add a job with custom scheduledAt", async () => {
-			const queue = createTestQueue();
-
-			const futureDate = new Date(Date.now() + 60000);
-
-			await queue.add("test", { foo: "baz" }, futureDate);
-
-			const jobs = await queue.listJobs("test");
-			expect(jobs.length).toBe(1);
-			const job = jobs[0]!;
-
-			expect(job.scheduledAt).toEqual(futureDate);
+			expect(job).toMatchObject({
+				jobId: expect.any(String),
+				runId: expect.any(String),
+				processorName: "test",
+				jobData: { foo: "bar" },
+				state: JobState.Pending,
+			});
 		});
 	});
 
@@ -77,102 +42,33 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({ processors: [processor] });
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
 
-			const jobId = await queue.add("test", { value: 42 });
+			const job = queue.add("test", { value: 42 });
 
 			expect(processedData).toBeUndefined();
 
 			queue.start();
-			await waitForJobCompletion(queue, jobId);
+			await waitForJobFinish(c, job.jobId);
 			queue.stop();
 
 			expect(processedData).toBeDefined();
 			expect(processedData).toEqual({ value: 42 });
 
-			const completedJobs = await queue.listCompletedJobs();
-			const run = await queue.getLatestRun(jobId);
+			const completedJobs = queue
+				.getAllForProcessor("test")
+				.filter((j) => ![JobState.Pending, JobState.Running].includes(j.state));
+
+			const run = queue.getByRunId(job.runId);
 			expect(completedJobs.length).toBe(1);
-			expect(completedJobs[0]).toMatchObject({
-				id: expect.any(String),
-				name: "test",
-				data: { value: 42 },
-				attempts: 1,
-				createdAt: expect.any(Date),
-				scheduledAt: expect.any(Date),
-				completedAt: expect.any(Date),
-			});
 			expect(run).toMatchObject({
-				id: expect.any(String),
-				jobId: jobId,
-				state: RunState.Success,
-				attempt: 1,
-				startedAt: expect.any(Date),
-				endedAt: expect.any(Date),
-				result: "done",
+				jobId: job.jobId,
+				runId: job.runId,
+				processorName: "test",
+				jobData: { value: 42 },
+				state: JobState.Success,
 			});
-		});
-
-		it("should not execute a job scheduled in the future", async () => {
-			let processed = false;
-
-			const processor: Processor<undefined, string> = {
-				name: "test",
-				process: async () => {
-					processed = true;
-					return ok("done");
-				},
-			};
-
-			const queue = createTestQueue({ processors: [processor] });
-
-			await queue.add("test", {}, new Date(Date.now() + 60000));
-
-			queue.start();
-			await delay(100);
-			queue.stop();
-
-			expect(processed).toBe(false);
-			const pendingJobs = await queue.listPendingJobs();
-			expect(pendingJobs.length).toBe(1);
-			expect(pendingJobs[0]).toMatchObject({
-				id: expect.any(String),
-				name: "test",
-				attempts: 0,
-				data: {},
-				createdAt: expect.any(Date),
-				scheduledAt: expect.any(Date),
-			});
-			expect(pendingJobs[0]?.completedAt).toBeUndefined();
-		});
-
-		it("should process jobs in scheduledAt order", async () => {
-			const processedOrder: string[] = [];
-
-			const processor: Processor<string, string> = {
-				name: "test",
-				process: async (payload) => {
-					processedOrder.push(payload);
-					return ok(payload);
-				},
-			};
-
-			const queue = createTestQueue({ processors: [processor] });
-
-			const now = Date.now();
-			await queue.add("test", "third", new Date(now + 20));
-			await queue.add("test", "first", new Date(now - 20));
-			await queue.add("test", "second", new Date(now));
-
-			queue.start();
-			await waitForAllJobsCompleted(queue);
-			queue.stop();
-
-			expect(processedOrder).toEqual(["first", "second", "third"]);
-
-			const allRuns = await queue.deps.runRepo.listSuccess();
-			expect(allRuns.length).toBe(3);
-			expect(allRuns.map((it) => it.result)).toEqual(["first", "second", "third"]);
 		});
 
 		it("should fail if return value is not a result", async () => {
@@ -200,32 +96,34 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({ processors: [processor] });
-			const jobId = await queue.add("test", {});
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
+			const job = queue.add("test", {});
 
 			queue.start();
-			await waitForJobCompletion(queue, jobId);
+			await waitForJobFinish(c, job.jobId);
 			queue.stop();
 
-			const runs = await queue.getJobRuns(jobId);
+			const runs = queue.getAllByJobId(job.jobId);
+			expect(runs).toBeDefined();
+			assert.ok(runs, "Expected runs to be defined");
+
 			expect(runs.length).toBe(3);
 
 			expect(runs[0]).toMatchObject({
-				state: RunState.Failed,
-				error: {
-					code: RunErrorCode.ProcessorException,
-					message: "Processor returned an invalid value, expected type 'Result' but received type 'string'",
-				},
+				state: JobState.Failed,
+				errorCode: JobErrorCode.ProcessorException,
+				errorMessage:
+					"AssertionError [ERR_ASSERTION]: Processor returned an invalid value, expected type 'Result' but received type 'string'",
 			});
 			expect(runs[1]).toMatchObject({
-				state: RunState.Failed,
-				error: {
-					code: RunErrorCode.ProcessorException,
-					message: "Processor returned an invalid value, expected type 'Result' but received type 'undefined'",
-				},
+				state: JobState.Failed,
+				errorCode: JobErrorCode.ProcessorException,
+				errorMessage:
+					"AssertionError [ERR_ASSERTION]: Processor returned an invalid value, expected type 'Result' but received type 'undefined'",
 			});
 			expect(runs[2]).toMatchObject({
-				state: RunState.Success,
+				state: JobState.Success,
 				result: "done",
 			});
 		});
@@ -247,53 +145,42 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({
+			const c = createTestContext({
 				processors: [processor],
-				exponentCalculator: new ExponentialBackoff({ baseDelayMs: 10 }),
 			});
+			const queue: Queue = c.build();
 
-			const jobId = await queue.add("test", {});
+			const job = queue.add("test", {});
 
 			queue.start();
-			await waitForJobCompletion(queue, jobId, 10);
+			await waitForJobFinish(c, job.jobId, 10);
 			queue.stop();
 
 			expect(attempts).toBe(3);
 
-			const updatedJob = await queue.getJob(jobId);
-			expect(updatedJob?.attempts).toBe(3);
-			expect(updatedJob?.completedAt).toBeInstanceOf(Date);
+			const updatedJob = queue.getByRunId(job.runId);
+			expect(updatedJob?.finishedAt).toBeInstanceOf(Date);
 
-			const runs = await queue.getJobRuns(jobId);
+			const runs = queue.getAllByJobId(job.jobId);
+			expect(runs).toBeDefined();
+			assert.ok(runs, "Expected runs to be defined");
 			expect(runs.length).toBe(3);
 			expect(runs[0]).toMatchObject({
-				id: expect.any(String),
-				jobId: jobId,
-				state: RunState.Failed,
-				attempt: 1,
-				startedAt: expect.any(Date),
-				endedAt: expect.any(Date),
-				error: { code: RunErrorCode.ProcessorError, message: "Simulated failure (attempt 1)" },
+				state: JobState.Failed,
+				errorCode: JobErrorCode.ProcessorError,
+				errorMessage: "Simulated failure (attempt 1)",
 			});
 			expect(runs[1]).toMatchObject({
-				id: expect.any(String),
-				jobId: jobId,
-				state: RunState.Failed,
-				attempt: 2,
-				startedAt: expect.any(Date),
-				endedAt: expect.any(Date),
-				error: { code: RunErrorCode.ProcessorError, message: "Simulated failure (attempt 2)" },
+				state: JobState.Failed,
+				errorCode: JobErrorCode.ProcessorError,
+				errorMessage: "Simulated failure (attempt 2)",
 			});
 			expect(runs[2]).toMatchObject({
-				id: expect.any(String),
-				jobId: jobId,
-				state: RunState.Success,
-				attempt: 3,
-				startedAt: expect.any(Date),
-				endedAt: expect.any(Date),
+				state: JobState.Success,
 				result: "success",
 			});
 		});
+
 		it("should store error message on failed run", async () => {
 			const processor: Processor = {
 				name: "test",
@@ -302,24 +189,23 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({
+			const c = createTestContext({
 				processors: [processor],
-				exponentCalculator: new ExponentialBackoff({ baseDelayMs: 10000 }),
 			});
+			const queue: Queue = c.build();
 
-			const jobId = await queue.add("test", {});
+			const job = queue.add("test", {});
 
 			queue.start();
-			await delay(100);
+			await waitForJobRunFinish(c, job.runId);
 			queue.stop();
 
-			const failedRuns = await queue.listFailedRuns();
-			expect(failedRuns.length).toBe(1);
-			expect(failedRuns[0]?.error).toEqual({
-				code: RunErrorCode.ProcessorError,
-				message: "Something went wrong",
-			});
-			expect(failedRuns[0]?.jobId).toBe(jobId);
+			const latest = queue.getByRunId(job.runId);
+			expect(latest).toBeDefined();
+			assert.ok(latest, "Expected latest job to be defined");
+
+			expect(latest.errorCode).toBe(JobErrorCode.ProcessorError);
+			expect(latest.errorMessage).toBe("Something went wrong");
 		});
 
 		it("should handle general exceptions in the processor", async () => {
@@ -336,20 +222,22 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({ processors: [processor] });
-			const jobId = await queue.add("test", {});
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
+			const job = queue.add("test", {});
 			queue.start();
-			await waitForJobCompletion(queue, jobId);
+			await waitForJobRunFinish(c, job.runId);
 			queue.stop();
 
-			const failedRuns = await queue.listFailedRuns();
+			const failedRuns = queue.getAllForProcessor("test").filter((r) => r.state === JobState.Failed);
 
 			expect(failedRuns.length).toBe(1);
-			expect(failedRuns[0]?.error).toEqual({
-				code: RunErrorCode.ProcessorException,
-				message: "Unexpected error",
-			});
-			expect(failedRuns[0]?.jobId).toBe(jobId);
+
+			const latest = queue.getByRunId(job.runId);
+			expect(latest).toBeDefined();
+			assert.ok(latest, "Expected latest job to be defined");
+			expect(latest.errorCode).toBe(JobErrorCode.ProcessorException);
+			expect(latest.errorMessage).toBe("Error: Unexpected error");
 		});
 	});
 
@@ -363,59 +251,31 @@ describe("Queue", () => {
 				process: async (_job, ctx) => {
 					for (const step of progressSteps) {
 						progressUpdates.push(step);
-						await ctx.updateProgress(step);
+						ctx.updateProgress(step);
 					}
 					return ok("done");
 				},
 			};
-			const queue = createTestQueue({ processors: [processor] });
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
 
-			const jobId = await queue.add("test", {});
+			const job = queue.add("test", {});
 
 			queue.start();
-			await waitForJobCompletion(queue, jobId);
+			await waitForJobFinish(c, job.jobId);
 			queue.stop();
 
-			const updatedJob = await queue.getJob(jobId);
+			const updatedJob = queue.getByRunId(job.runId);
 			expect(updatedJob?.progress).toBe(100);
 			expect(updatedJob?.progressUpdatedAt).toBeInstanceOf(Date);
 			expect(progressUpdates).toEqual(progressSteps);
-		});
-
-		it("should preserve progress across retries", async () => {
-			let attempt = 0;
-
-			const processor: Processor = {
-				name: "test",
-				process: async (_job, ctx) => {
-					attempt++;
-					await ctx.updateProgress(attempt * 25);
-					if (attempt < 2) {
-						return err("Fail first time");
-					}
-					return ok("success");
-				},
-			};
-
-			const queue = createTestQueue({
-				processors: [processor],
-				exponentCalculator: new ExponentialBackoff({ baseDelayMs: 10 }),
-			});
-
-			const jobId = await queue.add("test", {});
-
-			queue.start();
-			await waitForJobCompletion(queue, jobId);
-			queue.stop();
-
-			const updatedJob = await queue.getJob(jobId);
-			expect(updatedJob?.progress).toBe(50);
 		});
 	});
 
 	describe("start/stop", () => {
 		it("should track running state", () => {
-			const queue = createTestQueue();
+			const c = createTestContext();
+			const queue: Queue = c.build();
 
 			expect(queue.running).toBe(false);
 			queue.start();
@@ -425,8 +285,8 @@ describe("Queue", () => {
 		});
 
 		it("should not start twice", () => {
-			const queue = createTestQueue();
-
+			const c = createTestContext();
+			const queue: Queue = c.build();
 			queue.start();
 			queue.start();
 			expect(queue.running).toBe(true);
@@ -444,9 +304,10 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({ processors: [processor] });
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
 
-			await queue.add("test", {});
+			queue.add("test", {});
 
 			queue.start();
 			await delay(50);
@@ -479,13 +340,14 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({ processors: [processorA, processorB] });
+			const c = createTestContext({ processors: [processorA, processorB] });
+			const queue: Queue = c.build();
 
-			await queue.add("queueA", {});
-			await queue.add("queueB", {});
+			queue.add("queueA", {});
+			queue.add("queueB", {});
 
 			queue.start();
-			await waitForAllJobsCompleted(queue);
+			await waitForAllJobsFinish(c);
 			queue.stop();
 
 			expect(results.sort()).toEqual(["A", "B"]);
@@ -498,24 +360,25 @@ describe("Queue", () => {
 					return ok("done");
 				},
 			};
-			const queue = createTestQueue({ processors: [processor] });
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
 
-			const now = Date.now();
-			// Schedule unknownJob later so knownJob gets processed first
-			const jobWithoutProcessorId = await queue.add("test_noproc", {}, new Date(now + 10));
-			const jobWithProcessorId = await queue.add("test", {}, new Date(now - 10));
+			const jobWithoutProcessorId = queue.add("test_noproc", {});
+			const jobWithProcessorId = queue.add("test", {});
 
 			queue.start();
-			await delay(100);
+			await delay(500);
 			queue.stop();
 
-			const completed = await queue.listCompletedJobs();
-			const pending = await queue.listPendingJobs();
+			const latestJobWithoutProcessor = queue.getByRunId(jobWithoutProcessorId.runId);
+			expect(latestJobWithoutProcessor).toBeDefined();
+			assert.ok(latestJobWithoutProcessor, "Expected latest job to be defined");
+			expect(latestJobWithoutProcessor.state).toBe(JobState.Pending);
 
-			expect(completed.length).toBe(1);
-			expect(completed[0]?.id).toBe(jobWithProcessorId);
-			expect(pending.length).toBe(1);
-			expect(pending[0]?.id).toBe(jobWithoutProcessorId);
+			const latestJobWithProcessor = queue.getByRunId(jobWithProcessorId.runId);
+			expect(latestJobWithProcessor).toBeDefined();
+			assert.ok(latestJobWithProcessor, "Expected latest job to be defined");
+			expect(latestJobWithProcessor.state).toBe(JobState.Success);
 		});
 	});
 
@@ -528,53 +391,33 @@ describe("Queue", () => {
 				},
 			};
 
-			const queue = createTestQueue({ processors: [processor] });
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
 
-			const jobId = await queue.add("test", {});
+			const job = queue.add("test", {});
 
-			await queue.deps.runRepo.save({
-				id: "fake-run-1",
-				jobId: jobId,
-				attempt: 1,
-				state: RunState.Running,
-				startedAt: new Date(Date.now() - 60000), // started 60s ago
-				jobName: "test",
+			c.deps.jobRecordRepository.__rawSave({
+				...job,
+				startedAt: new Date(),
+				state: JobState.Running,
 			});
 
 			queue.start();
-			await waitForJobCompletion(queue, jobId);
+			await waitForJobFinish(c, job.jobId);
 			queue.stop();
 
-			const jobs = await queue.listJobs();
-			const failedRuns = await queue.deps.runRepo.listFailed();
-			const successfulRuns = await queue.deps.runRepo.listSuccess();
+			const jobs = queue.getAllByJobId(job.jobId);
 
-			expect(jobs.length).toBe(1);
+			expect(jobs.length).toBe(2);
 			expect(jobs[0]).toMatchObject({
-				id: jobId,
-				name: "test",
-				attempts: 2,
-				data: {},
-				completedAt: expect.any(Date),
+				jobId: job.jobId,
+				state: JobState.Failed,
+				errorCode: JobErrorCode.JobRunNotFound,
 			});
-
-			expect(failedRuns.length).toBe(1);
-			expect(failedRuns[0]).toMatchObject({
-				id: "fake-run-1",
-				jobId: jobId,
-				attempt: 1,
-				state: RunState.Failed,
-				error: {
-					code: RunErrorCode.JobRunNotFound,
-					message: "No active JobRun found for job test.",
-				},
-			});
-
-			expect(successfulRuns.length).toBe(1);
-			expect(successfulRuns[0]).toMatchObject({
-				jobId: jobId,
-				state: RunState.Success,
-				attempt: 2,
+			expect(jobs[1]).toMatchObject({
+				jobId: job.jobId,
+				state: JobState.Success,
+				result: "done",
 			});
 		});
 	});
