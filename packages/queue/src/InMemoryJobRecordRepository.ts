@@ -18,6 +18,7 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 			jobData: record.jobData,
 			state: JobState.Pending,
 			createdAt: new Date(),
+			externalReferenceId: record.externalReferenceId,
 		};
 
 		this.jobRecords.push(newRecord);
@@ -56,6 +57,10 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 			.slice(0, opts?.limit);
 	}
 
+	findAllByExternalReferenceId(externalReferenceId: string): JobRecord[] {
+		return this.jobRecords.filter((record) => record.externalReferenceId === externalReferenceId);
+	}
+
 	updateProgressForRunId(runId: string, progress: number): void {
 		const record = this.findByRunId(runId);
 		assert.ok(record, `JobRecord with runId ${runId} not found`);
@@ -85,6 +90,12 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 		record.state = JobState.Failed;
 		record.errorCode = errorCode;
 		record.errorMessage = errorMessage;
+	}
+
+	markCancelledForRunId(runId: string) {
+		const record = this.findByRunId(runId);
+		assert.ok(record, `JobRecord with runId ${runId} not found`);
+		record.state = JobState.Cancelled;
 	}
 
 	private filterJobRecordsByState(state: JobState[], filter?: (record: JobRecord) => boolean): JobRecord[] {

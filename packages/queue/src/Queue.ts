@@ -62,11 +62,22 @@ export class Queue {
 
 	// --- Public CRUD API ---
 
-	add<TData>(name: string, data: TData): JobRecord {
+	add<TData>(name: string, data: TData, externalReferenceId?: string): JobRecord {
 		return this.deps.jobRecordRepository.create({
 			processorName: name,
 			jobData: data,
+			externalReferenceId,
 		});
+	}
+
+	cancel(job: JobRecord): void {
+		const activeRun = this.jobRuns.get(job.runId);
+		if (activeRun) {
+			logger.info(`Cancelling active job run: ${humanizeJobRecord(job)}`);
+			activeRun.abort();
+		}
+
+		this.deps.jobRecordRepository.markCancelledForRunId(job.runId);
 	}
 
 	getByRunId(runId: JobRecord["runId"]): JobRecord | undefined {
@@ -79,6 +90,10 @@ export class Queue {
 
 	getAllForProcessor(name: string): JobRecord[] {
 		return this.deps.jobRecordRepository.findAllForProcessor(name);
+	}
+
+	getAllForExternalReferenceId(externalReferenceId: string): JobRecord[] {
+		return this.deps.jobRecordRepository.findAllByExternalReferenceId(externalReferenceId);
 	}
 
 	// --- Queue Management API ---

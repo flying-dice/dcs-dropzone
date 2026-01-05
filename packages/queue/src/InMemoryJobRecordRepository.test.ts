@@ -103,4 +103,20 @@ describe("InMemoryJobRecordRepository", () => {
 
 		expect(records).toHaveLength(0);
 	});
+
+	it("should find by external reference ID", () => {
+		const repository = new InMemoryJobRecordRepository();
+		const record1 = repository.create({ processorName: "test", jobData: {}, externalReferenceId: "ext-ref-1" });
+		const _record2 = repository.create({ processorName: "test", jobData: {}, externalReferenceId: "ext-ref-2" });
+		const records = repository.findAllByExternalReferenceId("ext-ref-1");
+		expect(records).toBeDefined();
+		assert.ok(records);
+
+		expect(records.length).toBe(1);
+
+		const [record] = records;
+		assert.ok(record);
+
+		expect(record.runId).toBe(record1.runId);
+	});
 });

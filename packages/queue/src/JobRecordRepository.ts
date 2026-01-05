@@ -3,6 +3,7 @@ export enum JobState {
 	Running = "running",
 	Success = "success",
 	Failed = "failed",
+	Cancelled = "cancelled",
 }
 
 export enum JobErrorCode {
@@ -18,6 +19,7 @@ export type JobRecord<TData = any, TResult = any> = {
 	jobData: TData;
 	state: JobState;
 	createdAt: Date;
+	externalReferenceId?: string;
 	startedAt?: Date;
 	finishedAt?: Date;
 	progress?: number;
@@ -33,6 +35,7 @@ export type CreateJobRecord = {
 	jobId?: JobRecord["jobId"];
 	jobData: JobRecord["jobData"];
 	processorName: JobRecord["processorName"];
+	externalReferenceId?: JobRecord["externalReferenceId"];
 };
 
 export interface JobRecordRepository {
@@ -43,6 +46,7 @@ export interface JobRecordRepository {
 	findByRunId(runId: string): JobRecord | undefined;
 	findAllByJobId(jobId: string): JobRecord[];
 	findAllForProcessor(processorName: string): JobRecord[];
+	findAllByExternalReferenceId(externalReferenceId: string): JobRecord[];
 
 	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string }): JobRecord[];
 
@@ -51,4 +55,5 @@ export interface JobRecordRepository {
 	markSuccessForRunId(runId: string, result: any): void;
 	markRunningForRunId(runId: string): void;
 	markFailedForRunId(runId: string, errorCode: JobErrorCode, errorMessage: string): void;
+	markCancelledForRunId(runId: string): void;
 }

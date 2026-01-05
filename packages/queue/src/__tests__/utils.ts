@@ -72,6 +72,26 @@ export async function waitForJobRunFinish(
 	throw new Error(`Timeout waiting for job with run id ${runId} to complete`);
 }
 
+export async function waitForJobRunStart(
+	c: TestContext,
+	runId: string,
+	timeoutSeconds = 5,
+): Promise<JobRecord | undefined> {
+	const start = Date.now();
+	const timeoutMs = timeoutSeconds * 1000;
+
+	while (Date.now() - start < timeoutMs) {
+		const job = c.deps.jobRecordRepository.findByRunId(runId);
+		assert.ok(job, `Job not found for Run ID ${runId}`);
+		if (job.startedAt) {
+			return job;
+		}
+		await delay(50);
+	}
+
+	throw new Error(`Timeout waiting for job with run id ${runId} to start`);
+}
+
 /**
  * Wait for all pending jobs to be completed.
  */
@@ -92,6 +112,22 @@ export async function waitForAllJobsFinish(c: TestContext, timeoutSeconds = 5): 
 /**
  * Create a delay promise.
  */
-export function delay(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+export function delay(ms: number, signal?: AbortSignal): Promise<void> {
+	return new Promise((resolve, reject) => {
+		if (signal?.aborted) {
+			reject(new DOMException("Aborted", "AbortError"));
+			return;
+		}
+
+		const timeoutId = setTimeout(resolve, ms);
+
+		signal?.addEventListener(
+			"abort",
+			() => {
+				clearTimeout(timeoutId);
+				reject(new DOMException("Aborted", "AbortError"));
+			},
+			{ once: true },
+		);
+	});
 }

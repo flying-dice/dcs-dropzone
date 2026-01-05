@@ -10,6 +10,10 @@ export class JobRun<TData = any, TResult = any> {
 		private readonly processor: Processor<TData, TResult>,
 	) {}
 
+	abort(): void {
+		this.abortController.abort();
+	}
+
 	async process(props: {
 		onProgress: (progress: number) => void;
 		onSuccess: (res: TResult) => void;

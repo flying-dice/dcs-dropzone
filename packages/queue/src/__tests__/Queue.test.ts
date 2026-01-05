@@ -5,7 +5,14 @@ import { err, ok, type Result } from "neverthrow";
 import { JobErrorCode, JobState } from "../JobRecordRepository.ts";
 import type { Processor } from "../Processor.ts";
 import type { Queue } from "../Queue.ts";
-import { createTestContext, delay, waitForAllJobsFinish, waitForJobFinish, waitForJobRunFinish } from "./utils.ts";
+import {
+	createTestContext,
+	delay,
+	waitForAllJobsFinish,
+	waitForJobFinish,
+	waitForJobRunFinish,
+	waitForJobRunStart,
+} from "./utils.ts";
 
 describe("Queue", () => {
 	describe("add", () => {
@@ -419,6 +426,68 @@ describe("Queue", () => {
 				state: JobState.Success,
 				result: "done",
 			});
+		});
+	});
+
+	describe("Cancellation", () => {
+		it("should cancel a pending job", async () => {
+			const processed: number[] = [];
+
+			const processor: Processor<{ id: number }, string> = {
+				name: "test",
+				process: async ({ id }) => {
+					processed.push(id);
+					return ok("done");
+				},
+			};
+
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
+
+			const jobToCancel = queue.add("test", { id: 1 });
+			const jobNotToCancel = queue.add("test", { id: 2 });
+
+			queue.cancel(jobToCancel);
+
+			queue.start();
+			await waitForAllJobsFinish(c);
+			queue.stop();
+
+			const updatedJobToCancel = queue.getByRunId(jobToCancel.runId);
+			expect(updatedJobToCancel?.state).toBe(JobState.Cancelled);
+			const updatedJobNotToCancel = queue.getByRunId(jobNotToCancel.runId);
+			expect(updatedJobNotToCancel?.state).toBe(JobState.Success);
+			expect(processed).toEqual([2]);
+		});
+
+		it("should abort a running job", async () => {
+			let started = false;
+			let finished = false;
+			const processor: Processor = {
+				name: "test",
+				process: async (_job, ctx) => {
+					started = true;
+					await delay(30_000, ctx.abortSignal);
+					finished = true;
+					return ok("done");
+				},
+			};
+
+			const c = createTestContext({ processors: [processor] });
+			const queue: Queue = c.build();
+
+			const job = queue.add("test", {});
+
+			queue.start();
+			await waitForJobRunStart(c, job.runId);
+			queue.cancel(job);
+			await waitForAllJobsFinish(c);
+			queue.stop();
+
+			const updatedJob = queue.getByRunId(job.runId);
+			expect(updatedJob?.state).toBe(JobState.Cancelled);
+			expect(started).toBe(true);
+			expect(finished).toBe(false);
 		});
 	});
 });
