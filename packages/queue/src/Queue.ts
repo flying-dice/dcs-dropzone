@@ -92,10 +92,6 @@ export class Queue {
 		return this.deps.jobRecordRepository.findAllForProcessor(name);
 	}
 
-	getAllForExternalReferenceId(externalReferenceId: string): JobRecord[] {
-		return this.deps.jobRecordRepository.findAllByExternalReferenceId(externalReferenceId);
-	}
-
 	// --- Queue Management API ---
 
 	start() {

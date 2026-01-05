@@ -18,7 +18,6 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 			jobData: record.jobData,
 			state: JobState.Pending,
 			createdAt: new Date(),
-			externalReferenceId: record.externalReferenceId,
 		};
 
 		this.jobRecords.push(newRecord);
@@ -55,10 +54,6 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 		return this.filterJobRecordsByState(state)
 			.filter((record) => !opts?.processorName || record.processorName === opts.processorName)
 			.slice(0, opts?.limit);
-	}
-
-	findAllByExternalReferenceId(externalReferenceId: string): JobRecord[] {
-		return this.jobRecords.filter((record) => record.externalReferenceId === externalReferenceId);
 	}
 
 	updateProgressForRunId(runId: string, progress: number): void {
