@@ -11,7 +11,7 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			repo.create({ processorName: "test-processor", jobData: { foo: "bar" } });
+			repo.create({ processorName: "test-processor", jobData: { foo: "bar" }, initialState: JobState.Waiting });
 
 			expect(db.select().from(T_JOBS).all()).toHaveLength(1);
 			expect(db.select().from(T_JOBS).get()).toMatchObject({
@@ -19,7 +19,7 @@ describe("DrizzleJobRecordRepository", () => {
 				jobId: expect.any(String),
 				processorName: "test-processor",
 				jobData: { foo: "bar" },
-				state: JobState.Pending,
+				state: JobState.Waiting,
 				createdAt: expect.any(Date),
 				startedAt: null,
 				finishedAt: null,
@@ -37,7 +37,11 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			const createdRecord = repo.create({ processorName: "test-processor", jobData: { foo: "bar" } });
+			const createdRecord = repo.create({
+				processorName: "test-processor",
+				jobData: { foo: "bar" },
+				initialState: JobState.Waiting,
+			});
 
 			const foundRecord = repo.findByRunId(createdRecord.runId);
 
@@ -46,7 +50,7 @@ describe("DrizzleJobRecordRepository", () => {
 				jobId: createdRecord.jobId,
 				processorName: "test-processor",
 				jobData: { foo: "bar" },
-				state: JobState.Pending,
+				state: JobState.Waiting,
 				createdAt: expect.any(Date),
 				startedAt: undefined,
 				finishedAt: undefined,
@@ -64,11 +68,16 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			const createdRecord1 = repo.create({ processorName: "test-processor", jobData: { foo: "bar" } });
+			const createdRecord1 = repo.create({
+				processorName: "test-processor",
+				jobData: { foo: "bar" },
+				initialState: JobState.Waiting,
+			});
 			const createdRecord2 = repo.create({
 				processorName: "test-processor",
 				jobData: { foo: "baz" },
 				jobId: createdRecord1.jobId,
+				initialState: JobState.Waiting,
 			});
 
 			const foundRecords = repo.findAllByJobId(createdRecord1.jobId);
@@ -88,9 +97,9 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			repo.create({ processorName: "processor1", jobData: {} });
-			repo.create({ processorName: "processor1", jobData: {} });
-			repo.create({ processorName: "processor2", jobData: {} });
+			repo.create({ processorName: "processor1", jobData: {}, initialState: JobState.Waiting });
+			repo.create({ processorName: "processor1", jobData: {}, initialState: JobState.Waiting });
+			repo.create({ processorName: "processor2", jobData: {}, initialState: JobState.Waiting });
 
 			const records = repo.findAllForProcessor("processor1");
 
@@ -109,9 +118,9 @@ describe("DrizzleJobRecordRepository", () => {
 
 		beforeAll(() => {
 			// Create test records
-			record1 = repo.create({ processorName: "processor1", jobData: {} });
-			record2 = repo.create({ processorName: "processor1", jobData: {} });
-			record3 = repo.create({ processorName: "processor2", jobData: {} });
+			record1 = repo.create({ processorName: "processor1", jobData: {}, initialState: JobState.Waiting });
+			record2 = repo.create({ processorName: "processor1", jobData: {}, initialState: JobState.Waiting });
+			record3 = repo.create({ processorName: "processor2", jobData: {}, initialState: JobState.Waiting });
 
 			// Manually update states for testing
 			db.update(T_JOBS).set({ state: JobState.Running }).where(eq(T_JOBS.runId, record1.runId)).run();
@@ -150,7 +159,7 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			const createdRecord = repo.create({ processorName: "test", jobData: {} });
+			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });
 
 			repo.markFailedForRunId(createdRecord.runId, JobErrorCode.ProcessorError, "Test error message");
 
@@ -178,7 +187,7 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			const createdRecord = repo.create({ processorName: "test", jobData: {} });
+			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });
 
 			repo.markRunningForRunId(createdRecord.runId);
 
@@ -206,7 +215,7 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			const createdRecord = repo.create({ processorName: "test", jobData: {} });
+			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });
 
 			repo.markSuccessForRunId(createdRecord.runId, "result");
 
@@ -234,7 +243,7 @@ describe("DrizzleJobRecordRepository", () => {
 			const db = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
-			const createdRecord = repo.create({ processorName: "test", jobData: {} });
+			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });
 
 			repo.updateProgressForRunId(createdRecord.runId, 50);
 
@@ -244,7 +253,7 @@ describe("DrizzleJobRecordRepository", () => {
 				jobId: createdRecord.jobId,
 				processorName: "test",
 				jobData: {},
-				state: JobState.Pending,
+				state: JobState.Waiting,
 				createdAt: expect.any(Date),
 				startedAt: undefined,
 				finishedAt: undefined,

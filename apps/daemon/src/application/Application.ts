@@ -1,23 +1,26 @@
+import type { JobRecordRepository } from "@packages/queue";
 import { BehaviorSubject, type Observable } from "rxjs";
 import type { SymbolicLinkDestRoot } from "webapp";
 import type { AttributesRepository } from "./ports/AttributesRepository.ts";
-import type { DownloadQueue } from "./ports/DownloadQueue.ts";
-import type { ExtractQueue } from "./ports/ExtractQueue.ts";
+import type { DownloadProcessor } from "./ports/DownloadProcessor.ts";
+import type { ExtractProcessor } from "./ports/ExtractProcessor.ts";
 import type { FileSystem } from "./ports/FileSystem.ts";
 import type { ReleaseRepository } from "./ports/ReleaseRepository.ts";
 import type { UUIDGenerator } from "./ports/UUIDGenerator.ts";
 import type { ModAndReleaseData } from "./schemas/ModAndReleaseData.ts";
 import { MissionScriptingFilesManager } from "./services/MissionScriptingFilesManager.ts";
 import { PathResolver } from "./services/PathResolver.ts";
+import { ReleaseAssetManager } from "./services/ReleaseAssetManager.ts";
 import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
 import { ReleaseToggle } from "./services/ReleaseToggle.ts";
 
 type Deps = {
-	downloadQueue: DownloadQueue;
-	extractQueue: ExtractQueue;
+	downloadProcessor: DownloadProcessor;
+	extractProcessor: ExtractProcessor;
 
 	attributesRepository: AttributesRepository;
 	releaseRepository: ReleaseRepository;
+	jobRecordRepository: JobRecordRepository;
 
 	generateUuid: UUIDGenerator;
 	fileSystem: FileSystem;
@@ -51,14 +54,21 @@ export abstract class Application {
 			pathResolver,
 		});
 
+		const releaseAssetManager = new ReleaseAssetManager({
+			...this.deps,
+			pathResolver,
+		});
+
 		this.releaseToggleService = new ReleaseToggle({
 			...this.deps,
+			releaseAssetManager,
 			pathResolver,
 			missionScriptingFilesManager,
 		});
 
 		this.releaseCatalog = new ReleaseCatalog({
 			...this.deps,
+			releaseAssetManager,
 			pathResolver,
 		});
 

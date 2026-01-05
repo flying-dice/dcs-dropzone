@@ -16,7 +16,7 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 			jobId: record.jobId || crypto.randomUUID(),
 			processorName: record.processorName,
 			jobData: record.jobData,
-			state: JobState.Pending,
+			state: record.initialState,
 			createdAt: new Date(),
 		};
 
@@ -44,6 +44,16 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 
 	findAllByJobId(jobId: string): JobRecord[] {
 		return Array.from(this.jobRecords.values()).filter((record) => record.jobId === jobId);
+	}
+
+	findLatestByJobId(jobId: string): JobRecord | undefined {
+		const records = this.findAllByJobId(jobId);
+		if (records.length === 0) {
+			return undefined;
+		}
+
+		records.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+		return records[0];
 	}
 
 	findAllForProcessor(processorName: string): JobRecord[] {
@@ -91,6 +101,12 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 		const record = this.findByRunId(runId);
 		assert.ok(record, `JobRecord with runId ${runId} not found`);
 		record.state = JobState.Cancelled;
+	}
+
+	markWaitingForRunId(runId: string) {
+		const record = this.findByRunId(runId);
+		assert.ok(record, `JobRecord with runId ${runId} not found`);
+		record.state = JobState.Waiting;
 	}
 
 	private filterJobRecordsByState(state: JobState[], filter?: (record: JobRecord) => boolean): JobRecord[] {

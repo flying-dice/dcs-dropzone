@@ -1,3 +1,4 @@
+import type { JobRecord } from "@packages/queue";
 import type { MissionScriptRunOn } from "webapp";
 import type { ReleaseRepository } from "../application/ports/ReleaseRepository.ts";
 import type { MissionScript } from "../application/schemas/MissionScript.ts";
@@ -10,6 +11,7 @@ import type { SymbolicLink } from "../application/schemas/SymbolicLink.ts";
 export class TestReleaseRepository implements ReleaseRepository {
 	private releases = new Map<string, ModAndReleaseData>();
 	private installedPaths = new Map<string, string | null>();
+	private jobsForReleases = new Map<string, Set<JobRecord["jobId"]>>();
 
 	saveRelease(data: ModAndReleaseData): void {
 		this.releases.set(data.releaseId, data);
@@ -122,5 +124,20 @@ export class TestReleaseRepository implements ReleaseRepository {
 
 	deleteRelease(releaseId: string) {
 		this.releases.delete(releaseId);
+	}
+
+	addJobForRelease(releaseId: string, jobId: JobRecord["jobId"]) {
+		if (!this.jobsForReleases.has(releaseId)) {
+			this.jobsForReleases.set(releaseId, new Set());
+		}
+		this.jobsForReleases.get(releaseId)!.add(jobId);
+	}
+
+	getJobIdsForRelease(releaseId: string): JobRecord["jobId"][] {
+		return Array.from(this.jobsForReleases.get(releaseId) ?? []);
+	}
+
+	clearJobsForRelease(releaseId: string): void {
+		this.jobsForReleases.delete(releaseId);
 	}
 }

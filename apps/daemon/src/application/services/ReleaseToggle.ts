@@ -1,12 +1,9 @@
 import { getLogger } from "log4js";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
-import type { DownloadQueue } from "../ports/DownloadQueue.ts";
-import type { ExtractQueue } from "../ports/ExtractQueue.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
 import type { PathResolver } from "./PathResolver.ts";
+import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 
 const logger = getLogger("ReleaseToggle");
 
@@ -15,8 +12,7 @@ type Deps = {
 	pathResolver: PathResolver;
 	releaseRepository: ReleaseRepository;
 	fileSystem: FileSystem;
-	downloadQueue: DownloadQueue;
-	extractQueue: ExtractQueue;
+	releaseAssetManager: ReleaseAssetManager;
 };
 
 export class ReleaseToggle {
@@ -74,18 +70,9 @@ export class ReleaseToggle {
 	private ensureReleaseIsReady(releaseId: string): void {
 		logger.debug(`Checking if release ${releaseId} is ready`);
 
-		if (
-			!this.deps.downloadQueue.getJobsForReleaseId(releaseId).every((it) => it.status === DownloadJobStatus.COMPLETED)
-		) {
-			logger.warn(`Release ${releaseId} is not ready: some download jobs are incomplete`);
-			throw new Error(`Cannot enable release ${releaseId} because not all download jobs are completed.`);
-		}
-
-		if (
-			!this.deps.extractQueue.getJobsForReleaseId(releaseId).every((it) => it.status === ExtractJobStatus.COMPLETED)
-		) {
-			logger.warn(`Release ${releaseId} is not ready: some extract jobs are incomplete`);
-			throw new Error(`Cannot enable release ${releaseId} because not all extract jobs are completed.`);
+		if (!this.deps.releaseAssetManager.isReleaseReady(releaseId)) {
+			logger.warn(`Release ${releaseId} is not ready: some jobs are incomplete`);
+			throw new Error(`Cannot enable release ${releaseId} because not all jobs are completed.`);
 		}
 
 		logger.debug(`Release ${releaseId} is ready for activation`);

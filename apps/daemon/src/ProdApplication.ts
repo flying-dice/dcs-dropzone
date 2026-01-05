@@ -1,10 +1,11 @@
 import { getLogger } from "log4js";
 import type { SymbolicLinkDestRoot } from "webapp";
-import { Drizzle7zExtractQueue } from "./adapters/Drizzle7zExtractQueue.ts";
 import { DrizzleAttributesRepository } from "./adapters/DrizzleAttributesRepository.ts";
+import { DrizzleJobRecordRepository } from "./adapters/DrizzleJobRecordRepository.ts";
 import { DrizzleReleaseRepository } from "./adapters/DrizzleReleaseRepository.ts";
-import { DrizzleWgetDownloadQueue } from "./adapters/DrizzleWgetDownloadQueue.ts";
 import { LocalFileSystem } from "./adapters/LocalFileSystem.ts";
+import { SevenZipExtractProcessor } from "./adapters/SevenZipExtractProcessor.ts";
+import { WgetDownloadProcessor } from "./adapters/WgetDownloadProcessor.ts";
 import { Application } from "./application/Application.ts";
 import Database from "./database";
 
@@ -24,19 +25,14 @@ export class ProdApplication extends Application {
 		const db = Database(deps.databaseUrl);
 		const attributesRepository = new DrizzleAttributesRepository({ db });
 		const releaseRepository = new DrizzleReleaseRepository({ db });
-
-		const downloadQueue = new DrizzleWgetDownloadQueue({
-			db,
-			wgetExecutablePath: deps.wgetExecutablePath,
-		});
-
-		const extractQueue = new Drizzle7zExtractQueue({
-			db,
-			downloadQueue,
-			sevenzipExecutablePath: deps.sevenzipExecutablePath,
-		});
+		const jobRecordRepository = new DrizzleJobRecordRepository({ db });
 
 		const fileSystem = new LocalFileSystem();
+
+		const downloadProcessor = new WgetDownloadProcessor({ wgetExecutablePath: deps.wgetExecutablePath });
+		const extractProcessor = new SevenZipExtractProcessor({
+			sevenZipExecutablePath: deps.sevenzipExecutablePath,
+		});
 
 		super({
 			dcsPaths: deps.dcsPaths,
@@ -44,9 +40,10 @@ export class ProdApplication extends Application {
 			generateUuid: () => crypto.randomUUID(),
 			attributesRepository,
 			releaseRepository,
-			downloadQueue,
-			extractQueue,
 			fileSystem,
+			jobRecordRepository,
+			downloadProcessor,
+			extractProcessor,
 		});
 	}
 }

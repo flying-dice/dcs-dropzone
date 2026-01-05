@@ -1,9 +1,12 @@
+import type { JobRecord } from "@packages/queue";
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
+import type { MissionScriptRunOn } from "webapp";
 import type { ReleaseRepository } from "../application/ports/ReleaseRepository.ts";
+import type { MissionScript } from "../application/schemas/MissionScript.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import {
+	T_JOBS_FOR_RELEASE,
 	T_MOD_RELEASE_ASSETS,
 	T_MOD_RELEASE_MISSION_SCRIPTS,
 	T_MOD_RELEASE_SYMBOLIC_LINKS,
@@ -137,20 +140,30 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.run();
 	}
 
-	getMissionScriptsForRelease(releaseId: string): {
-		id: string;
-		releaseId: string;
-		name: string;
-		purpose: string;
-		path: string;
-		root: SymbolicLinkDestRoot;
-		runOn: MissionScriptRunOn;
-		installedPath: string | null;
-	}[] {
+	getMissionScriptsForRelease(releaseId: string): MissionScript[] {
 		return this.db
 			.select()
 			.from(T_MOD_RELEASE_MISSION_SCRIPTS)
 			.where(eq(T_MOD_RELEASE_MISSION_SCRIPTS.releaseId, releaseId))
 			.all();
+	}
+
+	getJobIdsForRelease(releaseId: string): JobRecord["jobId"][] {
+		const all = this.db.select().from(T_JOBS_FOR_RELEASE).where(eq(T_JOBS_FOR_RELEASE.releaseId, releaseId)).all();
+		return all.map((r) => r.jobId);
+	}
+
+	addJobForRelease(releaseId: string, jobId: JobRecord["jobId"]) {
+		this.db
+			.insert(T_JOBS_FOR_RELEASE)
+			.values({
+				releaseId,
+				jobId,
+			})
+			.run();
+	}
+
+	clearJobsForRelease(releaseId: string): void {
+		this.db.delete(T_JOBS_FOR_RELEASE).where(eq(T_JOBS_FOR_RELEASE.releaseId, releaseId)).run();
 	}
 }

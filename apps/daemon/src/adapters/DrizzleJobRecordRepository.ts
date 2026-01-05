@@ -6,7 +6,7 @@ import {
 	type JobRecordRepository,
 	JobState,
 } from "@packages/queue";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { inArray } from "drizzle-orm/sql/expressions/conditions";
 import { T_JOBS } from "../database/schema.ts";
@@ -42,7 +42,7 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 			jobId: record.jobId || crypto.randomUUID(),
 			processorName: record.processorName,
 			jobData: record.jobData,
-			state: JobState.Pending,
+			state: record.initialState,
 			createdAt: new Date(),
 		};
 
@@ -57,6 +57,12 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 	findAllByJobId(jobId: string): JobRecord[] {
 		const rows = this.db.select().from(T_JOBS).where(eq(T_JOBS.jobId, jobId)).all();
 		return rows.map(mapRowToJobRecord);
+	}
+
+	findLatestByJobId(jobId: string): JobRecord | undefined {
+		const row = this.db.select().from(T_JOBS).where(eq(T_JOBS.jobId, jobId)).orderBy(desc(T_JOBS.createdAt)).get();
+
+		return row ? mapRowToJobRecord(row) : undefined;
 	}
 
 	findAllForProcessor(processorName: string): JobRecord[] {
@@ -115,6 +121,26 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 				state: JobState.Success,
 				finishedAt: new Date(),
 				result: result,
+			})
+			.where(eq(T_JOBS.runId, runId))
+			.run();
+	}
+
+	markCancelledForRunId(runId: string) {
+		this.db
+			.update(T_JOBS)
+			.set({
+				state: JobState.Cancelled,
+			})
+			.where(eq(T_JOBS.runId, runId))
+			.run();
+	}
+
+	markWaitingForRunId(runId: string) {
+		this.db
+			.update(T_JOBS)
+			.set({
+				state: JobState.Waiting,
 			})
 			.where(eq(T_JOBS.runId, runId))
 			.run();

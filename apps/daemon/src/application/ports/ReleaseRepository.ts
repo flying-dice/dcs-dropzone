@@ -1,3 +1,4 @@
+import type { JobRecord } from "@packages/queue";
 import type { MissionScriptRunOn } from "webapp";
 import type { MissionScript } from "../schemas/MissionScript.ts";
 import type { MissionScriptByRunOn } from "../schemas/MissionScriptByRunOn.ts";
@@ -22,4 +23,10 @@ export interface ReleaseRepository {
 	setInstalledPathForSymbolicLink(symbolicLinkId: string, installedPath: string | null): void;
 
 	getMissionScriptsForRelease(releaseId: string): MissionScript[];
+
+	addJobForRelease(releaseId: string, jobId: JobRecord["jobId"]): void;
+
+	getJobIdsForRelease(releaseId: string): JobRecord["jobId"][];
+
+	clearJobsForRelease(releaseId: string): void;
 }

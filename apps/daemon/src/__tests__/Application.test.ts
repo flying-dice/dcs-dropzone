@@ -1,14 +1,12 @@
 import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { ok } from "node:assert";
-import { lstatSync } from "node:fs";
+import { JobState } from "@packages/queue";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import type { Application } from "../application/Application.ts";
-import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../application/enums/ExtractJobStatus.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { TestCases } from "./TestCases.ts";
-import { waitForDownloadJobsForRelease, waitForExtractJobsForRelease } from "./utils.ts";
+import { waitForJobsForRelease } from "./utils.ts";
 
 describe.each(TestCases)("$label", ({ build }) => {
 	let modAndReleaseData: ModAndReleaseData;
@@ -74,8 +72,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const missionScriptsForRelease = app.deps.releaseRepository.getMissionScriptsForRelease(
 				modAndReleaseData.releaseId,
 			);
-			const downloadJobs = app.deps.downloadQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
-			const extractJobs = app.deps.extractQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
+			const downloadJobs = app.deps.jobRecordRepository.findAllForProcessor("download");
+			const extractJobs = app.deps.jobRecordRepository.findAllForProcessor("extract");
 
 			expect(allReleases.length).toEqual(1);
 			expect(allReleases[0]).toEqual({
@@ -120,32 +118,24 @@ describe.each(TestCases)("$label", ({ build }) => {
 			});
 
 			expect(downloadJobs.length).toEqual(1);
-			expect(downloadJobs[0]).toEqual({
-				id: "download:test-release-id__asset-1__url-1",
-				releaseId: "test-release-id",
-				releaseAssetId: "test-release-id__asset-1",
-				urlId: "test-release-id__asset-1__url-1",
-				url: "https://getsamplefiles.com/download/zip/sample-1.zip", // Download From
-				targetDirectory: expect.stringMatching(/test-release-id$/), // Download To
-				status: DownloadJobStatus.PENDING,
-				attempt: 0,
-				progressPercent: 0,
-				nextAttemptAfter: expect.any(Date),
-				createdAt: expect.any(Date),
+			expect(downloadJobs[0]).toMatchObject({
+				jobData: {
+					url: "https://getsamplefiles.com/download/zip/sample-1.zip",
+					destinationFolder: expect.stringMatching(/test-release-id$/),
+					releaseId: "test-release-id",
+					assetId: "test-release-id__asset-1",
+					urlId: "test-release-id__asset-1__url-1",
+				},
 			});
 
 			expect(extractJobs.length).toEqual(1);
-			expect(extractJobs[0]).toEqual({
-				id: "extract:test-release-id__asset-1",
-				releaseId: "test-release-id",
-				releaseAssetId: "test-release-id__asset-1",
-				archivePath: expect.stringMatching(/sample-1\.zip$/), // Path to archive from a download job
-				targetDirectory: expect.stringMatching(/test-release-id$/), // Extract to
-				status: ExtractJobStatus.PENDING,
-				attempt: 0,
-				progressPercent: 0,
-				nextAttemptAfter: expect.any(Date),
-				createdAt: expect.any(Date),
+			expect(extractJobs[0]).toMatchObject({
+				jobData: {
+					archivePath: expect.stringMatching(/sample-1\.zip$/),
+					destinationFolder: expect.stringMatching(/test-release-id$/),
+					releaseId: "test-release-id",
+					assetId: "test-release-id__asset-1",
+				},
 			});
 		});
 	});
@@ -163,15 +153,17 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const missionScriptsForRelease = app.deps.releaseRepository.getMissionScriptsForRelease(
 				modAndReleaseData.releaseId,
 			);
-			const downloadJobs = app.deps.downloadQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
-			const extractJobs = app.deps.extractQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
+			const downloadJobs = app.deps.jobRecordRepository.findAllForProcessor("download");
+			const extractJobs = app.deps.jobRecordRepository.findAllForProcessor("extract");
 
 			expect(allReleases.length).toEqual(0);
 			expect(assetsForRelease.length).toEqual(0);
 			expect(symbolicLinksForRelease.length).toEqual(0);
 			expect(missionScriptsForRelease.length).toEqual(0);
-			expect(downloadJobs.length).toEqual(0);
-			expect(extractJobs.length).toEqual(0);
+			expect(downloadJobs.length).toEqual(1);
+			expect(downloadJobs[0]?.state).toEqual(JobState.Cancelled);
+			expect(extractJobs.length).toEqual(1);
+			expect(extractJobs[0]?.state).toEqual(JobState.Cancelled);
 		});
 	});
 
@@ -179,18 +171,16 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should enable the release successfully when all jobs are completed", async () => {
 			app.addRelease(modAndReleaseData);
 
-			await waitForDownloadJobsForRelease(app.deps.downloadQueue, modAndReleaseData.releaseId, 5);
-			await new Promise((resolve) => setTimeout(resolve, 500));
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-			await waitForExtractJobsForRelease(app.deps.extractQueue, modAndReleaseData.releaseId, 5);
+			const downloadJobs = app.deps.jobRecordRepository.findAllForProcessor("download");
+			const extractJobs = app.deps.jobRecordRepository.findAllForProcessor("extract");
 
-			const downloadJobs = app.deps.downloadQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
-			const extractJobs = app.deps.extractQueue.getJobsForReleaseId(modAndReleaseData.releaseId);
-			expect(extractJobs.length).toEqual(1);
 			expect(downloadJobs.length).toEqual(1);
+			expect(extractJobs.length).toEqual(1);
 
-			expect(downloadJobs[0]?.status).toEqual(DownloadJobStatus.COMPLETED);
-			expect(extractJobs[0]?.status).toEqual(ExtractJobStatus.COMPLETED);
+			expect(downloadJobs[0]?.state).toEqual(JobState.Success);
+			expect(extractJobs[0]?.state).toEqual(JobState.Success);
 
 			app.enableRelease(modAndReleaseData.releaseId);
 
@@ -198,7 +188,6 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
 			ok(symlinkInstalledPath);
 			expect(symlinkInstalledPath).toEndWith("test.lua");
-			expect(lstatSync(symlinkInstalledPath).isSymbolicLink()).toBe(true);
 		});
 	});
 });

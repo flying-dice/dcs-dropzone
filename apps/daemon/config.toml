@@ -27,7 +27,7 @@ port = 3001                                                                     
 # =======================================
 # ProdApplication Configuration
 # =======================================
-[build]
+[app]
 mods_dir = "./._app_working_dir/mods"                                              # Path to application working directory
 tui_enabled = false                                                                 # Enable TUI interface
 

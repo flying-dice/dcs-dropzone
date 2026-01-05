@@ -1,9 +1,11 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { noop } from "lodash";
 import { getLogger } from "log4js";
 import type { Application } from "../application/Application.ts";
 import { ProdApplication } from "../ProdApplication.ts";
+import { TestApplication } from "./TestApplication.ts";
 import { getAllPathsForTree } from "./utils.ts";
 
 const logger = getLogger("TestCases");
@@ -11,7 +13,13 @@ const logger = getLogger("TestCases");
 export type TestCase = { label: string; build: () => { app: Application; cleanup: () => void } };
 
 export const TestCases: TestCase[] = [
-	// { label: "TestApplication", build: () => new TestApplication() },
+	{
+		label: "TestApplication",
+		build: () => ({
+			app: new TestApplication(),
+			cleanup: noop,
+		}),
+	},
 	{
 		label: "ProdApplication",
 		build: () => {

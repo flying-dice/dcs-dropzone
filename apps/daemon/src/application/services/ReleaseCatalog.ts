@@ -1,24 +1,20 @@
-import { basename, join } from "node:path";
 import { getLogger } from "log4js";
-import type { AssetStatus } from "../enums/AssetStatus.ts";
-import { inferAssetStatusFromJobs } from "../functions/inferAssetStatusFromJobs.ts";
+import { AssetStatus } from "../enums/AssetStatus.ts";
 import { inferReleaseStatusFromAssets } from "../functions/inferReleaseStatusFromAssets.ts";
 import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
-import type { DownloadQueue } from "../ports/DownloadQueue.ts";
-import type { ExtractQueue } from "../ports/ExtractQueue.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
-import { ModAndReleaseData, type ModReleaseAssetStatusData } from "../schemas/ModAndReleaseData.ts";
+import { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
 import type { PathResolver } from "./PathResolver.ts";
+import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 
 const logger = getLogger("ReleaseCatalog");
 
 type Deps = {
 	pathResolver: PathResolver;
-	downloadQueue: DownloadQueue;
-	extractQueue: ExtractQueue;
 	releaseRepository: ReleaseRepository;
 	fileSystem: FileSystem;
+	releaseAssetManager: ReleaseAssetManager;
 };
 
 export class ReleaseCatalog {
@@ -27,66 +23,14 @@ export class ReleaseCatalog {
 	add(data: ModAndReleaseData) {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
-		// Insert release and related data in a transaction
 		this.deps.releaseRepository.saveRelease(data);
-
-		// Prepare release folder and queues
-		const releaseFolder = this.deps.pathResolver.resolveReleasePath(data.releaseId);
-		this.deps.fileSystem.ensureDir(releaseFolder);
-
-		// Enqueue download and extract jobs for each asset
-		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(data.releaseId);
-
-		for (const asset of assets) {
-			logger.debug(`Downloading asset: ${asset.name}`);
-
-			const downloadJobIds: string[] = [];
-
-			for (const url of asset.urls) {
-				logger.debug(`Pushing download job for URL: ${url.url}`);
-				const downloadJobId = this.generateDownloadJobId(url.id);
-				this.deps.downloadQueue.pushJob(downloadJobId, data.releaseId, asset.id, url.id, url.url, releaseFolder);
-
-				downloadJobIds.push(downloadJobId);
-			}
-
-			// If the asset is an archive, create an extract job that depends on all download jobs
-			if (asset.isArchive && asset.urls.length > 0) {
-				// For multipart archives, the first file is typically the main archive
-				const firstUrl = asset.urls[0]?.url;
-				const archivePath = join(releaseFolder, decodeURIComponent(basename(firstUrl!)));
-
-				logger.debug(
-					`Pushing extract job for archive: ${archivePath} with ${downloadJobIds.length} download dependencies`,
-				);
-				this.deps.extractQueue.pushJob(
-					this.generateExtractJobId(asset.id),
-					data.releaseId,
-					asset.id,
-					archivePath,
-					releaseFolder,
-					downloadJobIds,
-				);
-			}
-
-			// Log warning if asset is marked as archive but has no URLs
-			if (asset.isArchive && asset.urls.length === 0) {
-				logger.warn(
-					`Asset "${asset.name}" (id: ${asset.id}) is marked as archive but has no URLs. No extract job will be created.`,
-				);
-			}
-		}
+		this.deps.releaseAssetManager.addRelease(data.releaseId);
 
 		logger.info(`Successfully added releaseId: ${data.releaseId}`);
 	}
 
 	remove(releaseId: string): void {
-		this.deps.downloadQueue.cancelJobsForRelease(releaseId);
-		this.deps.extractQueue.cancelJobsForRelease(releaseId);
-
-		const releaseFolder = this.deps.pathResolver.resolveReleasePath(releaseId);
-		this.deps.fileSystem.removeDir(releaseFolder);
-
+		this.deps.releaseAssetManager.removeRelease(releaseId);
 		this.deps.releaseRepository.deleteRelease(releaseId);
 	}
 
@@ -94,8 +38,10 @@ export class ReleaseCatalog {
 		const releases: ModAndReleaseData[] = [];
 
 		for (const release of this.deps.releaseRepository.getAllReleases()) {
+			const jobDataByAssetId = this.deps.releaseAssetManager.getProgressReportForAssets(release.releaseId);
+
 			const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(release.releaseId).map((asset) => {
-				const statusData = this.getJobDataForAsset(asset.id);
+				const statusData = jobDataByAssetId[asset.id];
 
 				return {
 					...asset,
@@ -112,44 +58,15 @@ export class ReleaseCatalog {
 				symbolicLinks,
 				missionScripts,
 				status: inferReleaseStatusFromAssets(
-					assets.map((it) => it.statusData.status),
+					assets.map((it) => it.statusData?.status ?? AssetStatus.PENDING),
 					symbolicLinks,
 				),
-				overallPercentProgress: totalPercentProgress(assets.flatMap((it) => it.statusData.overallPercentProgress)),
+				overallPercentProgress: totalPercentProgress(
+					assets.flatMap((it) => it.statusData?.overallPercentProgress ?? 0),
+				),
 			});
 		}
 
 		return ModAndReleaseData.array().parse(releases);
-	}
-
-	private getJobDataForAsset(releaseAssetId: string): ModReleaseAssetStatusData {
-		const downloadJobs = this.deps.downloadQueue.getJobsForReleaseAssetId(releaseAssetId);
-		const extractJobs = this.deps.extractQueue.getJobsForReleaseAssetId(releaseAssetId);
-
-		const downloadPercentProgress = totalPercentProgress(downloadJobs.map((it) => it.progressPercent));
-
-		const extractPercentProgress = totalPercentProgress(extractJobs.map((it) => it.progressPercent));
-
-		const overallPercentProgress = totalPercentProgress([
-			...downloadJobs.map((it) => it.progressPercent),
-			...extractJobs.map((it) => it.progressPercent),
-		]);
-
-		const status: AssetStatus = inferAssetStatusFromJobs(downloadJobs, extractJobs);
-
-		return {
-			downloadPercentProgress,
-			extractPercentProgress,
-			overallPercentProgress,
-			status,
-		};
-	}
-
-	private generateExtractJobId(assetId: string): string {
-		return `extract:${assetId}`;
-	}
-
-	private generateDownloadJobId(urlId: string): string {
-		return `download:${urlId}`;
 	}
 }

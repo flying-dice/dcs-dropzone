@@ -100,7 +100,9 @@ export async function waitForAllJobsFinish(c: TestContext, timeoutSeconds = 5): 
 	const timeoutMs = timeoutSeconds * 1000;
 
 	while (Date.now() - start < timeoutMs) {
-		if (c.deps.jobRecordRepository.findAllInState([JobState.Pending, JobState.Running]).length === 0) {
+		if (
+			c.deps.jobRecordRepository.findAllInState([JobState.Pending, JobState.Waiting, JobState.Running]).length === 0
+		) {
 			return;
 		}
 		await delay(50);

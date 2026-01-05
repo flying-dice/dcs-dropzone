@@ -16,7 +16,7 @@ import {
 
 describe("Queue", () => {
 	describe("add", () => {
-		it("should add a job with default scheduledAt", async () => {
+		it("should add a job", async () => {
 			const c = createTestContext();
 			const queue: Queue = c.build();
 
@@ -31,7 +31,7 @@ describe("Queue", () => {
 				runId: expect.any(String),
 				processorName: "test",
 				jobData: { foo: "bar" },
-				state: JobState.Pending,
+				state: JobState.Waiting,
 			});
 		});
 	});
@@ -65,7 +65,7 @@ describe("Queue", () => {
 
 			const completedJobs = queue
 				.getAllForProcessor("test")
-				.filter((j) => ![JobState.Pending, JobState.Running].includes(j.state));
+				.filter((j) => ![JobState.Pending, JobState.Waiting, JobState.Running].includes(j.state));
 
 			const run = queue.getByRunId(job.runId);
 			expect(completedJobs.length).toBe(1);
@@ -380,7 +380,7 @@ describe("Queue", () => {
 			const latestJobWithoutProcessor = queue.getByRunId(jobWithoutProcessorId.runId);
 			expect(latestJobWithoutProcessor).toBeDefined();
 			assert.ok(latestJobWithoutProcessor, "Expected latest job to be defined");
-			expect(latestJobWithoutProcessor.state).toBe(JobState.Pending);
+			expect(latestJobWithoutProcessor.state).toBe(JobState.Waiting);
 
 			const latestJobWithProcessor = queue.getByRunId(jobWithProcessorId.runId);
 			expect(latestJobWithProcessor).toBeDefined();

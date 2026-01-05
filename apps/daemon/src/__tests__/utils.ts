@@ -1,57 +1,59 @@
-import { expect } from "bun:test";
 import * as inspector from "node:inspector";
 import { join } from "node:path";
+import { type JobRecordRepository, JobState } from "@packages/queue";
 import { differenceInSeconds } from "date-fns";
-import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../application/enums/ExtractJobStatus.ts";
-import type { DownloadQueue } from "../application/ports/DownloadQueue.ts";
-import type { ExtractQueue } from "../application/ports/ExtractQueue.ts";
+import { compact } from "lodash";
+import { getLogger } from "log4js";
+import type { ReleaseRepository } from "../application/ports/ReleaseRepository.ts";
 
 export function getAllPathsForTree(path: string) {
 	const glob = new Bun.Glob(join(path, "**/*"));
 	return Array.from(glob.scanSync({ followSymlinks: true }));
 }
 
-export async function waitForDownloadJobsForRelease(
-	queue: DownloadQueue,
+export async function waitForJobsForRelease(
+	deps: { releaseRepository: ReleaseRepository; jobRecordRepository: JobRecordRepository },
 	releaseId: string,
 	timeoutSeconds: number = 30,
-	expectedJobCount: number = 1,
 ): Promise<void> {
-	inspector.console.log("Waiting for download and extract jobs to complete...");
-	const downloadWaitStartTime = Date.now();
+	inspector.console.log("Waiting for jobs to complete...");
+	const extractWaitStartTime = Date.now();
 
-	const jobs = queue.getJobsForReleaseId(releaseId);
-	expect(jobs.length).toEqual(expectedJobCount);
+	const getJobs = () => {
+		const jobIds = deps.releaseRepository.getJobIdsForRelease(releaseId);
+		const jobs = compact(jobIds.map((it) => deps.jobRecordRepository.findLatestByJobId(it)));
 
-	while (queue.getJobsForReleaseId(releaseId).some((it) => it.status !== DownloadJobStatus.COMPLETED)) {
-		if (differenceInSeconds(Date.now(), downloadWaitStartTime) > timeoutSeconds) {
-			const error = new Error(`Timeout waiting for download jobs to complete: ${jobs}`);
-			inspector.console.error({ jobs, error });
+		getLogger("waitForJobsForRelease").info(jobs);
+
+		return jobs;
+	};
+
+	while (getJobs().some((it) => [JobState.Pending, JobState.Waiting, JobState.Running].includes(it.state))) {
+		if (differenceInSeconds(Date.now(), extractWaitStartTime) > timeoutSeconds) {
+			const error = new Error(`Timeout waiting for extract jobs to complete.`);
+			inspector.console.error({ error });
 			throw error;
 		}
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await delay(250);
 	}
 }
 
-export async function waitForExtractJobsForRelease(
-	queue: ExtractQueue,
-	releaseId: string,
-	timeoutSeconds: number = 30,
-	expectedJobCount: number = 1,
-): Promise<void> {
-	inspector.console.log("Waiting for extract jobs to complete...");
-	const extractWaitStartTime = Date.now();
-
-	const jobs = queue.getJobsForReleaseId(releaseId);
-	expect(jobs.length).toEqual(expectedJobCount);
-
-	while (queue.getJobsForReleaseId(releaseId).some((it) => it.status !== ExtractJobStatus.COMPLETED)) {
-		if (differenceInSeconds(Date.now(), extractWaitStartTime) > timeoutSeconds) {
-			const error = new Error(`Timeout waiting for extract jobs to complete: ${JSON.stringify(jobs, undefined, 2)}`);
-			inspector.console.error({ jobs, error });
-			throw error;
+export function delay(ms: number, signal?: AbortSignal): Promise<void> {
+	return new Promise((resolve, reject) => {
+		if (signal?.aborted) {
+			reject(new DOMException("Aborted", "AbortError"));
+			return;
 		}
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-	}
+
+		const timeoutId = setTimeout(resolve, ms);
+
+		signal?.addEventListener(
+			"abort",
+			() => {
+				clearTimeout(timeoutId);
+				reject(new DOMException("Aborted", "AbortError"));
+			},
+			{ once: true },
+		);
+	});
 }

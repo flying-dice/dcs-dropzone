@@ -6,6 +6,6 @@ configure({
 		file: { type: "file", filename: "./__tests__.log", flags: "w" },
 	},
 	categories: {
-		default: { appenders: ["file"], level: "info" },
+		default: { appenders: ["file"], level: "trace" },
 	},
 });

@@ -1,31 +1,30 @@
+import { JobState } from "@packages/queue";
 import { AssetStatus } from "../enums/AssetStatus.ts";
-import { DownloadJobStatus } from "../enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../enums/ExtractJobStatus.ts";
 
 export function inferAssetStatusFromJobs(
-	downloadJobs: { status: DownloadJobStatus }[],
-	extractJobs: { status: ExtractJobStatus }[],
+	downloadJobs: { state: JobState }[],
+	extractJobs: { state: JobState }[],
 ): AssetStatus {
-	const downloadJobStatuses = downloadJobs.map((it) => it.status);
-	const extractJobStatuses = extractJobs.map((it) => it.status);
+	const downloadJobStatuses = downloadJobs.map((it) => it.state);
+	const extractJobStatuses = extractJobs.map((it) => it.state);
 
 	if (
-		downloadJobStatuses.some((status) => status === DownloadJobStatus.ERROR) ||
-		extractJobStatuses.some((status) => status === ExtractJobStatus.ERROR)
+		downloadJobStatuses.some((status) => status === JobState.Failed) ||
+		extractJobStatuses.some((status) => status === JobState.Failed)
 	) {
 		return AssetStatus.ERROR;
 	}
 
 	if (
-		downloadJobStatuses.every((status) => status === DownloadJobStatus.PENDING) &&
-		extractJobStatuses.every((status) => status === ExtractJobStatus.PENDING)
+		downloadJobStatuses.every((status) => status === JobState.Pending) &&
+		extractJobStatuses.every((status) => status === JobState.Pending)
 	) {
 		return AssetStatus.PENDING;
 	}
 
 	if (
-		downloadJobStatuses.every((status) => status === DownloadJobStatus.COMPLETED) &&
-		extractJobStatuses.every((status) => status === ExtractJobStatus.COMPLETED)
+		downloadJobStatuses.every((status) => status === JobState.Success) &&
+		extractJobStatuses.every((status) => status === JobState.Success)
 	) {
 		return AssetStatus.COMPLETED;
 	}

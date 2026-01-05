@@ -1,5 +1,6 @@
 export enum JobState {
 	Pending = "pending",
+	Waiting = "waiting",
 	Running = "running",
 	Success = "success",
 	Failed = "failed",
@@ -34,6 +35,7 @@ export type CreateJobRecord = {
 	jobId?: JobRecord["jobId"];
 	jobData: JobRecord["jobData"];
 	processorName: JobRecord["processorName"];
+	initialState: JobState.Waiting | JobState.Pending;
 };
 
 export interface JobRecordRepository {
@@ -43,6 +45,7 @@ export interface JobRecordRepository {
 	// -- Read --
 	findByRunId(runId: string): JobRecord | undefined;
 	findAllByJobId(jobId: string): JobRecord[];
+	findLatestByJobId(jobId: string): JobRecord | undefined;
 	findAllForProcessor(processorName: string): JobRecord[];
 
 	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string }): JobRecord[];
@@ -53,4 +56,5 @@ export interface JobRecordRepository {
 	markRunningForRunId(runId: string): void;
 	markFailedForRunId(runId: string, errorCode: JobErrorCode, errorMessage: string): void;
 	markCancelledForRunId(runId: string): void;
+	markWaitingForRunId(runId: string): void;
 }

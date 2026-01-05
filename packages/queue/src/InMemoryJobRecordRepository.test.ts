@@ -10,6 +10,7 @@ describe("InMemoryJobRecordRepository", () => {
 		const savedRecord = repository.create({
 			processorName: "test",
 			jobData: {},
+			initialState: JobState.Pending,
 		});
 
 		expect(savedRecord).toMatchObject({
@@ -22,9 +23,9 @@ describe("InMemoryJobRecordRepository", () => {
 
 	it("finds all job records for a specific processor", () => {
 		const repository = new InMemoryJobRecordRepository();
-		repository.create({ processorName: "processor1", jobData: {} });
-		repository.create({ processorName: "processor1", jobData: {} });
-		repository.create({ processorName: "processor2", jobData: {} });
+		repository.create({ processorName: "processor1", jobData: {}, initialState: JobState.Pending });
+		repository.create({ processorName: "processor1", jobData: {}, initialState: JobState.Pending });
+		repository.create({ processorName: "processor2", jobData: {}, initialState: JobState.Pending });
 
 		const records = repository.findAllForProcessor("processor1");
 
@@ -34,7 +35,7 @@ describe("InMemoryJobRecordRepository", () => {
 
 	it("marks a job record as completed", () => {
 		const repository = new InMemoryJobRecordRepository();
-		const record = repository.create({ processorName: "test", jobData: {} });
+		const record = repository.create({ processorName: "test", jobData: {}, initialState: JobState.Pending });
 
 		repository.markSuccessForRunId(record.runId, "result");
 
@@ -45,7 +46,7 @@ describe("InMemoryJobRecordRepository", () => {
 
 	it("should mark a job record as running", () => {
 		const repository = new InMemoryJobRecordRepository();
-		const record = repository.create({ processorName: "test", jobData: {} });
+		const record = repository.create({ processorName: "test", jobData: {}, initialState: JobState.Pending });
 
 		repository.markRunningForRunId(record.runId);
 
@@ -56,7 +57,7 @@ describe("InMemoryJobRecordRepository", () => {
 
 	it("should mark a job record as failed", () => {
 		const repository = new InMemoryJobRecordRepository();
-		const record = repository.create({ processorName: "test", jobData: {} });
+		const record = repository.create({ processorName: "test", jobData: {}, initialState: JobState.Pending });
 
 		repository.markFailedForRunId(record.runId, JobErrorCode.ProcessorError, "Test error message");
 
@@ -69,8 +70,8 @@ describe("InMemoryJobRecordRepository", () => {
 
 	it("should find by job Id", () => {
 		const repository = new InMemoryJobRecordRepository();
-		const record1 = repository.create({ processorName: "test", jobData: {} });
-		const _record2 = repository.create({ processorName: "test", jobData: {} });
+		const record1 = repository.create({ processorName: "test", jobData: {}, initialState: JobState.Pending });
+		const _record2 = repository.create({ processorName: "test", jobData: {}, initialState: JobState.Pending });
 		const records = repository.findAllByJobId(record1.jobId);
 		expect(records).toBeDefined();
 
@@ -86,7 +87,7 @@ describe("InMemoryJobRecordRepository", () => {
 
 	it("updates progress for a job record", () => {
 		const repository = new InMemoryJobRecordRepository();
-		const record = repository.create({ processorName: "test", jobData: {} });
+		const record = repository.create({ processorName: "test", jobData: {}, initialState: JobState.Pending });
 
 		repository.updateProgressForRunId(record.runId, 50);
 
@@ -97,7 +98,7 @@ describe("InMemoryJobRecordRepository", () => {
 
 	it("returns an empty array when no records match the processor name", () => {
 		const repository = new InMemoryJobRecordRepository();
-		repository.create({ processorName: "processor1", jobData: {} });
+		repository.create({ processorName: "processor1", jobData: {}, initialState: JobState.Pending });
 
 		const records = repository.findAllForProcessor("processor2");
 
