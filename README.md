@@ -12,7 +12,7 @@ dcs-dropzone/
 │   ├── webapp/             # Web application (frontend + backend server)
 │   └── daemon/             # Daemon service for downloads & installations
 ├── packages/               # Shared packages
-│   ├── hono/              # Shared Hono utilities and middleware
+│   ├── honoApplication/              # Shared Hono utilities and middleware
 │   ├── queue/             # Job queue library
 │   └── zod/               # Shared Zod schemas for validation
 ├── docs/                   # Technical documentation
@@ -26,7 +26,7 @@ dcs-dropzone/
 
 ### Packages
 
-- **@packages/hono**: Shared Hono utilities, middleware, and server components used across applications.
+- **@packages/honoApplication**: Shared Hono utilities, middleware, and server components used across applications.
 - **@packages/queue**: Lightweight job queue library for single-instance applications with pluggable storage.
 - **@packages/zod**: Shared Zod schemas for data validation and type safety across the monorepo.
 
@@ -121,7 +121,7 @@ bun run build        # Build daemon executable
 ```
 
 **Shared Packages**: The `packages/` directory contains code shared between apps:
-- Changes to `@packages/hono` or `@packages/zod` are immediately available to apps (no build step needed)
+- Changes to `@packages/honoApplication` or `@packages/zod` are immediately available to apps (no build step needed)
 - TypeScript references ensure type-checking works across package boundaries
 
 ### Building
@@ -192,7 +192,7 @@ Contributions are welcome! This project uses a monorepo structure with Bun works
 - Test changes locally with `bun run dev`
 - Run `bun run check` and `bun test` in the app directory
 
-**For Shared Package Changes** (e.g., hono or zod packages):
+**For Shared Package Changes** (e.g., honoApplication or zod packages):
 - Work in the relevant `packages/` directory
 - Changes are immediately reflected in dependent apps
 - Run checks across all workspaces: `bun run check` from root

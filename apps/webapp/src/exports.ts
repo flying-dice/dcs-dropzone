@@ -1,2 +1,2 @@
-export { MissionScriptRunOn } from "./server/application/enums/MissionScriptRunOn";
-export { SymbolicLinkDestRoot } from "./server/application/enums/SymbolicLinkDestRoot";
+export { MissionScriptRunOn } from "./application/enums/MissionScriptRunOn";
+export { SymbolicLinkDestRoot } from "./application/enums/SymbolicLinkDestRoot";
