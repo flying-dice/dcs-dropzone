@@ -1,8 +1,8 @@
 # Command–Query Pattern in the Webapp Server
 
-This document explains how the hono-side code under `apps/webapp/src/build/hono` uses the command–query pattern instead of a large service layer. Each operation is explicit, composable, and testable.
+This document explains how the server-side code under `apps/webapp/src/server/hono` uses the command–query pattern instead of a large service layer. Each operation is explicit, composable, and testable.
 
-**Note:** This pattern is used in the **webapp** application (`apps/webapp`). The daemon service (`apps/daemon`) uses a different architecture focused on queue management and system operations.
+**Note:** This pattern is used in the **webapp** application (`apps/webapp`). The daemon service (`apps/daemon`) uses a different architecture based on the **Ports & Adapters** pattern focused on queue management and system operations. See [Daemon Architecture](./daemon-architecture.md) for details.
 
 ## Why commands and queries?
 - Commands perform state changes (create/save/delete). They must be explicit about side effects and validations.
@@ -13,7 +13,7 @@ This separation avoids “god” services that just proxy between HTTP and the O
 ## Layout (single-file per operation)
 We use one file per operation (no per-operation folders):
 ```
-apps/webapp/src/build/hono/
+apps/webapp/src/server/
   commands/
     CreateMod.ts
     UpdateMod.ts
@@ -55,7 +55,7 @@ apps/webapp/src/build/hono/
 
 Example (abbreviated):
 ```
-// apps/webapp/src/build/hono/commands/UpdateMod.ts
+// apps/webapp/src/server/commands/UpdateMod.ts
 export type UpdateModCommand = { user: UserData; modId: string; updateData: typeof ModUpdateData._type };
 export type UpdateModResult = Result<void, "ModNotFound">;
 export default async function (cmd: UpdateModCommand): Promise<UpdateModResult> { /* ... */ }

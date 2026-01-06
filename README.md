@@ -21,8 +21,8 @@ dcs-dropzone/
 
 ### Apps
 
-- **webapp**: The web application that provides the UI for browsing and managing mods. Built with React, Hono build, and MongoDB.
-- **daemon**: The daemon service that runs locally to handle downloading, extracting, and installing mods into your DCS World installation.
+- **webapp**: The web application that provides the UI for browsing and managing mods. Built with React, Hono server, and MongoDB.
+- **daemon**: The background service that runs locally to handle downloading, extracting, and installing mods into your DCS World installation. Provides a REST API and optional TUI.
 
 ### Packages
 
@@ -52,7 +52,8 @@ dcs-dropzone/
 
 For developers and contributors, technical documentation is available in the [`docs/`](./docs) folder:
 
-- [Command-Query Pattern](./docs/command-query-pattern.md) - Server architecture pattern
+- [Command-Query Pattern](./docs/command-query-pattern.md) - Webapp server architecture pattern
+- [Daemon Architecture](./docs/daemon-architecture.md) - Daemon service architecture and design
 - [Download Queue System](./docs/download-queue-system.md) - Download management
 - [Extract Queue System](./docs/extract-queue-system.md) - Archive extraction
 
@@ -88,7 +89,7 @@ Each build can be run independently:
 # Web application (runs on default port)
 bun run dev:webapp
 
-# Daemon service (in another terminal)
+# Daemon background service (in another terminal)
 bun run dev:daemon
 ```
 
@@ -109,13 +110,13 @@ bun run test
 ```bash
 # Work on webapp
 cd apps/webapp
-bun run dev          # Start dev build
+bun run dev          # Start dev server
 bun run check        # Lint and type-check
 bun run test         # Run tests
 
 # Work on daemon
 cd apps/daemon
-bun run dev          # Start daemon
+bun run dev          # Start daemon service
 bun run build        # Build daemon executable
 ```
 
@@ -186,10 +187,10 @@ Contributions are welcome! This project uses a monorepo structure with Bun works
 
 ### Making Changes
 
-**For App-Specific Changes** (e.g., webapp or daemon):
+**For App-Specific Changes** (e.g., webapp server or daemon):
 - Work in the relevant `apps/` directory
 - Test changes locally with `bun run dev`
-- Run `bun run check` and `bun test` in the build directory
+- Run `bun run check` and `bun test` in the app directory
 
 **For Shared Package Changes** (e.g., hono or zod packages):
 - Work in the relevant `packages/` directory
@@ -198,7 +199,7 @@ Contributions are welcome! This project uses a monorepo structure with Bun works
 
 **Adding Dependencies**:
 - Shared dependencies: Add to root `package.json`
-- App-specific dependencies: Add to the build's `package.json`
+- App-specific dependencies: Add to the app's `package.json`
 - Package-specific dependencies: Add to the package's `package.json`
 
 ### Submitting Changes
