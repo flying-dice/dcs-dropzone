@@ -15,8 +15,3 @@ export function getPrevious<T>(items: T[], current: T | undefined): T | undefine
 	const previousIndex = clamp(currentIndex - 1, 0, items.length - 1);
 	return items[previousIndex];
 }
-
-export function toPercentOrDash(value: number | undefined): string {
-	if (value === undefined) return "-";
-	return `${value.toFixed(0)}%`;
-}
