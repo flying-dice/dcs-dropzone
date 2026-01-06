@@ -55,18 +55,18 @@ The available formats depend on your 7zip installation.
 
 ## Configuration
 
-The 7zip executable path is configured in the daemon's `config.toml` (`apps/daemon/config.toml`):
+The 7zip executable path is configured in the daemon's `config.toml` (located in the daemon's working directory):
 
 ```toml
 [binaries]
-sevenzip = "binaries/7za.exe"
+sevenzip = "bin/7za.exe"
 ```
 
 ## Troubleshooting
 
 **Extractions not starting:**
 - Verify all dependent downloads completed successfully
-- Check 7zip executable path in `apps/daemon/config.toml`
+- Check 7zip executable path in `config.toml`
 - Check logs for errors
 
 **Extractions failing:**

@@ -42,17 +42,17 @@ Downloads can be cancelled individually or by release.
 
 ## Configuration
 
-The wget executable path is configured in the daemon's `config.toml` (`apps/daemon/config.toml`):
+The wget executable path is configured in the daemon's `config.toml` (located in the daemon's working directory):
 
 ```toml
 [binaries]
-wget = "binaries/wget.exe"
+wget = "bin/wget.exe"
 ```
 
 ## Troubleshooting
 
 **Downloads not starting:**
-- Check wget executable path in `apps/daemon/config.toml`
+- Check wget executable path in `config.toml`
 - Check logs for errors
 
 **Downloads failing:**

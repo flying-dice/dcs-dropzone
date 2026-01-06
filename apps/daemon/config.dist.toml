@@ -9,20 +9,20 @@ dcs_install_dir = "C:/Program Files/Eagle Dynamics/DCS World"                  #
 # Third Party Binaries Configuration
 # =======================================
 [binaries]
-wget = "bin/wget.exe"                                                     # Path to download the winget binary
+wget = "bin/wget.exe"                                                     # Path to wget binary for downloads
 sevenzip = "bin/7za.exe"                                                  # Path to 7zip executable
 
 # =======================================
 # Server Configuration
 # =======================================
 [server]
-host = "127.0.0.1"                                                              # Address to bind the HTTP hono
+host = "127.0.0.1"                                                              # Address to bind the HTTP server
 port = 3001                                                                     # Port to listen on
 
 # =======================================
-# ProdApplication Configuration
+# Application Configuration
 # =======================================
-[build]
+[app]
 mods_dir = "./mods"                                                             # Path to application working directory
 tui_enabled = true                                                              # Enable Terminal User Interface (TUI)
 
