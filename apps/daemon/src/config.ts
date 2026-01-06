@@ -13,8 +13,8 @@ const configSchema = z.object({
 		url: z.string(),
 	}),
 	binaries: z.object({
-		wget: z.string().min(1, "wget path is required"),
-		sevenzip: z.string().min(1, "7zip path is required"),
+		wget: z.string().optional(),
+		sevenzip: z.string().optional(),
 	}),
 	dcs: z.object({
 		dcs_working_dir: z.string().min(1, "DCS working path is required"),

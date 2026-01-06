@@ -27,7 +27,7 @@ export const TestCases: TestCase[] = [
 				app: new ProdApplication({
 					databaseUrl: ":memory:",
 					wgetExecutablePath: SYSTEM_WGET_PATH,
-					sevenzipExecutablePath: SYSTEM_7ZIP_PATH,
+					sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
 					dropzoneModsFolder: tempDir.join("dcs-dropzone", "mods"),
 					dcsPaths: {
 						DCS_WORKING_DIR: tempDir.join("dcs-dropzone", "dcs", "working"),

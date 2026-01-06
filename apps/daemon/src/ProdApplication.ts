@@ -14,7 +14,7 @@ const logger = getLogger("ProdApplication");
 type Deps = {
 	databaseUrl: string;
 	wgetExecutablePath: string;
-	sevenzipExecutablePath: string;
+	sevenZipExecutablePath: string;
 	dropzoneModsFolder: string;
 	dcsPaths: Record<SymbolicLinkDestRoot, string>;
 };
@@ -31,7 +31,7 @@ export class ProdApplication extends Application {
 
 		const downloadProcessor = new WgetDownloadProcessor({ wgetExecutablePath: deps.wgetExecutablePath });
 		const extractProcessor = new SevenZipExtractProcessor({
-			sevenZipExecutablePath: deps.sevenzipExecutablePath,
+			sevenZipExecutablePath: deps.sevenZipExecutablePath,
 		});
 
 		super({
