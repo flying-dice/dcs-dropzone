@@ -40,4 +40,40 @@ export class TestFileSystem implements FileSystem {
 	resolve(...paths: string[]): string {
 		return paths.join("/");
 	}
+
+	glob(path: string, pattern: string): string[] {
+		const glob = new Bun.Glob(pattern);
+
+		const files: string[] = [];
+
+		for (const file of this.files.keys()) {
+			if (file.startsWith(path) && glob.match(file)) {
+				files.push(file);
+			}
+		}
+
+		for (const symlink of this.symlinks.keys()) {
+			if (symlink.startsWith(path) && glob.match(symlink)) {
+				files.push(symlink);
+			}
+		}
+
+		return files;
+	}
+
+	hasSymlink(linkPath: string): boolean {
+		return this.symlinks.has(linkPath);
+	}
+
+	hasFile(filePath: string): boolean {
+		return this.files.has(filePath);
+	}
+
+	getFileContent(filePath: string): string | undefined {
+		return this.files.get(filePath);
+	}
+
+	hasDir(dirPath: string): boolean {
+		return this.dirs.has(dirPath);
+	}
 }

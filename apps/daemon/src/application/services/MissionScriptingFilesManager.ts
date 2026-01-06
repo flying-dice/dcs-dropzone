@@ -1,5 +1,6 @@
 import { getLogger } from "log4js";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
+import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../../constants.ts";
 import { generateDropzoneMissionScriptingScript } from "../functions/generateDropzoneMissionScriptingScript.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
@@ -9,8 +10,8 @@ const logger = getLogger("MissionScriptingFilesManager");
 
 export class MissionScriptingFilesManager {
 	private static readonly PATHS: Record<MissionScriptRunOn, string> = {
-		[MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE]: "Scripts/DropzoneMissionScriptsBeforeSanitize.lua",
-		[MissionScriptRunOn.MISSION_START_AFTER_SANITIZE]: "Scripts/DropzoneMissionScriptsAfterSanitize.lua",
+		[MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE]: MISSION_START_BEFORE_SANITIZE,
+		[MissionScriptRunOn.MISSION_START_AFTER_SANITIZE]: MISSION_START_AFTER_SANITIZE,
 	};
 
 	private readonly beforeAbsPath: string;

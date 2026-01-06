@@ -6,6 +6,7 @@ import { TestAttributesRepository } from "./TestAttributesRepository.ts";
 import { TestDelayProcessor } from "./TestDelayProcessor.ts";
 import { TestFileSystem } from "./TestFileSystem.ts";
 import { TestReleaseRepository } from "./TestReleaseRepository.ts";
+import { TestTempDir } from "./TestTempDir.ts";
 import { TestUUIDGenerator } from "./TestUUIDGenerator.ts";
 
 export class TestApplication extends Application {
@@ -20,9 +21,10 @@ export class TestApplication extends Application {
 		const downloadProcessor = new TestDelayProcessor<"download", DownloadJobData, DownloadJobResult>("download");
 		const extractProcessor = new TestDelayProcessor<"extract", ExtractJobData, ExtractJobResult>("extract");
 
-		const dropzoneModsFolder = "mods";
-		const dcsWorkingDir = "C:/Users/JohnDoe/Saved Games/DCS";
-		const dcsInstallDir = "C:/Program Files/Eagle Dynamics/DCS World";
+		const tempFile = new TestTempDir();
+		const dropzoneModsFolder = tempFile.join("mods");
+		const dcsWorkingDir = tempFile.join("Saved Games", "DCS");
+		const dcsInstallDir = tempFile.join("Program Files", "Eagle Dynamics", "DCS World");
 
 		super({
 			jobRecordRepository,

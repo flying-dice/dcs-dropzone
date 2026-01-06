@@ -9,7 +9,7 @@ import {
 	unlinkSync,
 	writeFileSync,
 } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { getLogger } from "log4js";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
 
@@ -87,6 +87,11 @@ export class LocalFileSystem implements FileSystem {
 
 	resolve(...paths: string[]): string {
 		return resolve(...paths);
+	}
+
+	glob(path: string, pattern: string): string[] {
+		const glob = new Bun.Glob(join(path, pattern));
+		return Array.from(glob.scanSync({ followSymlinks: true }));
 	}
 
 	private getSymlinkType(pathlike: PathLike): SymlinkType {

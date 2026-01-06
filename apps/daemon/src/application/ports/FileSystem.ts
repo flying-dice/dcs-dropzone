@@ -4,4 +4,5 @@ export interface FileSystem {
 	removeDir(path: string): void;
 	writeFile(filePath: string, content: string): void;
 	resolve(...paths: string[]): string;
+	glob(path: string, pattern: string): string[];
 }

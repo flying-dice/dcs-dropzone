@@ -1,4 +1,4 @@
-import {delimiter, join} from "node:path";
+import { delimiter, join } from "node:path";
 
 /**
  * Finds the full path of a command in the system's PATH.

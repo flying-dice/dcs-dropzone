@@ -1,10 +1,12 @@
 import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { ok } from "node:assert";
+import { join } from "node:path";
 import { JobState } from "@packages/queue";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import type { Application } from "../application/Application.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
 import { TestCases } from "./TestCases.ts";
 import type { TestTempDir } from "./TestTempDir.ts";
 import { waitForJobsForRelease } from "./utils.ts";
@@ -122,7 +124,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(downloadJobs[0]).toMatchObject({
 				jobData: {
 					url: "https://getsamplefiles.com/download/zip/sample-1.zip",
-					destinationFolder: expect.stringMatching(/test-release-id$/),
+					destinationFolder: join(app.deps.dropzoneModsFolder, "test-release-id"),
 					releaseId: "test-release-id",
 					assetId: "test-release-id__asset-1",
 					urlId: "test-release-id__asset-1__url-1",
@@ -132,8 +134,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(extractJobs.length).toEqual(1);
 			expect(extractJobs[0]).toMatchObject({
 				jobData: {
-					archivePath: expect.stringMatching(/sample-1\.zip$/),
-					destinationFolder: expect.stringMatching(/test-release-id$/),
+					archivePath: join(app.deps.dropzoneModsFolder, "test-release-id", "sample-1.zip"),
+					destinationFolder: join(app.deps.dropzoneModsFolder, "test-release-id"),
 					releaseId: "test-release-id",
 					assetId: "test-release-id__asset-1",
 				},
@@ -189,6 +191,22 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
 			ok(symlinkInstalledPath);
 			expect(symlinkInstalledPath).toEndWith("test.lua");
+		});
+
+		it("should write Mission Scripting Files", async () => {
+			app.addRelease(modAndReleaseData);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+
+			app.enableRelease(modAndReleaseData.releaseId);
+
+			const dcsWorkingDirFiles = app.deps.fileSystem.glob(app.deps.dcsPaths.DCS_WORKING_DIR, "**/*");
+
+			const missionStartAfterSanitizeFile = dcsWorkingDirFiles.find((f) => f.endsWith(MISSION_START_AFTER_SANITIZE));
+
+			const missionStartBeforeSanitizeFile = dcsWorkingDirFiles.find((f) => f.endsWith(MISSION_START_BEFORE_SANITIZE));
+
+			expect(missionStartBeforeSanitizeFile).toBeDefined();
+			expect(missionStartAfterSanitizeFile).toBeDefined();
 		});
 	});
 });
