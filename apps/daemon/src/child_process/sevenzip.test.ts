@@ -1,34 +1,32 @@
 import "../__tests__/log4js.ts";
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getLogger } from "log4js";
-import { getAllPathsForTree } from "../__tests__/utils.ts";
+import { TestTempDir } from "../__tests__/TestTempDir.ts";
+import { SYSTEM_7ZIP_PATH } from "../__tests__/utils.ts";
 import { SevenzipErrors, spawnSevenzip } from "./sevenzip.ts";
 
 const logger = getLogger("sevenzip.test.ts");
 
 describe("Sevenzip Child Process", () => {
-	let tempDir: string;
-	let exePath: string;
+	let tempDir: TestTempDir;
 
 	beforeEach(() => {
-		exePath = process.env.SEVEN7_PATH || "bin/7za.exe";
-		tempDir = mkdtempSync(join(tmpdir(), "dcs-dropzone__"));
+		tempDir = new TestTempDir();
 		logger.info("Running test with temporary directory:", tempDir);
 	});
 
 	afterEach(() => {
-		logger.info("Removing temporary directory:", getAllPathsForTree(tempDir));
-		rmSync(tempDir, { recursive: true });
+		logger.info("Removing temporary directory:", tempDir.glob("**/*"));
+		tempDir.cleanup();
 	});
 
 	test("should return PropsError if executable path does not exist", async () => {
 		const result = await spawnSevenzip({
 			exePath: join(tmpdir(), "7za.exe"),
 			archivePath: "test.7z",
-			targetDir: tempDir,
+			targetDir: tempDir.path,
 			onProgress: () => {},
 		});
 
@@ -40,7 +38,7 @@ describe("Sevenzip Child Process", () => {
 		const result = await spawnSevenzip({
 			exePath: tmpdir(),
 			archivePath: "test.7z",
-			targetDir: tempDir,
+			targetDir: tempDir.path,
 			onProgress: () => {},
 		});
 
@@ -50,9 +48,9 @@ describe("Sevenzip Child Process", () => {
 
 	test("should return PropsError if archive path does not exist", async () => {
 		const result = await spawnSevenzip({
-			exePath,
+			exePath: SYSTEM_7ZIP_PATH,
 			archivePath: "nonexistent/test.7z",
-			targetDir: tempDir,
+			targetDir: tempDir.path,
 			onProgress: () => {},
 		});
 

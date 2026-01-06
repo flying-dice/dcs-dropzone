@@ -6,17 +6,18 @@ import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import type { Application } from "../application/Application.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { TestCases } from "./TestCases.ts";
+import type { TestTempDir } from "./TestTempDir.ts";
 import { waitForJobsForRelease } from "./utils.ts";
 
 describe.each(TestCases)("$label", ({ build }) => {
 	let modAndReleaseData: ModAndReleaseData;
 	let app: Application;
-	let cleanup: () => void;
+	let tempDir: TestTempDir;
 
 	beforeEach(() => {
 		const c = build();
 		app = c.app;
-		cleanup = c.cleanup;
+		tempDir = c.tempDir;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -57,7 +58,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 	});
 
 	afterEach(() => {
-		cleanup();
+		tempDir.cleanup();
 	});
 
 	describe("addRelease", () => {

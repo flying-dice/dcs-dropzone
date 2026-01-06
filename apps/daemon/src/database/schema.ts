@@ -1,8 +1,6 @@
 import type { JobErrorCode, JobState } from "@packages/queue";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import { DownloadJobStatus } from "../application/enums/DownloadJobStatus.ts";
-import { ExtractJobStatus } from "../application/enums/ExtractJobStatus.ts";
 
 export const T_APP_ATTRIBUTES = sqliteTable("APP_ATTRIBUTES", {
 	key: text("key").primaryKey(),

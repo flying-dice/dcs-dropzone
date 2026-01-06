@@ -1,15 +1,11 @@
+import * as assert from "node:assert";
 import * as inspector from "node:inspector";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { type JobRecordRepository, JobState } from "@packages/queue";
 import { differenceInSeconds } from "date-fns";
 import { compact } from "lodash";
 import { getLogger } from "log4js";
 import type { ReleaseRepository } from "../application/ports/ReleaseRepository.ts";
-
-export function getAllPathsForTree(path: string) {
-	const glob = new Bun.Glob(join(path, "**/*"));
-	return Array.from(glob.scanSync({ followSymlinks: true }));
-}
 
 export async function waitForJobsForRelease(
 	deps: { releaseRepository: ReleaseRepository; jobRecordRepository: JobRecordRepository },
@@ -57,3 +53,24 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
 		);
 	});
 }
+
+/**
+ * Finds the full path of a command in the system's PATH.
+ *
+ * Adds the local "bin" directory to the PATH for resolution.
+ */
+export function which(command: string): string | null {
+	return Bun.which(command, { PATH: [join(process.cwd(), "bin"), process.env.PATH].join(delimiter) });
+}
+
+const WGET_BINARIES = ["wget"];
+const SEVEN_ZIP_BINARIES = ["7za", "7zz"];
+
+const _SYSTEM_WGET_PATH = WGET_BINARIES.map(which).find(Boolean);
+const _SYSTEM_7ZIP_PATH = SEVEN_ZIP_BINARIES.map(which).find(Boolean);
+
+assert.ok(_SYSTEM_WGET_PATH, `${WGET_BINARIES.join(",")} must be installed and available in PATH.`);
+assert.ok(_SYSTEM_7ZIP_PATH, `${SEVEN_ZIP_BINARIES.join(",")} must be installed and available in PATH.`);
+
+export const SYSTEM_WGET_PATH: string = _SYSTEM_WGET_PATH!;
+export const SYSTEM_7ZIP_PATH: string = _SYSTEM_7ZIP_PATH!;
