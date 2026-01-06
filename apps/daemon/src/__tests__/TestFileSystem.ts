@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
 
 export class TestFileSystem implements FileSystem {
@@ -38,7 +39,7 @@ export class TestFileSystem implements FileSystem {
 	}
 
 	resolve(...paths: string[]): string {
-		return paths.join("/");
+		return resolve(...paths);
 	}
 
 	glob(path: string, pattern: string): string[] {
