@@ -14,9 +14,6 @@ dcs_install_dir = "./._dcs_install_dir"                                         
 wget = "bin/wget.exe"                                                     # Path to download the winget binary
 sevenzip = "bin/7za.exe"                                                  # Path to 7zip executable
 
-#wget = "/opt/homebrew/bin/wget"                                                 # Path to download the winget binary
-#sevenzip = "/opt/homebrew/bin/7zz"                                              # Path to 7zip executable
-
 # =======================================
 # Server Configuration
 # =======================================
