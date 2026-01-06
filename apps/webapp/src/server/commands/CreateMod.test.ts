@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { ModCategory } from "../enums/ModCategory.ts";
+import { ModCategory } from "../application/enums/ModCategory.ts";
 import createMod from "./CreateMod.ts";
 
 describe("CreateMod", () => {

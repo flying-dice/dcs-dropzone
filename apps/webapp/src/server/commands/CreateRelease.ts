@@ -1,11 +1,11 @@
 import { err, ok, type Result } from "neverthrow";
 import objectHash from "object-hash";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import type { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
-import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import type { UserData } from "../schemas/UserData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModRelease } from "../infrastructure/mongo-db/entities/ModRelease.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import type { ModReleaseCreateData } from "../application/schemas/ModReleaseCreateData.ts";
+import { ModReleaseData } from "../application/schemas/ModReleaseData.ts";
+import type { UserData } from "../application/schemas/UserData.ts";
 
 export type CreateReleaseCommand = {
 	user: UserData;

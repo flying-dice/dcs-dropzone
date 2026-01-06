@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import Database from "../infrastructure/mongo-db";
-import { ErrorData } from "../schemas/ErrorData.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
 
 const router = new Hono();
 const logger = getLogger("api/health");

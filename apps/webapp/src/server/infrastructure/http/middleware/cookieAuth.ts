@@ -3,9 +3,9 @@ import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
-import appConfig from "../ApplicationConfig.ts";
-import getUserById, { type GetUserByIdResult } from "../queries/GetUserById.ts";
-import type { UserData } from "../schemas/UserData.ts";
+import appConfig from "../../../ApplicationConfig.ts";
+import getUserById, { type GetUserByIdResult } from "../../../queries/GetUserById.ts";
+import type { UserData } from "../../../application/schemas/UserData.ts";
 
 const logger = getLogger("cookieAuth");
 

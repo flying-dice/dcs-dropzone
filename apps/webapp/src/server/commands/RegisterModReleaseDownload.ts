@@ -1,8 +1,8 @@
 import { getLogger } from "log4js";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
-import { ModReleaseDownload } from "../entities/ModReleaseDownload.ts";
-import type { ModReleaseDownloadData } from "../schemas/ModReleaseDownloadData.ts";
+import type { ModReleaseDownloadData } from "../application/schemas/ModReleaseDownloadData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModRelease } from "../infrastructure/mongo-db/entities/ModRelease.ts";
+import { ModReleaseDownload } from "../infrastructure/mongo-db/entities/ModReleaseDownload.ts";
 
 const logger = getLogger("RegisterModReleaseDownloadCommand");
 

@@ -2,8 +2,8 @@ import { getLogger } from "log4js";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import * as mongoose from "mongoose";
 import applicationConfig from "../../ApplicationConfig.ts";
-import { ModReleaseMigrations } from "../../entities/ModRelease.ts";
-import { ModSummaryMigrations } from "../../entities/ModSummary.ts";
+import { ModReleaseMigrations } from "./entities/ModRelease.ts";
+import { ModSummaryMigrations } from "./entities/ModSummary.ts";
 import { MongoUrl } from "./MongoUrl.ts";
 
 const logger = getLogger("Database");

@@ -1,7 +1,7 @@
 import { getLogger } from "log4js";
-import { ModRelease } from "../entities/ModRelease.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import type { ModLatestReleaseData } from "../schemas/ModLatestReleaseData.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import type { ModLatestReleaseData } from "../application/schemas/ModLatestReleaseData.ts";
+import { ModRelease } from "../infrastructure/mongo-db/entities/ModRelease.ts";
 
 const logger = getLogger("FindUpdateInformationByIdsQuery");
 

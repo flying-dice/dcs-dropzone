@@ -4,19 +4,19 @@ import { toCamelCase } from "drizzle-orm/casing";
 import { getLogger } from "log4js";
 import objectHash from "object-hash";
 import { getRegistryEntry, getRegistryIndex } from "../../client/_autogen/legacy_api.ts";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
-import { MissionScriptRunOn } from "../enums/MissionScriptRunOn.ts";
-import { ModCategory } from "../enums/ModCategory.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import { SymbolicLinkDestRoot } from "../enums/SymbolicLinkDestRoot.ts";
-import { ModData } from "../schemas/ModData.ts";
+import { MissionScriptRunOn } from "../application/enums/MissionScriptRunOn.ts";
+import { ModCategory } from "../application/enums/ModCategory.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import { SymbolicLinkDestRoot } from "../application/enums/SymbolicLinkDestRoot.ts";
+import { ModData } from "../application/schemas/ModData.ts";
 import {
 	ModReleaseData,
 	type ModReleaseMissionScriptData,
 	type ModReleaseSymbolicLinkData,
-} from "../schemas/ModReleaseData.ts";
-import type { UserData } from "../schemas/UserData.ts";
+} from "../application/schemas/ModReleaseData.ts";
+import type { UserData } from "../application/schemas/UserData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModRelease } from "../infrastructure/mongo-db/entities/ModRelease.ts";
 
 const logger = getLogger("MigrateLegacyRegistryCommand");
 

@@ -7,13 +7,13 @@ import { z } from "zod";
 import createRelease from "../commands/CreateRelease.ts";
 import deleteRelease from "../commands/DeleteRelease.ts";
 import updateRelease from "../commands/UpdateRelease.ts";
-import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { cookieAuth } from "../infrastructure/http/middleware/cookieAuth.ts";
 import findUserModReleaseById from "../queries/FindUserModReleaseById.ts";
 import findUserModReleases from "../queries/FindUserModReleases.ts";
-import { ErrorData } from "../schemas/ErrorData.ts";
-import { ModReleaseCreateData } from "../schemas/ModReleaseCreateData.ts";
-import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import { OkData } from "../schemas/OkData.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
+import { ModReleaseCreateData } from "../application/schemas/ModReleaseCreateData.ts";
+import { ModReleaseData } from "../application/schemas/ModReleaseData.ts";
+import { OkData } from "../application/schemas/OkData.ts";
 
 const router = new Hono();
 

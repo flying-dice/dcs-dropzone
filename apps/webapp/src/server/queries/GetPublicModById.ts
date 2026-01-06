@@ -1,10 +1,10 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
-import { Mod } from "../entities/Mod.ts";
-import { User } from "../entities/User.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import { ModData } from "../schemas/ModData.ts";
-import { UserData } from "../schemas/UserData.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import { ModData } from "../application/schemas/ModData.ts";
+import { UserData } from "../application/schemas/UserData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { User } from "../infrastructure/mongo-db/entities/User.ts";
 
 const logger = getLogger("GetById");
 

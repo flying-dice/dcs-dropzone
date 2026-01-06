@@ -1,8 +1,8 @@
 import { subSeconds } from "date-fns";
 import { getLogger } from "log4js";
 import type { QueryFilter } from "mongoose";
-import { Migration } from "../../entities/Migration.ts";
-import { MigrationStatus } from "../../enums/MigrationStatus.ts";
+import { MigrationStatus } from "../../application/enums/MigrationStatus.ts";
+import { Migration } from "./entities/Migration.ts";
 
 const logger = getLogger("Migrations");
 const INSTANCE_ID = crypto.randomUUID();

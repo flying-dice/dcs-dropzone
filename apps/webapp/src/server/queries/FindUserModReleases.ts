@@ -1,9 +1,9 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
-import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import type { UserData } from "../schemas/UserData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModRelease } from "../infrastructure/mongo-db/entities/ModRelease.ts";
+import { ModReleaseData } from "../application/schemas/ModReleaseData.ts";
+import type { UserData } from "../application/schemas/UserData.ts";
 
 const logger = getLogger("FindUserModReleases");
 

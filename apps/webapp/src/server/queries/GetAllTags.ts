@@ -1,5 +1,5 @@
-import { Mod } from "../entities/Mod.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
 
 type GetAllTagsResult = string[];
 

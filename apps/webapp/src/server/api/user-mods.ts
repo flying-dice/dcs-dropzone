@@ -7,16 +7,16 @@ import { z } from "zod";
 import createMod from "../commands/CreateMod.ts";
 import deleteMod from "../commands/DeleteMod.ts";
 import updateMod from "../commands/UpdateMod.ts";
-import { cookieAuth } from "../middleware/cookieAuth.ts";
+import { cookieAuth } from "../infrastructure/http/middleware/cookieAuth.ts";
 import findAllUserMods from "../queries/FindAllUserMods.ts";
 import findUserModById from "../queries/FindUserModById.ts";
-import { ErrorData } from "../schemas/ErrorData.ts";
-import { ModCreateData } from "../schemas/ModCreateData.ts";
-import { ModData } from "../schemas/ModData.ts";
-import { ModSummaryData } from "../schemas/ModSummaryData.ts";
-import { ModUpdateData } from "../schemas/ModUpdateData.ts";
-import { OkData } from "../schemas/OkData.ts";
-import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
+import { ModCreateData } from "../application/schemas/ModCreateData.ts";
+import { ModData } from "../application/schemas/ModData.ts";
+import { ModSummaryData } from "../application/schemas/ModSummaryData.ts";
+import { ModUpdateData } from "../application/schemas/ModUpdateData.ts";
+import { OkData } from "../application/schemas/OkData.ts";
+import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
 
 const router = new Hono();
 

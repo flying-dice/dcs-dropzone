@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { User } from "../entities/User.ts";
+import { User } from "../infrastructure/mongo-db/entities/User.ts";
 import handleAuthResult from "./HandleAuthResult.ts";
 
 describe("HandleAuthResult", () => {

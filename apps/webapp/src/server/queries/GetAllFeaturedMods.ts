@@ -1,6 +1,6 @@
-import { ModSummary } from "../entities/ModSummary.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import { ModSummaryData } from "../schemas/ModSummaryData.ts";
+import { ModSummary } from "../infrastructure/mongo-db/entities/ModSummary.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import { ModSummaryData } from "../application/schemas/ModSummaryData.ts";
 
 type GetAllFeaturedModsResult = ModSummaryData[];
 

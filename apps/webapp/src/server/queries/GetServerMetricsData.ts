@@ -1,7 +1,7 @@
 import { getLogger } from "log4js";
-import { Mod } from "../entities/Mod.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import { ServerMetricsData } from "../schemas/ServerMetricsData.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import { ServerMetricsData } from "../application/schemas/ServerMetricsData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
 
 const logger = getLogger("GetServerMetricsDataQuery");
 

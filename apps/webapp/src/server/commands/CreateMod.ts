@@ -1,9 +1,9 @@
 import { getLogger } from "log4js";
-import { Mod } from "../entities/Mod.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import type { ModCreateData } from "../schemas/ModCreateData.ts";
-import { ModData } from "../schemas/ModData.ts";
-import type { UserData } from "../schemas/UserData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import type { ModCreateData } from "../application/schemas/ModCreateData.ts";
+import { ModData } from "../application/schemas/ModData.ts";
+import type { UserData } from "../application/schemas/UserData.ts";
 
 export type CreateModCommand = {
 	user: UserData;

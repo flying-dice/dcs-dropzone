@@ -5,9 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import appConfig from "../ApplicationConfig.ts";
 import migrateLegacyRegistry from "../commands/MigrateLegacyRegistry.ts";
-import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { ErrorData } from "../schemas/ErrorData.ts";
-import { OkData } from "../schemas/OkData.ts";
+import { cookieAuth } from "../infrastructure/http/middleware/cookieAuth.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
+import { OkData } from "../application/schemas/OkData.ts";
 
 const router = new Hono();
 const logger = getLogger("api/migrate");

@@ -1,6 +1,6 @@
 import mongoose, { type InferRawDocType, type InferSchemaType, Schema } from "mongoose";
 import objectHash from "object-hash";
-import { MongoMigration } from "../infrastructure/mongo-db/MongoMigration.ts";
+import { MongoMigration } from "../MongoMigration.ts";
 
 const schema = new Schema(
 	{

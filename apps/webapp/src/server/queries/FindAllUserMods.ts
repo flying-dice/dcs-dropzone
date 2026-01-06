@@ -1,9 +1,9 @@
 import { getLogger } from "log4js";
-import { ModSummary } from "../entities/ModSummary.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import { ModSummaryData } from "../schemas/ModSummaryData.ts";
-import type { UserData } from "../schemas/UserData.ts";
-import { UserModsMetaData } from "../schemas/UserModsMetaData.ts";
+import { ModSummary } from "../infrastructure/mongo-db/entities/ModSummary.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import { ModSummaryData } from "../application/schemas/ModSummaryData.ts";
+import type { UserData } from "../application/schemas/UserData.ts";
+import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
 
 const logger = getLogger("FindAllUserModsQuery");
 

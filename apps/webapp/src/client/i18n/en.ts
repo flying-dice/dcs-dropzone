@@ -1,4 +1,4 @@
-import { ModCategory } from "../../server/enums/ModCategory.ts";
+import { ModCategory } from "../../server/application/enums/ModCategory.ts";
 import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
 import assetHelpMd from "./en_AssetHelp.md" with { type: "text" };
 import missionScriptHelp from "./en_MissionScriptHelp.md" with { type: "text" };

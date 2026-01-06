@@ -1,5 +1,5 @@
 import mongoose, { type InferRawDocType, type InferSchemaType, Schema } from "mongoose";
-import { MongoMigration } from "../infrastructure/mongo-db/MongoMigration.ts";
+import { MongoMigration } from "../MongoMigration.ts";
 import { Mod } from "./Mod.ts";
 
 const schema = new Schema(

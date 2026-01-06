@@ -4,9 +4,9 @@ import { StatusCodes } from "http-status-codes";
 import getAllFeaturedMods from "../queries/GetAllFeaturedMods.ts";
 import getAllPopularMods from "../queries/GetAllPopularMods.ts";
 import getServerMetricsData from "../queries/GetServerMetricsData.ts";
-import { ErrorData } from "../schemas/ErrorData.ts";
-import { ModSummaryData } from "../schemas/ModSummaryData.ts";
-import { ServerMetricsData } from "../schemas/ServerMetricsData.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
+import { ModSummaryData } from "../application/schemas/ModSummaryData.ts";
+import { ServerMetricsData } from "../application/schemas/ServerMetricsData.ts";
 
 const router = new Hono();
 

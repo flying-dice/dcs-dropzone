@@ -7,9 +7,9 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import appConfig from "../ApplicationConfig.ts";
 import handleAuthResult from "../commands/HandleAuthResult.ts";
-import { cookieAuth } from "../middleware/cookieAuth.ts";
-import { ErrorData } from "../schemas/ErrorData.ts";
-import { UserData } from "../schemas/UserData.ts";
+import { cookieAuth } from "../infrastructure/http/middleware/cookieAuth.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
+import { UserData } from "../application/schemas/UserData.ts";
 import { AuthServiceFactory } from "../services/AuthService/AuthServiceFactory.ts";
 import { AuthServiceProvider } from "../services/AuthService/AuthServiceProvider.ts";
 

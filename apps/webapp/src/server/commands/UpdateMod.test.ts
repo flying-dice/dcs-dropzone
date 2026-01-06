@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { Mod } from "../entities/Mod.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
 import updateMod from "./UpdateMod.ts";
 
 describe("UpdateMod", () => {

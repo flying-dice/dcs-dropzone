@@ -1,9 +1,9 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import { ModReleaseData } from "../schemas/ModReleaseData.ts";
+import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import { ModReleaseData } from "../application/schemas/ModReleaseData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModRelease } from "../infrastructure/mongo-db/entities/ModRelease.ts";
 
 const logger = getLogger("FindPublicModReleasesQuery");
 

@@ -1,7 +1,7 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
-import { User } from "../entities/User.ts";
-import { UserData } from "../schemas/UserData.ts";
+import { UserData } from "../application/schemas/UserData.ts";
+import { User } from "../infrastructure/mongo-db/entities/User.ts";
 
 const logger = getLogger("GetUserById");
 

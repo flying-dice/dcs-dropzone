@@ -10,11 +10,11 @@ import findLatestPublicModReleaseByModId, {
 } from "../queries/FindLatestPublicModReleaseByModId.ts";
 import findPublicModReleaseById from "../queries/FindPublicModReleaseById.ts";
 import findPublicModReleases from "../queries/FindPublicModReleases.ts";
-import { ErrorData } from "../schemas/ErrorData.ts";
-import { ModReleaseData } from "../schemas/ModReleaseData.ts";
-import { ModReleaseDownloadData } from "../schemas/ModReleaseDownloadData.ts";
-import { OkData } from "../schemas/OkData.ts";
-import { TypedErrorData } from "../schemas/TypedErrorData.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
+import { ModReleaseData } from "../application/schemas/ModReleaseData.ts";
+import { ModReleaseDownloadData } from "../application/schemas/ModReleaseDownloadData.ts";
+import { OkData } from "../application/schemas/OkData.ts";
+import { TypedErrorData } from "../application/schemas/TypedErrorData.ts";
 
 const router = new Hono();
 

@@ -3,9 +3,9 @@ import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import { ModCategory } from "../enums/ModCategory.ts";
+import { ModCategory } from "../application/enums/ModCategory.ts";
 import getCategoryCounts from "../queries/GetCategoryCounts.ts";
-import { ErrorData } from "../schemas/ErrorData.ts";
+import { ErrorData } from "../application/schemas/ErrorData.ts";
 
 const router = new Hono();
 

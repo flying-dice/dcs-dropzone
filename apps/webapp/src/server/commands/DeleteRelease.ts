@@ -1,8 +1,8 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
-import { Mod } from "../entities/Mod.ts";
-import { ModRelease } from "../entities/ModRelease.ts";
-import type { UserData } from "../schemas/UserData.ts";
+import type { UserData } from "../application/schemas/UserData.ts";
+import { Mod } from "../infrastructure/mongo-db/entities/Mod.ts";
+import { ModRelease } from "../infrastructure/mongo-db/entities/ModRelease.ts";
 
 const logger = getLogger("DeleteReleaseCommand");
 
