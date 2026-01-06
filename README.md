@@ -9,7 +9,7 @@ This project uses a monorepo structure organized with Bun workspaces:
 ```
 dcs-dropzone/
 ├── apps/                    # Applications
-│   ├── webapp/             # Web application (frontend + build)
+│   ├── webapp/             # Web application (frontend + backend server)
 │   └── daemon/             # Daemon service for downloads & installations
 ├── packages/               # Shared packages
 │   ├── hono/              # Shared Hono utilities and middleware
@@ -26,7 +26,7 @@ dcs-dropzone/
 
 ### Packages
 
-- **@packages/hono**: Shared Hono utilities, middleware, and build components used across applications.
+- **@packages/hono**: Shared Hono utilities, middleware, and server components used across applications.
 - **@packages/queue**: Lightweight job queue library for single-instance applications with pluggable storage.
 - **@packages/zod**: Shared Zod schemas for data validation and type safety across the monorepo.
 
@@ -83,7 +83,7 @@ This will install dependencies for the root workspace and all apps and packages.
 
 ### Running Development Servers
 
-Each build can be run independently:
+Each app can be run independently:
 
 ```bash
 # Web application (runs on default port)
@@ -144,7 +144,7 @@ bun run build
 # Run all tests across the monorepo
 bun run test
 
-# Run tests for a specific build/package
+# Run tests for a specific app/package
 cd apps/webapp
 bun test
 ```
@@ -157,7 +157,7 @@ The monorepo uses Biome for linting and formatting:
 # Check and fix all workspaces
 bun run check
 
-# Check a specific build/package
+# Check a specific app/package
 cd apps/webapp
 bun run check
 ```
