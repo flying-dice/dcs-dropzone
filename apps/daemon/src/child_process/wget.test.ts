@@ -25,7 +25,7 @@ describe("Wget Child Process", () => {
 	test("should return PropsError if executable path does not exist", async () => {
 		const result = await spawnWget({
 			exePath: join(tmpdir(), "wget.exe"),
-			url: "https://getsamplefiles.com/download/zip/sample-1.zip",
+			url: "https://github.com/flying-dice/hello-world-mod/raw/refs/heads/main/sample-1.zip",
 			target: tempDir.path,
 			onProgress: () => {},
 		});
@@ -37,7 +37,7 @@ describe("Wget Child Process", () => {
 	test("should download file successfully", async () => {
 		const result = await spawnWget({
 			exePath: SYSTEM_WGET_PATH,
-			url: "https://getsamplefiles.com/download/zip/sample-1.zip",
+			url: "https://github.com/flying-dice/hello-world-mod/raw/refs/heads/main/sample-1.zip",
 			target: tempDir.path,
 			onProgress: () => {},
 		});
