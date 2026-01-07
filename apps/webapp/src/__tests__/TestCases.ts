@@ -1,7 +1,6 @@
 import { noop } from "lodash";
 import { getLogger } from "log4js";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import mongoose from "mongoose";
 import type { Application } from "../application/Application.ts";
 import { ProdApplication } from "../ProdApplication.ts";
 import { TestApplication } from "./TestApplication.ts";
@@ -31,13 +30,18 @@ export const TestCases: TestCase[] = [
 			const app = new ProdApplication({
 				mongoUri: mongoMemoryServer.getUri(),
 			});
-			await app.init();
+			const _mongoose = await app.init();
 
 			const cleanup = async () => {
 				logger.info("Cleaning up ProdApplication test case database");
-				for (const collection of (await mongoose.connection.db?.collections()) ?? []) {
-					logger.debug(`Dropping collection: ${collection.collectionName}`);
-					await mongoose.connection.db?.dropCollection(collection.collectionName);
+				for (const connection of _mongoose.connections) {
+					const db = connection.db;
+					if (!db) continue;
+					const collections = await db.collections({ timeoutMS: 5000 });
+					for (const collection of collections) {
+						logger.debug(`Dropping collection: ${collection.collectionName}`);
+						await db.dropCollection(collection.collectionName, { timeoutMS: 5000 });
+					}
 				}
 			};
 

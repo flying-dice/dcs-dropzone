@@ -31,9 +31,10 @@ export class ProdApplication extends Application {
 	}
 
 	@Log(logger)
-	async init(): Promise<void> {
+	async init(): Promise<mongoose.Mongoose> {
 		logger.info("Connecting to MongoDB...");
-		await mongoose.connect(this.mongoUri);
+		const _mongoose = await mongoose.connect(this.mongoUri);
 		await applyDatabaseMigrations();
+		return _mongoose;
 	}
 }
