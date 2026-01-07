@@ -4,7 +4,6 @@ import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import registerModReleaseDownload from "../../application/commands/RegisterModReleaseDownload.ts";
 import findLatestPublicModReleaseByModId, {
 	FindLatestPublicModReleaseByModIdError,
 } from "../../application/queries/FindLatestPublicModReleaseByModId.ts";

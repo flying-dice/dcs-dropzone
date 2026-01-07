@@ -1,6 +1,6 @@
 import { getLogger } from "log4js";
+import { Mod } from "../../database/entities/Mod.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";
-import { Mod } from "../mongo-db/entities/Mod.ts";
 import { ServerMetricsData } from "../schemas/ServerMetricsData.ts";
 
 const logger = getLogger("GetServerMetricsDataQuery");

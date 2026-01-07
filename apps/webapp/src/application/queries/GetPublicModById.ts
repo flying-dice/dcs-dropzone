@@ -1,8 +1,8 @@
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
+import { Mod } from "../../database/entities/Mod.ts";
+import { User } from "../../database/entities/User.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";
-import { Mod } from "../mongo-db/entities/Mod.ts";
-import { User } from "../mongo-db/entities/User.ts";
 import { ModData } from "../schemas/ModData.ts";
 import { UserData } from "../schemas/UserData.ts";
 

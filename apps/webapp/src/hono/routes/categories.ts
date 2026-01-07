@@ -3,11 +3,16 @@ import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
+import type { Application } from "../../application/Application.ts";
 import { ModCategory } from "../../application/enums/ModCategory.ts";
 import getCategoryCounts from "../../application/queries/GetCategoryCounts.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 
-const router = new Hono();
+const router = new Hono<{
+	Variables: {
+		app: Application;
+	};
+}>();
 
 const _logger = getLogger("api/categories");
 

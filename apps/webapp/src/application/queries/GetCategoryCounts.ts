@@ -1,6 +1,6 @@
+import { Mod } from "../../database/entities/Mod.ts";
 import { ModCategory } from "../enums/ModCategory.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";
-import { Mod } from "../mongo-db/entities/Mod.ts";
 
 type GetCategoryCounts = Record<ModCategory, number>;
 

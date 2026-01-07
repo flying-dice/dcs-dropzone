@@ -1,24 +1,23 @@
 import { getLogger } from "log4js";
 import { OAuthApp, Octokit } from "octokit";
 import { z } from "zod";
-import type { AuthResult, AuthService } from "./AuthService.ts";
+import type { AuthenticationProvider, AuthResult } from "../application/ports/AuthenticationProvider.ts";
 
-const logger = getLogger("GithubAuthService");
+const logger = getLogger("GithubAuthenticationProvider");
 
-export const GithubAuthServiceConfig = z.object({
-	enabled: z.boolean(),
+export const GithubAuthenticationProviderConfig = z.object({
 	clientId: z.string(),
 	clientSecret: z.string(),
 	redirectUrl: z.url(),
 });
 
-export type GithubAuthServiceConfig = z.infer<typeof GithubAuthServiceConfig>;
+export type GithubAuthenticationProviderConfig = z.infer<typeof GithubAuthenticationProviderConfig>;
 
-export class GithubAuthService implements AuthService {
+export class GithubAuthenticationProvider implements AuthenticationProvider {
 	private readonly app: OAuthApp;
 
-	constructor(config: GithubAuthServiceConfig) {
-		const { clientId, clientSecret, redirectUrl } = GithubAuthServiceConfig.parse(config);
+	constructor(config: GithubAuthenticationProviderConfig) {
+		const { clientId, clientSecret, redirectUrl } = GithubAuthenticationProviderConfig.parse(config);
 
 		this.app = new OAuthApp({
 			clientType: "oauth-app",

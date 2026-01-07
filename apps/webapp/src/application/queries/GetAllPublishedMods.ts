@@ -1,8 +1,8 @@
 import { getLogger } from "log4js";
 import type { QueryFilter } from "mongoose";
+import { ModSummary } from "../../database/entities/ModSummary.ts";
 import type { ModCategory } from "../enums/ModCategory.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";
-import { ModSummary } from "../mongo-db/entities/ModSummary.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
 import { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import { PageData } from "../schemas/PageData.ts";

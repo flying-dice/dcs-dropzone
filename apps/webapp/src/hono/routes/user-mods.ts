@@ -4,11 +4,6 @@ import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import createMod from "../../application/commands/CreateMod.ts";
-import deleteMod from "../../application/commands/DeleteMod.ts";
-import updateMod from "../../application/commands/UpdateMod.ts";
-import findAllUserMods from "../../application/queries/FindAllUserMods.ts";
-import findUserModById from "../../application/queries/FindUserModById.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 import { ModCreateData } from "../../application/schemas/ModCreateData.ts";
 import { ModData } from "../../application/schemas/ModData.ts";
@@ -16,7 +11,7 @@ import { ModSummaryData } from "../../application/schemas/ModSummaryData.ts";
 import { ModUpdateData } from "../../application/schemas/ModUpdateData.ts";
 import { OkData } from "../../application/schemas/OkData.ts";
 import { UserModsMetaData } from "../../application/schemas/UserModsMetaData.ts";
-import { cookieAuth } from "../http/middleware/cookieAuth.ts";
+import { cookieAuth } from "../middleware/cookieAuth.ts";
 
 const router = new Hono();
 

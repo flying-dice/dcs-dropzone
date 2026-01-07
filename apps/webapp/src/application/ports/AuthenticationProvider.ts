@@ -17,7 +17,7 @@ export type AuthResult = {
 /**
  * Interface defining the authentication service.
  */
-export interface AuthService {
+export interface AuthenticationProvider {
 	/**
 	 * Generates and returns the URL for initiating the web flow authorization process.
 	 * @returns {string} The authorization URL.

@@ -3,20 +3,21 @@ import { camelToKebabCase } from "@mantine/core";
 import { toCamelCase } from "drizzle-orm/casing";
 import { getLogger } from "log4js";
 import objectHash from "object-hash";
-import { getRegistryEntry, getRegistryIndex } from "../../client/_autogen/legacy_api.ts";
-import { MissionScriptRunOn } from "../enums/MissionScriptRunOn.ts";
-import { ModCategory } from "../enums/ModCategory.ts";
-import { ModVisibility } from "../enums/ModVisibility.ts";
-import { SymbolicLinkDestRoot } from "../enums/SymbolicLinkDestRoot.ts";
-import { ModData } from "../schemas/ModData.ts";
+
+import { MissionScriptRunOn } from "./application/enums/MissionScriptRunOn.ts";
+import { ModCategory } from "./application/enums/ModCategory.ts";
+import { ModVisibility } from "./application/enums/ModVisibility.ts";
+import { SymbolicLinkDestRoot } from "./application/enums/SymbolicLinkDestRoot.ts";
+import { ModData } from "./application/schemas/ModData.ts";
 import {
 	ModReleaseData,
 	type ModReleaseMissionScriptData,
 	type ModReleaseSymbolicLinkData,
-} from "../schemas/ModReleaseData.ts";
-import type { UserData } from "../schemas/UserData.ts";
-import { Mod } from "../../mongo-db/entities/Mod.ts";
-import { ModRelease } from "../../mongo-db/entities/ModRelease.ts";
+} from "./application/schemas/ModReleaseData.ts";
+import type { UserData } from "./application/schemas/UserData.ts";
+import { Mod } from "./database/entities/Mod.ts";
+import { ModRelease } from "./database/entities/ModRelease.ts";
+import { getRegistryEntry, getRegistryIndex } from "./wui/_autogen/legacy_api.ts";
 
 const logger = getLogger("MigrateLegacyRegistryCommand");
 

@@ -4,8 +4,8 @@ import { ze } from "@packages/zod";
 import { int, string } from "getenv";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import { GithubAuthServiceConfig } from "./application/services/AuthService/GithubAuthService.ts";
-import { MockAuthServiceConfig } from "./application/services/AuthService/MockAuthService.ts";
+import { MockAuthServiceConfig } from "./__tests__/MockAuthService.ts";
+import { GithubAuthenticationProviderConfig } from "./adapters/GithubAuthenticationProvider.ts";
 
 const logger = getLogger("ApplicationConfig");
 

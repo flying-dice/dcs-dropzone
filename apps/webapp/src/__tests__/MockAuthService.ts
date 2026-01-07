@@ -1,6 +1,6 @@
 import { getLogger } from "log4js";
 import { z } from "zod";
-import type { AuthResult, AuthService } from "./AuthService.ts";
+import type { AuthenticationProvider, AuthResult } from "../application/ports/AuthenticationProvider.ts";
 
 const logger = getLogger("MockAuthService");
 
@@ -14,7 +14,7 @@ export type MockAuthServiceConfig = z.infer<typeof MockAuthServiceConfig>;
  * Mock authentication service for testing without real OAuth.
  * Always returns the same mock user regardless of callback parameters.
  */
-export class MockAuthService implements AuthService {
+export class MockAuthService implements AuthenticationProvider {
 	private readonly mockUser: AuthResult = {
 		id: "0",
 		username: "mockuser",

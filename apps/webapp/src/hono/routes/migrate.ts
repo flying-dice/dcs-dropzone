@@ -4,10 +4,10 @@ import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import appConfig from "../../ApplicationConfig.ts";
-import migrateLegacyRegistry from "../../application/commands/MigrateLegacyRegistry.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 import { OkData } from "../../application/schemas/OkData.ts";
-import { cookieAuth } from "../http/middleware/cookieAuth.ts";
+import migrateLegacyRegistry from "../../MigrateLegacyRegistry.ts";
+import { cookieAuth } from "../middleware/cookieAuth.ts";
 
 const router = new Hono();
 const logger = getLogger("api/migrate");
