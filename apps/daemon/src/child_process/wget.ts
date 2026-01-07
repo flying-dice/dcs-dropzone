@@ -134,7 +134,8 @@ export async function spawnWget(props: SpawnWgetProps, abortSignal?: AbortSignal
 
 	return new Promise((resolve, reject) => {
 		const _wget = spawn(exePath, args, {
-			stdio: "pipe",
+			env: { ...process.env },
+			stdio: ["ignore", "pipe", "pipe"],
 			cwd: target,
 			signal: abortSignal,
 		});

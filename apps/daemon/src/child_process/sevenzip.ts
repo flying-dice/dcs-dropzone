@@ -152,7 +152,8 @@ export async function spawnSevenzip(props: SpawnSevenzipProps, abortSignal?: Abo
 
 	return new Promise((resolve, reject) => {
 		const _7zip = spawn(exePath, args, {
-			stdio: "pipe",
+			env: { ...process.env },
+			stdio: ["ignore", "pipe", "pipe"],
 			signal: abortSignal,
 		});
 
