@@ -626,10 +626,32 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`Registering download for release '${releaseId}' for mod '${id}'`);
 
+				// Ensure the requested mod release exists and is public before registering a download
+				const releaseResult = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
+
+				let notFoundError: string | null = null;
+				releaseResult.match(
+					() => {
+						// Release exists and is public; proceed with download registration
+					},
+					(error) => {
+						notFoundError = error;
+					},
+				);
+
+				if (notFoundError !== null) {
+					return c.json(
+						ErrorData.parse(<ErrorData>{
+							code: StatusCodes.NOT_FOUND,
+							error: notFoundError,
+						}),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
 				await c.var.app.downloads.registerModReleaseDownload(id, releaseId, daemonInstanceId);
 
-				const okData: OkData = { ok: true };
-				return c.json(OkData.parse(okData), StatusCodes.OK);
+				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
 	}
