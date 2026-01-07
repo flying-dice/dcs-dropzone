@@ -4,18 +4,18 @@ import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import findLatestPublicModReleaseByModId, {
-	FindLatestPublicModReleaseByModIdError,
-} from "../../application/queries/FindLatestPublicModReleaseByModId.ts";
-import findPublicModReleaseById from "../../application/queries/FindPublicModReleaseById.ts";
-import findPublicModReleases from "../../application/queries/FindPublicModReleases.ts";
+import type { Application } from "../../application/Application.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 import { ModReleaseData } from "../../application/schemas/ModReleaseData.ts";
 import { ModReleaseDownloadData } from "../../application/schemas/ModReleaseDownloadData.ts";
 import { OkData } from "../../application/schemas/OkData.ts";
 import { TypedErrorData } from "../../application/schemas/TypedErrorData.ts";
 
-const router = new Hono();
+const router = new Hono<{
+	Variables: {
+		app: Application;
+	};
+}>();
 
 const logger = getLogger("api/mod-releases");
 
@@ -43,7 +43,7 @@ router.get(
 
 		logger.debug(`Fetching public releases for mod '${id}'`);
 
-		const result = await findPublicModReleases({ modId: id });
+		const result = await c.var.app.publicMods.findPublicModReleases(id);
 
 		return result.match(
 			(data) => c.json({ data }, StatusCodes.OK),
@@ -59,6 +59,8 @@ router.get(
 	},
 );
 
+const LatestModReleaseErrors = z.enum(["ModNotFound", "ReleaseNotFound"]);
+
 router.get(
 	"/:id/releases/latest",
 	describeJsonRoute({
@@ -68,7 +70,7 @@ router.get(
 		tags: ["Mod Releases"],
 		responses: {
 			[StatusCodes.OK]: ModReleaseData,
-			[StatusCodes.NOT_FOUND]: TypedErrorData(z.enum(FindLatestPublicModReleaseByModIdError)),
+			[StatusCodes.NOT_FOUND]: TypedErrorData(LatestModReleaseErrors),
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
@@ -83,7 +85,7 @@ router.get(
 
 		logger.debug(`Fetching latest release for mod '${id}'`);
 
-		const result = await findLatestPublicModReleaseByModId({ modId: id });
+		const result = await c.var.app.publicMods.findLatestPublicModRelease(id);
 
 		return result.match(
 			(data) => c.json(data, StatusCodes.OK),
@@ -127,7 +129,7 @@ router.get(
 
 		logger.debug(`Fetching public release '${releaseId}' for mod '${id}'`);
 
-		const result = await findPublicModReleaseById({ modId: id, releaseId });
+		const result = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
 
 		return result.match(
 			(data) => c.json(data, StatusCodes.OK),
@@ -144,7 +146,7 @@ router.get(
 );
 
 /**
- * GET /api/mods/:id/releases/:releaseId - Get a specific public release
+ * POST /api/mods/:id/releases/:releaseId/downloads - Register a download for a specific public release
  */
 router.post(
 	"/:id/releases/:releaseId/downloads",
@@ -171,10 +173,9 @@ router.post(
 		const { id, releaseId } = c.req.valid("param");
 		const { daemonInstanceId } = c.req.valid("json");
 
-		logger.debug(`Fetching public release '${releaseId}' for mod '${id}'`);
+		logger.debug(`Registering download for release '${releaseId}' for mod '${id}'`);
 
-		const commandData: ModReleaseDownloadData = { modId: id, releaseId, daemonInstanceId };
-		await registerModReleaseDownload({ data: ModReleaseDownloadData.parse(commandData) });
+		await c.var.app.downloads.registerModReleaseDownload(id, releaseId, daemonInstanceId);
 
 		const okData: OkData = { ok: true };
 		return c.json(OkData.parse(okData), StatusCodes.OK);

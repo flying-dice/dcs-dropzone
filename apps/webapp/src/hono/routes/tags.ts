@@ -3,10 +3,14 @@ import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import getAllTags from "../../application/queries/GetAllTags.ts";
+import type { Application } from "../../application/Application.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 
-const router = new Hono();
+const router = new Hono<{
+	Variables: {
+		app: Application;
+	};
+}>();
 
 const _logger = getLogger("api/tags");
 
@@ -26,7 +30,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const result = await getAllTags();
+		const result = await c.var.app.publicMods.getAllTags();
 
 		return c.json(z.string().array().parse(result), StatusCodes.OK);
 	},

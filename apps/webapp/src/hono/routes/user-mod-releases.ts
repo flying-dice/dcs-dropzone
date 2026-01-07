@@ -4,13 +4,18 @@ import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
+import type { Application } from "../../application/Application.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 import { ModReleaseCreateData } from "../../application/schemas/ModReleaseCreateData.ts";
 import { ModReleaseData } from "../../application/schemas/ModReleaseData.ts";
 import { OkData } from "../../application/schemas/OkData.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 
-const router = new Hono();
+const router = new Hono<{
+	Variables: {
+		app: Application;
+	};
+}>();
 
 const logger = getLogger("api/user-mod-releases");
 
@@ -42,10 +47,7 @@ router.get(
 
 		logger.debug(`User '${user.id}' is requesting releases for mod '${id}'`);
 
-		const result = await findUserModReleases({
-			user,
-			modId: id,
-		});
+		const result = await c.var.app.userMods.findReleases(user, id);
 
 		return result.match(
 			(data) => c.json({ data }, StatusCodes.OK),
@@ -93,11 +95,7 @@ router.get(
 
 		logger.debug(`User '${user.id}' is requesting release '${releaseId}' for mod '${id}'`);
 
-		const result = await findUserModReleaseById({
-			user,
-			modId: id,
-			releaseId,
-		});
+		const result = await c.var.app.userMods.findReleaseById(user, id, releaseId);
 
 		return result.match(
 			(body) => c.json(body, StatusCodes.OK),
@@ -141,11 +139,7 @@ router.post(
 
 		logger.debug(`User '${user.id}' is creating a new release for mod '${id}'`);
 
-		const result = await createRelease({
-			modId: id,
-			createData,
-			user,
-		});
+		const result = await c.var.app.userMods.createRelease(user, { ...createData, modId: id });
 
 		return result.match(
 			(body) => c.json(body, StatusCodes.CREATED),
@@ -195,13 +189,10 @@ router.put(
 
 		logger.debug(`User '${user.id}' is updating release '${releaseId}' for mod '${id}'`);
 
-		const result = await updateRelease({
-			user,
-			updateData: {
-				id: releaseId,
-				modId: id,
-				...updates,
-			},
+		const result = await c.var.app.userMods.updateRelease(user, {
+			id: releaseId,
+			modId: id,
+			...updates,
 		});
 
 		return result.match(
@@ -256,11 +247,7 @@ router.delete(
 
 		logger.debug(`User '${user.id}' is deleting release '${releaseId}' for mod '${id}'`);
 
-		const result = await deleteRelease({
-			user,
-			modId: id,
-			releaseId,
-		});
+		const result = await c.var.app.userMods.deleteRelease(user, id, releaseId);
 
 		return result.match(
 			() =>

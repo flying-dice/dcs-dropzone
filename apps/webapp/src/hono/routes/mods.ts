@@ -4,8 +4,7 @@ import { Hono } from "hono";
 import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
-import getAllPublishedMods from "../../application/queries/GetAllPublishedMods.ts";
-import getModById from "../../application/queries/GetPublicModById.ts";
+import type { Application } from "../../application/Application.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../../application/schemas/ModAvailableFilterData.ts";
 import { ModData } from "../../application/schemas/ModData.ts";
@@ -13,7 +12,11 @@ import { ModSummaryData } from "../../application/schemas/ModSummaryData.ts";
 import { PageData } from "../../application/schemas/PageData.ts";
 import { UserData } from "../../application/schemas/UserData.ts";
 
-const router = new Hono();
+const router = new Hono<{
+	Variables: {
+		app: Application;
+	};
+}>();
 
 router.get(
 	"/:id",
@@ -42,7 +45,7 @@ router.get(
 	async (c) => {
 		const { id } = c.req.valid("param");
 
-		const result = await getModById(id);
+		const result = await c.var.app.publicMods.getModById(id);
 
 		return result.match(
 			(mod) => c.json(mod, StatusCodes.OK),
@@ -84,7 +87,7 @@ router.get(
 	async (c) => {
 		const { page, size, category, maintainers, tags, term } = c.req.valid("query");
 
-		const result = await getAllPublishedMods({
+		const result = await c.var.app.publicMods.getAllPublishedMods({
 			page,
 			size,
 			filter: {

@@ -18,7 +18,7 @@ const configSchema = z.object({
 	userCookieMaxAge: z.number().int(),
 	homepageUrl: z.url(),
 	admins: ze.csv(),
-	authServiceGh: GithubAuthServiceConfig.optional(),
+	authServiceGh: GithubAuthenticationProviderConfig.optional(),
 	authServiceMock: MockAuthServiceConfig.optional(),
 });
 

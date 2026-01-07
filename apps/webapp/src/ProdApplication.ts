@@ -1,7 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { getLogger } from "log4js";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { GithubAuthenticationProvider } from "./adapters/GithubAuthenticationProvider.ts";
+import { MongoDownloadsRepository } from "./adapters/MongoDownloadsRepository.ts";
+import { MongoModRepository } from "./adapters/MongoModRepository.ts";
+import { MongoUserRepository } from "./adapters/MongoUserRepository.ts";
 import { Application } from "./application/Application.ts";
 import { applyDatabaseMigrations } from "./database";
 import { MongoUrl } from "./database/MongoUrl.ts";
@@ -27,9 +31,10 @@ export class ProdApplication extends Application {
 				clientSecret: deps.githubClientSecret,
 				redirectUrl: deps.githubRedirectUrl,
 			}),
-			downloadsRepository: {},
-			modRepository: {},
-			userRepository: {},
+			downloadsRepository: new MongoDownloadsRepository(),
+			modRepository: new MongoModRepository(),
+			userRepository: new MongoUserRepository(),
+			generateUuid: () => randomUUID(),
 		});
 
 		this.mongoUri = deps.mongoUri;

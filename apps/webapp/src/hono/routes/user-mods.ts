@@ -4,6 +4,7 @@ import { validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
+import type { Application } from "../../application/Application.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 import { ModCreateData } from "../../application/schemas/ModCreateData.ts";
 import { ModData } from "../../application/schemas/ModData.ts";
@@ -13,7 +14,11 @@ import { OkData } from "../../application/schemas/OkData.ts";
 import { UserModsMetaData } from "../../application/schemas/UserModsMetaData.ts";
 import { cookieAuth } from "../middleware/cookieAuth.ts";
 
-const router = new Hono();
+const router = new Hono<{
+	Variables: {
+		app: Application;
+	};
+}>();
 
 const logger = getLogger("api/user-mods");
 
@@ -41,9 +46,7 @@ router.get(
 	async (c) => {
 		const user = c.var.getUser();
 
-		const mods = await findAllUserMods({
-			user,
-		});
+		const mods = await c.var.app.userMods.findAllMods(user);
 
 		return c.json(mods, StatusCodes.OK);
 	},
@@ -75,10 +78,7 @@ router.get(
 
 		logger.debug(`User '${user.id}' is requesting mod '${id}'`);
 
-		const result = await findUserModById({
-			modId: id,
-			user,
-		});
+		const result = await c.var.app.userMods.findById(user, id);
 
 		return result.match(
 			(body) => {
@@ -121,10 +121,7 @@ router.post(
 		const user = c.var.getUser();
 
 		logger.debug(`User '${user.id}' is creating a new mod '${createData.name}'`);
-		const result = await createMod({
-			user,
-			createData,
-		});
+		const result = await c.var.app.userMods.createMod(user, createData);
 
 		return c.json(result, StatusCodes.CREATED);
 	},
@@ -156,11 +153,7 @@ router.put(
 		const updateData = c.req.valid("json");
 		const user = c.var.getUser();
 
-		const result = await updateMod({
-			user,
-			modId: id,
-			updateData,
-		});
+		const result = await c.var.app.userMods.updateMod(user, { ...updateData, id });
 
 		return result.match(
 			() => {
@@ -203,7 +196,7 @@ router.delete(
 		const { id } = c.req.valid("param");
 		const user = c.var.getUser();
 
-		const result = await deleteMod({ user, id });
+		const result = await c.var.app.userMods.deleteMod(user, id);
 
 		return result.match(
 			() => {

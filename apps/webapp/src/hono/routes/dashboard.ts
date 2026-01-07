@@ -1,14 +1,16 @@
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { Hono } from "hono";
 import { StatusCodes } from "http-status-codes";
-import getAllFeaturedMods from "../../application/queries/GetAllFeaturedMods.ts";
-import getAllPopularMods from "../../application/queries/GetAllPopularMods.ts";
-import getServerMetricsData from "../../application/queries/GetServerMetricsData.ts";
+import type { Application } from "../../application/Application.ts";
 import { ErrorData } from "../../application/schemas/ErrorData.ts";
 import { ModSummaryData } from "../../application/schemas/ModSummaryData.ts";
 import { ServerMetricsData } from "../../application/schemas/ServerMetricsData.ts";
 
-const router = new Hono();
+const router = new Hono<{
+	Variables: {
+		app: Application;
+	};
+}>();
 
 router.get(
 	"/api/server-metrics",
@@ -23,7 +25,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const metrics = await getServerMetricsData();
+		const metrics = await c.var.app.publicMods.getServerMetrics();
 		return c.json(metrics, StatusCodes.OK);
 	},
 );
@@ -41,7 +43,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const result = await getAllFeaturedMods();
+		const result = await c.var.app.publicMods.getAllFeaturedMods();
 
 		return c.json(result, StatusCodes.OK);
 	},
@@ -60,7 +62,7 @@ router.get(
 		},
 	}),
 	async (c) => {
-		const result = await getAllPopularMods();
+		const result = await c.var.app.publicMods.getAllPopularMods();
 
 		return c.json(result, StatusCodes.OK);
 	},

@@ -1,8 +1,9 @@
-import type { ModUpdateData } from "../../wui/_autogen/api.ts";
+import type { ModCategory } from "../enums/ModCategory.ts";
 import type { ModData } from "../schemas/ModData.ts";
 import type { ModReleaseData } from "../schemas/ModReleaseData.ts";
 import type { ModReleaseUpdateData } from "../schemas/ModReleaseUpdateData.ts";
 import type { ModSummaryData } from "../schemas/ModSummaryData.ts";
+import type { ModUpdateData } from "../schemas/ModUpdateData.ts";
 
 export interface ModRepository {
 	createMod(modData: ModData): Promise<ModData>;
@@ -23,4 +24,38 @@ export interface ModRepository {
 	findAllModsForMaintainerSortedByCreatedAtDesc(userId: string): Promise<ModSummaryData[]>;
 	getTotalDownloadsCountForMaintainer(userId: string): Promise<number>;
 	getTotalPublicModsCountForMaintainer(userId: string): Promise<number>;
+
+	// Public mod queries
+	findPublicModById(
+		modId: string,
+	): Promise<{ mod: ModData; maintainers: { id: string; username: string }[] } | undefined>;
+	findAllPublishedMods(query: {
+		page: number;
+		size: number;
+		filter?: {
+			category?: ModCategory;
+			maintainers?: string[];
+			tags?: string[];
+			term?: string;
+		};
+	}): Promise<{
+		data: ModSummaryData[];
+		count: number;
+		categories: string[];
+		tags: string[];
+		maintainers: { id: string; username: string }[];
+	}>;
+	findAllFeaturedMods(): Promise<ModSummaryData[]>;
+	findAllPopularMods(): Promise<ModSummaryData[]>;
+	findAllTags(): Promise<string[]>;
+	getCategoryCounts(): Promise<Record<string, number>>;
+	getServerMetrics(): Promise<{ totalMods: number; totalDownloads: number }>;
+
+	// Public release queries
+	findPublicModRelease(modId: string, releaseId: string): Promise<ModReleaseData | undefined>;
+	findPublicModReleases(modId: string): Promise<ModReleaseData[] | undefined>;
+	findLatestPublicModRelease(modId: string): Promise<ModReleaseData | undefined>;
+	findUpdateInformationByIds(
+		modIds: string[],
+	): Promise<{ modId: string; id: string; version: string; createdAt: string }[]>;
 }
