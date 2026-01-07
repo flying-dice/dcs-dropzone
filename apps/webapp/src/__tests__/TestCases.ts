@@ -10,6 +10,7 @@ const logger = getLogger("TestCases");
 
 logger.debug("Starting in-memory MongoDB server for tests");
 const mongoMemoryServer = await MongoMemoryServer.create();
+await mongoMemoryServer.ensureInstance();
 
 logger.debug(`In-memory MongoDB server started at URI: ${mongoMemoryServer.getUri()}`);
 
