@@ -11,7 +11,7 @@ export class WebFlowAuthenticator {
 	constructor(protected readonly deps: Deps) {}
 
 	getWebFlowAuthorizationUrl(): string {
-		throw this.deps.authProvider.getWebFlowAuthorizationUrl();
+		return this.deps.authProvider.getWebFlowAuthorizationUrl();
 	}
 
 	async handleAuthCallback(code: string, state: string): Promise<AuthResult> {

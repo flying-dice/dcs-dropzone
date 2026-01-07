@@ -239,8 +239,7 @@ export class UserMods {
 		return {
 			data: ModSummaryData.array().parse(mods),
 			meta: UserModsMetaData.parse({
-				totalMods: mods.length,
-				totalPublicMods: countPublic,
+				published: countPublic,
 				totalDownloads: countDownloads,
 			}),
 		};
