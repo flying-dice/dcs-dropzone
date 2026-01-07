@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies # (assuming your project has dependencies)
         run: bun install # You can use npm/yarn/pnpm instead if you prefer
 
-      - name: Add daemon bin to PATH
+      - name: Add daemon bins to PATH
         run: echo "${{ github.workspace }}\apps\daemon\bin" >> $env:GITHUB_PATH
 
       - name: Run tests

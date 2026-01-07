@@ -12,6 +12,7 @@
         "@hono/standard-validator": "^0.2.1",
         "@opentui/core": "^0.1.63",
         "@opentui/react": "^0.1.63",
+        "@packages/decorators": "workspace:*",
         "@packages/hono": "workspace:*",
         "@packages/queue": "workspace:*",
         "@scalar/hono-api-reference": "^0.9.30",

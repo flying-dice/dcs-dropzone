@@ -1,3 +1,4 @@
+import { Log } from "@packages/decorators";
 import type { ProcessorContext } from "@packages/queue";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
@@ -15,6 +16,7 @@ export class WgetDownloadProcessor implements DownloadProcessor {
 
 	constructor(protected readonly deps: Deps) {}
 
+	@Log(logger)
 	async process(jobData: DownloadJobData, ctx: ProcessorContext): Promise<Result<DownloadJobResult, string>> {
 		logger.debug(`Processing download job: ${JSON.stringify(jobData)}`);
 		const res = await spawnWget({

@@ -1,6 +1,8 @@
+import { Log } from "@packages/decorators";
 import type { JobRecord } from "@packages/queue";
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
+import { getLogger } from "log4js";
 import type { MissionScriptRunOn } from "webapp";
 import type { ReleaseRepository } from "../application/ports/ReleaseRepository.ts";
 import type { MissionScript } from "../application/schemas/MissionScript.ts";
@@ -13,6 +15,8 @@ import {
 	T_MOD_RELEASES,
 } from "../database/schema.ts";
 
+const logger = getLogger("DrizzleReleaseRepository");
+
 export class DrizzleReleaseRepository implements ReleaseRepository {
 	protected readonly db: BunSQLiteDatabase;
 
@@ -20,6 +24,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 		this.db = deps.db;
 	}
 
+	@Log(logger)
 	deleteRelease(releaseId: string): void {
 		this.db.transaction(
 			(trx) => {
@@ -35,10 +40,12 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 		);
 	}
 
+	@Log(logger)
 	getAllReleases() {
 		return this.db.select().from(T_MOD_RELEASES).all();
 	}
 
+	@Log(logger)
 	getMissionScriptsByRunOn(runOn: MissionScriptRunOn) {
 		return this.db
 			.select({
@@ -53,10 +60,12 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.all();
 	}
 
+	@Log(logger)
 	getReleaseAssetsForRelease(releaseId: string) {
 		return this.db.select().from(T_MOD_RELEASE_ASSETS).where(eq(T_MOD_RELEASE_ASSETS.releaseId, releaseId)).all();
 	}
 
+	@Log(logger)
 	getSymbolicLinksForRelease(releaseId: string) {
 		return this.db
 			.select()
@@ -65,6 +74,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.all();
 	}
 
+	@Log(logger)
 	saveRelease(data: ModAndReleaseData): void {
 		this.db.transaction(
 			(trx) => {
@@ -132,6 +142,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 		);
 	}
 
+	@Log(logger)
 	setInstalledPathForSymbolicLink(symbolicLinkId: string, installedPath: string | null): void {
 		this.db
 			.update(T_MOD_RELEASE_SYMBOLIC_LINKS)
@@ -140,6 +151,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.run();
 	}
 
+	@Log(logger)
 	getMissionScriptsForRelease(releaseId: string): MissionScript[] {
 		return this.db
 			.select()
@@ -148,11 +160,13 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.all();
 	}
 
+	@Log(logger)
 	getJobIdsForRelease(releaseId: string): JobRecord["jobId"][] {
 		const all = this.db.select().from(T_JOBS_FOR_RELEASE).where(eq(T_JOBS_FOR_RELEASE.releaseId, releaseId)).all();
 		return all.map((r) => r.jobId);
 	}
 
+	@Log(logger)
 	addJobForRelease(releaseId: string, jobId: JobRecord["jobId"]) {
 		this.db
 			.insert(T_JOBS_FOR_RELEASE)
@@ -163,6 +177,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.run();
 	}
 
+	@Log(logger)
 	clearJobsForRelease(releaseId: string): void {
 		this.db.delete(T_JOBS_FOR_RELEASE).where(eq(T_JOBS_FOR_RELEASE.releaseId, releaseId)).run();
 	}
