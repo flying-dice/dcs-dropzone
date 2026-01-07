@@ -370,27 +370,35 @@ export class MongoModRepository implements ModRepository {
 	async findUpdateInformationByIds(
 		modIds: string[],
 	): Promise<{ modId: string; id: string; version: string; createdAt: string }[]> {
-		const results: { modId: string; id: string; version: string; createdAt: string }[] = [];
-
-		for (const modId of modIds) {
-			const latestRelease = await ModRelease.findOne({
-				modId: modId,
-				visibility: ModVisibility.PUBLIC,
-			})
-				.sort({ createdAt: -1 })
-				.lean()
-				.exec();
-
-			if (latestRelease) {
-				results.push({
-					modId: modId,
-					id: latestRelease.id,
-					version: latestRelease.version,
-					createdAt: latestRelease.createdAt.toString(),
-				});
-			}
+		if (modIds.length === 0) {
+			return [];
 		}
 
-		return results;
+		const aggregated = await ModRelease.aggregate([
+			{
+				$match: {
+					modId: { $in: modIds },
+					visibility: ModVisibility.PUBLIC,
+				},
+			},
+			{
+				$sort: { createdAt: -1 },
+			},
+			{
+				$group: {
+					_id: "$modId",
+					id: { $first: "$id" },
+					version: { $first: "$version" },
+					createdAt: { $first: "$createdAt" },
+				},
+			},
+		]).exec();
+
+		return aggregated.map((doc: any) => ({
+			modId: doc._id as string,
+			id: doc.id as string,
+			version: doc.version as string,
+			createdAt: (doc.createdAt as Date).toString(),
+		}));
 	}
 }
