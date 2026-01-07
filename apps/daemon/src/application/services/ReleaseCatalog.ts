@@ -1,3 +1,4 @@
+import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { AssetStatus } from "../enums/AssetStatus.ts";
 import { inferReleaseStatusFromAssets } from "../functions/inferReleaseStatusFromAssets.ts";
@@ -20,6 +21,7 @@ type Deps = {
 export class ReleaseCatalog {
 	constructor(protected deps: Deps) {}
 
+	@Log(logger)
 	add(data: ModAndReleaseData) {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
@@ -29,11 +31,13 @@ export class ReleaseCatalog {
 		logger.info(`Successfully added releaseId: ${data.releaseId}`);
 	}
 
+	@Log(logger)
 	remove(releaseId: string): void {
 		this.deps.releaseAssetManager.removeRelease(releaseId);
 		this.deps.releaseRepository.deleteRelease(releaseId);
 	}
 
+	@Log(logger)
 	getAllReleasesWithStatus(): ModAndReleaseData[] {
 		const releases: ModAndReleaseData[] = [];
 

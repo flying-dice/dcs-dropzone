@@ -12,6 +12,7 @@
         "@hono/standard-validator": "^0.2.1",
         "@opentui/core": "^0.1.63",
         "@opentui/react": "^0.1.63",
+        "@packages/decorators": "workspace:*",
         "@packages/hono": "workspace:*",
         "@packages/queue": "workspace:*",
         "@scalar/hono-api-reference": "^0.9.30",
@@ -59,6 +60,7 @@
         "@mantine/modals": "8.3.10",
         "@mantine/notifications": "8.3.10",
         "@monaco-editor/react": "^4.7.0",
+        "@packages/decorators": "workspace:*",
         "@packages/hono": "workspace:*",
         "@packages/zod": "workspace:*",
         "@scalar/hono-api-reference": "^0.9.30",
@@ -105,6 +107,13 @@
         "@types/react": "19.2.3",
         "@types/react-dom": "19.2.3",
         "orval": "^8.0.0-rc.0",
+      },
+    },
+    "packages/decorators": {
+      "name": "@packages/decorators",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "log4js": ">=6",
       },
     },
     "packages/hono": {
@@ -434,6 +443,8 @@
     "@orval/swr": ["@orval/swr@8.0.0-rc.0", "", { "dependencies": { "@orval/core": "8.0.0-rc.0", "@orval/fetch": "8.0.0-rc.0" } }, "sha512-4oIxyc3Tzsbc5t6Z1eTUjZ3oY14pBSIL02NolNjebzbp/fjldyh7BTlrgdN7+/DSrb46Of1eKYXMsWfLFnelHA=="],
 
     "@orval/zod": ["@orval/zod@8.0.0-rc.0", "", { "dependencies": { "@orval/core": "8.0.0-rc.0", "lodash.uniq": "^4.5.0", "openapi3-ts": "4.5.0" } }, "sha512-0fqjXDbrM6A+930qrzKQJ6fx/ixuGl8yplfdGkA2dGXqymWUPGmVyfNqGpPhhjBLgtmIQDoUpr+fASoEPuxxbA=="],
+
+    "@packages/decorators": ["@packages/decorators@workspace:packages/decorators"],
 
     "@packages/hono": ["@packages/hono@workspace:packages/hono"],
 

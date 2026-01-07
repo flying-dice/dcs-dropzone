@@ -1,4 +1,5 @@
 import { basename, join } from "node:path";
+import { Log } from "@packages/decorators";
 import { type JobRecord, type JobRecordRepository, JobState, Queue, QueueEvents } from "@packages/queue";
 import { getLogger } from "log4js";
 import { inferAssetStatusFromJobs } from "../functions/inferAssetStatusFromJobs.ts";
@@ -50,6 +51,7 @@ export class ReleaseAssetManager {
 		);
 	}
 
+	@Log(logger)
 	getProgressReportForAssets(releaseId: string): Record<string, ModReleaseAssetStatusData> {
 		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(releaseId);
 		const assetStatusData: Record<string, ModReleaseAssetStatusData> = {};
@@ -73,6 +75,7 @@ export class ReleaseAssetManager {
 		return assetStatusData;
 	}
 
+	@Log(logger)
 	addRelease(releaseId: string) {
 		const releaseFolder = this.deps.pathResolver.resolveReleasePath(releaseId);
 		this.deps.fileSystem.ensureDir(releaseFolder);
@@ -94,6 +97,7 @@ export class ReleaseAssetManager {
 		}
 	}
 
+	@Log(logger)
 	removeRelease(releaseId: string) {
 		for (const jobId of this.deps.releaseRepository.getJobIdsForRelease(releaseId)) {
 			const job = this.queue.getLatestByJobId(jobId);
@@ -108,6 +112,7 @@ export class ReleaseAssetManager {
 		this.deps.releaseRepository.clearJobsForRelease(releaseId);
 	}
 
+	@Log(logger)
 	isReleaseReady(releaseId: string) {
 		const allJobs = this.deps.releaseRepository
 			.getJobIdsForRelease(releaseId)

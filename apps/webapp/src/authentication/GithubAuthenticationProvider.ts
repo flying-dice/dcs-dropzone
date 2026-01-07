@@ -1,7 +1,7 @@
 import { getLogger } from "log4js";
 import { OAuthApp, Octokit } from "octokit";
 import { z } from "zod";
-import type { AuthenticationProvider, AuthResult } from "../application/ports/AuthenticationProvider.ts";
+import type { AuthenticationProvider, AuthResult } from "./AuthenticationProvider.ts";
 
 const logger = getLogger("GithubAuthenticationProvider");
 

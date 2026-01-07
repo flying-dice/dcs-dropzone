@@ -1,3 +1,4 @@
+import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
@@ -18,6 +19,7 @@ type Deps = {
 export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
+	@Log(logger)
 	enable(releaseId: string): void {
 		logger.info(`Enabling Release ${releaseId}`);
 		this.ensureReleaseIsReady(releaseId);
@@ -41,6 +43,7 @@ export class ReleaseToggle {
 		logger.info(`Finished enabling Release ${releaseId}`);
 	}
 
+	@Log(logger)
 	disable(releaseId: string): void {
 		logger.info(`Disabling Release ${releaseId}`);
 

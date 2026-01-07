@@ -1,4 +1,5 @@
 import mongoose, { type InferRawDocType, type InferSchemaType, Schema } from "mongoose";
+import { ModCategory } from "../../application/enums/ModCategory.ts";
 import { MongoMigration } from "../MongoMigration.ts";
 import { Mod } from "./Mod.ts";
 
@@ -6,7 +7,7 @@ const schema = new Schema(
 	{
 		id: { type: String, required: true, unique: true },
 		name: { type: String, required: true },
-		category: { type: String, required: true },
+		category: { type: String, enum: ModCategory, required: true },
 		description: { type: String, required: true },
 		tags: { type: [String], required: true },
 		dependencies: { type: [String], required: true },

@@ -1,14 +1,7 @@
 import { getLogger } from "log4js";
-import { z } from "zod";
-import type { AuthenticationProvider, AuthResult } from "../application/ports/AuthenticationProvider.ts";
+import type { AuthenticationProvider, AuthResult } from "./AuthenticationProvider.ts";
 
 const logger = getLogger("MockAuthService");
-
-export const MockAuthServiceConfig = z.object({
-	enabled: z.boolean(),
-});
-
-export type MockAuthServiceConfig = z.infer<typeof MockAuthServiceConfig>;
 
 /**
  * Mock authentication service for testing without real OAuth.
@@ -23,14 +16,14 @@ export class MockAuthService implements AuthenticationProvider {
 		profileUrl: "https://github.com",
 	};
 
-	constructor(_config: MockAuthServiceConfig) {
+	constructor() {
 		logger.info("MockAuthService initialized - authentication is disabled");
 	}
 
 	getWebFlowAuthorizationUrl(): string {
 		logger.debug("Mock auth: generating authorization URL (redirecting to homepage)");
 		// Redirect to the homepage since there's no real OAuth flow
-		return "/auth/github/callback?code=mockcode&state=mockstate";
+		return "/auth/callback?code=mockcode&state=mockstate";
 	}
 
 	async handleCallback(_code: string, _state: string): Promise<AuthResult> {

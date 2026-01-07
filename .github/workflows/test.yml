@@ -1,0 +1,45 @@
+name: test.yml
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: build-app
+    runs-on: windows-latest
+    env:
+      BUN_INSTALL_CACHE_DIR: ${{ github.workspace }}\.cache\bun
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Cache Bun download cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\.cache\bun
+          key: ${{ runner.os }}-bun-cache-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-cache-
+
+      - name: Install dependencies # (assuming your project has dependencies)
+        run: bun install # You can use npm/yarn/pnpm instead if you prefer
+
+      - name: Add daemon bins to PATH
+        run: echo "${{ github.workspace }}\apps\daemon\bin" >> $env:GITHUB_PATH
+
+      - name: Run tests
+        run: bun test
+
+      - name: Upload log artifact
+        if: always()  # upload even if the build step fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs
+          path: logs/
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: 'unit.junit.xml'
