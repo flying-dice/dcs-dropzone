@@ -323,7 +323,12 @@ export class MongoModRepository implements ModRepository {
 	}
 
 	async findPublicModReleases(modId: string): Promise<ModReleaseData[] | undefined> {
-		const mod = await Mod.findOne({ id: modId }).lean().exec();
+		const mod = await Mod.findOne({
+			id: modId,
+			visibility: { $in: [ModVisibility.PUBLIC, ModVisibility.UNLISTED] },
+		})
+			.lean()
+			.exec();
 		if (!mod) {
 			return undefined;
 		}
