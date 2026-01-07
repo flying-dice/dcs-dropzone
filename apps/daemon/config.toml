@@ -18,7 +18,7 @@ sevenzip = "bin/7za.exe"                                                  # Path
 # Server Configuration
 # =======================================
 [server]
-host = "0.0.0.0"                                                                # Address to bind the HTTP hono
+host = "0.0.0.0"                                                                # Address to bind the HTTP honoApplication
 port = 3001                                                                     # Port to listen on
 
 # =======================================

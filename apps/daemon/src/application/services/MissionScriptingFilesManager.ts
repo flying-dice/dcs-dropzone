@@ -1,3 +1,4 @@
+import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../../constants.ts";
@@ -35,6 +36,7 @@ export class MissionScriptingFilesManager {
 		);
 	}
 
+	@Log(logger)
 	rebuild() {
 		logger.info("Regenerating Dropzone Mission Scripting Files");
 

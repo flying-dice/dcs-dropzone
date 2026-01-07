@@ -116,7 +116,7 @@ The `ReleaseAssetManager` coordinates these queues:
 
 ## REST API
 
-The daemon exposes a REST API via Hono (`HonoApplication` in `apps/daemon/src/hono/`):
+The daemon exposes a REST API via Hono (`HonoApplication` in `apps/daemon/src/honoApplication/`):
 
 ### Endpoints
 

@@ -32,7 +32,10 @@ describe.each(TestCases)("$label", ({ build }) => {
 					id: "test-release-id__asset-1",
 					name: "Test Asset",
 					urls: [
-						{ id: "test-release-id__asset-1__url-1", url: "https://getsamplefiles.com/download/zip/sample-1.zip" },
+						{
+							id: "test-release-id__asset-1__url-1",
+							url: "https://github.com/flying-dice/hello-world-mod/raw/refs/heads/main/sample-1.zip",
+						},
 					],
 					isArchive: true,
 				},
@@ -94,7 +97,12 @@ describe.each(TestCases)("$label", ({ build }) => {
 				releaseId: "test-release-id",
 				name: "Test Asset",
 				isArchive: true,
-				urls: [{ id: "test-release-id__asset-1__url-1", url: "https://getsamplefiles.com/download/zip/sample-1.zip" }],
+				urls: [
+					{
+						id: "test-release-id__asset-1__url-1",
+						url: "https://github.com/flying-dice/hello-world-mod/raw/refs/heads/main/sample-1.zip",
+					},
+				],
 			});
 
 			expect(symbolicLinksForRelease.length).toEqual(modAndReleaseData.symbolicLinks.length);
@@ -123,7 +131,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(downloadJobs.length).toEqual(1);
 			expect(downloadJobs[0]).toMatchObject({
 				jobData: {
-					url: "https://getsamplefiles.com/download/zip/sample-1.zip",
+					url: "https://github.com/flying-dice/hello-world-mod/raw/refs/heads/main/sample-1.zip",
 					destinationFolder: join(app.deps.dropzoneModsFolder, "test-release-id"),
 					releaseId: "test-release-id",
 					assetId: "test-release-id__asset-1",

@@ -134,7 +134,8 @@ export async function spawnWget(props: SpawnWgetProps, abortSignal?: AbortSignal
 
 	return new Promise((resolve, reject) => {
 		const _wget = spawn(exePath, args, {
-			stdio: "pipe",
+			env: { ...process.env },
+			stdio: ["ignore", "pipe", "pipe"],
 			cwd: target,
 			signal: abortSignal,
 		});
@@ -170,7 +171,7 @@ export async function spawnWget(props: SpawnWgetProps, abortSignal?: AbortSignal
 				resolve(code);
 			} else {
 				_wget.removeAllListeners();
-				reject(new Error(`Failed to download file, code: ${code} - ${getWgetErrorMessage(code)}`));
+				reject(new Error(` ${code} - ${getWgetErrorMessage(code)}`));
 			}
 		});
 	}).then(
@@ -179,7 +180,7 @@ export async function spawnWget(props: SpawnWgetProps, abortSignal?: AbortSignal
 			return ok(join(target, basename(url)));
 		},
 		(error) => {
-			logger.error(`Wget process error: ${error}`);
+			logger.error("Wget process error", { error, url });
 			return err(WgetErrors.ProcessError);
 		},
 	);

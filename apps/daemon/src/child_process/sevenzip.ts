@@ -152,7 +152,8 @@ export async function spawnSevenzip(props: SpawnSevenzipProps, abortSignal?: Abo
 
 	return new Promise((resolve, reject) => {
 		const _7zip = spawn(exePath, args, {
-			stdio: "pipe",
+			env: { ...process.env },
+			stdio: ["ignore", "pipe", "pipe"],
 			signal: abortSignal,
 		});
 
@@ -191,7 +192,7 @@ export async function spawnSevenzip(props: SpawnSevenzipProps, abortSignal?: Abo
 				resolve(code);
 			} else {
 				_7zip.removeAllListeners();
-				reject(new Error(`Failed to extract archive, code: ${code} - ${getSevenzipErrorMessage(code)}`));
+				reject(new Error(`${code} - ${getSevenzipErrorMessage(code)}`));
 			}
 		});
 	}).then(
@@ -200,7 +201,7 @@ export async function spawnSevenzip(props: SpawnSevenzipProps, abortSignal?: Abo
 			return ok(targetDir);
 		},
 		(error) => {
-			logger.error(`Sevenzip process error: ${error}`);
+			logger.error("Sevenzip process error", { error, archivePath });
 			return err(SevenzipErrors.ProcessError);
 		},
 	);

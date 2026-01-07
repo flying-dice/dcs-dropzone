@@ -1,6 +1,6 @@
 # Command–Query Pattern in the Webapp Server
 
-This document explains how the server-side code under `apps/webapp/src/server/hono` uses the command–query pattern instead of a large service layer. Each operation is explicit, composable, and testable.
+This document explains how the server-side code under `apps/webapp/src/server/honoApplication` uses the command–query pattern instead of a large service layer. Each operation is explicit, composable, and testable.
 
 **Note:** This pattern is used in the **webapp** application (`apps/webapp`). The daemon service (`apps/daemon`) uses a different architecture based on the **Ports & Adapters** pattern focused on queue management and system operations. See [Daemon Architecture](./daemon-architecture.md) for details.
 

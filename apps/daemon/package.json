@@ -20,6 +20,7 @@
 		"@opentui/react": "^0.1.63",
 		"@packages/hono": "workspace:*",
 		"@packages/queue": "workspace:*",
+		"@packages/decorators": "workspace:*",
 		"@scalar/hono-api-reference": "^0.9.30",
 		"@types/lodash": "^4.17.21",
 		"date-fns": "^4.1.0",
