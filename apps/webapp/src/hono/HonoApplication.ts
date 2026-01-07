@@ -1005,10 +1005,10 @@ export class HonoApplication extends Hono<Env> {
 						),
 					(error) =>
 						c.json(
-							{
+							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
 								error,
-							},
+							}),
 							StatusCodes.NOT_FOUND,
 						),
 				);
