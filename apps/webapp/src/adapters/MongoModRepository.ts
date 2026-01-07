@@ -56,6 +56,8 @@ export class MongoModRepository implements ModRepository {
 
 	async createModRelease(releaseData: ModReleaseData): Promise<ModReleaseData> {
 		const doc = await ModRelease.create(releaseData);
+		// Update mod's latestReleaseId to the new release
+		await Mod.updateOne({ id: releaseData.modId }, { latestReleaseId: releaseData.id });
 		return ModReleaseDataSchema.parse(doc.toObject());
 	}
 
