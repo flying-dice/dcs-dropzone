@@ -281,23 +281,20 @@ export class MongoModRepository implements ModRepository {
 	}
 
 	async getServerMetrics(): Promise<{ totalMods: number; totalDownloads: number }> {
-		const totalMods = await Mod.countDocuments({
-			visibility: ModVisibility.PUBLIC,
-		}).exec();
-
 		const result = await Mod.aggregate([
 			{ $match: { visibility: ModVisibility.PUBLIC } },
 			{
 				$group: {
 					_id: null,
-					total: { $sum: "$downloadsCount" },
+					totalMods: { $sum: 1 },
+					totalDownloads: { $sum: "$downloadsCount" },
 				},
 			},
-		]);
+		]).exec();
 
 		return {
-			totalMods,
-			totalDownloads: result[0]?.total || 0,
+			totalMods: result[0]?.totalMods || 0,
+			totalDownloads: result[0]?.totalDownloads || 0,
 		};
 	}
 
