@@ -1,6 +1,6 @@
 import type { ModCategory } from "../application/enums/ModCategory.ts";
 import { ModVisibility } from "../application/enums/ModVisibility.ts";
-import type { ModRepository } from "../application/ports/ModRepository.ts";
+import type { ModFilters, ModRepository } from "../application/ports/ModRepository.ts";
 import type { ModData } from "../application/schemas/ModData.ts";
 import type { ModReleaseData } from "../application/schemas/ModReleaseData.ts";
 import type { ModReleaseUpdateData } from "../application/schemas/ModReleaseUpdateData.ts";
@@ -13,12 +13,6 @@ import type { ModUpdateData } from "../application/schemas/ModUpdateData.ts";
 export class TestModRepository implements ModRepository {
 	private mods = new Map<string, ModData>();
 	private releases = new Map<string, ModReleaseData>();
-	private users = new Map<string, { id: string; username: string }>();
-
-	// User helper for maintainer lookups
-	setUser(user: { id: string; username: string }): void {
-		this.users.set(user.id, user);
-	}
 
 	async createMod(modData: ModData): Promise<ModData> {
 		this.mods.set(modData.id, modData);
@@ -164,36 +158,21 @@ export class TestModRepository implements ModRepository {
 	}
 
 	// Public mod queries
-	async findPublicModById(
-		modId: string,
-	): Promise<{ mod: ModData; maintainers: { id: string; username: string }[] } | undefined> {
+	async findPublicModById(modId: string): Promise<ModData | undefined> {
 		const mod = this.mods.get(modId);
 		if (!mod || (mod.visibility !== ModVisibility.PUBLIC && mod.visibility !== ModVisibility.UNLISTED)) {
 			return undefined;
 		}
 
-		const maintainers = mod.maintainers
-			.map((id) => this.users.get(id))
-			.filter((u): u is { id: string; username: string } => u !== undefined);
-
-		return { mod, maintainers };
+		return mod;
 	}
 
-	async findAllPublishedMods(query: {
-		page: number;
-		size: number;
-		filter?: {
-			category?: ModCategory;
-			maintainers?: string[];
-			tags?: string[];
-			term?: string;
-		};
-	}): Promise<{
+	async findAllPublishedMods(query: { page: number; size: number; filter?: ModFilters }): Promise<{
 		data: ModSummaryData[];
 		count: number;
-		categories: string[];
+		categories: ModCategory[];
 		tags: string[];
-		maintainers: { id: string; username: string }[];
+		maintainers: string[];
 	}> {
 		let mods = Array.from(this.mods.values()).filter((mod) => mod.visibility === ModVisibility.PUBLIC);
 
@@ -220,10 +199,7 @@ export class TestModRepository implements ModRepository {
 
 		const categories = [...new Set(mods.map((mod) => mod.category))];
 		const allTags = [...new Set(mods.flatMap((mod) => mod.tags))];
-		const allMaintainerIds = [...new Set(mods.flatMap((mod) => mod.maintainers))];
-		const maintainers = allMaintainerIds
-			.map((id) => this.users.get(id))
-			.filter((u): u is { id: string; username: string } => u !== undefined);
+		const maintainers = [...new Set(mods.flatMap((mod) => mod.maintainers))];
 
 		return {
 			data: paginatedMods.map((mod) => ({
@@ -355,10 +331,7 @@ export class TestModRepository implements ModRepository {
 		}
 
 		const release = this.releases.get(mod.latestReleaseId);
-		if (
-			!release ||
-			(release.visibility !== ModVisibility.PUBLIC && release.visibility !== ModVisibility.UNLISTED)
-		) {
+		if (!release || (release.visibility !== ModVisibility.PUBLIC && release.visibility !== ModVisibility.UNLISTED)) {
 			return undefined;
 		}
 
@@ -387,20 +360,5 @@ export class TestModRepository implements ModRepository {
 		}
 
 		return results;
-	}
-
-	// Test helper methods
-	clear(): void {
-		this.mods.clear();
-		this.releases.clear();
-		this.users.clear();
-	}
-
-	getAllMods(): ModData[] {
-		return Array.from(this.mods.values());
-	}
-
-	getAllReleases(): ModReleaseData[] {
-		return Array.from(this.releases.values());
 	}
 }

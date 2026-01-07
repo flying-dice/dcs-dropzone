@@ -16,12 +16,14 @@ export class TestUserRepository implements UserRepository {
 		return userDetails;
 	}
 
-	// Test helper methods
-	getAllUsers(): UserData[] {
-		return Array.from(this.users.values());
-	}
-
-	clear(): void {
-		this.users.clear();
+	async findAllByIds(userIds: string[]): Promise<UserData[]> {
+		const foundUsers: UserData[] = [];
+		for (const userId of userIds) {
+			const user = this.users.get(userId);
+			if (user) {
+				foundUsers.push(user);
+			}
+		}
+		return foundUsers;
 	}
 }

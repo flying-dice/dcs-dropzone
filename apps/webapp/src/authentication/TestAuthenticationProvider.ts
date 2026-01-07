@@ -1,4 +1,4 @@
-import type { AuthenticationProvider, AuthResult } from "../application/ports/AuthenticationProvider.ts";
+import type { AuthenticationProvider, AuthResult } from "./AuthenticationProvider.ts";
 
 /**
  * Test double for AuthenticationProvider port.

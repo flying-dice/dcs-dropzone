@@ -1,4 +1,3 @@
-import "../mongo-db";
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
@@ -14,7 +13,6 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
 import appConfig from "../ApplicationConfig.ts";
-import migrateLegacyRegistry from "../MigrateLegacyRegistry.ts";
 import type { Application } from "../application/Application.ts";
 import { ModCategory } from "../application/enums/ModCategory.ts";
 import { ErrorData } from "../application/schemas/ErrorData.ts";
@@ -32,7 +30,9 @@ import { ServerMetricsData } from "../application/schemas/ServerMetricsData.ts";
 import { TypedErrorData } from "../application/schemas/TypedErrorData.ts";
 import { UserData } from "../application/schemas/UserData.ts";
 import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
+import type { AuthenticationProvider } from "../authentication/AuthenticationProvider.ts";
 import Database from "../database";
+import migrateLegacyRegistry from "../MigrateLegacyRegistry.ts";
 import { cookieAuth } from "./middleware/cookieAuth.ts";
 
 const logger = getLogger("HonoApplication");
@@ -45,8 +45,12 @@ type Env = {
 };
 
 export class HonoApplication extends Hono<Env> {
-	constructor(app: Application) {
+	private readonly authProvider: AuthenticationProvider;
+
+	constructor(app: Application, authProvider: AuthenticationProvider) {
 		super();
+
+		this.authProvider = authProvider;
 
 		this.use("*", (c, next) => {
 			c.set("app", app);
@@ -203,9 +207,9 @@ export class HonoApplication extends Hono<Env> {
 			async (c) => {
 				const { code, state } = c.req.valid("query");
 
-				const authResult = await c.var.app.authenticator.handleAuthCallback(code, state);
+				const authResult = await this.authProvider.handleCallback(code, state);
 
-				const userData = await c.var.app.authenticator.handleAuthResult(authResult);
+				const userData = await c.var.app.users.saveUserDetails(authResult);
 
 				await setSignedCookie(c, appConfig.userCookieName, userData.id, appConfig.userCookieSecret, {
 					maxAge: appConfig.userCookieMaxAge,
@@ -232,7 +236,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			(c) => {
-				return c.redirect(c.var.app.authenticator.getWebFlowAuthorizationUrl());
+				return c.redirect(this.authProvider.getWebFlowAuthorizationUrl());
 			},
 		);
 	}
@@ -626,32 +630,22 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`Registering download for release '${releaseId}' for mod '${id}'`);
 
-				// Ensure the requested mod release exists and is public before registering a download
 				const releaseResult = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
 
-				let notFoundError: string | null = null;
-				releaseResult.match(
-					() => {
-						// Release exists and is public; proceed with download registration
+				return releaseResult.match(
+					async () => {
+						await c.var.app.downloads.registerModReleaseDownload(id, releaseId, daemonInstanceId);
+						return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 					},
 					(error) => {
-						notFoundError = error;
+						return c.json(
+							ErrorData.parse(<ErrorData>{
+								code: StatusCodes.NOT_FOUND,
+								error,
+							}),
+						);
 					},
 				);
-
-				if (notFoundError !== null) {
-					return c.json(
-						ErrorData.parse(<ErrorData>{
-							code: StatusCodes.NOT_FOUND,
-							error: notFoundError,
-						}),
-						StatusCodes.NOT_FOUND,
-					);
-				}
-
-				await c.var.app.downloads.registerModReleaseDownload(id, releaseId, daemonInstanceId);
-
-				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
 	}

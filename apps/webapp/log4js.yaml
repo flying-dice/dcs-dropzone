@@ -27,7 +27,7 @@ appenders:
 categories:
   default:
     appenders: [console, jsonFile]
-    level: debug
+    level: trace
 
   db:
     appenders: [db, jsonFile]

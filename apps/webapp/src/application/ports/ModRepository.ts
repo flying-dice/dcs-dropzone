@@ -5,6 +5,13 @@ import type { ModReleaseUpdateData } from "../schemas/ModReleaseUpdateData.ts";
 import type { ModSummaryData } from "../schemas/ModSummaryData.ts";
 import type { ModUpdateData } from "../schemas/ModUpdateData.ts";
 
+export type ModFilters = {
+	category?: ModCategory;
+	maintainers?: string[];
+	tags?: string[];
+	term?: string;
+};
+
 export interface ModRepository {
 	createMod(modData: ModData): Promise<ModData>;
 	updateMod(updateData: ModUpdateData): Promise<ModData | undefined>;
@@ -26,25 +33,16 @@ export interface ModRepository {
 	getTotalPublicModsCountForMaintainer(userId: string): Promise<number>;
 
 	// Public mod queries
-	findPublicModById(
-		modId: string,
-	): Promise<{ mod: ModData; maintainers: { id: string; username: string }[] } | undefined>;
-	findAllPublishedMods(query: {
-		page: number;
-		size: number;
-		filter?: {
-			category?: ModCategory;
-			maintainers?: string[];
-			tags?: string[];
-			term?: string;
-		};
-	}): Promise<{
+	findPublicModById(modId: string): Promise<ModData | undefined>;
+
+	findAllPublishedMods(query: { page: number; size: number; filter?: ModFilters }): Promise<{
 		data: ModSummaryData[];
 		count: number;
-		categories: string[];
+		categories: ModCategory[];
 		tags: string[];
-		maintainers: { id: string; username: string }[];
+		maintainers: string[];
 	}>;
+
 	findAllFeaturedMods(): Promise<ModSummaryData[]>;
 	findAllPopularMods(): Promise<ModSummaryData[]>;
 	findAllTags(): Promise<string[]>;

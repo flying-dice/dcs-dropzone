@@ -1,6 +1,6 @@
+import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
-import type { AuthResult } from "../ports/AuthenticationProvider.ts";
 import type { UserRepository } from "../ports/UserRepository.ts";
 import { UserData } from "../schemas/UserData.ts";
 
@@ -13,6 +13,13 @@ type Deps = {
 export class Users {
 	constructor(protected readonly deps: Deps) {}
 
+	@Log(logger)
+	async saveUserDetails(user: UserData): Promise<UserData> {
+		const saved = await this.deps.userRepository.saveUserDetails(UserData.parse(user));
+		return UserData.parse(saved);
+	}
+
+	@Log(logger)
 	async getUserById(userId: string): Promise<Result<UserData, "UserNotFound">> {
 		const user = await this.deps.userRepository.findById(userId);
 
@@ -22,23 +29,5 @@ export class Users {
 		}
 
 		return ok(UserData.parse(user));
-	}
-
-	async createFromAuthResult(authResult: AuthResult): Promise<UserData> {
-		logger.debug({ id: authResult.id, username: authResult.username }, "registerUserDetails start");
-
-		const user = UserData.parse({
-			id: authResult.id,
-			name: authResult.name,
-			username: authResult.username,
-			avatarUrl: authResult.avatarUrl,
-			profileUrl: authResult.profileUrl,
-		});
-
-		const saved = await this.deps.userRepository.saveUserDetails(user);
-
-		logger.debug({ userId: user.id }, "User registered/persisted");
-
-		return UserData.parse(saved);
 	}
 }

@@ -6,7 +6,7 @@ export function UserContextProvider({ children }: { children: ReactNode }) {
 	const user = useGetAuthenticatedUser();
 
 	function handleLogin() {
-		globalThis.open("/auth/github/login", "_self");
+		globalThis.open("/auth/login", "_self");
 	}
 
 	function handleLogout() {

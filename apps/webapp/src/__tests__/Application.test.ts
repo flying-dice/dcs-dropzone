@@ -1,53 +1,43 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
+import "./log4js.ts";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import type { Application } from "../application/Application.ts";
 import { ModCategory } from "../application/enums/ModCategory.ts";
 import { ModVisibility } from "../application/enums/ModVisibility.ts";
 import type { UserData } from "../application/schemas/UserData.ts";
-import { type TestableApplication, TestCases, cleanupProdTests, initializeProdTests } from "./TestCases.ts";
+import { TestCases } from "./TestCases.ts";
 
-// Initialize MongoDB before all tests for ProdApplication
-beforeAll(async () => {
-	await initializeProdTests();
-});
-
-// Cleanup MongoDB after all tests
-afterAll(async () => {
-	await cleanupProdTests();
-});
+const TEST_USER: Readonly<UserData> = {
+	id: "test-user-id",
+	username: "TEST_USER",
+	name: "Test User",
+	avatarUrl: "https://example.com/avatar.png",
+	profileUrl: "https://example.com/profile",
+};
 
 describe.each(TestCases)("$label", ({ build }) => {
-	let testable: TestableApplication;
 	let app: Application;
-	let testUser: UserData;
+	let cleanup: () => Promise<void>;
 
 	beforeEach(async () => {
-		testable = build();
-		app = testable.app;
-
-		// Create a test user via the authenticator flow
-		const authResult = await app.authenticator.handleAuthCallback("test-code", "test-state");
-		const user = await app.authenticator.handleAuthResult(authResult);
-		testUser = user;
-
-		// Also set the user in the mod repository for maintainer lookups (TestApplication only)
-		if (testable.testModRepository?.setUser) {
-			testable.testModRepository.setUser({ id: testUser.id, username: testUser.username });
-		}
+		const c = await build();
+		app = c.app;
+		cleanup = c.cleanup;
+		await app.users.saveUserDetails(TEST_USER);
 	});
 
 	afterEach(async () => {
-		await testable.clear();
+		await cleanup();
 	});
 
 	describe("Users Service", () => {
 		it("should get user by id", async () => {
-			const result = await app.users.getUserById(testUser.id);
+			const result = await app.users.getUserById(TEST_USER.id);
 
 			expect(result.isOk()).toBe(true);
 			result.match(
 				(user) => {
-					expect(user.id).toBe(testUser.id);
-					expect(user.username).toBe(testUser.username);
+					expect(user.id).toBe(TEST_USER.id);
+					expect(user.username).toBe(TEST_USER.username);
 				},
 				() => {},
 			);
@@ -66,36 +56,6 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 	});
 
-	describe("WebFlowAuthenticator", () => {
-		it("should return authorization URL", () => {
-			const url = app.authenticator.getWebFlowAuthorizationUrl();
-			expect(url).toBeDefined();
-			expect(typeof url).toBe("string");
-		});
-
-		it("should handle auth callback and create user", async () => {
-			if (testable.testAuthProvider) {
-				testable.testAuthProvider.setNextAuthResult({
-					id: "new-user-id",
-					username: "newuser",
-					name: "New User",
-					avatarUrl: "https://example.com/new-avatar.png",
-					profileUrl: "https://example.com/new-profile",
-				});
-			}
-
-			const authResult = await app.authenticator.handleAuthCallback("code", "state");
-			const user = await app.authenticator.handleAuthResult(authResult);
-
-			expect(user.id).toBeDefined();
-			expect(user.username).toBeDefined();
-
-			// Verify user was saved by looking it up
-			const savedUserResult = await app.users.getUserById(user.id);
-			expect(savedUserResult.isOk()).toBe(true);
-		});
-	});
-
 	describe("UserMods Service", () => {
 		describe("createMod", () => {
 			it("should create a new mod", async () => {
@@ -105,14 +65,14 @@ describe.each(TestCases)("$label", ({ build }) => {
 					description: "A test mod description",
 				};
 
-				const mod = await app.userMods.createMod(testUser, createData);
+				const mod = await app.userMods.createMod(TEST_USER, createData);
 
 				expect(mod.id).toBeDefined();
 				expect(mod.name).toBe("Test Mod");
 				expect(mod.category).toBe(ModCategory.MOD);
 				expect(mod.description).toBe("A test mod description");
 				expect(mod.visibility).toBe(ModVisibility.PRIVATE);
-				expect(mod.maintainers).toContain(testUser.id);
+				expect(mod.maintainers).toContain(TEST_USER.id);
 				expect(mod.downloadsCount).toBe(0);
 			});
 
@@ -123,10 +83,10 @@ describe.each(TestCases)("$label", ({ build }) => {
 					description: "Should be persisted",
 				};
 
-				const mod = await app.userMods.createMod(testUser, createData);
+				const mod = await app.userMods.createMod(TEST_USER, createData);
 
 				// Verify persistence using public API
-				const findResult = await app.userMods.findById(testUser, mod.id);
+				const findResult = await app.userMods.findById(TEST_USER, mod.id);
 				expect(findResult.isOk()).toBe(true);
 				findResult.match(
 					(found) => {
@@ -145,8 +105,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 					description: "Should be findable",
 				};
 
-				const created = await app.userMods.createMod(testUser, createData);
-				const result = await app.userMods.findById(testUser, created.id);
+				const created = await app.userMods.createMod(TEST_USER, createData);
+				const result = await app.userMods.findById(TEST_USER, created.id);
 
 				expect(result.isOk()).toBe(true);
 				result.match(
@@ -159,7 +119,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			});
 
 			it("should return ModNotFound for non-existent mod", async () => {
-				const result = await app.userMods.findById(testUser, "non-existent-mod");
+				const result = await app.userMods.findById(TEST_USER, "non-existent-mod");
 
 				expect(result.isErr()).toBe(true);
 				result.match(
@@ -177,7 +137,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 					description: "Owned by another user",
 				};
 
-				const created = await app.userMods.createMod(testUser, createData);
+				const created = await app.userMods.createMod(TEST_USER, createData);
 
 				// Create another user
 				const otherUser: UserData = {
@@ -207,9 +167,9 @@ describe.each(TestCases)("$label", ({ build }) => {
 					description: "Original description",
 				};
 
-				const created = await app.userMods.createMod(testUser, createData);
+				const created = await app.userMods.createMod(TEST_USER, createData);
 
-				const result = await app.userMods.updateMod(testUser, {
+				const result = await app.userMods.updateMod(TEST_USER, {
 					id: created.id,
 					name: "Updated Name",
 					description: "Updated description",
@@ -243,18 +203,18 @@ describe.each(TestCases)("$label", ({ build }) => {
 					description: "Will be deleted",
 				};
 
-				const created = await app.userMods.createMod(testUser, createData);
-				const result = await app.userMods.deleteMod(testUser, created.id);
+				const created = await app.userMods.createMod(TEST_USER, createData);
+				const result = await app.userMods.deleteMod(TEST_USER, created.id);
 
 				expect(result.isOk()).toBe(true);
 
 				// Verify mod is gone using public API
-				const findResult = await app.userMods.findById(testUser, created.id);
+				const findResult = await app.userMods.findById(TEST_USER, created.id);
 				expect(findResult.isErr()).toBe(true);
 			});
 
 			it("should return ModNotFound for non-existent mod", async () => {
-				const result = await app.userMods.deleteMod(testUser, "non-existent");
+				const result = await app.userMods.deleteMod(TEST_USER, "non-existent");
 
 				expect(result.isErr()).toBe(true);
 				result.match(
@@ -269,18 +229,18 @@ describe.each(TestCases)("$label", ({ build }) => {
 		describe("findAllMods", () => {
 			it("should return all mods for maintainer with metadata", async () => {
 				// Create multiple mods
-				await app.userMods.createMod(testUser, {
+				await app.userMods.createMod(TEST_USER, {
 					name: "Mod 1",
 					category: ModCategory.MOD,
 					description: "First mod",
 				});
-				await app.userMods.createMod(testUser, {
+				await app.userMods.createMod(TEST_USER, {
 					name: "Mod 2",
 					category: ModCategory.TERRAIN,
 					description: "Second mod",
 				});
 
-				const result = await app.userMods.findAllMods(testUser);
+				const result = await app.userMods.findAllMods(TEST_USER);
 
 				expect(result.data.length).toBe(2);
 				// Schema expects 'published' and 'totalDownloads'
@@ -300,13 +260,13 @@ describe.each(TestCases)("$label", ({ build }) => {
 				description: "A mod for testing releases",
 			};
 
-			const mod = await app.userMods.createMod(testUser, createData);
+			const mod = await app.userMods.createMod(TEST_USER, createData);
 			modId = mod.id;
 		});
 
 		describe("createRelease", () => {
 			it("should create a new release for a mod", async () => {
-				const result = await app.userMods.createRelease(testUser, {
+				const result = await app.userMods.createRelease(TEST_USER, {
 					modId,
 					version: "1.0.0",
 				});
@@ -326,7 +286,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			});
 
 			it("should persist the release in repository", async () => {
-				const createResult = await app.userMods.createRelease(testUser, {
+				const createResult = await app.userMods.createRelease(TEST_USER, {
 					modId,
 					version: "1.0.0",
 				});
@@ -335,12 +295,12 @@ describe.each(TestCases)("$label", ({ build }) => {
 				const release = createResult._unsafeUnwrap();
 
 				// Verify persistence using public API
-				const findResult = await app.userMods.findReleaseById(testUser, modId, release.id);
+				const findResult = await app.userMods.findReleaseById(TEST_USER, modId, release.id);
 				expect(findResult.isOk()).toBe(true);
 			});
 
 			it("should return ModNotFound for non-existent mod", async () => {
-				const result = await app.userMods.createRelease(testUser, {
+				const result = await app.userMods.createRelease(TEST_USER, {
 					modId: "non-existent",
 					version: "1.0.0",
 				});
@@ -357,14 +317,14 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 		describe("findReleaseById", () => {
 			it("should find release by id", async () => {
-				const createResult = await app.userMods.createRelease(testUser, {
+				const createResult = await app.userMods.createRelease(TEST_USER, {
 					modId,
 					version: "1.0.0",
 				});
 
 				const releaseId = createResult._unsafeUnwrap().id;
 
-				const result = await app.userMods.findReleaseById(testUser, modId, releaseId);
+				const result = await app.userMods.findReleaseById(TEST_USER, modId, releaseId);
 
 				expect(result.isOk()).toBe(true);
 				result.match(
@@ -379,10 +339,10 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 		describe("findReleases", () => {
 			it("should find all releases for a mod", async () => {
-				await app.userMods.createRelease(testUser, { modId, version: "1.0.0" });
-				await app.userMods.createRelease(testUser, { modId, version: "1.1.0" });
+				await app.userMods.createRelease(TEST_USER, { modId, version: "1.0.0" });
+				await app.userMods.createRelease(TEST_USER, { modId, version: "1.1.0" });
 
-				const result = await app.userMods.findReleases(testUser, modId);
+				const result = await app.userMods.findReleases(TEST_USER, modId);
 
 				expect(result.isOk()).toBe(true);
 				result.match(
@@ -396,14 +356,14 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 		describe("updateRelease", () => {
 			it("should update a release", async () => {
-				const createResult = await app.userMods.createRelease(testUser, {
+				const createResult = await app.userMods.createRelease(TEST_USER, {
 					modId,
 					version: "1.0.0",
 				});
 
 				const release = createResult._unsafeUnwrap();
 
-				const result = await app.userMods.updateRelease(testUser, {
+				const result = await app.userMods.updateRelease(TEST_USER, {
 					id: release.id,
 					modId,
 					version: "1.0.1",
@@ -428,24 +388,24 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 		describe("deleteRelease", () => {
 			it("should delete a release", async () => {
-				const createResult = await app.userMods.createRelease(testUser, {
+				const createResult = await app.userMods.createRelease(TEST_USER, {
 					modId,
 					version: "1.0.0",
 				});
 
 				const releaseId = createResult._unsafeUnwrap().id;
 
-				const result = await app.userMods.deleteRelease(testUser, modId, releaseId);
+				const result = await app.userMods.deleteRelease(TEST_USER, modId, releaseId);
 
 				expect(result.isOk()).toBe(true);
 
 				// Verify release is gone using public API
-				const findResult = await app.userMods.findReleaseById(testUser, modId, releaseId);
+				const findResult = await app.userMods.findReleaseById(TEST_USER, modId, releaseId);
 				expect(findResult.isErr()).toBe(true);
 			});
 
 			it("should return ReleaseNotFound for non-existent release", async () => {
-				const result = await app.userMods.deleteRelease(testUser, modId, "non-existent");
+				const result = await app.userMods.deleteRelease(TEST_USER, modId, "non-existent");
 
 				expect(result.isErr()).toBe(true);
 				result.match(
@@ -461,33 +421,33 @@ describe.each(TestCases)("$label", ({ build }) => {
 	describe("PublicMods Service", () => {
 		beforeEach(async () => {
 			// Create some public mods for testing
-			const mod1 = await app.userMods.createMod(testUser, {
+			const mod1 = await app.userMods.createMod(TEST_USER, {
 				name: "Public Mod 1",
 				category: ModCategory.MOD,
 				description: "First public mod",
 			});
 
 			// Make it public
-			await app.userMods.updateMod(testUser, {
+			await app.userMods.updateMod(TEST_USER, {
 				...mod1,
 				visibility: ModVisibility.PUBLIC,
 				tags: ["fighter", "modern"],
 			});
 
-			const mod2 = await app.userMods.createMod(testUser, {
+			const mod2 = await app.userMods.createMod(TEST_USER, {
 				name: "Public Mod 2",
 				category: ModCategory.TERRAIN,
 				description: "Second public mod",
 			});
 
-			await app.userMods.updateMod(testUser, {
+			await app.userMods.updateMod(TEST_USER, {
 				...mod2,
 				visibility: ModVisibility.PUBLIC,
 				tags: ["armor"],
 			});
 
 			// Create a private mod
-			await app.userMods.createMod(testUser, {
+			await app.userMods.createMod(TEST_USER, {
 				name: "Private Mod",
 				category: ModCategory.SOUND,
 				description: "Should not be visible",
@@ -540,7 +500,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				result.match(
 					({ mod, maintainers }) => {
 						expect(mod.id).toBe(publicMod!.id);
-						expect(maintainers.length).toBeGreaterThan(0);
+						expect(maintainers).toEqual([TEST_USER]);
 					},
 					() => {},
 				);
@@ -588,20 +548,20 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 		beforeEach(async () => {
 			// Create a public mod with a release
-			const mod = await app.userMods.createMod(testUser, {
+			const mod = await app.userMods.createMod(TEST_USER, {
 				name: "Public Mod with Releases",
 				category: ModCategory.MOD,
 				description: "Has releases",
 			});
 
-			await app.userMods.updateMod(testUser, {
+			await app.userMods.updateMod(TEST_USER, {
 				...mod,
 				visibility: ModVisibility.PUBLIC,
 			});
 
 			publicModId = mod.id;
 
-			const releaseResult = await app.userMods.createRelease(testUser, {
+			const releaseResult = await app.userMods.createRelease(TEST_USER, {
 				modId: publicModId,
 				version: "1.0.0",
 			});
@@ -676,20 +636,20 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 		beforeEach(async () => {
 			// Create a public mod with a release
-			const mod = await app.userMods.createMod(testUser, {
+			const mod = await app.userMods.createMod(TEST_USER, {
 				name: "Downloadable Mod",
 				category: ModCategory.MOD,
 				description: "Can be downloaded",
 			});
 
-			await app.userMods.updateMod(testUser, {
+			await app.userMods.updateMod(TEST_USER, {
 				...mod,
 				visibility: ModVisibility.PUBLIC,
 			});
 
 			publicModId = mod.id;
 
-			const releaseResult = await app.userMods.createRelease(testUser, {
+			const releaseResult = await app.userMods.createRelease(TEST_USER, {
 				modId: publicModId,
 				version: "1.0.0",
 			});
@@ -698,33 +658,12 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		describe("registerModReleaseDownload", () => {
-			it("should register a download", async () => {
-				// Register a download - this should not throw
-				await app.downloads.registerModReleaseDownload(publicModId, publicReleaseId, "daemon-instance-1");
-
-				// Verify via test repository if available, otherwise just ensure it didn't throw
-				if (testable.testDownloadsRepository?.getModReleaseDownloadCount) {
-					const downloadCount = await testable.testDownloadsRepository.getModReleaseDownloadCount(
-						publicModId,
-						publicReleaseId,
-					);
-					expect(downloadCount).toBe(1);
-				}
-			});
-
 			it("should track unique daemon instances", async () => {
 				await app.downloads.registerModReleaseDownload(publicModId, publicReleaseId, "daemon-1");
 				await app.downloads.registerModReleaseDownload(publicModId, publicReleaseId, "daemon-2");
 				await app.downloads.registerModReleaseDownload(publicModId, publicReleaseId, "daemon-1"); // Duplicate
 
-				// Verify via test repository if available
-				if (testable.testDownloadsRepository?.getModReleaseDownloadCount) {
-					const downloadCount = await testable.testDownloadsRepository.getModReleaseDownloadCount(
-						publicModId,
-						publicReleaseId,
-					);
-					expect(downloadCount).toBe(2); // Only unique instances
-				}
+				expect(await app.downloads.getModDownloadCount(publicModId)).toBe(2);
 			});
 		});
 	});
@@ -732,7 +671,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 	describe("End-to-End: Full Mod Lifecycle", () => {
 		it("should support creating, updating, releasing, and deleting a mod", async () => {
 			// 1. Create a mod
-			const mod = await app.userMods.createMod(testUser, {
+			const mod = await app.userMods.createMod(TEST_USER, {
 				name: "Lifecycle Test Mod",
 				category: ModCategory.MOD,
 				description: "Testing full lifecycle",
@@ -740,16 +679,62 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 			expect(mod.visibility).toBe(ModVisibility.PRIVATE);
 
+			expect(await app.publicMods.getAllPublishedMods({ page: 1, size: 10, filter: {} })).toEqual({
+				data: [],
+				filter: {
+					categories: [],
+					maintainers: [],
+					tags: [],
+				},
+				page: {
+					number: 1,
+					size: 10,
+					totalElements: 0,
+					totalPages: 1,
+				},
+			});
+
 			// 2. Update mod to public
-			const updateResult = await app.userMods.updateMod(testUser, {
+			const updateResult = await app.userMods.updateMod(TEST_USER, {
 				...mod,
 				visibility: ModVisibility.PUBLIC,
 				tags: ["test", "e2e"],
 			});
 			expect(updateResult.isOk()).toBe(true);
+			expect(await app.publicMods.getAllPublishedMods({ page: 1, size: 10, filter: {} })).toEqual({
+				data: [
+					{
+						id: mod.id,
+						name: "Lifecycle Test Mod",
+						category: ModCategory.MOD,
+						description: "Testing full lifecycle",
+						downloadsCount: 0,
+						dependencies: [],
+						maintainers: ["test-user-id"],
+						tags: ["test", "e2e"],
+						thumbnail: "https://cdn-icons-png.flaticon.com/512/10446/10446694.png",
+					},
+				],
+				filter: {
+					categories: [ModCategory.MOD],
+					maintainers: [
+						{
+							id: TEST_USER.id,
+							username: TEST_USER.username,
+						},
+					],
+					tags: expect.arrayContaining(["e2e", "test"]),
+				},
+				page: {
+					number: 1,
+					size: 10,
+					totalElements: 1,
+					totalPages: 1,
+				},
+			});
 
 			// 3. Create a release
-			const releaseResult = await app.userMods.createRelease(testUser, {
+			const releaseResult = await app.userMods.createRelease(TEST_USER, {
 				modId: mod.id,
 				version: "1.0.0",
 			});
@@ -767,17 +752,18 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 			// 6. Register a download
 			await app.downloads.registerModReleaseDownload(mod.id, release.id, "test-daemon");
+			expect(await app.downloads.getModDownloadCount(mod.id)).toBe(1);
 
 			// 7. Verify server metrics include our mod
 			const metrics = await app.publicMods.getServerMetrics();
-			expect(metrics.totalMods).toBeGreaterThan(0);
+			expect(metrics.totalMods).toEqual(1);
 
 			// 8. Delete the release
-			const deleteReleaseResult = await app.userMods.deleteRelease(testUser, mod.id, release.id);
+			const deleteReleaseResult = await app.userMods.deleteRelease(TEST_USER, mod.id, release.id);
 			expect(deleteReleaseResult.isOk()).toBe(true);
 
 			// 9. Delete the mod
-			const deleteModResult = await app.userMods.deleteMod(testUser, mod.id);
+			const deleteModResult = await app.userMods.deleteMod(TEST_USER, mod.id);
 			expect(deleteModResult.isOk()).toBe(true);
 
 			// 10. Verify mod is no longer visible
