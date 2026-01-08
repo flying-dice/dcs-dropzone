@@ -44,7 +44,7 @@ describe("Log", () => {
 			const testInstance = new TestClass();
 
 			expect(() => testInstance.testMethod()).toThrow("Test error");
-			expect(logger.trace).toHaveBeenNthCalledWith(1, "Method testMethod called", [42, "Hello"]);
+			expect(logger.trace).toHaveBeenNthCalledWith(1, "Method testMethod called", []);
 			expect(logger.error).toHaveBeenNthCalledWith(
 				1,
 				expect.stringMatching(/^Method testMethod failed after \d+ms with error$/),
@@ -91,8 +91,8 @@ describe("Log", () => {
 			}
 
 			const testInstance = new TestClass();
-			expect(() => testInstance.testAsyncMethod()).toThrow("Test error");
-			expect(logger.trace).toHaveBeenNthCalledWith(1, "Method testAsyncMethod called", [42, "Hello"]);
+			await expect(testInstance.testAsyncMethod()).rejects.toThrow("Test error");
+			expect(logger.trace).toHaveBeenNthCalledWith(1, "Method testAsyncMethod called", []);
 			expect(logger.error).toHaveBeenNthCalledWith(
 				1,
 				expect.stringMatching(/^Method testAsyncMethod failed after \d+ms with error$/),
