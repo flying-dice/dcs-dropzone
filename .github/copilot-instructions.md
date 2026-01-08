@@ -1,4 +1,4 @@
-# DCS Dropzone - Copilot Instructions
+# DCS Dropzone - Copilot/Agent Instructions
 
 ## Repository Overview
 
@@ -91,10 +91,8 @@ cd apps/daemon && bun run biome    # Fast: ~478ms
 cd apps/daemon && bun run tsc
 ```
 
-**WARNING**: The `bun run check` command may fail with `depcheck` crashes due to Bun 1.3.5 compatibility issues. This is a known issue. If it fails:
-- Run `bun run biome` and `bun run tsc` separately in each workspace instead
 - Both biome and tsc should pass cleanly
-- Skip `bunx depcheck` if it crashes - this is a known Bun compatibility issue
+- depcheck may have issues, skip this and allow it to be maintained separately
 
 ### Development Servers
 
@@ -161,11 +159,16 @@ The daemon build script (`build-daemon.ts`) bundles the app with third-party bin
 
 ### Testing Conventions
 
-- Test files: `*.test.ts` (co-located with source)
+- Test files: `*.test.ts` (co-located with source for mockist testing (Mock dependencies))
+- Test files: `src/__tests__/*.test.ts` for Sociable tests (real dependencies, but Test Doubles for Port Adapters)
 - Use descriptive test names with nested describes
 - Mock implementations use "Test" prefix (e.g., `TestFileSystem`, `TestRepository`)
 - Use `expect()` for assertions
-- Async test support with proper cleanup
+- Prefer the use of Sociable tests for coverage, use Mockist tests for Port Adapters i.e. Repositories, File Systems
+- Avoid the use of Mockist style tests unless it's a Pure Function with no side effects, avoid crystallizing the implementation of collaborators.
+- The use of Hexagonal Architecture (Ports & Adapters) is strongly enforced to enable:
+  - Mockist testing of Port Adapters.
+  - Sociable testing of the 'Application' API covering the entire business logic used in that use case.
 
 ### Architecture Patterns
 
@@ -230,7 +233,7 @@ Before committing changes, ALWAYS:
 
 - **Job Queue**: The `@packages/queue` library is for single-instance use only (no distributed locking)
 - **React Version**: Uses React 19 (latest)
-- **UI Framework**: Mantine 8.3.10 for React components
+- **UI Framework**: Mantine 8.3.10 for React components, see documentation https://mantine.dev/llms.txt
 - **Internationalization**: i18next with browser language detection
 - **Drag & Drop**: @dnd-kit libraries for UI interactions
 - **Monaco Editor**: Code editor component (@monaco-editor/react)
