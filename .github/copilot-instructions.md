@@ -79,7 +79,12 @@ cd apps/daemon && bun test
 # Check all workspaces (runs biome + tsc + depcheck in each)
 bun run check
 
-# Individual workspace checks
+# Workspace-level commands (run from root or within workspace)
+bun run biome      # Format and lint with Biome
+bun run tsc        # Type checking with TypeScript
+bunx depcheck      # Check for unused dependencies
+
+# Run checks in specific workspaces
 cd apps/webapp && bun run biome    # Fast: ~863ms
 cd apps/webapp && bun run tsc      # Type checking only
 cd apps/daemon && bun run biome    # Fast: ~478ms
@@ -89,6 +94,7 @@ cd apps/daemon && bun run tsc
 **WARNING**: The `bun run check` command may fail with `depcheck` crashes due to Bun 1.3.5 compatibility issues. This is a known issue. If it fails:
 - Run `bun run biome` and `bun run tsc` separately in each workspace instead
 - Both biome and tsc should pass cleanly
+- Skip `bunx depcheck` if it crashes - this is a known Bun compatibility issue
 
 ### Development Servers
 
