@@ -7,7 +7,10 @@
 		"packages/*"
 	],
 	"scripts": {
+		"biome": "bun run --workspaces biome",
+		"tsc": "bun run --workspaces tsc",
 		"check": "bun run --workspaces check",
+		"depcheck": "bun run --workspaces depcheck",
 		"tests": "bun run --workspaces tests",
 		"dev:webapp": "cd apps/webapp && bun run dev",
 		"dev:daemon": "cd apps/daemon && bun run dev"

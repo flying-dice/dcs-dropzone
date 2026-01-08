@@ -2,7 +2,6 @@ import { expect, it, mock } from "bun:test";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { jsonErrorTransformer } from "./jsonErrorTransformer";
-import { ErrorData } from "./schemas.ts";
 
 it("returns JSON response with HTTPException details", async () => {
 	const mockContext = {

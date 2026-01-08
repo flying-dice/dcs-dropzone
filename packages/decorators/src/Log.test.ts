@@ -36,14 +36,14 @@ describe("Log", () => {
 
 			class TestClass {
 				@Log(logger)
-				testMethod(a: number, b: string): string {
+				testMethod(): string {
 					throw new Error("Test error");
 				}
 			}
 
 			const testInstance = new TestClass();
 
-			expect(() => testInstance.testMethod(42, "Hello")).toThrow("Test error");
+			expect(() => testInstance.testMethod()).toThrow("Test error");
 			expect(logger.trace).toHaveBeenNthCalledWith(1, "Method testMethod called", [42, "Hello"]);
 			expect(logger.error).toHaveBeenNthCalledWith(
 				1,
@@ -85,13 +85,13 @@ describe("Log", () => {
 
 			class TestClass {
 				@Log(logger)
-				async testAsyncMethod(a: number, b: string): Promise<string> {
+				async testAsyncMethod(): Promise<string> {
 					throw new Error("Test error");
 				}
 			}
 
 			const testInstance = new TestClass();
-			expect(() => testInstance.testAsyncMethod(42, "Hello")).toThrow("Test error");
+			expect(() => testInstance.testAsyncMethod()).toThrow("Test error");
 			expect(logger.trace).toHaveBeenNthCalledWith(1, "Method testAsyncMethod called", [42, "Hello"]);
 			expect(logger.error).toHaveBeenNthCalledWith(
 				1,

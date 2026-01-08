@@ -6,7 +6,8 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"tsc": "tsc --noEmit",
-		"check": "bun run biome && bun run tsc && bunx depcheck",
+		"check": "bun run biome && bun run tsc",
+		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",
 		"tests": "bun test --coverage",
 		"build": "bun build-daemon.ts",
