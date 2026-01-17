@@ -1,6 +1,6 @@
 import { join, resolve } from "node:path";
 
-const OUT_DIR = "./dist/daemon";
+const OUT_DIR = "./dist";
 const BUN_NAME = "appd";
 
 const ASSETS: [string, string][] = [
@@ -16,6 +16,7 @@ const outfile = join(resolve(OUT_DIR), BUN_NAME);
 await Bun.build({
 	entrypoints: ["./src/index.ts"],
 	minify: true,
+	sourcemap: "inline",
 	compile: {
 		outfile,
 		windows: {

@@ -13,6 +13,7 @@
 		"depcheck": "bun run --workspaces depcheck",
 		"tests": "bun run --workspaces tests",
 		"dev:webapp": "cd apps/webapp && bun run dev",
-		"dev:daemon": "cd apps/daemon && bun run dev"
+		"dev:daemon": "cd apps/daemon && bun run dev",
+		"build:webapp": "bun run --filter webapp build"
 	}
 }

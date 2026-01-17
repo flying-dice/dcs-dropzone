@@ -10,7 +10,7 @@
 		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",
 		"tests": "bun test --coverage",
-		"build": "bun build-daemon.ts",
+		"build": "bun build.ts",
 		"start": "docker compose up",
 		"drizzle": "drizzle-kit generate --config drizzle.config.ts --name=init",
 		"postdrizzle": "bun drizzle-migration.setup.ts"

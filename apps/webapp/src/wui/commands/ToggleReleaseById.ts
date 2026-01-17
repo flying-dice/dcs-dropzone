@@ -1,4 +1,3 @@
-import getDebug from "debug";
 import { StatusCodes } from "http-status-codes";
 import { type Err, err, type Ok, ok, type Result } from "neverthrow";
 import {
@@ -17,22 +16,18 @@ export type ToggleReleaseByIdResult = Result<
 	"FailedToGetDaemonReleases" | "FailedToFindDaemonRelease" | string
 >;
 
-const debug = getDebug("ToggleReleaseByIdCommand");
-
 export default async function (command: ToggleReleaseByIdCommand): Promise<ToggleReleaseByIdResult> {
 	const { releaseId } = command;
 
 	const releases = await getAllDaemonReleases();
 
 	if (releases.status !== StatusCodes.OK || !releases.data) {
-		debug("Failed to get daemon releases", releases);
 		return err("FailedToGetDaemonReleases");
 	}
 
 	const subscription = releases.data.find((it) => it.releaseId === releaseId);
 
 	if (!subscription) {
-		debug(`ReleaseId: ${releaseId} is not present in daemon.`);
 		return err("FailedToFindDaemonRelease");
 	}
 

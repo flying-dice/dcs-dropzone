@@ -1,4 +1,3 @@
-import getDebug from "debug";
 import { StatusCodes } from "http-status-codes";
 import { err, ok, type Result } from "neverthrow";
 import { getModById, getModReleaseById, registerModReleaseDownloadById } from "../_autogen/api.ts";
@@ -16,31 +15,24 @@ export type AddReleaseToDaemonByIdResult = Result<
 	"FailedToGetHealth" | "FailedToGetMod" | "FailedToGetRelease" | "FailedToAddReleaseToDaemon"
 >;
 
-const debug = getDebug("AddReleaseToDaemonByIdCommand");
-
 export default async function (command: AddReleaseToDaemonByIdCommand): Promise<AddReleaseToDaemonByIdResult> {
 	const { modId, releaseId, form } = command;
 
 	const health = await getDaemonHealth();
 
 	if (health.status !== StatusCodes.OK || !health.data) {
-		debug("Failed to get daemon health", health);
 		return err("FailedToGetHealth");
 	}
 
 	const mod = await getModById(modId);
 	if (mod.status !== StatusCodes.OK || !mod.data) {
-		debug("Failed to get mod", mod);
 		return err("FailedToGetMod");
 	}
 
 	const release = await getModReleaseById(modId, releaseId);
 	if (release.status !== StatusCodes.OK || !release.data) {
-		debug("Failed to get release", release);
 		return err("FailedToGetRelease");
 	}
-
-	debug(`Requesting daemon to add releaseId: ${releaseId} for modId: ${modId}`);
 
 	const result = await addReleaseToDaemon({
 		modId: mod.data.mod.id,
@@ -55,12 +47,10 @@ export default async function (command: AddReleaseToDaemonByIdCommand): Promise<
 	});
 
 	if (result.status !== StatusCodes.OK) {
-		debug("Failed to add release to daemon", result);
 		return err("FailedToAddReleaseToDaemon");
 	}
 
 	if (!form) {
-		debug("Adding Mod Release Download Count");
 		await registerModReleaseDownloadById(mod.data.mod.id, release.data.id, {
 			daemonInstanceId: health.data.daemonInstanceId,
 		});

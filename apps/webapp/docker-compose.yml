@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: apps/webapp/Dockerfile
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/dcs-dropzone
+      HOMEPAGE_URL: http://localhost:3000
+      USER_COOKIE_SECRET: 4Y0cfP8Hp2uE3VJz8zUuW4g2m3idli1f1wrBvUmdj8E
+    ports:
+      - "3000:3000"
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+    mongo-data:

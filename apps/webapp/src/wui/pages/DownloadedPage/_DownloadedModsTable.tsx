@@ -59,7 +59,6 @@ export function _DownloadedModsTable(props: DownloadedModsTableProps) {
 					latest?: ModReleaseData;
 					latestError?: GetLatestModReleaseById404Error | string;
 				}> => {
-					console.log("Fetching latest for modId:", mod.modId);
 					const latest = await memoizedGetLatestModReleaseById.call(mod.modId);
 
 					return {

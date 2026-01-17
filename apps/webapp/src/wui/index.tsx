@@ -2,7 +2,6 @@ import { MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import getDebug from "debug";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
@@ -44,8 +43,6 @@ const app = (
 	</StrictMode>
 );
 
-const debug = getDebug("client:index");
-
 /**
  * If HMR is not enabled, the build will be rendered using the cached root instance.
  * If HMR is enabled, but the root instance is not cached, it will be created and cached.
@@ -58,7 +55,6 @@ function getCachedRootOrCreate(elem: HTMLElement): ReturnType<typeof createRoot>
 	if (!import.meta.hot) return createRoot(elem);
 
 	if (import.meta.hot && !import.meta.hot.data.root) {
-		debug("HMR enabled: creating new root instance");
 		const root = createRoot(elem);
 		import.meta.hot.data.root = root;
 		return root;

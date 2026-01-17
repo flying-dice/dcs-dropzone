@@ -19,7 +19,7 @@
 │   │   ├── src/
 │   │   ├── bin/       # Third-party binaries (wget.exe, 7za.exe, etc.)
 │   │   ├── config.toml
-│   │   ├── build-daemon.ts
+│   │   ├── build.ts
 │   │   ├── drizzle.config.ts
 │   │   └── package.json
 │   └── webapp/        # Web UI for mod management
@@ -116,7 +116,7 @@ cd apps/webapp && bun run build
 cd apps/daemon && bun run build
 ```
 
-The daemon build script (`build-daemon.ts`) bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
+The daemon build script (`build.ts`) bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
 
 ## CI/CD Pipeline
 
