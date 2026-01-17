@@ -50,4 +50,4 @@ app.log
 ._dcs_working_dir
 ._dcs_install_dir
 .cookie_secret
-logs/*.log
+*.log
