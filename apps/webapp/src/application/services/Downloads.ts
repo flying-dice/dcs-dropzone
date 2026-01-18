@@ -13,9 +13,8 @@ export class Downloads {
 
 	@Log(logger)
 	async registerModReleaseDownload(modId: string, releaseId: string, daemonInstanceId: string): Promise<void> {
-		logger.debug({ modId, releaseId, daemonInstanceId }, "registerModReleaseDownload start");
+		logger.info("Registering mod release download", { modId, releaseId, daemonInstanceId });
 		await this.deps.downloadsRepository.addModReleaseDownload(modId, releaseId, daemonInstanceId);
-		logger.debug({ modId, releaseId, daemonInstanceId }, "registerModReleaseDownload complete");
 	}
 
 	@Log(logger)

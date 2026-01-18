@@ -24,7 +24,7 @@ export class Users {
 		const user = await this.deps.userRepository.findById(userId);
 
 		if (!user) {
-			logger.warn({ userId }, "getUserById user not found");
+			logger.warn("getUserById user not found", { userId });
 			return err("UserNotFound");
 		}
 
