@@ -19,8 +19,15 @@ export const requestResponseLogger: MiddlewareHandler = async (c, next) => {
 	const duration = +(performance.now() - start).toFixed(4);
 	const status = c.res.status;
 
-	logger.debug(
-		{ requestId, method, path, status, duration },
-		`Completed ${method} ${path} -> ${status} in ${duration}ms`,
-	);
+	if (c.res.ok) {
+		logger.debug(
+			{ requestId, method, path, status, duration },
+			`Completed ${method} ${path} -> ${status} in ${duration}ms`,
+		);
+	} else {
+		logger.warn(
+			{ requestId, method, path, status, duration },
+			`Completed ${method} ${path} -> ${status} in ${duration}ms`,
+		);
+	}
 };

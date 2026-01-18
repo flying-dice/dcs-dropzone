@@ -783,7 +783,7 @@ export class HonoApplication extends Hono<Env> {
 			}),
 			cookieAuth(),
 			validator("param", z.object({ id: z.string() })),
-			validator("json", ModUpdateData),
+			validator("json", ModUpdateData.omit({ id: true })),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const updateData = c.req.valid("json");
@@ -960,7 +960,7 @@ export class HonoApplication extends Hono<Env> {
 			}),
 			cookieAuth(),
 			validator("param", z.object({ id: z.string() })),
-			validator("json", ModReleaseCreateData),
+			validator("json", ModReleaseCreateData.omit({ modId: true })),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const createData = c.req.valid("json");
