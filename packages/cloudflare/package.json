@@ -3,6 +3,7 @@
 	"description": "DCS Dropzone Cloudflare Containers",
 	"private": true,
 	"scripts": {
+		"tests": "echo \"No tests specified\" && exit 0",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
