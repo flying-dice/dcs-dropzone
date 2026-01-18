@@ -1,0 +1,10 @@
+appenders:
+  console:
+    type: stdout
+    layout:
+      type: json
+
+categories:
+  default:
+    appenders: [console]
+    level: info
