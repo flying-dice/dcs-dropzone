@@ -53,6 +53,7 @@ const bunServer = serve({
 	development: process.env.NODE_ENV !== "production",
 	routes: {
 		"/*": index,
+		"/dcs-dropzone-daemon.tar": Bun.file("./dcs-dropzone-daemon.tar"),
 		"/auth": honoApp.fetch,
 		"/auth/**": honoApp.fetch,
 		"/api": honoApp.fetch,

@@ -14,6 +14,7 @@
 		"tests": "bun run --workspaces tests",
 		"test": "bun run test",
 		"daemon:dev": "cd apps/daemon && bun run dev",
+		"daemon:build": "bun run --filter daemon build",
 		"webapp:dev": "cd apps/webapp && bun run dev",
 		"webapp:build": "bun run --filter webapp build",
 		"webapp:deploy": "bun run --filter cloudflare deploy"

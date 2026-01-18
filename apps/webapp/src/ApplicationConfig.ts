@@ -36,13 +36,14 @@ function getOrGenerateCookieSecret(): string {
 }
 
 const authServiceGhConfigJson = string("AUTH_SERVICE_GH", "");
+const cookieSecretFromEnv = string("USER_COOKIE_SECRET", "");
 
 const appConfig = configSchema.parse({
 	version,
 	nodeEnv: string("NODE_ENV", "development"),
 	port: int("PORT", 3000),
 	mongoUri: string("MONGO_URI", "mongodb://memory:27017/dcs-dropzone"),
-	userCookieSecret: string("USER_COOKIE_SECRET", getOrGenerateCookieSecret()),
+	userCookieSecret: cookieSecretFromEnv ?? getOrGenerateCookieSecret(),
 	userCookieName: string("USER_COOKIE_NAME", "USERID"),
 	userCookieMaxAge: int("USER_COOKIE_MAX_AGE", 86400), // default to 1 day
 	homepageUrl: string("HOMEPAGE_URL", "http://localhost:3000"),
