@@ -26,7 +26,7 @@
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
-	"vars": { "MY_VARIABLE": "production_value" },
+	// "vars": {},
 	/**
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
@@ -46,7 +46,8 @@
 			"class_name": "DcsDropzoneContainer",
 			"image": "../../apps/webapp/Dockerfile",
 			"max_instances": 10,
-			"image_build_context": "../../"
+			"image_build_context": "../../",
+			"instance_type": "basic"
 		}
 	],
 	"durable_objects": {

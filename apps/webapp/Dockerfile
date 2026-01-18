@@ -15,6 +15,7 @@ FROM debian:stable-slim
 
 # Copy the built binary from builder
 COPY --from=builder /build/apps/webapp/dist/app /usr/bin/application
+COPY --from=builder /build/apps/webapp/log4js.yaml /root/log4js.yaml
 
 EXPOSE 3000
 

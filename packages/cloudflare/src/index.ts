@@ -1,3 +1,4 @@
+import { env } from "cloudflare:workers";
 import { Container, getContainer, getRandom } from "@cloudflare/containers";
 import { type Context, Hono } from "hono";
 
@@ -7,7 +8,9 @@ export class DcsDropzoneContainer extends Container<Env> {
 	sleepAfter = "2m";
 	// Environment variables passed to the container
 	envVars = {
-		MESSAGE: "I was passed in via the container class!",
+		MONGO_URI: env.MONGO_URI,
+		HOMEPAGE_URL: env.HOMEPAGE_URL,
+		USER_COOKIE_SECRET: env.USER_COOKIE_SECRET,
 	};
 
 	// Optional lifecycle hooks
