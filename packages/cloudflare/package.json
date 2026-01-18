@@ -1,5 +1,5 @@
 {
-	"name": "dcs-dropzone",
+	"name": "cloudflare",
 	"description": "DCS Dropzone Cloudflare Containers",
 	"private": true,
 	"scripts": {

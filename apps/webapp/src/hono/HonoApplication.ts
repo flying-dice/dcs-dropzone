@@ -173,14 +173,23 @@ export class HonoApplication extends Hono<Env> {
 				description: "Checks the health status of the application.",
 				tags: ["Health"],
 				responses: {
-					[StatusCodes.OK]: null,
+					[StatusCodes.OK]: z.object({
+						status: z.literal("ok"),
+						version: z.string(),
+					}),
 					[StatusCodes.SERVICE_UNAVAILABLE]: ErrorData,
 				},
 			}),
 			async (c) => {
 				try {
 					await Database.ping();
-					return c.body(null, StatusCodes.OK);
+					return c.json(
+						{
+							status: "ok",
+							version: appConfig.version,
+						},
+						StatusCodes.OK,
+					);
 				} catch (error) {
 					return c.json(ErrorData.parse({ error: String(error) }), StatusCodes.SERVICE_UNAVAILABLE);
 				}

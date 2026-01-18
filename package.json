@@ -12,8 +12,9 @@
 		"check": "bun run --workspaces check",
 		"depcheck": "bun run --workspaces depcheck",
 		"tests": "bun run --workspaces tests",
-		"dev:webapp": "cd apps/webapp && bun run dev",
-		"dev:daemon": "cd apps/daemon && bun run dev",
-		"build:webapp": "bun run --filter webapp build"
+		"daemon:dev": "cd apps/daemon && bun run dev",
+		"webapp:dev": "cd apps/webapp && bun run dev",
+		"webapp:build": "bun run --filter webapp build",
+		"webapp:deploy": "bun run --filter cloudflare deploy"
 	}
 }
