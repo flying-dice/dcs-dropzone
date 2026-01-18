@@ -1,4 +1,5 @@
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
+import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { ErrorData, OkData } from "@packages/hono/schemas";
@@ -8,9 +9,13 @@ import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { describeRoute, openAPIRouteHandler, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
+import { getLogger } from "log4js";
 import { z } from "zod";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+
+const logger = getLogger("HonoApplication");
+const loggingHook = getLoggingHook(logger);
 
 type Env = {
 	Variables: {
@@ -75,7 +80,7 @@ export class HonoApplication extends Hono<Env> {
 					[StatusCodes.OK]: null,
 				},
 			}),
-			validator("json", ModAndReleaseData),
+			validator("json", ModAndReleaseData, loggingHook),
 
 			(c) => {
 				const modAndRelease = c.req.valid("json");
@@ -120,6 +125,7 @@ export class HonoApplication extends Hono<Env> {
 				z.object({
 					releaseId: z.string(),
 				}),
+				loggingHook,
 			),
 			(c) => {
 				const { releaseId } = c.req.valid("param");
@@ -191,7 +197,7 @@ export class HonoApplication extends Hono<Env> {
 				summary: "Enable a release by creating its symbolic links",
 				responses: { [StatusCodes.OK]: OkData, [StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData },
 			}),
-			validator("param", z.object({ releaseId: z.string() })),
+			validator("param", z.object({ releaseId: z.string() }), loggingHook),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
 				c.var.app.enableRelease(releaseId);
@@ -209,7 +215,7 @@ export class HonoApplication extends Hono<Env> {
 				summary: "Disable a release by removing its symbolic links",
 				responses: { [StatusCodes.OK]: OkData, [StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData },
 			}),
-			validator("param", z.object({ releaseId: z.string() })),
+			validator("param", z.object({ releaseId: z.string() }), loggingHook),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
 				c.var.app.disableRelease(releaseId);

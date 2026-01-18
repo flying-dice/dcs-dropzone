@@ -1,50 +1,10 @@
 appenders:
   console:
     type: stdout
-
-  db:
-    type: file
-    filename: logs/db.log
-
-  http:
-    type: file
-    filename: logs/http.log
-
-  dq:
-    type: file
-    filename: logs/Download.log
-
-  errorFile:
-    type: file
-    filename: logs/error.log
-
-  jsonFile:
-    type: file
-    filename: logs/log.json
     layout:
       type: json
 
 categories:
   default:
-    appenders: [console, jsonFile]
-    level: trace
-
-  db:
-    appenders: [db, jsonFile]
-    level: debug
-
-  DownloadQueue:
-    appenders: [console, dq]
-    level: debug
-
-  WgetChildProcess:
-    appenders: [console, dq]
-    level: debug
-
-  requestResponseLogger:
-    appenders: [http]
-    level: debug
-
-  error:
-    appenders: [errorFile, jsonFile]
-    level: error
+    appenders: [console]
+    level: info

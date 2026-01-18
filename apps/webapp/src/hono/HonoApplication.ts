@@ -1,12 +1,13 @@
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
+import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
+import { toLoggable } from "@packages/hono/toLoggable";
 import { ze } from "@packages/zod";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { setSignedCookie } from "hono/cookie";
 import { cors } from "hono/cors";
-import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { describeRoute, openAPIRouteHandler, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
@@ -33,10 +34,10 @@ import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
 import type { AuthenticationProvider } from "../authentication/AuthenticationProvider.ts";
 import Database from "../database";
 import database from "../database";
-import migrateLegacyRegistry from "../MigrateLegacyRegistry.ts";
 import { cookieAuth } from "./middleware/cookieAuth.ts";
 
 const logger = getLogger("HonoApplication");
+const loggingHook = getLoggingHook(logger);
 
 type Env = {
 	Variables: {
@@ -103,9 +104,6 @@ export class HonoApplication extends Hono<Env> {
 		this.createUserModRelease();
 		this.updateUserModRelease();
 		this.deleteUserModRelease();
-
-		// Migration route
-		this.migrateLegacyRegistry();
 
 		// API docs
 		this.getApiDocs();
@@ -215,7 +213,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 				},
 			}),
-			validator("query", z.object({ code: z.string(), state: z.string() })),
+			validator("query", z.object({ code: z.string(), state: z.string() }), loggingHook),
 			async (c) => {
 				const { code, state } = c.req.valid("query");
 
@@ -429,6 +427,7 @@ export class HonoApplication extends Hono<Env> {
 					tags: ze.csv().optional(),
 					term: z.string().optional(),
 				}),
+				loggingHook,
 			),
 			async (c) => {
 				const { page, size, category, maintainers, tags, term } = c.req.valid("query");
@@ -473,6 +472,7 @@ export class HonoApplication extends Hono<Env> {
 				z.object({
 					id: z.string(),
 				}),
+				loggingHook,
 			),
 			async (c) => {
 				const { id } = c.req.valid("param");
@@ -504,7 +504,7 @@ export class HonoApplication extends Hono<Env> {
 					[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 				},
 			}),
-			validator("param", z.object({ id: z.string() })),
+			validator("param", z.object({ id: z.string() }), loggingHook),
 			async (c) => {
 				const { id } = c.req.valid("param");
 
@@ -548,6 +548,7 @@ export class HonoApplication extends Hono<Env> {
 				z.object({
 					id: z.string(),
 				}),
+				loggingHook,
 			),
 			async (c) => {
 				const { id } = c.req.valid("param");
@@ -591,6 +592,7 @@ export class HonoApplication extends Hono<Env> {
 					id: z.string(),
 					releaseId: z.string(),
 				}),
+				loggingHook,
 			),
 			async (c) => {
 				const { id, releaseId } = c.req.valid("param");
@@ -634,8 +636,9 @@ export class HonoApplication extends Hono<Env> {
 					id: z.string(),
 					releaseId: z.string(),
 				}),
+				loggingHook,
 			),
-			validator("json", ModReleaseDownloadData.pick({ daemonInstanceId: true })),
+			validator("json", ModReleaseDownloadData.pick({ daemonInstanceId: true }), loggingHook),
 			async (c) => {
 				const { id, releaseId } = c.req.valid("param");
 				const { daemonInstanceId } = c.req.valid("json");
@@ -709,7 +712,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			cookieAuth(),
-			validator("param", z.object({ id: z.string() })),
+			validator("param", z.object({ id: z.string() }), loggingHook),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const user = c.var.getUser();
@@ -752,7 +755,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			cookieAuth(),
-			validator("json", ModCreateData),
+			validator("json", ModCreateData, loggingHook),
 			async (c) => {
 				const createData = c.req.valid("json");
 				const user = c.var.getUser();
@@ -782,8 +785,8 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			cookieAuth(),
-			validator("param", z.object({ id: z.string() })),
-			validator("json", ModUpdateData.omit({ id: true })),
+			validator("param", z.object({ id: z.string() }), loggingHook),
+			validator("json", ModUpdateData.omit({ id: true }), loggingHook),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const updateData = c.req.valid("json");
@@ -826,7 +829,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			cookieAuth(),
-			validator("param", z.object({ id: z.string() })),
+			validator("param", z.object({ id: z.string() }), loggingHook),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const user = c.var.getUser();
@@ -871,7 +874,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			cookieAuth(),
-			validator("param", z.object({ id: z.string() })),
+			validator("param", z.object({ id: z.string() }), loggingHook),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const user = c.var.getUser();
@@ -918,6 +921,7 @@ export class HonoApplication extends Hono<Env> {
 					id: z.string(),
 					releaseId: z.string(),
 				}),
+				loggingHook,
 			),
 			async (c) => {
 				const { id, releaseId } = c.req.valid("param");
@@ -959,8 +963,8 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			cookieAuth(),
-			validator("param", z.object({ id: z.string() })),
-			validator("json", ModReleaseCreateData.omit({ modId: true })),
+			validator("param", z.object({ id: z.string() }), loggingHook),
+			validator("json", ModReleaseCreateData.omit({ modId: true }), loggingHook),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const createData = c.req.valid("json");
@@ -1008,8 +1012,9 @@ export class HonoApplication extends Hono<Env> {
 					id: z.string(),
 					releaseId: z.string(),
 				}),
+				loggingHook,
 			),
-			validator("json", ModReleaseData.omit({ id: true, modId: true, versionHash: true })),
+			validator("json", ModReleaseData.omit({ id: true, modId: true, versionHash: true }), loggingHook),
 			async (c) => {
 				const { id, releaseId } = c.req.valid("param");
 				const updates = c.req.valid("json");
@@ -1067,6 +1072,7 @@ export class HonoApplication extends Hono<Env> {
 					id: z.string(),
 					releaseId: z.string(),
 				}),
+				loggingHook,
 			),
 			async (c) => {
 				const { id, releaseId } = c.req.valid("param");
@@ -1093,35 +1099,6 @@ export class HonoApplication extends Hono<Env> {
 							StatusCodes.NOT_FOUND,
 						),
 				);
-			},
-		);
-	}
-
-	// Migration route
-	private migrateLegacyRegistry() {
-		this.get(
-			"/api/_migrate",
-			describeJsonRoute({
-				operationId: "migrateLegacyRegistry",
-				summary: "Migrate Legacy Registry",
-				description: "Migrates data from the legacy registry to the new system. Only accessible by the admin users.",
-				tags: ["Migration"],
-				responses: {
-					[StatusCodes.OK]: OkData,
-					[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
-				},
-			}),
-			cookieAuth(),
-			async (c) => {
-				const user = c.var.getUser();
-				logger.debug({ userId: user.id, admins: appConfig.admins }, "Migration requested by user");
-				if (!appConfig.admins?.includes(user.id)) {
-					throw new HTTPException(StatusCodes.UNAUTHORIZED);
-				}
-
-				await migrateLegacyRegistry({ user });
-
-				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
 	}
