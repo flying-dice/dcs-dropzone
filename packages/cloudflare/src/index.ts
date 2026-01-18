@@ -11,6 +11,7 @@ export class DcsDropzoneContainer extends Container<Env> {
 		MONGO_URI: env.MONGO_URI,
 		HOMEPAGE_URL: env.HOMEPAGE_URL,
 		USER_COOKIE_SECRET: env.USER_COOKIE_SECRET,
+		AUTH_SERVICE_GH: env.AUTH_SERVICE_GH,
 	};
 
 	// Optional lifecycle hooks
