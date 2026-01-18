@@ -8,7 +8,7 @@ COPY . .
 
 # Install dependencies and build
 RUN bun install --frozen-lockfile
-RUN bun run build:webapp
+RUN bun run webapp:build
 
 # Runtime stage
 FROM debian:stable-slim
