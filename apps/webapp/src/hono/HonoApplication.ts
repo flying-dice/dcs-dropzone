@@ -32,6 +32,7 @@ import { UserData } from "../application/schemas/UserData.ts";
 import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
 import type { AuthenticationProvider } from "../authentication/AuthenticationProvider.ts";
 import Database from "../database";
+import database from "../database";
 import migrateLegacyRegistry from "../MigrateLegacyRegistry.ts";
 import { cookieAuth } from "./middleware/cookieAuth.ts";
 
@@ -176,6 +177,7 @@ export class HonoApplication extends Hono<Env> {
 					[StatusCodes.OK]: z.object({
 						status: z.literal("ok"),
 						version: z.string(),
+						mongoStatus: z.boolean(),
 					}),
 					[StatusCodes.SERVICE_UNAVAILABLE]: ErrorData,
 				},
@@ -187,6 +189,7 @@ export class HonoApplication extends Hono<Env> {
 						{
 							status: "ok",
 							version: appConfig.version,
+							mongoStatus: await database.ping(),
 						},
 						StatusCodes.OK,
 					);
