@@ -11,7 +11,6 @@ import { describeRoute, openAPIRouteHandler, resolver, validator } from "hono-op
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import { version } from "../../package.json";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 
@@ -155,7 +154,6 @@ export class HonoApplication extends Hono<Env> {
 									z.object({
 										status: z.literal("UP"),
 										daemonInstanceId: z.string(),
-										version: z.string(),
 									}),
 								),
 							},
@@ -179,7 +177,7 @@ export class HonoApplication extends Hono<Env> {
 			}),
 			async (c) => {
 				try {
-					return c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId(), version }, StatusCodes.OK);
+					return c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId() }, StatusCodes.OK);
 				} catch (error) {
 					return c.json(
 						{ status: "DOWN", daemonInstanceId: c.var.app.getDaemonInstanceId(), error: String(error) },

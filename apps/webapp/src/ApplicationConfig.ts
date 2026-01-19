@@ -4,13 +4,11 @@ import { ze } from "@packages/zod";
 import { int, string } from "getenv";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import { version } from "../package.json";
 import { GithubAuthenticationProviderConfig } from "./authentication/GithubAuthenticationProvider.ts";
 
 const logger = getLogger("ApplicationConfig");
 
 const configSchema = z.object({
-	version: z.string(),
 	nodeEnv: z.enum(["development", "production", "test"]),
 	port: z.number().int().min(1).max(65535),
 	mongoUri: z.string(),
@@ -39,7 +37,6 @@ const authServiceGhConfigJson = string("AUTH_SERVICE_GH", "");
 const cookieSecretFromEnv = string("USER_COOKIE_SECRET", "");
 
 const appConfig = configSchema.parse({
-	version,
 	nodeEnv: string("NODE_ENV", "development"),
 	port: int("PORT", 3000),
 	mongoUri: string("MONGO_URI", "mongodb://memory:27017/dcs-dropzone"),
