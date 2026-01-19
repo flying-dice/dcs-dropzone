@@ -1,6 +1,5 @@
 {
 	"name": "dcs-dropzone",
-	"version": "0.1.0",
 	"private": true,
 	"workspaces": [
 		"apps/*",
@@ -13,12 +12,16 @@
 		"plugins": [
 			"@semantic-release/commit-analyzer",
 			"@semantic-release/release-notes-generator",
-			"@semantic-release/npm",
-			"@semantic-release/git",
 			[
 				"@semantic-release/exec",
 				{
 					"prepareCmd": "bun run daemon:build"
+				}
+			],
+			[
+				"@semantic-release/changelog",
+				{
+					"changelogFile": "CHANGELOG.md"
 				}
 			],
 			[
@@ -27,6 +30,15 @@
 					"assets": [
 						"apps/daemon/dist/dcs-dropzone-daemon.tar"
 					]
+				}
+			],
+			[
+				"@semantic-release/git",
+				{
+					"assets": [
+						"CHANGELOG.md"
+					],
+					"message": "chore(release): ${nextRelease.gitTag} [skip ci]\n\n${nextRelease.notes}"
 				}
 			]
 		]
