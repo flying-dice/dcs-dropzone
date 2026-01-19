@@ -32,6 +32,18 @@ export class HonoApplication extends Hono<Env> {
 			return next();
 		});
 
+		// Handle Private Network Access (PNA) preflight requests
+		// https://developer.chrome.com/blog/private-network-access-preflight
+		this.use("*", async (c, next) => {
+			// Check if this is a preflight request with the PNA header before processing
+			const hasPnaHeader = c.req.header("Access-Control-Request-Private-Network") === "true";
+			await next();
+			// Add the PNA response header if the request included it
+			if (hasPnaHeader) {
+				c.res.headers.set("Access-Control-Allow-Private-Network", "true");
+			}
+		});
+
 		this.use("/*", cors());
 
 		this.use(requestId());
