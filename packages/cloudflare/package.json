@@ -3,7 +3,9 @@
 	"description": "DCS Dropzone Cloudflare Containers",
 	"private": true,
 	"scripts": {
+		"tsc": "tsc --noEmit",
 		"tests": "echo \"No tests specified\" && exit 0",
+		"depcheck": "bunx depcheck",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",

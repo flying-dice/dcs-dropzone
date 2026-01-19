@@ -6,10 +6,34 @@
 		"apps/*",
 		"packages/*"
 	],
+	"release": {
+		"branches": [
+			"main"
+		],
+		"plugins": [
+			"@semantic-release/commit-analyzer",
+			"@semantic-release/release-notes-generator",
+			"@semantic-release/npm",
+			"@semantic-release/git",
+			[
+				"@semantic-release/exec",
+				{
+					"prepareCmd": "bun run daemon:build"
+				}
+			],
+			[
+				"@semantic-release/github",
+				{
+					"assets": [
+						"apps/daemon/dist/dcs-dropzone-daemon.tar"
+					]
+				}
+			]
+		]
+	},
 	"scripts": {
-		"biome": "bun run --workspaces biome",
+		"biome": "biome check",
 		"tsc": "bun run --workspaces tsc",
-		"check": "bun run --workspaces check",
 		"depcheck": "bun run --workspaces depcheck",
 		"tests": "bun run --workspaces tests",
 		"test": "bun run test",
@@ -18,5 +42,14 @@
 		"webapp:dev": "cd apps/webapp && bun run dev",
 		"webapp:build": "bun run --filter webapp build",
 		"webapp:deploy": "bun run --filter cloudflare deploy"
+	},
+	"devDependencies": {
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/commit-analyzer": "^13.0.0",
+		"@semantic-release/exec": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
+		"@semantic-release/github": "^10.1.3",
+		"@semantic-release/release-notes-generator": "^14.0.1",
+		"semantic-release": "^24.0.0"
 	}
 }
