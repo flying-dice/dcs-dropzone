@@ -134,7 +134,11 @@ export class UserMods {
 				};
 
 				const result = await this.deps.modRepository.createModRelease(ModReleaseData.parse(releaseData));
-				logger.info("Release created successfully", { releaseId: id, modId: createData.modId, version: createData.version });
+				logger.info("Release created successfully", {
+					releaseId: id,
+					modId: createData.modId,
+					version: createData.version,
+				});
 				return ok(ModReleaseData.parse(result));
 			},
 			(e) => err(e),

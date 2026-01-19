@@ -4,9 +4,7 @@ import { type Context, Hono } from "hono";
 
 export class DcsDropzoneContainer extends Container<Env> {
 	defaultPort = 3000;
-	// Time before container sleeps due to inactivity (default: 30s)
 	sleepAfter = "2m";
-	// Environment variables passed to the container
 	envVars = {
 		MONGO_URI: env.MONGO_URI,
 		HOMEPAGE_URL: env.HOMEPAGE_URL,
@@ -42,7 +40,7 @@ function getSpecificContainer(c: Context) {
 
 // Get all requests as using a singleton container
 app.all("*", async (c) => {
-	let container: ReturnType<typeof getContainer>;
+	let container: DurableObjectStub<DcsDropzoneContainer>;
 
 	const specificContainerId = getSpecificContainer(c);
 	if (specificContainerId) {

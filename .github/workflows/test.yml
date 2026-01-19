@@ -22,21 +22,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-cache-
 
-      - name: Install dependencies # (assuming your project has dependencies)
-        run: bun install # You can use npm/yarn/pnpm instead if you prefer
+      - name: Install dependencies
+        run: bun install
 
       - name: Add daemon bins to PATH
         run: echo "${{ github.workspace }}\apps\daemon\bin" >> $env:GITHUB_PATH
+
+      - name: Run Biome
+        run: bun run biome
+
+      - name: Run TypeScript Compiler
+        run: bun run tsc
+
+      - name: Build Webapp
+        run: bun run webapp:build
+
+      - name: Build Daemon
+        run: bun run daemon:build
 
       - name: Run tests
         run: bun test
 
       - name: Upload log artifact
-        if: always()  # upload even if the build step fails
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Logs
           path: logs/
+
+      - name: Upload Daemon Build Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dcs-dropzone-daemon.tar
+          path: 'apps/daemon/dist/dcs-dropzone-daemon.tar'
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5

@@ -1,5 +1,5 @@
 import { Database, type Statement } from "bun:sqlite";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import { ensureDirSync } from "fs-extra";
 import { getLogger } from "log4js";
 import { AppDatabaseMigration } from "./app-database-migration";
@@ -54,7 +54,7 @@ export class AppDatabase {
 		logger.debug("Initializing AppDatabase...");
 		logger.debug({ filename }, "Ensuring database directory exists");
 		if (filename !== ":memory:") {
-			ensureDirSync(dirname(filename));
+			ensureDirSync(dirname(resolve(filename)));
 		}
 
 		logger.debug({ filename }, "Opening database connection");

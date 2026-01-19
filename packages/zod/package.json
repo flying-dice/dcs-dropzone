@@ -1,6 +1,5 @@
 {
 	"name": "@packages/zod",
-	"version": "0.1.0",
 	"private": true,
 	"type": "module",
 	"exports": {
@@ -9,7 +8,6 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"tsc": "tsc --noEmit",
-		"check": "bun run biome && bun run tsc",
 		"depcheck": "bunx depcheck",
 		"tests": "bun test"
 	},

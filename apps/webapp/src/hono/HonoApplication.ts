@@ -2,7 +2,6 @@ import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
-import { toLoggable } from "@packages/hono/toLoggable";
 import { ze } from "@packages/zod";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
@@ -174,7 +173,6 @@ export class HonoApplication extends Hono<Env> {
 				responses: {
 					[StatusCodes.OK]: z.object({
 						status: z.literal("ok"),
-						version: z.string(),
 						mongoStatus: z.boolean(),
 					}),
 					[StatusCodes.SERVICE_UNAVAILABLE]: ErrorData,
@@ -186,7 +184,6 @@ export class HonoApplication extends Hono<Env> {
 					return c.json(
 						{
 							status: "ok",
-							version: appConfig.version,
 							mongoStatus: await database.ping(),
 						},
 						StatusCodes.OK,
