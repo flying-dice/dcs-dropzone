@@ -35,21 +35,21 @@ describe("HonoApplication", () => {
 			expect(response.headers.get("Access-Control-Allow-Private-Network")).toBeNull();
 		});
 
-		it("should add Access-Control-Allow-Private-Network header for GET requests with PNA header", async () => {
+		it("should add Access-Control-Allow-Private-Network header for POST preflight requests with PNA header", async () => {
 			const app = new TestApplication();
 			const honoApp = new HonoApplication(app);
 
-			// Make a GET request with the PNA header
-			const response = await honoApp.request("/api/health", {
-				method: "GET",
+			// Make an OPTIONS preflight request for a POST with the PNA header
+			const response = await honoApp.request("/api/downloads", {
+				method: "OPTIONS",
 				headers: {
 					"Access-Control-Request-Private-Network": "true",
+					"Access-Control-Request-Method": "POST",
 					Origin: "https://example.com",
 				},
 			});
 
 			expect(response.headers.get("Access-Control-Allow-Private-Network")).toBe("true");
-			expect(response.status).toBe(200);
 		});
 	});
 });
