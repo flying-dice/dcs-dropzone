@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.0.0...v1.0.1) (2026-01-19)
+
+
+### Bug Fixes
+
+* update baseUrl in daemon settings from localhost to 127.0.0.1 for consistency ([1573ff3](https://github.com/flying-dice/dcs-dropzone/commit/1573ff30f062a5cfe539ae9114c7dfe807de70ef))
+
 # 1.0.0 (2026-01-19)
 
 
