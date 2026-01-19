@@ -32,7 +32,7 @@
 		]
 	},
 	"scripts": {
-		"biome": "biome check",
+		"biome": "biome ci",
 		"tsc": "bun run --workspaces tsc",
 		"depcheck": "bun run --workspaces depcheck",
 		"tests": "bun run --workspaces tests",
