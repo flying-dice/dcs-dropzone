@@ -44,11 +44,18 @@ jobs:
         run: bun test
 
       - name: Upload log artifact
-        if: always()  # upload even if the build step fails
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Logs
           path: logs/
+
+      - name: Upload Daemon Build Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dcs-dropzone-daemon.tar
+          path: 'apps/daemon/dist/dcs-dropzone-daemon.tar'
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
