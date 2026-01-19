@@ -7,7 +7,7 @@ export const DaemonSettings = z.object({
 export type DaemonSettings = z.infer<typeof DaemonSettings>;
 
 const daemonSettings = DaemonSettings.parse({
-	baseUrl: "http://localhost:3001",
+	baseUrl: "http://127.0.0.1:3001",
 });
 
 export function configureDaemon(settings: DaemonSettings) {
