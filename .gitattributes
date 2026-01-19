@@ -1,4 +1,5 @@
 # Default: text files use LF in the repo
+# Without this, windows-latest CI runners may check out with CRLF line endings and fail Biome checks
 * text=auto eol=lf
 
 # keep common binaries untouched
