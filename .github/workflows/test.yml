@@ -35,10 +35,10 @@ jobs:
         run: bun run tsc
 
       - name: Build Webapp
-        run: bun run build:webapp
+        run: bun run webapp:build
 
       - name: Build Daemon
-        run: bun run build:daemon
+        run: bun run daemon:build
 
       - name: Run tests
         run: bun test
