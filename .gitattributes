@@ -1,0 +1,10 @@
+# Default: text files use LF in the repo
+* text=auto eol=lf
+
+# keep common binaries untouched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
