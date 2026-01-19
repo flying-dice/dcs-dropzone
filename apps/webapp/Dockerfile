@@ -26,7 +26,7 @@ COPY ./bun.lock ./bun.lock
 COPY ./bunfig.toml ./bunfig.toml
 
 # Install dependencies and build
-RUN bun install --frozen-lockfile
+RUN bun install
 RUN bun run webapp:build
 
 # Runtime stage
