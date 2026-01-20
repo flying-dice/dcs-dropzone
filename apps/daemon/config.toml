@@ -1,9 +1,36 @@
 # =======================================
+# DCS Dropzone Configuration
+# =======================================
+#
+# Environment Variable Support:
+# All path fields in this configuration file support environment variable expansion.
+# Variables are expanded at runtime using the system's environment.
+#
+# Supported Formats:
+#   Windows-style: %VARNAME%        (e.g., %USERPROFILE%/Documents)
+#   Unix-style:    $VARNAME         (e.g., $HOME/documents)
+#   Unix-style:    ${VARNAME}       (e.g., ${HOME}/documents)
+#
+# Supported Variables (allowlist for security):
+#   Windows:  USERPROFILE, APPDATA, LOCALAPPDATA, PROGRAMFILES, PROGRAMFILES(X86),
+#             PROGRAMDATA, TEMP, TMP, HOMEDRIVE, HOMEPATH
+#   Unix:     HOME
+#
+# Examples:
+#   dcs_working_dir = "%USERPROFILE%/Saved Games/DCS.openbeta"
+#   dcs_install_dir = "${PROGRAMFILES}/Eagle Dynamics/DCS World"
+#   mods_dir = "$HOME/.local/share/dcs-dropzone/mods"
+#
+# Note: Unsupported variables will NOT be expanded and a warning will be logged.
+#
+# =======================================
+
+# =======================================
 # DCS World Configuration
 # =======================================
 [dcs]
-#dcs_working_dir = "C:/Users/jonat/Saved Games/DCS.openbeta"                     # Path to DCS World working directory
-#dcs_install_dir = "D:/Program Files/Eagle Dynamics/DCS World OpenBeta"          # Path to DCS World installation directory
+#dcs_working_dir = "%USERPROFILE%/Saved Games/DCS.openbeta"                     # Path to DCS World working directory (supports env vars)
+#dcs_install_dir = "%PROGRAMFILES%/Eagle Dynamics/DCS World OpenBeta"          # Path to DCS World installation directory (supports env vars)
 dcs_working_dir = "./._dcs_working_dir"                                          # Path to DCS World working directory
 dcs_install_dir = "./._dcs_install_dir"                                          # Path to DCS World installation directory
 
@@ -11,8 +38,8 @@ dcs_install_dir = "./._dcs_install_dir"                                         
 # Third Party Binaries Configuration
 # =======================================
 [binaries]
-wget = "bin/wget.exe"                                                     # Path to download the winget binary
-sevenzip = "bin/7za.exe"                                                  # Path to 7zip executable
+wget = "bin/wget.exe"                                                     # Path to download the winget binary (supports env vars)
+sevenzip = "bin/7za.exe"                                                  # Path to 7zip executable (supports env vars)
 
 # =======================================
 # Server Configuration
@@ -25,11 +52,11 @@ port = 3001                                                                     
 # ProdApplication Configuration
 # =======================================
 [app]
-mods_dir = "./._app_working_dir/mods"                                              # Path to application working directory
+mods_dir = "./._app_working_dir/mods"                                              # Path to application working directory (supports env vars)
 tui_enabled = false                                                                 # Enable TUI interface
 
 # =======================================
 # Database Configuration
 # =======================================
 [database]
-url = "./._app_working_dir/index.sqlite"                                                            # Database URL
+url = "./._app_working_dir/index.sqlite"                                                            # Database URL (supports env vars)
