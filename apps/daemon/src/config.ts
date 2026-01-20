@@ -2,12 +2,6 @@ import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { z } from "zod";
 
-export const CONFIG_FILE_PATH = `${process.cwd()}/config.toml`;
-
-const file = Bun.file(CONFIG_FILE_PATH);
-const text = await file.text();
-const config = Bun.TOML.parse(text);
-
 const configSchema = z
 	.object({
 		server: z.object({
@@ -115,14 +109,16 @@ const configSchema = z
 
 export type AppConfig = z.infer<typeof configSchema>;
 
-// Parse config and export result
-const parseResult = configSchema.safeParse(config);
+/**
+ * Loads and parses the application configuration from config.toml.
+ * This function uses Zod's parse() which throws ZodError on validation failure.
+ * Caller should catch ZodError to handle validation errors.
+ */
+export async function loadConfig(): Promise<AppConfig> {
+	const file = Bun.file(`${process.cwd()}/config.toml`);
+	const text = await file.text();
+	const config = Bun.TOML.parse(text);
 
-export const configParseResult = parseResult;
-
-// Export a default config. Note: This will be an empty object if parsing fails,
-// but index.ts checks configParseResult.success and exits before using appConfig
-// in the error case, so this is safe.
-const appConfig = parseResult.success ? parseResult.data : ({} as AppConfig);
-
-export default appConfig;
+	// This will throw ZodError if validation fails
+	return configSchema.parse(config);
+}
