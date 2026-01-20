@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.0.1...v1.1.0) (2026-01-20)
+
+
+### Features
+
+* add Private Network Access CORS support to daemon ([95b0f55](https://github.com/flying-dice/dcs-dropzone/commit/95b0f556cb4fdd61d8bf654b07a76156ed2a6e77))
+
 ## [1.0.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.0.0...v1.0.1) (2026-01-19)
 
 
