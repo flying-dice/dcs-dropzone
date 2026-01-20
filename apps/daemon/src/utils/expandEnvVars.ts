@@ -24,6 +24,45 @@ const ALLOWED_ENV_VARS = new Set([
 ]);
 
 /**
+ * Gets the value of an environment variable with special handling for platform-specific naming.
+ *
+ * @param varName - The variable name as written in the config
+ * @param upperVarName - The uppercase version of the variable name
+ * @returns The environment variable value or undefined
+ */
+function getEnvVarValue(varName: string, upperVarName: string): string | undefined {
+	// Try the uppercase version first, then original case
+	let value = process.env[upperVarName] || process.env[varName];
+
+	// Handle special case for PROGRAMFILES(X86) which might be stored differently:
+	// - ProgramFiles(x86) on real Windows systems
+	// - PROGRAMFILES_X86 in test environments
+	if (!value && upperVarName === "PROGRAMFILES(X86)") {
+		value = process.env["ProgramFiles(x86)"] || process.env.PROGRAMFILES_X86;
+	}
+
+	return value;
+}
+
+/**
+ * Logs a warning for an unsupported environment variable.
+ */
+function warnUnsupportedVar(varName: string): void {
+	logger.warn(
+		`Environment variable '${varName}' is not in the allowlist and will not be expanded. Supported variables: ${Array.from(ALLOWED_ENV_VARS).join(", ")}`,
+	);
+}
+
+/**
+ * Logs a warning for an undefined environment variable.
+ */
+function warnUndefinedVar(varName: string): void {
+	logger.warn(
+		`Environment variable '${varName}' is not set and cannot be expanded. The path will contain the literal variable reference.`,
+	);
+}
+
+/**
  * Expands environment variables in a path string.
  *
  * Supports both Windows-style (%VAR%) and Unix-style ($VAR or ${VAR}) variables.
@@ -50,28 +89,15 @@ export function expandEnvVars(path: string): string {
 
 		// Check if variable is in allowlist
 		if (!ALLOWED_ENV_VARS.has(upperVarName)) {
-			logger.warn(
-				`Environment variable '${varName}' is not in the allowlist and will not be expanded. Supported variables: ${Array.from(ALLOWED_ENV_VARS).join(", ")}`,
-			);
+			warnUnsupportedVar(varName);
 			return match; // Return original match unchanged
 		}
 
-		// Get value from environment (case-insensitive on Windows)
-		// Try different case variations and also try with 'ProgramFiles(x86)' style
-		const value =
-			process.env[upperVarName] ||
-			process.env[varName] ||
-			// Handle special case for PROGRAMFILES(X86) which might be stored as:
-			// - ProgramFiles(x86) on real Windows systems
-			// - PROGRAMFILES_X86 in test environments
-			(upperVarName === "PROGRAMFILES(X86)"
-				? process.env["ProgramFiles(x86)"] || process.env.PROGRAMFILES_X86
-				: undefined);
+		// Get value from environment
+		const value = getEnvVarValue(varName, upperVarName);
 
 		if (value === undefined) {
-			logger.warn(
-				`Environment variable '${varName}' is not set and cannot be expanded. The path will contain the literal variable reference.`,
-			);
+			warnUndefinedVar(varName);
 			return match; // Return original match unchanged
 		}
 
@@ -85,18 +111,14 @@ export function expandEnvVars(path: string): string {
 		const upperVarName = varName.toUpperCase();
 
 		if (!ALLOWED_ENV_VARS.has(upperVarName)) {
-			logger.warn(
-				`Environment variable '${varName}' is not in the allowlist and will not be expanded. Supported variables: ${Array.from(ALLOWED_ENV_VARS).join(", ")}`,
-			);
+			warnUnsupportedVar(varName);
 			return match;
 		}
 
-		const value = process.env[upperVarName] || process.env[varName];
+		const value = getEnvVarValue(varName, upperVarName);
 
 		if (value === undefined) {
-			logger.warn(
-				`Environment variable '${varName}' is not set and cannot be expanded. The path will contain the literal variable reference.`,
-			);
+			warnUndefinedVar(varName);
 			return match;
 		}
 
@@ -110,18 +132,14 @@ export function expandEnvVars(path: string): string {
 		const upperVarName = varName.toUpperCase();
 
 		if (!ALLOWED_ENV_VARS.has(upperVarName)) {
-			logger.warn(
-				`Environment variable '${varName}' is not in the allowlist and will not be expanded. Supported variables: ${Array.from(ALLOWED_ENV_VARS).join(", ")}`,
-			);
+			warnUnsupportedVar(varName);
 			return match;
 		}
 
-		const value = process.env[upperVarName] || process.env[varName];
+		const value = getEnvVarValue(varName, upperVarName);
 
 		if (value === undefined) {
-			logger.warn(
-				`Environment variable '${varName}' is not set and cannot be expanded. The path will contain the literal variable reference.`,
-			);
+			warnUndefinedVar(varName);
 			return match;
 		}
 
