@@ -22,11 +22,11 @@ export function ErrorApp(props: { error: ZodError }) {
 			</box>
 
 			<box flexDirection="column" marginBottom={2}>
-				{props.error.issues.map((issue) => {
-					const key = issue.path.length > 0 ? issue.path.join(".") : `issue-${issue.message.substring(0, 20)}`;
+				{props.error.issues.map((issue, index) => {
+					const pathStr = issue.path.length > 0 ? issue.path.join(".") : "config";
 					return (
-						<box key={key} flexDirection="row" marginBottom={1}>
-							<text fg="yellow">• [{issue.path.join(".")}]</text>
+						<box key={`error-${index}-${pathStr}`} flexDirection="row" marginBottom={1}>
+							<text fg="yellow">• [{pathStr}]</text>
 							<text> {issue.message}</text>
 						</box>
 					);

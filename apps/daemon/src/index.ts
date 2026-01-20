@@ -4,7 +4,7 @@ import * as assert from "node:assert";
 import { serve } from "bun";
 import { getLogger } from "log4js";
 import { ZodError } from "zod";
-import { type AppConfig, loadConfig } from "./config.ts";
+import { type AppConfig, CONFIG_FILE_PATH, loadConfig } from "./config.ts";
 import { SEVEN_ZIP_BINARIES, WGET_BINARIES } from "./constants.ts";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
@@ -31,7 +31,7 @@ try {
 		logger.error("\nPlease update your config.toml file and restart the daemon.");
 
 		// Show errors in TUI if enabled (default to true if not specified)
-		const rawConfig = Bun.TOML.parse(await Bun.file(`${process.cwd()}/config.toml`).text()) as any;
+		const rawConfig = Bun.TOML.parse(await Bun.file(CONFIG_FILE_PATH).text()) as any;
 		const tuiEnabled = rawConfig?.app?.tui_enabled !== false;
 
 		if (tuiEnabled) {
