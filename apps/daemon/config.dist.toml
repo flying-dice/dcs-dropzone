@@ -30,7 +30,7 @@
 # =======================================
 [dcs]
 dcs_working_dir = "%USERPROFILE%/Saved Games/DCS"                              # Path to DCS World working directory (supports env vars)
-dcs_install_dir = "C:/Program Files/Eagle Dynamics/DCS World"                  # Path to DCS World installation directory (supports env vars)
+dcs_install_dir = "%PROGRAMFILES%/Eagle Dynamics/DCS World"                    # Path to DCS World installation directory (supports env vars)
 
 # =======================================
 # Third Party Binaries Configuration
