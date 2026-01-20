@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { expandEnvVars } from "./expandEnvVars";
 
 describe("expandEnvVars", () => {
@@ -7,15 +7,12 @@ describe("expandEnvVars", () => {
 	beforeEach(() => {
 		// Save original environment
 		originalEnv = { ...process.env };
-		// Set up test environment variables
+		// Set up test environment variables (only ones we're testing, don't override system ones)
 		process.env.USERPROFILE = "C:/Users/TestUser";
 		process.env.APPDATA = "C:/Users/TestUser/AppData/Roaming";
-		process.env.LOCALAPPDATA = "C:/Users/TestUser/AppData/Local";
 		process.env.PROGRAMFILES = "C:/Program Files";
 		process.env.PROGRAMFILES_X86 = "C:/Program Files (x86)";
 		process.env.PROGRAMDATA = "C:/ProgramData";
-		process.env.TEMP = "C:/Users/TestUser/AppData/Local/Temp";
-		process.env.TMP = "C:/Users/TestUser/AppData/Local/Temp";
 		process.env.HOME = "/home/testuser";
 		process.env.HOMEDRIVE = "C:";
 		process.env.HOMEPATH = "/Users/TestUser";
@@ -39,6 +36,8 @@ describe("expandEnvVars", () => {
 		});
 
 		it("should expand LOCALAPPDATA variable", () => {
+			// Temporarily set for this test
+			process.env.LOCALAPPDATA = "C:/Users/TestUser/AppData/Local";
 			const result = expandEnvVars("%LOCALAPPDATA%/MyApp");
 			expect(result).toBe("C:/Users/TestUser/AppData/Local/MyApp");
 		});
@@ -59,11 +58,15 @@ describe("expandEnvVars", () => {
 		});
 
 		it("should expand TEMP variable", () => {
+			// Temporarily set for this test
+			process.env.TEMP = "C:/Users/TestUser/AppData/Local/Temp";
 			const result = expandEnvVars("%TEMP%/file.txt");
 			expect(result).toBe("C:/Users/TestUser/AppData/Local/Temp/file.txt");
 		});
 
 		it("should expand TMP variable", () => {
+			// Temporarily set for this test
+			process.env.TMP = "C:/Users/TestUser/AppData/Local/Temp";
 			const result = expandEnvVars("%TMP%/file.txt");
 			expect(result).toBe("C:/Users/TestUser/AppData/Local/Temp/file.txt");
 		});
@@ -84,6 +87,8 @@ describe("expandEnvVars", () => {
 		});
 
 		it("should expand multiple variables in one path", () => {
+			// Temporarily set for this test
+			process.env.TEMP = "C:/Users/TestUser/AppData/Local/Temp";
 			const result = expandEnvVars("%USERPROFILE%/AppData/%TEMP%");
 			expect(result).toBe("C:/Users/TestUser/AppData/C:/Users/TestUser/AppData/Local/Temp");
 		});
@@ -121,13 +126,16 @@ describe("expandEnvVars", () => {
 		});
 	});
 
+	// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${VAR} syntax intentionally
 	describe("Unix-style expansion ($VAR or ${VAR})", () => {
 		it("should expand $HOME variable", () => {
 			const result = expandEnvVars("$HOME/documents");
 			expect(result).toBe("/home/testuser/documents");
 		});
 
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${HOME} syntax intentionally
 		it("should expand ${HOME} variable with braces", () => {
+			// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${HOME} syntax intentionally
 			const result = expandEnvVars("${HOME}/documents");
 			expect(result).toBe("/home/testuser/documents");
 		});
@@ -137,7 +145,9 @@ describe("expandEnvVars", () => {
 			expect(result).toBe("C:/Users/TestUser/Documents");
 		});
 
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${APPDATA} syntax intentionally
 		it("should expand ${APPDATA} variable", () => {
+			// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${APPDATA} syntax intentionally
 			const result = expandEnvVars("${APPDATA}/MyApp");
 			expect(result).toBe("C:/Users/TestUser/AppData/Roaming/MyApp");
 		});
@@ -147,8 +157,11 @@ describe("expandEnvVars", () => {
 			expect(result).toBe("$UNSUPPORTED_VAR/path");
 		});
 
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${VAR} syntax intentionally
 		it("should leave unsupported ${VAR} unexpanded", () => {
+			// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${UNSUPPORTED_VAR} syntax intentionally
 			const result = expandEnvVars("${UNSUPPORTED_VAR}/path");
+			// biome-ignore lint/suspicious/noTemplateCurlyInString: Asserting ${UNSUPPORTED_VAR} remains unexpanded
 			expect(result).toBe("${UNSUPPORTED_VAR}/path");
 		});
 

@@ -65,7 +65,7 @@ export function expandEnvVars(path: string): string {
 			// - ProgramFiles(x86) on real Windows systems
 			// - PROGRAMFILES_X86 in test environments
 			(upperVarName === "PROGRAMFILES(X86)"
-				? process.env["ProgramFiles(x86)"] || process.env["PROGRAMFILES_X86"]
+				? process.env["ProgramFiles(x86)"] || process.env.PROGRAMFILES_X86
 				: undefined);
 
 		if (value === undefined) {
