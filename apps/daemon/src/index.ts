@@ -3,7 +3,7 @@ import "./log4js.ts";
 import * as assert from "node:assert";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import appConfig, { configParseResult } from "./config.ts";
+import appConfig, { CONFIG_FILE_PATH, configParseResult } from "./config.ts";
 import { SEVEN_ZIP_BINARIES, WGET_BINARIES } from "./constants.ts";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
@@ -25,7 +25,7 @@ if (!configParseResult.success) {
 
 	// If TUI is requested, we need to check the raw config
 	// Since we can't trust the parsed config, check the raw TOML
-	const rawConfig = Bun.TOML.parse(await Bun.file(`${process.cwd()}/config.toml`).text()) as any;
+	const rawConfig = Bun.TOML.parse(await Bun.file(CONFIG_FILE_PATH).text()) as any;
 	const tuiEnabled = rawConfig?.app?.tui_enabled !== false; // Default to true
 
 	if (tuiEnabled) {

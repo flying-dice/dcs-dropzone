@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
@@ -53,7 +53,6 @@ describe("Config Validation", () => {
 					});
 				} else {
 					try {
-						const { statSync } = require("node:fs");
 						const stats = statSync(dcsWorkingDir);
 						if (!stats.isDirectory()) {
 							ctx.addIssue({
@@ -81,7 +80,6 @@ describe("Config Validation", () => {
 					});
 				} else {
 					try {
-						const { statSync } = require("node:fs");
 						const stats = statSync(dcsInstallDir);
 						if (!stats.isDirectory()) {
 							ctx.addIssue({
@@ -109,7 +107,6 @@ describe("Config Validation", () => {
 					});
 				} else {
 					try {
-						const { statSync } = require("node:fs");
 						const stats = statSync(modsDir);
 						if (!stats.isDirectory()) {
 							ctx.addIssue({
