@@ -145,6 +145,11 @@ describe("expandEnvVars", () => {
 			expect(result).toBe("C:/Users/TestUser/Documents");
 		});
 
+		it("should expand $PROGRAMFILES(X86) variable", () => {
+			const result = expandEnvVars("$PROGRAMFILES(X86)/MyApp");
+			expect(result).toBe("C:/Program Files (x86)/MyApp");
+		});
+
 		// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${APPDATA} syntax intentionally
 		it("should expand ${APPDATA} variable", () => {
 			// biome-ignore lint/suspicious/noTemplateCurlyInString: Testing ${APPDATA} syntax intentionally

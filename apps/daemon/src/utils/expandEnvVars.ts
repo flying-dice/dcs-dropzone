@@ -82,8 +82,7 @@ export function expandEnvVars(path: string): string {
 	let result = path;
 
 	// Windows-style variables: %VAR%
-	// Match %VARNAME% pattern, capturing the variable name (including parentheses)
-	// Use non-greedy match and explicitly exclude % inside the variable name
+	// Match %VARNAME% pattern, capturing the variable name (alphanumeric, underscore, and parentheses)
 	result = result.replace(/%([A-Za-z0-9_()]+)%/g, (match, varName) => {
 		const upperVarName = varName.toUpperCase();
 
@@ -127,8 +126,8 @@ export function expandEnvVars(path: string): string {
 	});
 
 	// Then handle $VAR pattern (without braces)
-	// Match $VARNAME where VARNAME is alphanumeric + underscore
-	result = result.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, varName) => {
+	// Match $VARNAME where VARNAME is alphanumeric, underscore, and parentheses
+	result = result.replace(/\$([A-Za-z_][A-Za-z0-9_()]*)/g, (match, varName) => {
 		const upperVarName = varName.toUpperCase();
 
 		if (!ALLOWED_ENV_VARS.has(upperVarName)) {
