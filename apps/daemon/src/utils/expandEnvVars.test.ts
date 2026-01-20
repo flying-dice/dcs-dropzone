@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { expandEnvVars } from "./expandEnvVars";
+import { expandEnvVars } from "./expandEnvVars.ts";
 
 describe("expandEnvVars", () => {
 	let originalEnv: Record<string, string | undefined>;
@@ -11,6 +11,8 @@ describe("expandEnvVars", () => {
 		process.env.USERPROFILE = "C:/Users/TestUser";
 		process.env.APPDATA = "C:/Users/TestUser/AppData/Roaming";
 		process.env.PROGRAMFILES = "C:/Program Files";
+		// Set both the Windows naming and test environment naming for PROGRAMFILES(X86)
+		process.env["ProgramFiles(x86)"] = "C:/Program Files (x86)";
 		process.env.PROGRAMFILES_X86 = "C:/Program Files (x86)";
 		process.env.PROGRAMDATA = "C:/ProgramData";
 		process.env.HOME = "/home/testuser";
@@ -206,6 +208,26 @@ describe("expandEnvVars", () => {
 			process.env.USERPROFILE = "C:/Users/Test User (Special)";
 			const result = expandEnvVars("%USERPROFILE%/Documents");
 			expect(result).toBe("C:/Users/Test User (Special)/Documents");
+		});
+
+		it("should not expand literal dollar signs in dollar amounts", () => {
+			const result = expandEnvVars("C:/Files/$5/data");
+			expect(result).toBe("C:/Files/$5/data");
+		});
+
+		it("should not expand dollar signs not followed by valid variable names", () => {
+			const result = expandEnvVars("path$/file");
+			expect(result).toBe("path$/file");
+		});
+
+		it("should not expand dollar signs at the end of paths", () => {
+			const result = expandEnvVars("path/file$");
+			expect(result).toBe("path/file$");
+		});
+
+		it("should not expand dollar signs followed by numbers", () => {
+			const result = expandEnvVars("price$100/item");
+			expect(result).toBe("price$100/item");
 		});
 	});
 });
