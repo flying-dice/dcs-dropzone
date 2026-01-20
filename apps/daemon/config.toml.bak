@@ -1,0 +1,35 @@
+# =======================================
+# DCS World Configuration
+# =======================================
+[dcs]
+#dcs_working_dir = "C:/Users/jonat/Saved Games/DCS.openbeta"                     # Path to DCS World working directory
+#dcs_install_dir = "D:/Program Files/Eagle Dynamics/DCS World OpenBeta"          # Path to DCS World installation directory
+dcs_working_dir = "./._dcs_working_dir"                                          # Path to DCS World working directory
+dcs_install_dir = "./._dcs_install_dir"                                          # Path to DCS World installation directory
+
+# =======================================
+# Third Party Binaries Configuration
+# =======================================
+[binaries]
+wget = "bin/wget.exe"                                                     # Path to download the winget binary
+sevenzip = "bin/7za.exe"                                                  # Path to 7zip executable
+
+# =======================================
+# Server Configuration
+# =======================================
+[server]
+host = "0.0.0.0"                                                                # Address to bind the HTTP honoApplication
+port = 3001                                                                     # Port to listen on
+
+# =======================================
+# ProdApplication Configuration
+# =======================================
+[app]
+mods_dir = "./._app_working_dir/mods"                                              # Path to application working directory
+tui_enabled = false                                                                 # Enable TUI interface
+
+# =======================================
+# Database Configuration
+# =======================================
+[database]
+url = "./._app_working_dir/index.sqlite"                                                            # Database URL
