@@ -1,10 +1,12 @@
 import { exists, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { writeManifest } from "@packages/manifest";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "appd";
 const BUN_ARCHIVE_NAME = `dcs-dropzone-daemon.tar`;
 const BUN_ARCHIVE_PATH = join(OUT_DIR, BUN_ARCHIVE_NAME);
+const BUN_ARCHIVE_MANIFEST_PATH = `${BUN_ARCHIVE_PATH}.manifest`;
 
 console.log("Building release archive:", BUN_ARCHIVE_NAME);
 if (await exists(BUN_ARCHIVE_PATH)) {
@@ -60,4 +62,23 @@ for await (const file of releaseFilesGlob.scan(OUT_DIR)) {
 
 const archive = new Bun.Archive(filesForArchive);
 await Bun.write(BUN_ARCHIVE_PATH, archive);
+
+const hasher = new Bun.CryptoHasher("sha256");
+hasher.update(await archive.bytes());
+const digest = hasher.digest("hex");
+
+await writeManifest(BUN_ARCHIVE_MANIFEST_PATH, {
+	__version: process.env.RELEASE_VERSION,
+	__tag: process.env.RELEASE_TAG,
+	createdAt: new Date(),
+	files: await archive.files().then((it) =>
+		it
+			.entries()
+			.toArray()
+			.map(([n, _f]) => n)
+			.filter((it) => !it.endsWith(".manifest")),
+	),
+	etag: digest,
+});
+
 console.log("Created archive at:", BUN_ARCHIVE_PATH);

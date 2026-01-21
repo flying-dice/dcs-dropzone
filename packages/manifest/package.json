@@ -1,0 +1,17 @@
+{
+	"name": "@packages/manifest",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"biome": "biome check --write",
+		"tsc": "tsc --noEmit",
+		"depcheck": "bunx depcheck",
+		"tests": "bun test"
+	},
+	"peerDependencies": {
+		"zod": ">=4"
+	}
+}

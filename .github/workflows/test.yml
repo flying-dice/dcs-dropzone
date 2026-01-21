@@ -14,13 +14,13 @@ jobs:
       - name: Install bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Cache Bun download cache
+      - name: Cache Bun install cache
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}\.cache\bun
-          key: ${{ runner.os }}-bun-cache-${{ hashFiles('**/bun.lockb') }}
+          path: ${{ github.workspace }}\.bun\install\cache
+          key: ${{ runner.os }}-bun-install-cache-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
-            ${{ runner.os }}-bun-cache-
+            ${{ runner.os }}-bun-install-cache-
 
       - name: Install dependencies
         run: bun install
@@ -56,6 +56,13 @@ jobs:
         with:
           name: dcs-dropzone-daemon.tar
           path: 'apps/daemon/dist/dcs-dropzone-daemon.tar'
+
+      - name: Upload Daemon Build Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dcs-dropzone-daemon.tar.manifest
+          path: 'apps/daemon/dist/dcs-dropzone-daemon.tar.manifest'
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5

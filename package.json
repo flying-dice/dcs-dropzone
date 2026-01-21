@@ -15,7 +15,7 @@
 			[
 				"@semantic-release/exec",
 				{
-					"prepareCmd": "bun run daemon:build"
+					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run daemon:build\""
 				}
 			],
 			[
@@ -28,7 +28,9 @@
 				"@semantic-release/github",
 				{
 					"assets": [
-						"apps/daemon/dist/dcs-dropzone-daemon.tar"
+						"apps/daemon/dist/dcs-dropzone-daemon.tar",
+						"apps/daemon/dist/dcs-dropzone-daemon.tar.manifest",
+						"apps/launcher/dist/launcher.exe"
 					]
 				}
 			],
