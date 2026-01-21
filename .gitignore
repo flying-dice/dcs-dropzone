@@ -51,3 +51,4 @@ app.log
 ._dcs_install_dir
 .cookie_secret
 *.log
+packages/cloudflare/.wrangler
