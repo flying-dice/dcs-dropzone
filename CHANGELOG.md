@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.1.0...v1.2.0) (2026-01-21)
+
+
+### Features
+
+* add launcher and manifest handling for update management ([9ca3f47](https://github.com/flying-dice/dcs-dropzone/commit/9ca3f47bd67ba7e059031f2613eac6c01035be4a))
+
 # [1.1.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.0.1...v1.1.0) (2026-01-20)
 
 
