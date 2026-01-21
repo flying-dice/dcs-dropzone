@@ -11,7 +11,7 @@ const MANIFEST_PATH = ".manifest";
 const stableAssetUrl = `${STABLE_LATEST_URL}/download/${DOWNLOAD_ASSET}`;
 const stableAssetManifestUrl = `${stableAssetUrl}.manifest`;
 
-const SYMLINKS = ["appd.exe", ".manifest", "bin"];
+const SYMLINKS = ["appd.exe", ".manifest", "bin", "config.toml"];
 
 const logger = getLogger("Launcher");
 
