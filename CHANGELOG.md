@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.2.0...v1.2.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* add launcher build command and update CI workflow ([e9c1d7e](https://github.com/flying-dice/dcs-dropzone/commit/e9c1d7e22d914b4b9eab9442ade02e9bbc2a55f2))
+
 # [1.2.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.1.0...v1.2.0) (2026-01-21)
 
 
