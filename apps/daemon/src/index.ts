@@ -4,11 +4,11 @@ import * as assert from "node:assert";
 import { serve } from "bun";
 import { getLogger } from "log4js";
 import { ZodError } from "zod";
-import { type AppConfig, CONFIG_FILE_PATH, loadConfig } from "./config.ts";
+import { type AppConfig, loadConfig } from "./config.ts";
 import { SEVEN_ZIP_BINARIES, WGET_BINARIES } from "./constants.ts";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
-import { startErrorTui, startTui } from "./tui";
+import { startTui } from "./tui";
 import { which } from "./utils/which.ts";
 
 const logger = getLogger("bootstrap");
@@ -29,23 +29,7 @@ try {
 		}
 
 		logger.error("\nPlease update your config.toml file and restart the daemon.");
-
-		// Show errors in TUI if enabled (default to true if not specified)
-		const rawConfig = Bun.TOML.parse(await Bun.file(CONFIG_FILE_PATH).text()) as any;
-		const tuiEnabled = rawConfig?.app?.tui_enabled !== false;
-
-		if (tuiEnabled) {
-			logger.info("Starting error TUI...");
-			await startErrorTui(error, async () => {
-				logger.info("Error TUI destroyed, exiting...");
-				process.exit(1);
-			});
-		} else {
-			process.exit(1);
-		}
-
-		// Wait forever in case TUI is running
-		await new Promise(() => {});
+		process.exit(1);
 	}
 
 	// Re-throw non-Zod errors
