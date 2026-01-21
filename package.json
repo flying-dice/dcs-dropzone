@@ -15,7 +15,7 @@
 			[
 				"@semantic-release/exec",
 				{
-					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run daemon:build\""
+					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; bun run daemon:build\""
 				}
 			],
 			[
@@ -51,6 +51,8 @@
 		"depcheck": "bun run --workspaces depcheck",
 		"tests": "bun run --workspaces tests",
 		"test": "bun run test",
+		"launcher:dev": "cd apps/launcher && bun run dev",
+		"launcher:build": "bun run --filter launcher build",
 		"daemon:dev": "cd apps/daemon && bun run dev",
 		"daemon:build": "bun run --filter daemon build",
 		"webapp:dev": "cd apps/webapp && bun run dev",

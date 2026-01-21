@@ -40,6 +40,9 @@ jobs:
       - name: Build Daemon
         run: bun run daemon:build
 
+      - name: Build Launcher
+        run: bun run launcher:build
+
       - name: Run tests
         run: bun test
 
@@ -63,6 +66,13 @@ jobs:
         with:
           name: dcs-dropzone-daemon.tar.manifest
           path: 'apps/daemon/dist/dcs-dropzone-daemon.tar.manifest'
+
+      - name: Upload Launcher Build Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher.exe
+          path: 'apps/launcher/dist/launcher.exe'
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
