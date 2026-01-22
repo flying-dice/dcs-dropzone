@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.2.1...v1.3.0) (2026-01-22)
+
+
+### Bug Fixes
+
+* **launcher:** add config.toml to symlinks post install linking ([f1b42b6](https://github.com/flying-dice/dcs-dropzone/commit/f1b42b6c6c567ef6ea151d08d0ef56c598fb1a05))
+
+
+### Features
+
+* **config:** implement config file reading and writing with validation ([a31b2ac](https://github.com/flying-dice/dcs-dropzone/commit/a31b2ac0ff648cb373a679faeb6de1a40ffc194d))
+
 ## [1.2.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.2.0...v1.2.1) (2026-01-21)
 
 
