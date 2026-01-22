@@ -1,5 +1,5 @@
 import { Badge, Group, Stack, Text, TextInput } from "@mantine/core";
-import { ze } from "@packages/zod";
+import { ze } from "@packages/zod/ze";
 import { err, ok, type Result } from "neverthrow";
 import type * as React from "react";
 import { useState } from "react";

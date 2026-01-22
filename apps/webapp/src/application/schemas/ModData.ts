@@ -1,4 +1,4 @@
-import { ze } from "@packages/zod";
+import { ze } from "@packages/zod/ze";
 import { z } from "zod";
 import { ModCategory } from "../enums/ModCategory.ts";
 import { ModVisibility } from "../enums/ModVisibility.ts";

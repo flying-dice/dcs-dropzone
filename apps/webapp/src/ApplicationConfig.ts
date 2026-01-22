@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { ze } from "@packages/zod";
+import { ze } from "@packages/zod/ze";
 import { int, string } from "getenv";
 import { getLogger } from "log4js";
 import { z } from "zod";

@@ -1,4 +1,4 @@
-import { ze } from "@packages/zod";
+import { zen } from "@packages/zod/zen";
 import { z } from "zod";
 
 export const ConfigSchema = z.object({
@@ -7,18 +7,18 @@ export const ConfigSchema = z.object({
 		port: z.number().int().min(1).max(65535),
 	}),
 	database: z.object({
-		url: ze.path({ resolve: true, normalize: true, expandEnvVars: true }),
+		url: zen.path({ resolve: true, normalize: true, expandEnvVars: true }),
 	}),
 	binaries: z.object({
-		wget: ze.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
-		sevenzip: ze.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
+		wget: zen.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
+		sevenzip: zen.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
 	}),
 	dcs: z.object({
-		dcs_working_dir: ze.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
-		dcs_install_dir: ze.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
+		dcs_working_dir: zen.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
+		dcs_install_dir: zen.path({ exists: "check", resolve: true, normalize: true, expandEnvVars: true }),
 	}),
 	app: z.object({
-		mods_dir: ze.path({ exists: "ensure", resolve: true, normalize: true, expandEnvVars: true }),
+		mods_dir: zen.path({ exists: "ensure", resolve: true, normalize: true, expandEnvVars: true }),
 		tui_enabled: z.boolean(),
 	}),
 });

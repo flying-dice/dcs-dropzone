@@ -20,7 +20,7 @@
 │   │   ├── bin/       # Third-party binaries (wget.exe, 7za.exe, etc.)
 │   │   ├── config.toml
 │   │   ├── build.ts
-│   │   ├── drizzle.index.ts
+│   │   ├── drizzle.ze.ts
 │   │   └── package.json
 │   └── webapp/        # Web UI for mod management
 │       ├── src/
@@ -103,7 +103,7 @@ bun run dev:webapp
 
 # Start daemon dev server  
 bun run dev:daemon
-# Or: cd apps/daemon && bun --watch src/index.ts
+# Or: cd apps/daemon && bun --watch src/ze.ts
 ```
 
 ### Building
@@ -201,7 +201,7 @@ These are bundled with the built daemon and must exist for tests to pass.
 
 ### 3. Database Configuration
 
-- **Daemon**: SQLite via Drizzle ORM (`apps/daemon/drizzle.index.ts`)
+- **Daemon**: SQLite via Drizzle ORM (`apps/daemon/drizzle.ze.ts`)
   - Migrations in `apps/daemon/src/database/ddl/`
   - Schema in `apps/daemon/src/database/ConfigSchema.ts`
 - **Webapp**: MongoDB via Mongoose

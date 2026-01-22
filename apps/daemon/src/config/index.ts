@@ -1,5 +1,5 @@
 import * as assert from "node:assert";
-import { getShapeFromZodObject } from "@packages/zod";
+import { getShapeFromZodObject } from "@packages/zod/ze";
 import inquirer from "inquirer";
 import { get, merge } from "lodash";
 import { ZodOptional, type ZodType, z } from "zod";

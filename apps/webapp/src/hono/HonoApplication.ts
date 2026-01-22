@@ -2,7 +2,7 @@ import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
-import { ze } from "@packages/zod";
+import { ze } from "@packages/zod/ze";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { setSignedCookie } from "hono/cookie";

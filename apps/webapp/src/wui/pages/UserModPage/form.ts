@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { ze } from "@packages/zod";
+import { ze } from "@packages/zod/ze";
 import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";
