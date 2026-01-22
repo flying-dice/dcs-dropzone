@@ -41,8 +41,7 @@ try {
 	const config = <Configuration>Bun.YAML.parse(text);
 
 	configure(mergeWith({}, config, TUI_CONFIG));
-} catch (error) {
-	console.error("Failed to configure log4js using file due to:", error);
+} catch (_error) {
 	console.log("Falling back to default log4js configuration.");
 	configure(
 		mergeWith(
