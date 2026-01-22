@@ -1,62 +1,61 @@
-import "./log4js.ts";
-import { exists, symlink, unlink } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fetchManifest, readManifest, writeManifest } from "@packages/manifest";
-import { getLogger } from "log4js";
 
-const STABLE_LATEST_URL = "https://github.com/flying-dice/dcs-dropzone/releases/latest";
+const RELEASE_BASEURL =
+	process.env.RELEASE_BASEURL ?? "https://github.com/flying-dice/dcs-dropzone/releases/latest/download";
 const DOWNLOAD_ASSET = "dcs-dropzone-daemon.tar";
 const MANIFEST_PATH = ".manifest";
 
-const stableAssetUrl = `${STABLE_LATEST_URL}/download/${DOWNLOAD_ASSET}`;
+const stableAssetUrl = join(RELEASE_BASEURL, DOWNLOAD_ASSET);
 const stableAssetManifestUrl = `${stableAssetUrl}.manifest`;
 
-const SYMLINKS = ["appd.exe", ".manifest", "bin", "config.toml"];
+console.info(`Checking for updates from ${stableAssetUrl}...`);
 
-const logger = getLogger("Launcher");
-
-logger.info(`Checking for updates from ${stableAssetUrl}...`);
-
-logger.debug("Fetching latest release manifest...");
+console.debug("Fetching latest release manifest...");
 const latestReleaseManifest = await fetchManifest(stableAssetManifestUrl);
+const folderName = latestReleaseManifest.__version || latestReleaseManifest.createdAt.getTime().toString();
 
 function getLatestReleasePath(path: string) {
-	return resolve(join(latestReleaseManifest.createdAt.getTime().toString(), path));
+	return resolve(join(folderName, path));
 }
 
-logger.debug("Reading installed release manifest...");
+console.debug("Reading installed release manifest...");
 const installedReleaseManifest = await readManifest(MANIFEST_PATH).catch((e) => {
-	logger.warn(`Failed to read local manifest, Err: ${e.message}`);
-	logger.info("Assuming no installed version.");
+	console.warn(`Failed to read local manifest, Err: ${e.message}`);
+	console.info("Assuming no installed version.");
 });
 
-if (latestReleaseManifest.etag === installedReleaseManifest?.etag) {
-	logger.info("No updates available. Exiting.");
-	process.exit(0);
-}
+async function applyUpdate() {
+	console.info("Update available. Downloading new version...");
+	const response = await fetch(stableAssetUrl);
+	const archive = new Bun.Archive(await response.blob());
 
-logger.info("Update available. Downloading new version...");
-const response = await fetch(stableAssetUrl);
-const archive = new Bun.Archive(await response.blob());
+	const files = await archive.files();
 
-const files = await archive.files();
-
-for (const [path, file] of files) {
-	logger.info(`${path}`);
-	await Bun.write(getLatestReleasePath(path), file);
-}
-
-for (const symlinkPath of SYMLINKS) {
-	const _path = symlinkPath;
-	const _target = getLatestReleasePath(symlinkPath);
-
-	if (await exists(_path)) {
-		logger.debug("Removing existing symlink:", _path);
-		await unlink(_path);
+	for (const [path, file] of files) {
+		console.info(`- ${path}`);
+		await Bun.write(getLatestReleasePath(path), file);
 	}
-	logger.debug(`Creating symlink: ${_path} -> ${_target}`);
-	await symlink(_target, _path, "file");
+
+	console.info("Update downloaded successfully, updating manifest.");
+	await writeManifest(MANIFEST_PATH, latestReleaseManifest);
 }
 
-logger.info("Update downloaded successfully, updating manifest.");
-await writeManifest(getLatestReleasePath(MANIFEST_PATH), latestReleaseManifest);
+if (
+	latestReleaseManifest.etag !== installedReleaseManifest?.etag ||
+	latestReleaseManifest.files.some((it) => !existsSync(join(folderName, it)))
+) {
+	await applyUpdate();
+}
+
+const executablePath = resolve(`${folderName}/appd.exe`);
+
+Bun.spawn({
+	cmd: [executablePath],
+	cwd: folderName,
+	env: { ...process.env, DCS_DROPZONE__INSTALL_DIR: resolve(folderName), DCS_DROPZONE__WORKING_DIR: process.cwd() },
+	stdout: "inherit",
+	stdin: "inherit",
+	stderr: "inherit",
+});

@@ -19,7 +19,6 @@ const ASSETS: [string, string][] = [
 	["bin/7za.exe", "bin/7za.exe"],
 	["bin/7za.dll", "bin/7za.dll"],
 	["bin/7zxa.dll", "bin/7zxa.dll"],
-	["config.dist.toml", "config.toml"],
 ];
 
 const outfile = join(resolve(OUT_DIR), BUN_NAME);
@@ -68,8 +67,8 @@ hasher.update(await archive.bytes());
 const digest = hasher.digest("hex");
 
 await writeManifest(BUN_ARCHIVE_MANIFEST_PATH, {
-	__version: process.env.RELEASE_VERSION,
-	__tag: process.env.RELEASE_TAG,
+	__version: process.env.RELEASE_VERSION || "0.0.0",
+	__tag: process.env.RELEASE_TAG || "v0.0.0-dev",
 	createdAt: new Date(),
 	files: await archive.files().then((it) =>
 		it

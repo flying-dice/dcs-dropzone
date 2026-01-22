@@ -14,3 +14,5 @@ export function which(command: string): string | null {
 	logger.trace("Resolved path:", resolved);
 	return resolved;
 }
+
+console.log(import.meta.file);
