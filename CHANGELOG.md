@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.3.1...v1.4.0) (2026-01-24)
+
+
+### Features
+
+* enhance App component with error handling and keyboard shortcuts for loading edge as app ([c84cffc](https://github.com/flying-dice/dcs-dropzone/commit/c84cffcb9918de013eb01dad28dc0805e3eb8452))
+
 ## [1.3.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.3.0...v1.3.1) (2026-01-22)
 
 
