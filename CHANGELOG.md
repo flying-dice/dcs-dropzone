@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.3.0...v1.3.1) (2026-01-22)
+
+
+### Bug Fixes
+
+* move node based zod extensions to seperate import ([5e45d8c](https://github.com/flying-dice/dcs-dropzone/commit/5e45d8c964c886a78c5c5dfbd85dabc6a1facbc6))
+
 # [1.3.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.2.1...v1.3.0) (2026-01-22)
 
 
