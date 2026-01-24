@@ -8,7 +8,7 @@ import { DrizzleJobRecordRepository } from "./DrizzleJobRecordRepository.ts";
 describe("DrizzleJobRecordRepository", () => {
 	describe("create", () => {
 		it("should create a new record where no job id exists", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			repo.create({ processorName: "test-processor", jobData: { foo: "bar" }, initialState: JobState.Waiting });
@@ -34,7 +34,7 @@ describe("DrizzleJobRecordRepository", () => {
 
 	describe("findByRunId", () => {
 		it("should find a record by its run ID", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			const createdRecord = repo.create({
@@ -65,7 +65,7 @@ describe("DrizzleJobRecordRepository", () => {
 
 	describe("findAllByJobId", () => {
 		it("should find all records by job ID", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			const createdRecord1 = repo.create({
@@ -94,7 +94,7 @@ describe("DrizzleJobRecordRepository", () => {
 
 	describe("findAllForProcessor", () => {
 		it("should find all records for a specific processor", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			repo.create({ processorName: "processor1", jobData: {}, initialState: JobState.Waiting });
@@ -109,7 +109,7 @@ describe("DrizzleJobRecordRepository", () => {
 	});
 
 	describe("findAllInState", () => {
-		const db = Database(":memory:");
+		const { db } = Database(":memory:");
 		const repo = new DrizzleJobRecordRepository({ db });
 
 		let record1: JobRecord;
@@ -156,7 +156,7 @@ describe("DrizzleJobRecordRepository", () => {
 
 	describe("markFailedForRunId", () => {
 		it("should mark a job record as failed", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });
@@ -184,7 +184,7 @@ describe("DrizzleJobRecordRepository", () => {
 
 	describe("markRunningForRunId", () => {
 		it("should mark a job record as running", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });
@@ -212,7 +212,7 @@ describe("DrizzleJobRecordRepository", () => {
 
 	describe("markSuccessForRunId", () => {
 		it("should mark a job record as success", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });
@@ -240,7 +240,7 @@ describe("DrizzleJobRecordRepository", () => {
 
 	describe("updateProgressForRunId", () => {
 		it("should update progress for a job record", () => {
-			const db = Database(":memory:");
+			const { db } = Database(":memory:");
 			const repo = new DrizzleJobRecordRepository({ db });
 
 			const createdRecord = repo.create({ processorName: "test", jobData: {}, initialState: JobState.Waiting });

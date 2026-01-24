@@ -1,6 +1,6 @@
 import { useKeyboard, useRenderer } from "@opentui/react";
 import { compact } from "lodash";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { BehaviorSubject, Observable } from "rxjs";
 import { match } from "ts-pattern";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";

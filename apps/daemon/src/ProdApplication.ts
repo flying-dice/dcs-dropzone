@@ -8,6 +8,7 @@ import { SevenZipExtractProcessor } from "./adapters/SevenZipExtractProcessor.ts
 import { WgetDownloadProcessor } from "./adapters/WgetDownloadProcessor.ts";
 import { Application } from "./application/Application.ts";
 import Database from "./database";
+import type { AppDatabase } from "./database/app-database.ts";
 
 const logger = getLogger("ProdApplication");
 
@@ -20,9 +21,12 @@ type Deps = {
 };
 
 export class ProdApplication extends Application {
+	private readonly appDatabase: AppDatabase;
+
 	constructor(deps: Deps) {
 		logger.info("Bootstrapping ProdApplication with config:", deps);
-		const db = Database(deps.databaseUrl);
+		const { db, appDatabase } = Database(deps.databaseUrl);
+
 		const attributesRepository = new DrizzleAttributesRepository({ db });
 		const releaseRepository = new DrizzleReleaseRepository({ db });
 		const jobRecordRepository = new DrizzleJobRecordRepository({ db });
@@ -45,5 +49,12 @@ export class ProdApplication extends Application {
 			downloadProcessor,
 			extractProcessor,
 		});
+
+		this.appDatabase = appDatabase;
+	}
+
+	override close() {
+		super.close();
+		this.appDatabase.close();
 	}
 }

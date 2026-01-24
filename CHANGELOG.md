@@ -61,7 +61,7 @@
 * **queue:** add log4js configuration and enhance logging in queue processing, bugfixes for return types and unchecked errors ([a283ea8](https://github.com/flying-dice/dcs-dropzone/commit/a283ea86a07ad51771a27d53985c213ac956367d))
 * remove comment from install dependencies step in test.yml for clarity ([00b15cc](https://github.com/flying-dice/dcs-dropzone/commit/00b15ccd7a26986eabbe10bcd5278f01b2f1c35a))
 * remove test step from semantic release workflow for streamlined process ([b91c411](https://github.com/flying-dice/dcs-dropzone/commit/b91c41187624fb3b6ed33f80e007bc82a5ad0a15))
-* remove unused daemon build steps from Dockerfile and index.ts ([3514884](https://github.com/flying-dice/dcs-dropzone/commit/35148841ceae24e27209b8051ee1b2ed11ca36ee))
+* remove unused daemon build steps from Dockerfile and worker.ts ([3514884](https://github.com/flying-dice/dcs-dropzone/commit/35148841ceae24e27209b8051ee1b2ed11ca36ee))
 * remove version field from health check responses in HonoApplication and ApplicationConfig ([692b9b2](https://github.com/flying-dice/dcs-dropzone/commit/692b9b29885b497a0c25424f1b8d7213a6918c71))
 * streamline MongoDB connection logging and ensure consistent connection flow ([5e87f14](https://github.com/flying-dice/dcs-dropzone/commit/5e87f146aa902b2cbc1d156eb2aa891e60c36909))
 * **tests:** ensure MongoDB instance is created for in-memory tests ([d862f05](https://github.com/flying-dice/dcs-dropzone/commit/d862f053ff6c8d680d5259ece18bc93ee7dc5109))

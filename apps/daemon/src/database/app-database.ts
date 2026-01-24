@@ -117,4 +117,9 @@ export class AppDatabase {
 
 		return appDatabase;
 	}
+
+	close(): void {
+		this.logger.debug("Closing database connection");
+		this.db.close();
+	}
 }

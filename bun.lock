@@ -46,6 +46,7 @@
         "ts-pattern": "^5.9.0",
         "type-fest": "^5.4.1",
         "webapp": "workspace:*",
+        "webview-bun": "^2.4.0",
         "zod": "^4.2.1",
       },
       "devDependencies": {
@@ -1898,6 +1899,8 @@
     "webapp": ["webapp@workspace:apps/webapp"],
 
     "webidl-conversions": ["webidl-conversions@7.0.0", "", {}, "sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g=="],
+
+    "webview-bun": ["webview-bun@2.4.0", "", {}, "sha512-0+ugnQlcUHmuW+iLeb+Lzb8rGUJh7WEdXvNsuvaVEXT3EagK380XdD7heVJu0Ek/mNxMY3G2JM142YRQ1hDUGQ=="],
 
     "whatwg-url": ["whatwg-url@14.2.0", "", { "dependencies": { "tr46": "^5.1.0", "webidl-conversions": "^7.0.0" } }, "sha512-De72GdQZzNTUBBChsXueQUnPKDkg/5A5zp7pFDuQAj5UFoENpiACU0wlCvzpAGnTkj++ihpKwKyYewn/XNUbKw=="],
 

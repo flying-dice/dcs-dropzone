@@ -35,12 +35,15 @@ export abstract class Application {
 	private readonly daemonInstanceId: string;
 	private readonly releaseToggleService: ReleaseToggle;
 	private readonly releaseCatalog: ReleaseCatalog;
+	private readonly releaseAssetManager: ReleaseAssetManager;
 
 	private _release$ = new BehaviorSubject<ModAndReleaseData[]>([]);
 
 	get release$(): Observable<ModAndReleaseData[]> {
 		return this._release$.asObservable();
 	}
+
+	private readonly updateReleasesTimeout: NodeJS.Timeout;
 
 	protected constructor(public readonly deps: Deps) {
 		this.daemonInstanceId =
@@ -54,26 +57,31 @@ export abstract class Application {
 			pathResolver,
 		});
 
-		const releaseAssetManager = new ReleaseAssetManager({
+		this.releaseAssetManager = new ReleaseAssetManager({
 			...this.deps,
 			pathResolver,
 		});
 
 		this.releaseToggleService = new ReleaseToggle({
 			...this.deps,
-			releaseAssetManager,
+			releaseAssetManager: this.releaseAssetManager,
 			pathResolver,
 			missionScriptingFilesManager,
 		});
 
 		this.releaseCatalog = new ReleaseCatalog({
 			...this.deps,
-			releaseAssetManager,
+			releaseAssetManager: this.releaseAssetManager,
 			pathResolver,
 		});
 
 		this.updateReleasesObservable();
-		setInterval(() => this.updateReleasesObservable(), 1000);
+		this.updateReleasesTimeout = setInterval(() => this.updateReleasesObservable(), 1000);
+	}
+
+	public close() {
+		this.releaseAssetManager.stopProcessingJobs();
+		this.updateReleasesTimeout.close();
 	}
 
 	public getDaemonInstanceId(): string {

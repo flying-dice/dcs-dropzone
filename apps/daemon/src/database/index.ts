@@ -5,17 +5,25 @@ import { ddlExports } from "./db-ddl.ts";
 
 const logger = getLogger("db");
 
-export default (databaseUrl: string) => {
+export default (databaseUrl: string, abortSignal?: AbortSignal) => {
 	logger.debug("Compiling migrations...");
 
 	const appDatabase = AppDatabase.withMigrations(databaseUrl, ddlExports);
 
-	return drizzle({
-		client: appDatabase.getDatabase(),
-		logger: {
-			logQuery: (query: string, params: unknown[]) => {
-				logger.debug({ query, params });
-			},
-		},
+	abortSignal?.addEventListener("abort", () => {
+		logger.info("Abort signal received, closing database connection...");
+		appDatabase.close();
 	});
+
+	return {
+		db: drizzle({
+			client: appDatabase.getDatabase(),
+			logger: {
+				logQuery: (query: string, params: unknown[]) => {
+					logger.debug({ query, params });
+				},
+			},
+		}),
+		appDatabase,
+	};
 };

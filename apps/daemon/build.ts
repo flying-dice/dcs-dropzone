@@ -25,7 +25,7 @@ const outfile = join(resolve(OUT_DIR), BUN_NAME);
 
 console.log("Building Project with Bun...");
 await Bun.build({
-	entrypoints: ["./src/index.ts"],
+	entrypoints: ["./src/index.ts", "./src/webview/worker.ts"],
 	minify: true,
 	sourcemap: "inline",
 	compile: {
@@ -39,6 +39,7 @@ await Bun.build({
 	env: "BUN_PUBLIC_*",
 	define: {
 		"process.env.NODE_ENV": `"production"`,
+		"process.env.__DROPZONE_WEBVIEW_WORKER_MODULE_PATH": `"./webview/worker.ts"`,
 	},
 });
 

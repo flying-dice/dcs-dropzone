@@ -51,6 +51,10 @@ export class ReleaseAssetManager {
 		);
 	}
 
+	stopProcessingJobs() {
+		this.queue.stop();
+	}
+
 	@Log(logger)
 	getProgressReportForAssets(releaseId: string): Record<string, ModReleaseAssetStatusData> {
 		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(releaseId);
