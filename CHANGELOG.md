@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.4.0...v1.5.0) (2026-01-24)
+
+
+### Features
+
+* implement WebviewWorker for managing webview instances and graceful shutdown ([f4059f9](https://github.com/flying-dice/dcs-dropzone/commit/f4059f925e391088a5a4396496b34620ec0d337e))
+
 # [1.4.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.3.1...v1.4.0) (2026-01-24)
 
 
