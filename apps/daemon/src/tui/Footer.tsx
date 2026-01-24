@@ -1,9 +1,9 @@
 import { Colors } from "./theme.ts";
 
-export function Footer() {
+export function Footer(props: { instructions: string[] }) {
 	return (
 		<box height={1} flexDirection={"row"} backgroundColor={Colors.DARK}>
-			<text fg={"white"}>↑/↓: Navigate Mods | E: Enable | D: Disable | R: Remove | C: Clear Logs</text>
+			<text fg={"white"}>{props.instructions.join(" | ")}</text>
 		</box>
 	);
 }

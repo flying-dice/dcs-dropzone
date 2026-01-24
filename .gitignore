@@ -52,3 +52,5 @@ app.log
 .cookie_secret
 *.log
 packages/cloudflare/.wrangler
+apps/daemon/config.json
+apps/daemon/config.schema.json

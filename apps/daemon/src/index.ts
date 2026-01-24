@@ -2,11 +2,16 @@ import "./tui/index.tsx";
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
+import { fromThrowable } from "neverthrow";
 import appConfig from "./config";
 import applicationConfig from "./config";
 import { HonoApplication } from "./hono/HonoApplication.ts";
+import { recentLoggingEvent$ } from "./log4js.ts";
 import { ProdApplication } from "./ProdApplication.ts";
 import { startTui } from "./tui";
+import { openUrl } from "./utils/openUrl.ts";
+
+const APP_URL = "https://dcs-dropzone-container.flying-dice.workers.dev";
 
 const logger = getLogger("bootstrap");
 
@@ -41,9 +46,18 @@ logger.info(`🚀 Server running at ${bunServer.url}`);
 
 if (applicationConfig.app.tui_enabled) {
 	logger.info("Starting TUI...");
-	await startTui(app, async () => {
-		logger.info("TUI destroyed, exiting...");
-		process.exit();
+	await startTui({
+		recentLoggingEvent$,
+		release$: app.release$,
+		onEnableRelease: (releaseId) => app.enableRelease(releaseId),
+		onDisableRelease: (releaseId) => app.disableRelease(releaseId),
+		onRemoveRelease: (releaseId) => app.disableRelease(releaseId),
+		onOpenBrowser: () => openUrl(APP_URL),
+		onQuit: async () => {
+			logger.info("Quit signal received from TUI, shutting down...");
+			await bunServer.stop(true);
+			process.exit(0);
+		},
 	});
 }
 

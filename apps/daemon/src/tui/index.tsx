@@ -1,13 +1,22 @@
 import { createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
-import type { Application } from "../application/Application.ts";
-import { App } from "./App.tsx";
+import { App, type AppProps } from "./App.tsx";
 
-export async function startTui(app: Application, onDestroy?: () => void) {
+export async function startTui(props: AppProps) {
 	const renderer = await createCliRenderer({
 		consoleOptions: { title: "Dropzone Daemon" },
-		onDestroy,
+		exitOnCtrlC: false,
 		openConsoleOnError: false,
 	});
-	createRoot(renderer).render(<App app={app} />);
+
+	createRoot(renderer).render(
+		<App
+			{...props}
+			onQuit={() => {
+				renderer.stop();
+				renderer.destroy();
+				props.onQuit();
+			}}
+		/>,
+	);
 }
