@@ -9,9 +9,19 @@ COPY ./apps/webapp/tsconfig.json ./apps/webapp/tsconfig.json
 COPY ./apps/webapp/bun-env.d.ts ./apps/webapp/bun-env.d.ts
 COPY ./apps/webapp/build.ts ./apps/webapp/build.ts
 
+COPY ./packages/client_webapp/src ./packages/client_webapp/src
+COPY ./packages/client_webapp/package.json ./packages/client_webapp/package.json
+COPY ./packages/client_webapp/tsconfig.json ./packages/client_webapp/tsconfig.json
+
 COPY ./packages/decorators/src ./packages/decorators/src
 COPY ./packages/decorators/package.json ./packages/decorators/package.json
 COPY ./packages/decorators/tsconfig.json ./packages/decorators/tsconfig.json
+
+COPY ./packages/dzui/src ./packages/dzui/src
+COPY ./packages/dzui/i18n ./packages/dzui/i18n
+COPY ./packages/dzui/package.json ./packages/dzui/package.json
+COPY ./packages/dzui/tsconfig.json ./packages/dzui/tsconfig.json
+COPY ./packages/dzui/bun-env.d.ts ./packages/dzui/bun-env.d.ts
 
 COPY ./packages/hono/src ./packages/hono/src
 COPY ./packages/hono/package.json ./packages/hono/package.json
