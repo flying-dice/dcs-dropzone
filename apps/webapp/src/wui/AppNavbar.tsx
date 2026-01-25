@@ -1,12 +1,10 @@
-import { AppShell, Stack, Text } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { AppShell, Divider, Stack, Text } from "@mantine/core";
+import { AppIcons, CategoryShortcut, DzNavLink } from "@packages/dzui";
+import { useLocation, useNavigate } from "react-router-dom";
 import { type ModDataCategory, useGetCategories } from "./_autogen/api.ts";
-import { CategoryShortcut } from "./components/CategoryShortcut.tsx";
-import { NavShortcut } from "./components/NavShortcut.tsx";
 import { useDashboardMetrics } from "./hooks/useDashboardMetrics.ts";
 import type { I18nKeys } from "./i18n/I18nKeys.ts";
 import { useAppTranslation } from "./i18n/useAppTranslation.ts";
-import { AppIcons } from "./icons.ts";
 
 export type AppNavbarProps = {
 	withMyMods: boolean;
@@ -27,28 +25,66 @@ export function AppNavbar(props: AppNavbarProps) {
 
 	const m = useDashboardMetrics();
 
+	const location = useLocation();
+
 	return (
 		<AppShell.Navbar>
 			<Stack p={"md"} gap={"xl"}>
 				<Stack gap={"xs"}>
-					<NavShortcut icon={AppIcons.Home} label={t("DASHBOARD")} to={"/"} />
-					<NavShortcut icon={AppIcons.Mods} label={t("BROWSE_MODS")} to={"/mods"} />
-					<NavShortcut icon={AppIcons.Downloaded} label={t("DOWNLOADED")} to={"/downloaded"} count={m.downloads} />
-					<NavShortcut
+					<DzNavLink
+						icon={AppIcons.Daemon}
+						label={t("DAEMON")}
+						onClick={() => {
+							window.open("http://127.0.0.1:3001/", "_self");
+						}}
+					/>
+
+					<Divider />
+
+					<DzNavLink
+						icon={AppIcons.Home}
+						label={t("DASHBOARD")}
+						active={location.pathname === "/"}
+						onClick={() => nav("/")}
+					/>
+					<DzNavLink
+						icon={AppIcons.Mods}
+						label={t("BROWSE_MODS")}
+						active={location.pathname === "/mods"}
+						onClick={() => nav("/mods")}
+					/>
+					<DzNavLink
+						icon={AppIcons.Downloaded}
+						label={t("DOWNLOADED")}
+						active={location.pathname === "/downloaded"}
+						count={m.downloads}
+						onClick={() => nav("/downloaded")}
+					/>
+					<DzNavLink
 						icon={AppIcons.Enabled}
 						label={t("ENABLED")}
 						count={m.enabled}
 						countColor={"green"}
-						to={"/enabled"}
+						active={location.pathname === "/enabled"}
+						onClick={() => nav("/enabled")}
 					/>
-					<NavShortcut
+					<DzNavLink
 						icon={AppIcons.Updates}
 						label={t("UPDATES")}
 						count={m.outdated}
 						countColor={"red"}
-						to={"/updates"}
+						active={location.pathname === "/updates"}
+						onClick={() => nav("/updates")}
 					/>
-					{props.withMyMods && <NavShortcut icon={AppIcons.UserMods} label={t("MY_MODS")} to={"/user-mods"} />}
+
+					{props.withMyMods && (
+						<DzNavLink
+							icon={AppIcons.UserMods}
+							label={t("MY_MODS")}
+							active={location.pathname === "/user-mods"}
+							onClick={() => nav("/user-mods")}
+						/>
+					)}
 				</Stack>
 				<Stack gap="0">
 					<Text fw={"bold"} fz={12} c={"gray"} pb={"sm"}>

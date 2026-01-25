@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Webapp" type="BunRunConfiguration">
+    <option name="program" value="src/index.ts" />
+    <option name="runtimeParameters" value="--watch" />
+    <option name="workingDirectory" value="$PROJECT_DIR$/apps/webapp" />
+    <method v="2" />
+  </configuration>
+</component>

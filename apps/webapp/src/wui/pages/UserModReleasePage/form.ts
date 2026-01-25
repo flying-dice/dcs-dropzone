@@ -1,4 +1,5 @@
 import { useForm } from "@mantine/form";
+import { showErrorNotification, showSuccessNotification } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";
@@ -13,8 +14,6 @@ import {
 	type UserData,
 	updateUserModRelease,
 } from "../../_autogen/api.ts";
-import { showErrorNotification } from "../../utils/showErrorNotification.tsx";
-import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 
 export const userModReleaseFormValues = z.object({
 	id: z.string(),

@@ -7,13 +7,13 @@
 	},
 	"scripts": {
 		"biome": "biome check --write",
-		"tsc": "tsc --noEmit",
+		"build": "bun build.ts",
+		"clientgen": "bun run --bun orval --config orval.config.cjs",
 		"depcheck": "bunx depcheck",
 		"dev": "bun --hot src/index.ts",
+		"start": "docker compose up --build",
 		"tests": "bun test",
-		"clientgen": "bun run --bun orval --config orval.config.cjs",
-		"build": "bun build.ts",
-		"start": "docker compose up --build"
+		"tsc": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",
@@ -29,16 +29,15 @@
 		"@mantine/modals": "8.3.10",
 		"@mantine/notifications": "8.3.10",
 		"@monaco-editor/react": "^4.7.0",
+		"@packages/decorators": "workspace:*",
+		"@packages/dzui": "workspace:*",
 		"@packages/hono": "workspace:*",
 		"@packages/zod": "workspace:*",
-		"@packages/decorators": "workspace:*",
 		"@scalar/hono-api-reference": "^0.9.30",
 		"@tanstack/react-query": "^5.90.12",
 		"@types/getenv": "^1.0.3",
 		"@types/lodash": "^4.17.21",
 		"date-fns": "^4.1.0",
-		"drizzle-kit": "^0.31.8",
-		"drizzle-orm": "^0.45.1",
 		"embla-carousel": "^8.6.0",
 		"embla-carousel-react": "^8.6.0",
 		"getenv": "^2.0.0",
@@ -73,6 +72,6 @@
 		"@types/object-hash": "^3.0.6",
 		"@types/react": "19.2.3",
 		"@types/react-dom": "19.2.3",
-		"orval": "^8.0.0-rc.0"
+		"orval": "^8.0.3"
 	}
 }

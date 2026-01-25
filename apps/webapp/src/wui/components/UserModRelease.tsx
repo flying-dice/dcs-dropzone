@@ -1,9 +1,9 @@
 import { Alert, Badge, Group, type MantineColor, Text } from "@mantine/core";
+import { VisibilityIcons } from "@packages/dzui";
 import { formatDistanceToNow } from "date-fns";
 import type { IconType } from "react-icons";
 import { FaCalendar, FaDownload } from "react-icons/fa6";
 import type { ModDataVisibility, ModReleaseData } from "../_autogen/api.ts";
-import { VisibilityIcons } from "../icons.ts";
 import { Stat } from "./Stat.tsx";
 
 export type UserModReleaseProps = {

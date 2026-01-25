@@ -14,7 +14,6 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import appConfig from "../ApplicationConfig.ts";
 import type { Application } from "../application/Application.ts";
-import { ModCategory } from "../application/enums/ModCategory.ts";
 import { ErrorData } from "../application/schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../application/schemas/ModAvailableFilterData.ts";
 import { ModCreateData } from "../application/schemas/ModCreateData.ts";
@@ -218,6 +217,7 @@ export class HonoApplication extends Hono<Env> {
 
 				const userData = await c.var.app.users.saveUserDetails(authResult);
 
+				logger.debug("Setting signed cookie for user:", userData.id);
 				await setSignedCookie(c, appConfig.userCookieName, userData.id, appConfig.userCookieSecret, {
 					maxAge: appConfig.userCookieMaxAge,
 				});
@@ -365,7 +365,7 @@ export class HonoApplication extends Hono<Env> {
 				description: "Retrieves a list of all mod categories along with the count of published mods in each category.",
 				tags: ["Categories"],
 				responses: {
-					[StatusCodes.OK]: z.record(z.enum(ModCategory), z.number()),
+					[StatusCodes.OK]: z.record(z.string(), z.number()),
 					[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 				},
 			}),

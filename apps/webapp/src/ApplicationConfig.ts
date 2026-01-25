@@ -1,5 +1,4 @@
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { ze } from "@packages/zod/ze";
 import { int, string } from "getenv";
 import { getLogger } from "log4js";
@@ -12,7 +11,7 @@ const configSchema = z.object({
 	nodeEnv: z.enum(["development", "production", "test"]),
 	port: z.number().int().min(1).max(65535),
 	mongoUri: z.string(),
-	userCookieSecret: z.string(),
+	userCookieSecret: z.string().nonempty(),
 	userCookieName: z.string(),
 	userCookieMaxAge: z.number().int(),
 	homepageUrl: z.url(),
@@ -22,25 +21,14 @@ const configSchema = z.object({
 
 export type ApplicationConfig = z.infer<typeof configSchema>;
 
-function getOrGenerateCookieSecret(): string {
-	if (existsSync(".cookie_secret")) {
-		return readFileSync(".cookie_secret", "utf8");
-	}
-
-	const cookieSecret = randomBytes(32).toString("base64url");
-	writeFileSync(".cookie_secret", cookieSecret);
-
-	return getOrGenerateCookieSecret();
-}
-
 const authServiceGhConfigJson = string("AUTH_SERVICE_GH", "");
-const cookieSecretFromEnv = string("USER_COOKIE_SECRET", "");
+const cookieSecretFromEnv = string("USER_COOKIE_SECRET", randomBytes(32).toString("base64url"));
 
 const appConfig = configSchema.parse({
 	nodeEnv: string("NODE_ENV", "development"),
 	port: int("PORT", 3000),
 	mongoUri: string("MONGO_URI", "mongodb://memory:27017/dcs-dropzone"),
-	userCookieSecret: cookieSecretFromEnv ?? getOrGenerateCookieSecret(),
+	userCookieSecret: cookieSecretFromEnv,
 	userCookieName: string("USER_COOKIE_NAME", "USERID"),
 	userCookieMaxAge: int("USER_COOKIE_MAX_AGE", 86400), // default to 1 day
 	homepageUrl: string("HOMEPAGE_URL", "http://localhost:3000"),

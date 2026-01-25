@@ -4,3 +4,7 @@ ignores:
   - "@fontsource/inter"
   - drizzle-kit
   - mongodb
+  - "@packages/hono"
+  - "@hono/standard-validator"
+  - "@scalar/hono-api-reference"
+  - hono-openapi

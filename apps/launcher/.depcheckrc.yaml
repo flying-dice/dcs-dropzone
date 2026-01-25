@@ -1,3 +1,4 @@
 ignores:
   - bun
   - bun:*
+  - "@types/bun"

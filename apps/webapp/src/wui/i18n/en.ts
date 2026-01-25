@@ -89,6 +89,7 @@ export default {
 		CHANGELOG: "Changelog",
 		DARK: "Dark",
 		DASHBOARD: "Dashboard",
+		DAEMON: "Daemon",
 		DELETE: "Delete",
 		DELETE_RELEASE: "Delete Release",
 		DELETE_RELEASE_SUCCESS_DESC: "The release has been deleted.",

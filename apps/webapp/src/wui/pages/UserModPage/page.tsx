@@ -1,4 +1,5 @@
-import { AppShell, Container, Flex, Stack, useComputedColorScheme } from "@mantine/core";
+import { Container, Flex, Stack } from "@mantine/core";
+import { DzMain } from "@packages/dzui";
 import { type ModData, type UserData, useGetUserModById, useGetUserMods } from "../../_autogen/api.ts";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
@@ -23,8 +24,6 @@ export function _UserModPage(props: UserModPageProps) {
 	const mod = useGetUserModById(props.mod.id);
 	const breakpoint = useBreakpoint();
 
-	const colorScheme = useComputedColorScheme();
-
 	const form = useUserModForm(props.mod);
 	const [_, handleSubmit] = useUserModFormSubmit(props.mod, props.user, async () => {
 		await mod.refetch();
@@ -33,8 +32,8 @@ export function _UserModPage(props: UserModPageProps) {
 	});
 
 	return (
-		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
-			<Container size={"xl"} p={"md"}>
+		<DzMain>
+			<Container p={"md"}>
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Flex gap={"md"} direction={breakpoint.isMd ? "column" : "row"}>
 						<Stack flex={"auto"} gap={"lg"}>
@@ -54,6 +53,6 @@ export function _UserModPage(props: UserModPageProps) {
 					</Flex>
 				</form>
 			</Container>
-		</AppShell.Main>
+		</DzMain>
 	);
 }

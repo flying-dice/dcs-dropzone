@@ -1,14 +1,13 @@
 import { Alert, Skeleton, Stack } from "@mantine/core";
+import { AppIcons, EmptyState } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { times } from "lodash";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useGetMods } from "../../_autogen/api.ts";
-import { EmptyState } from "../../components/EmptyState.tsx";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { AppIcons } from "../../icons.ts";
 
 export function _ModsList(props: { page: number; size: number; filters: Record<string, unknown> }) {
 	const { t } = useAppTranslation();

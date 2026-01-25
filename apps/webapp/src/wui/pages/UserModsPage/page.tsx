@@ -1,5 +1,6 @@
-import { AppShell, Container, Stack, useComputedColorScheme } from "@mantine/core";
+import { Container, Stack } from "@mantine/core";
 import { modals } from "@mantine/modals";
+import { DzMain } from "@packages/dzui";
 import type { UserData } from "../../_autogen/api.ts";
 import { useGetUserMods } from "../../_autogen/api.ts";
 import { NewModForm } from "../../components/NewModForm.tsx";
@@ -15,7 +16,6 @@ export type UserModsPageProps = {
 
 export function _UserModsPage(_: UserModsPageProps) {
 	const { t } = useAppTranslation();
-	const colorScheme = useComputedColorScheme();
 	const mods = useGetUserMods();
 
 	const { openNewModModal, handleNewModSubmit } = useNewModModal(async () => {
@@ -27,14 +27,14 @@ export function _UserModsPage(_: UserModsPageProps) {
 	};
 
 	return (
-		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
-			<Container size={"xl"}>
+		<DzMain>
+			<Container>
 				<Stack py={"md"} gap={"xl"}>
 					<_UserModsStats />
 					<_UserModsHeader onNewMod={handleNewMod} />
 					<_UserModsList />
 				</Stack>
 			</Container>
-		</AppShell.Main>
+		</DzMain>
 	);
 }

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const WebviewWorkerEnv = z.object({
 	__DROPZONE_WEBVIEW_URL: z.url(),
+	__DROPZONE_WEBAPP_URL: z.url(),
 	__DROPZONE_WEBVIEW_DEBUG: z.coerce.boolean(),
 	__DROPZONE_WEBVIEW_TITLE: z.string(),
 });

@@ -1,16 +1,11 @@
-import "./tui/index.tsx";
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
 import appConfig from "./config";
-import applicationConfig from "./config";
 import { HonoApplication } from "./hono/HonoApplication.ts";
-import { recentLoggingEvent$ } from "./log4js.ts";
 import { ProdApplication } from "./ProdApplication.ts";
-import { startTui } from "./tui";
 import { WebviewWorker } from "./webview";
-
-const APP_URL = "https://dcs-dropzone-container.flying-dice.workers.dev";
+import index from "./wui/index.html";
 
 const logger = getLogger("bootstrap");
 
@@ -35,6 +30,7 @@ const bunServer = serve({
 	port: appConfig.server.port,
 	development: process.env.NODE_ENV !== "production",
 	routes: {
+		"/*": index,
 		"/api": honoApp.fetch,
 		"/api/**": honoApp.fetch,
 		"/v3/api-docs": honoApp.fetch,
@@ -43,47 +39,38 @@ const bunServer = serve({
 
 logger.info(`🚀 Server running at ${bunServer.url}`);
 
-const webviewWorker: WebviewWorker = new WebviewWorker();
+const webviewWorker: WebviewWorker = new WebviewWorker(bunServer.url.toString(), appConfig.app.webapp_url, {
+	debug: process.env.NODE_ENV !== "production",
+});
+
+webviewWorker.onMessage(async (message) => {
+	switch (message.type) {
+		case "window-closed":
+			logger.info("Webview window closed by user.");
+			await handleGracefulShutdown();
+			break;
+		default:
+			logger.warn("Unknown message type from webview worker:", message);
+	}
+});
+
+webviewWorker.onError(async (error: ErrorEvent) => {
+	logger.error("Error in webview worker:", error.message);
+	await handleGracefulShutdown();
+});
 
 async function handleGracefulShutdown() {
 	logger.info("Graceful shutdown initiated...");
 	logger.debug("Terminating webview worker...");
-	webviewWorker.terminate(APP_URL);
+	webviewWorker.terminate();
 
 	logger.debug("Stopping Bun server...");
-	await bunServer.stop();
+	await bunServer.stop(true);
 
 	logger.debug("Closing application...");
 	app.close();
 
 	logger.info("Shutdown complete.");
-}
-
-if (applicationConfig.app.tui_enabled) {
-	logger.info("Starting TUI...");
-	await startTui({
-		recentLoggingEvent$,
-		release$: app.release$,
-		onEnableRelease: (releaseId) => app.enableRelease(releaseId),
-		onDisableRelease: (releaseId) => app.disableRelease(releaseId),
-		onRemoveRelease: (releaseId) => app.disableRelease(releaseId),
-		onOpenBrowser: () => {
-			webviewWorker
-				.open(APP_URL, {
-					debug: process.env.NODE_ENV !== "production",
-				})
-				.match(
-					() => {},
-					(e) => {
-						throw new Error(e);
-					},
-				);
-		},
-		onQuit: async () => {
-			logger.info("Quit signal received from TUI, shutting down...");
-			await handleGracefulShutdown();
-		},
-	});
 }
 
 logger.debug("Bootstrap complete!");

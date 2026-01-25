@@ -1,5 +1,4 @@
 import {
-	AppShell,
 	Badge,
 	Box,
 	Card,
@@ -13,6 +12,7 @@ import {
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
+import { DzMain } from "@packages/dzui";
 import {
 	type ModData,
 	type ModReleaseData,
@@ -45,9 +45,9 @@ export function _Page(props: _PageProps) {
 	).length;
 
 	return (
-		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
+		<DzMain>
 			<Stack bg={colorScheme === "light" ? "white" : "dark.7"}>
-				<Container size={"xl"} pt={"md"}>
+				<Container pt={"md"}>
 					<Grid>
 						<GridCol span={isSm || isMd ? 12 : 8}>
 							<_Screenshots mod={props.mod} />
@@ -142,6 +142,6 @@ export function _Page(props: _PageProps) {
 					</Tabs.Panel>
 				</Container>
 			</Tabs>
-		</AppShell.Main>
+		</DzMain>
 	);
 }

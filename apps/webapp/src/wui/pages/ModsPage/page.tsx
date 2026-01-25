@@ -1,4 +1,5 @@
-import { AppShell, Container, Stack, useComputedColorScheme } from "@mantine/core";
+import { Container, Stack } from "@mantine/core";
+import { DzMain } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useEffect, useMemo, useState } from "react";
 import { useGetMods } from "../../_autogen/api.ts";
@@ -8,7 +9,6 @@ import { _ModsList } from "./_ModsList.tsx";
 import { _PaginationControls } from "./_PaginationControls.tsx";
 
 export function _ModsPage() {
-	const colorScheme = useComputedColorScheme();
 	const [size, setSize] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 
@@ -34,8 +34,8 @@ export function _ModsPage() {
 	}, [mods.data?.data, mods.data?.status, page]);
 
 	return (
-		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
-			<Container size={"xl"}>
+		<DzMain>
+			<Container>
 				<Stack py={"md"}>
 					<_ModsFilters
 						initialValues={initialValues}
@@ -55,6 +55,6 @@ export function _ModsPage() {
 					/>
 				</Stack>
 			</Container>
-		</AppShell.Main>
+		</DzMain>
 	);
 }

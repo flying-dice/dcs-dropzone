@@ -1,9 +1,9 @@
 import { modals, openModal } from "@mantine/modals";
+import { showErrorNotification } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { createUserMod } from "../_autogen/api.ts";
 import type { NewModFormValues } from "../components/NewModForm.tsx";
-import { showErrorNotification } from "../utils/showErrorNotification.tsx";
 
 /**
  * Custom hook for handling new mod creation modal and submission

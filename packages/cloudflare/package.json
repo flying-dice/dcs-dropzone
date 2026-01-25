@@ -1,24 +1,24 @@
 {
 	"name": "cloudflare",
-	"description": "DCS Dropzone Cloudflare Containers",
 	"private": true,
+	"description": "DCS Dropzone Cloudflare Containers",
 	"scripts": {
-		"tsc": "tsc --noEmit",
-		"tests": "echo \"No tests specified\" && exit 0",
+		"cf-typegen": "wrangler types",
 		"depcheck": "bunx depcheck",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"cf-typegen": "wrangler types"
+		"tests": "echo \"No tests specified\" && exit 0",
+		"tsc": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@cloudflare/containers": "^0.0.28",
+		"hono": "4.11.4"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.3.6",
 		"typescript": "5.8.3",
 		"wrangler": "^4.44.0"
-	},
-	"dependencies": {
-		"@cloudflare/containers": "^0.0.28",
-		"hono": "4.11.4"
 	},
 	"cloudflare": {
 		"label": "Containers Starter",

@@ -1,11 +1,10 @@
+import { showErrorNotification, showSuccessNotification } from "@packages/dzui";
 import { useAsyncFn } from "react-use";
 import { ModAndReleaseDataStatus, removeReleaseFromDaemon, useGetAllDaemonReleases } from "../_autogen/daemon_api.ts";
 import addReleaseToDaemonById from "../commands/AddReleaseToDaemonById.ts";
 import toggleReleaseById from "../commands/ToggleReleaseById.ts";
 import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
-import { showErrorNotification } from "../utils/showErrorNotification.tsx";
-import { showSuccessNotification } from "../utils/showSuccessNotification.tsx";
 import { useErrorModal } from "./useErrorModal.tsx";
 
 export function useDaemon() {

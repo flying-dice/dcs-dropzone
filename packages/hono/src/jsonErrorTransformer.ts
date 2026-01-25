@@ -18,7 +18,8 @@ const logger = getLogger("jsonErrorTransformer");
  * - For other errors, it defaults to an internal build error (500) with the error message.
  */
 export const jsonErrorTransformer: ErrorHandler = (error, c) => {
-	logger.error(`Error occurred: ${error.message}`, { error });
+	logger.error(error);
+	logger.error(`Error occurred: ${error.message}`, { error, stack: error.stack });
 	if (error instanceof HTTPException) {
 		return c.json(
 			ErrorData.parse(<ErrorData>{

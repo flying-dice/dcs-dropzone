@@ -3,3 +3,5 @@ ignores:
   - bun:*
   - ringbufferjs
   - "@types/ringbufferjs"
+  - webview-bun
+  - "@fontsource/inter"

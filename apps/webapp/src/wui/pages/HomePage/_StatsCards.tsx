@@ -1,8 +1,7 @@
 import { Group } from "@mantine/core";
-import { StatCard } from "../../components/StatCard.tsx";
+import { AppIcons, StatCard } from "@packages/dzui";
 import { useDashboardMetrics } from "../../hooks/useDashboardMetrics.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { AppIcons } from "../../icons.ts";
 import { orDefaultValue } from "../../utils/orDefaultValue.ts";
 
 export function _StatsCards() {

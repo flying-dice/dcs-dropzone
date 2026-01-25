@@ -1,9 +1,9 @@
 import { Button, Card, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
+import { showSuccessNotification } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
 import { deleteUserMod, type ModData, useGetUserMods } from "../../_autogen/api.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { showSuccessNotification } from "../../utils/showSuccessNotification.tsx";
 import type { UserModForm } from "./form.ts";
 
 export function _FormActions(props: { form: UserModForm; mod: ModData }) {

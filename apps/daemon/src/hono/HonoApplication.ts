@@ -116,7 +116,6 @@ export class HonoApplication extends Hono<Env> {
 			}),
 			(c) => {
 				const subscriptions = c.var.app.getAllReleasesWithStatus();
-
 				return c.json(subscriptions, StatusCodes.OK);
 			},
 		);

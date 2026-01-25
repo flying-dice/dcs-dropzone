@@ -1,4 +1,5 @@
-import { Alert, AppShell, Container, Skeleton, useComputedColorScheme } from "@mantine/core";
+import { Alert, Container, Skeleton } from "@mantine/core";
+import { DzMain } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useParams } from "react-router-dom";
 import { match } from "ts-pattern";
@@ -8,7 +9,6 @@ import { _Page } from "./page.tsx";
 
 export function ModPage() {
 	const { t } = useAppTranslation();
-	const colorScheme = useComputedColorScheme();
 	const params = useParams<{ modId: string; releaseId: string }>();
 	const mod = useGetModById(params.modId || "-");
 	const latestReleaseId = mod.data?.status === StatusCodes.OK ? mod.data.data.mod.latestReleaseId : undefined;
@@ -33,12 +33,12 @@ export function ModPage() {
 			),
 		)
 		.otherwise(() => (
-			<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
-				<Container size={"xl"} p={"md"}>
+			<DzMain>
+				<Container p={"md"}>
 					<Alert title={t("MOD_FETCH_ERROR_TITLE")} color={"red"}>
 						{t("MOD_FETCH_ERROR_DESC")}
 					</Alert>
 				</Container>
-			</AppShell.Main>
+			</DzMain>
 		));
 }

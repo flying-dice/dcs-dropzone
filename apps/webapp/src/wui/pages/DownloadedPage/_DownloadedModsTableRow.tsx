@@ -1,10 +1,11 @@
 import { Anchor, Checkbox, Progress, Table, Text, Tooltip } from "@mantine/core";
+import { ModActionsMenu } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { GetLatestModReleaseById404Error, type ModReleaseData } from "../../_autogen/api.ts";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
+import { useDaemon } from "../../hooks/useDaemon.ts";
 import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
-import { _ModActionsMenu } from "./_ModActionsMenu.tsx";
 
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
@@ -18,7 +19,13 @@ export type DownloadedModsTableRowProps = {
 export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 	const nav = useNavigate();
 	const { t } = useAppTranslation();
-	const isLatest = props.latest ? props.latest.versionHash === props.mod.versionHash : undefined;
+	const { toggle, update, remove } = useDaemon();
+	const handleToggle = () => toggle(props.mod.releaseId);
+
+	const latest = props.latest;
+	const isLatest = latest ? latest.versionHash === props.mod.versionHash : undefined;
+	const handleUpdate = latest ? () => update(props.mod.modId, props.mod.releaseId, latest.id) : undefined;
+	const handleRemove = () => remove(props.mod.releaseId);
 
 	return (
 		<Table.Tr>
@@ -82,7 +89,14 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 				)}
 			</Table.Td>
 			<Table.Td>
-				<_ModActionsMenu mod={props.mod} isLatest={isLatest} latest={props.latest ? props.latest : undefined} />
+				<ModActionsMenu
+					mod={props.mod}
+					isLatest={isLatest}
+					latest={latest}
+					onUpdate={handleUpdate}
+					onRemove={handleRemove}
+					onToggle={handleToggle}
+				/>
 			</Table.Td>
 		</Table.Tr>
 	);

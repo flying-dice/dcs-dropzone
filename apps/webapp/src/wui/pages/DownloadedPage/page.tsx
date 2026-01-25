@@ -1,22 +1,23 @@
-import { AppShell, Container, Stack, useComputedColorScheme } from "@mantine/core";
+import { Container, Stack } from "@mantine/core";
+import { DownloadedStatsCards, DzMain } from "@packages/dzui";
+import { useDashboardMetrics } from "../../hooks/useDashboardMetrics.ts";
 import { _DownloadedModsTable } from "./_DownloadedModsTable.tsx";
-import { _StatsCards } from "./_StatsCards.tsx";
 
 export type DownloadedPageProps = {
 	variant: "downloads" | "enabled" | "updates";
 };
 
 export function _DownloadedPage(props: DownloadedPageProps) {
-	const colorScheme = useComputedColorScheme();
+	const { enabled, outdated, downloads } = useDashboardMetrics();
 
 	return (
-		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
-			<Container size={"xl"}>
-				<Stack py={"xl"} gap={"xl"}>
-					<_StatsCards />
+		<DzMain>
+			<Container>
+				<Stack py={"md"} gap={"xl"}>
+					<DownloadedStatsCards enabled={enabled} downloaded={downloads} updates={outdated} />
 					<_DownloadedModsTable variant={props.variant} />
 				</Stack>
 			</Container>
-		</AppShell.Main>
+		</DzMain>
 	);
 }

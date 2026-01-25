@@ -7,12 +7,12 @@
 	},
 	"scripts": {
 		"biome": "biome check --write",
-		"tsc": "tsc --noEmit",
 		"depcheck": "bunx depcheck",
-		"tests": "bun test --coverage"
+		"tests": "bun test --coverage",
+		"tsc": "tsc --noEmit"
 	},
 	"peerDependencies": {
-		"neverthrow": "^8.2.0",
-		"log4js": "^6.9.1"
+		"log4js": "^6.9.1",
+		"neverthrow": "^8.2.0"
 	}
 }

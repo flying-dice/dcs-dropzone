@@ -1,4 +1,5 @@
-import { AppShell, Container, Flex, Stack, useComputedColorScheme } from "@mantine/core";
+import { Container, Flex, Stack } from "@mantine/core";
+import { DzMain } from "@packages/dzui";
 import {
 	type ModData,
 	type ModReleaseData,
@@ -23,7 +24,6 @@ type UserModReleasePageProps = {
 };
 
 export function _UserModReleasePage(props: UserModReleasePageProps) {
-	const colorScheme = useComputedColorScheme();
 	const breakpoint = useBreakpoint();
 
 	const releases = useGetUserModReleases(props.mod.id);
@@ -36,8 +36,8 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 	});
 
 	return (
-		<AppShell.Main bg={colorScheme === "light" ? "gray.0" : "dark.8"}>
-			<Container size={"xl"} p={"md"}>
+		<DzMain>
+			<Container p={"md"}>
 				<form onSubmit={form.onSubmit(handleSubmit)}>
 					<Flex gap={"md"} direction={breakpoint.isMd ? "column" : "row"}>
 						<Stack flex={"auto"} gap={"lg"}>
@@ -54,6 +54,6 @@ export function _UserModReleasePage(props: UserModReleasePageProps) {
 					</Flex>
 				</form>
 			</Container>
-		</AppShell.Main>
+		</DzMain>
 	);
 }

@@ -5,6 +5,20 @@
 		"apps/*",
 		"packages/*"
 	],
+	"scripts": {
+		"biome": "biome ci",
+		"daemon:build": "bun run --filter daemon build",
+		"daemon:dev": "cd apps/daemon && bun run dev",
+		"depcheck": "bun run --workspaces depcheck",
+		"launcher:build": "bun run --filter launcher build",
+		"launcher:dev": "cd apps/launcher && bun run dev",
+		"test": "bun run test",
+		"tests": "bun run --workspaces tests",
+		"tsc": "bun run --workspaces tsc",
+		"webapp:build": "bun run --filter webapp build",
+		"webapp:deploy": "bun run --filter cloudflare deploy",
+		"webapp:dev": "cd apps/webapp && bun run dev"
+	},
 	"release": {
 		"branches": [
 			"main"
@@ -44,20 +58,6 @@
 				}
 			]
 		]
-	},
-	"scripts": {
-		"biome": "biome ci",
-		"tsc": "bun run --workspaces tsc",
-		"depcheck": "bun run --workspaces depcheck",
-		"tests": "bun run --workspaces tests",
-		"test": "bun run test",
-		"launcher:dev": "cd apps/launcher && bun run dev",
-		"launcher:build": "bun run --filter launcher build",
-		"daemon:dev": "cd apps/daemon && bun run dev",
-		"daemon:build": "bun run --filter daemon build",
-		"webapp:dev": "cd apps/webapp && bun run dev",
-		"webapp:build": "bun run --filter webapp build",
-		"webapp:deploy": "bun run --filter cloudflare deploy"
 	},
 	"devDependencies": {
 		"@semantic-release/changelog": "^6.0.3",

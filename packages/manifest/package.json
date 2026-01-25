@@ -7,9 +7,9 @@
 	},
 	"scripts": {
 		"biome": "biome check --write",
-		"tsc": "tsc --noEmit",
 		"depcheck": "bunx depcheck",
-		"tests": "bun test"
+		"tests": "bun test",
+		"tsc": "tsc --noEmit"
 	},
 	"peerDependencies": {
 		"zod": ">=4"

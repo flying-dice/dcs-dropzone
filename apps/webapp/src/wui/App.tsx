@@ -1,4 +1,3 @@
-import "./index.css";
 import { AppShell } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { HashRouter, Route, Routes } from "react-router-dom";

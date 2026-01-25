@@ -1,8 +1,8 @@
 import { Card, Stack, Text } from "@mantine/core";
+import { VisibilityIcons } from "@packages/dzui";
 import { FaFileDownload } from "react-icons/fa";
 import { FaTag } from "react-icons/fa6";
 import { Stat } from "../../components/Stat.tsx";
-import { VisibilityIcons } from "../../icons.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 export function _Summary(props: { form: UserModReleaseForm }) {

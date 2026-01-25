@@ -44,7 +44,7 @@ export const defaultConfig: ConfigSchema = {
 	},
 	app: {
 		mods_dir: MODS_DIR,
-		tui_enabled: true,
+		webapp_url: "https://dcs-dropzone-container.flying-dice.workers.dev/",
 	},
 	dcs: {
 		dcs_working_dir: DCS_WORKING_DIR,
