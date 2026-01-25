@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.5.0...v1.6.0) (2026-01-25)
+
+
+### Bug Fixes
+
+* remove jsxImportSource from tsconfig.json ([4861ee5](https://github.com/flying-dice/dcs-dropzone/commit/4861ee5e5b0014869f2e41a4f3db4e819c261c8c))
+
+
+### Features
+
+* add daemon webview due to terminal inconsistencies, extract common ui components ([2d9fd7f](https://github.com/flying-dice/dcs-dropzone/commit/2d9fd7f83e341b7d09a1c43194c21302953c06c6))
+
 # [1.5.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.4.0...v1.5.0) (2026-01-24)
 
 
