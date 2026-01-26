@@ -4,15 +4,22 @@ import { AppIcons, ColorSchemeControls, DzHeader, DzNavLink, useAppTranslation }
 import { useEffect, useState } from "react";
 import { DownloadedPage } from "./pages/DaemonPage";
 
+const STORAGE_KEY_WEBVIEW_URL = "_dropzoneWebviewUrl";
+const STORAGE_KEY_WEBAPP_URL = "_dropzoneWebappUrl";
+
 export function App() {
 	const navbar = useDisclosure();
 	const { t } = useAppTranslation();
-	const [webviewUrlAvailable, setWebviewUrlAvailable] = useState(false);
-	const [webappUrlAvailable, setWebappUrlAvailable] = useState(false);
+	const [webviewUrlAvailable, setWebviewUrlAvailable] = useState(() => {
+		return localStorage.getItem(STORAGE_KEY_WEBVIEW_URL) !== null;
+	});
+	const [webappUrlAvailable, setWebappUrlAvailable] = useState(() => {
+		return localStorage.getItem(STORAGE_KEY_WEBAPP_URL) !== null;
+	});
 
 	useEffect(() => {
-		const webviewUrl = localStorage.getItem("_dropzoneWebviewUrl");
-		const webappUrl = localStorage.getItem("_dropzoneWebappUrl");
+		const webviewUrl = localStorage.getItem(STORAGE_KEY_WEBVIEW_URL);
+		const webappUrl = localStorage.getItem(STORAGE_KEY_WEBAPP_URL);
 		setWebviewUrlAvailable(webviewUrl !== null);
 		setWebappUrlAvailable(webappUrl !== null);
 	}, []);
@@ -40,7 +47,7 @@ export function App() {
 							label={t("DAEMON")}
 							disabled={!webviewUrlAvailable}
 							onClick={() => {
-								const url = localStorage.getItem("_dropzoneWebviewUrl");
+								const url = localStorage.getItem(STORAGE_KEY_WEBVIEW_URL);
 								if (url) {
 									window.open(url, "_self");
 								} else {
@@ -55,7 +62,7 @@ export function App() {
 							label={t("DASHBOARD")}
 							disabled={!webappUrlAvailable}
 							onClick={() => {
-								const url = localStorage.getItem("_dropzoneWebappUrl");
+								const url = localStorage.getItem(STORAGE_KEY_WEBAPP_URL);
 								if (url) {
 									window.open(url, "_self");
 								} else {
