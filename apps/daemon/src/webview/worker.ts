@@ -25,8 +25,8 @@ webview.title = __DROPZONE_WEBVIEW_TITLE;
 webview.setHTML(index);
 webview.navigate(__DROPZONE_WEBVIEW_URL);
 
-webview.eval(`localStorage.setItem("_dropzoneWebviewUrl", "${__DROPZONE_WEBVIEW_URL}")`);
-webview.eval(`localStorage.setItem("_dropzoneWebappUrl", "${__DROPZONE_WEBAPP_URL}")`);
+webview.eval(`localStorage.setItem("_dropzoneWebviewUrl", ${JSON.stringify(__DROPZONE_WEBVIEW_URL)})`);
+webview.eval(`localStorage.setItem("_dropzoneWebappUrl", ${JSON.stringify(__DROPZONE_WEBAPP_URL)})`);
 
 webview.run();
 
