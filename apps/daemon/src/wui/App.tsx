@@ -1,10 +1,8 @@
 import { AppShell, Divider, Stack } from "@mantine/core";
 import { useDisclosure, useLocalStorage } from "@mantine/hooks";
 import { AppIcons, ColorSchemeControls, DzHeader, DzNavLink, useAppTranslation } from "@packages/dzui";
+import { STORAGE_KEY_WEBAPP_URL, STORAGE_KEY_WEBVIEW_URL } from "./constants.ts";
 import { DownloadedPage } from "./pages/DaemonPage";
-
-const STORAGE_KEY_WEBVIEW_URL = "_dropzoneWebviewUrl";
-const STORAGE_KEY_WEBAPP_URL = "_dropzoneWebappUrl";
 
 export function App() {
 	const navbar = useDisclosure();

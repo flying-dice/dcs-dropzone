@@ -1,4 +1,5 @@
 import { Webview } from "webview-bun";
+import { STORAGE_KEY_WEBAPP_URL, STORAGE_KEY_WEBVIEW_URL } from "../wui/constants.ts";
 import { WindowClosed } from "./messages/WindowClosed.ts";
 import { WebviewWorkerEnv } from "./WebviewWorkerEnv.ts";
 
@@ -25,8 +26,12 @@ webview.title = __DROPZONE_WEBVIEW_TITLE;
 webview.setHTML(index);
 webview.navigate(__DROPZONE_WEBVIEW_URL);
 
-webview.eval(`localStorage.setItem("_dropzoneWebviewUrl", ${JSON.stringify(__DROPZONE_WEBVIEW_URL)})`);
-webview.eval(`localStorage.setItem("_dropzoneWebappUrl", ${JSON.stringify(__DROPZONE_WEBAPP_URL)})`);
+webview.eval(
+	`localStorage.setItem(${JSON.stringify(STORAGE_KEY_WEBVIEW_URL)}, ${JSON.stringify(__DROPZONE_WEBVIEW_URL)})`,
+);
+webview.eval(
+	`localStorage.setItem(${JSON.stringify(STORAGE_KEY_WEBAPP_URL)}, ${JSON.stringify(__DROPZONE_WEBAPP_URL)})`,
+);
 
 webview.run();
 
