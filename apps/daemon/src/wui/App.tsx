@@ -1,7 +1,6 @@
 import { AppShell, Divider, Stack } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useLocalStorage } from "@mantine/hooks";
 import { AppIcons, ColorSchemeControls, DzHeader, DzNavLink, useAppTranslation } from "@packages/dzui";
-import { useEffect, useState } from "react";
 import { DownloadedPage } from "./pages/DaemonPage";
 
 const STORAGE_KEY_WEBVIEW_URL = "_dropzoneWebviewUrl";
@@ -10,19 +9,14 @@ const STORAGE_KEY_WEBAPP_URL = "_dropzoneWebappUrl";
 export function App() {
 	const navbar = useDisclosure();
 	const { t } = useAppTranslation();
-	const [webviewUrlAvailable, setWebviewUrlAvailable] = useState(() => {
-		return localStorage.getItem(STORAGE_KEY_WEBVIEW_URL) !== null;
+	const [webviewUrl] = useLocalStorage<string | null>({
+		key: STORAGE_KEY_WEBVIEW_URL,
+		defaultValue: null,
 	});
-	const [webappUrlAvailable, setWebappUrlAvailable] = useState(() => {
-		return localStorage.getItem(STORAGE_KEY_WEBAPP_URL) !== null;
+	const [webappUrl] = useLocalStorage<string | null>({
+		key: STORAGE_KEY_WEBAPP_URL,
+		defaultValue: null,
 	});
-
-	useEffect(() => {
-		const webviewUrl = localStorage.getItem(STORAGE_KEY_WEBVIEW_URL);
-		const webappUrl = localStorage.getItem(STORAGE_KEY_WEBAPP_URL);
-		setWebviewUrlAvailable(webviewUrl !== null);
-		setWebappUrlAvailable(webappUrl !== null);
-	}, []);
 
 	return (
 		<AppShell
@@ -45,11 +39,10 @@ export function App() {
 							icon={AppIcons.Daemon}
 							active
 							label={t("DAEMON")}
-							disabled={!webviewUrlAvailable}
+							disabled={!webviewUrl}
 							onClick={() => {
-								const url = localStorage.getItem(STORAGE_KEY_WEBVIEW_URL);
-								if (url) {
-									window.open(url, "_self");
+								if (webviewUrl) {
+									window.open(webviewUrl, "_self");
 								} else {
 									console.warn("Webview URL not found in localStorage");
 								}
@@ -60,11 +53,10 @@ export function App() {
 						<DzNavLink
 							icon={AppIcons.Home}
 							label={t("DASHBOARD")}
-							disabled={!webappUrlAvailable}
+							disabled={!webappUrl}
 							onClick={() => {
-								const url = localStorage.getItem(STORAGE_KEY_WEBAPP_URL);
-								if (url) {
-									window.open(url, "_self");
+								if (webappUrl) {
+									window.open(webappUrl, "_self");
 								} else {
 									console.warn("Webapp URL not found in localStorage");
 								}
