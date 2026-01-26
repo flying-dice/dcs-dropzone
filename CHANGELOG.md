@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.7.0...v1.8.0) (2026-01-26)
+
+
+### Features
+
+* implement DzAppShell component and refactor App structure for improved layout ([a37f3c1](https://github.com/flying-dice/dcs-dropzone/commit/a37f3c120ed66e06148a2914f6af31447a469a07))
+
 # [1.7.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.6.1...v1.7.0) (2026-01-26)
 
 
