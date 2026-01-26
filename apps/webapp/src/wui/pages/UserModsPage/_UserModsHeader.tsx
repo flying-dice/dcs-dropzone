@@ -1,6 +1,6 @@
 import { Button, Group } from "@mantine/core";
+import { useAppTranslation } from "@packages/dzui";
 import { FaPlus } from "react-icons/fa";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 
 export function _UserModsHeader(props: { onNewMod: () => void }) {
 	const { t } = useAppTranslation();

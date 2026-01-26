@@ -1,5 +1,5 @@
 import { Card, Group, Stack, Text } from "@mantine/core";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
+import { useAppTranslation } from "@packages/dzui";
 
 export function _UserModMetrics(props: { downloads: number }) {
 	const { t } = useAppTranslation();

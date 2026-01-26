@@ -1,7 +1,7 @@
 import { Card, Stack, Text } from "@mantine/core";
+import { useAppTranslation } from "@packages/dzui";
 import type { ModReleaseMissionScriptData } from "../../_autogen/api.ts";
 import { MissionScriptListItem } from "../../components/MissionScriptListItem.tsx";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 
 export type _InstallationMissionScriptsProps = {
 	missionScripts: ModReleaseMissionScriptData[];

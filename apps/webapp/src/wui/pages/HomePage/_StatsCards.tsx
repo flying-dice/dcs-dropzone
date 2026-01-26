@@ -1,7 +1,6 @@
 import { Group } from "@mantine/core";
-import { AppIcons, StatCard } from "@packages/dzui";
+import { AppIcons, StatCard, useAppTranslation } from "@packages/dzui";
 import { useDashboardMetrics } from "../../hooks/useDashboardMetrics.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { orDefaultValue } from "../../utils/orDefaultValue.ts";
 
 export function _StatsCards() {

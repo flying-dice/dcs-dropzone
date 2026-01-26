@@ -1,6 +1,6 @@
 import { Card, Select, Stack, Text, TextInput } from "@mantine/core";
+import { useAppTranslation } from "@packages/dzui";
 import { ModDataVisibility } from "../../_autogen/api.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 export function _BasicInfo(props: { form: UserModReleaseForm }) {

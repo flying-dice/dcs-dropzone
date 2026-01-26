@@ -13,7 +13,6 @@ export async function waitForJobsForRelease(
 	releaseId: string,
 	timeoutSeconds: number = 30,
 ): Promise<void> {
-	inspector.console.log("Waiting for jobs to complete...");
 	const extractWaitStartTime = Date.now();
 
 	const getJobs = () => {

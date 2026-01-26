@@ -1,12 +1,11 @@
 import { Button, Group, Stack, Text } from "@mantine/core";
-import { AppIcons, EmptyState } from "@packages/dzui";
+import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useGetPopularMods } from "../../_autogen/api.ts";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 
 export function _PopularMods() {
 	const nav = useNavigate();

@@ -1,7 +1,7 @@
+import { useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useParams } from "react-router-dom";
 import { type UserData, useGetUserModById } from "../../_autogen/api.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _UserModPage } from "./page.tsx";
 
 export function UserModPage(props: { user: UserData }) {

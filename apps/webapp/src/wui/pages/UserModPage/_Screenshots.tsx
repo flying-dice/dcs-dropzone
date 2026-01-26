@@ -5,15 +5,15 @@ import { AspectRatio, Button, Card, Group, Image, SimpleGrid, Stack, Text, Texta
 import { useForm } from "@mantine/form";
 import { useListState } from "@mantine/hooks";
 import { modals, openConfirmModal, openModal } from "@mantine/modals";
+import { type TranslateFunction, useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useEffect } from "react";
 import { FaCamera } from "react-icons/fa6";
 import { z } from "zod";
-import { type TranslateFunction, useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModForm } from "./form.ts";
 
 const formSchema = z.object({
-	url: z.string().url("Invalid Image URL format").max(1000),
+	url: z.url("Invalid Image URL format").max(1000),
 });
 
 type FormValues = z.infer<typeof formSchema>;

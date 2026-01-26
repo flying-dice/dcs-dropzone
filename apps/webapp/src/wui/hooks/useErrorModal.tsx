@@ -1,7 +1,7 @@
 import { Code, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { openModal } from "@mantine/modals";
+import { useAppTranslation } from "@packages/dzui";
 import { FaExclamationTriangle } from "react-icons/fa";
-import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 
 export function useErrorModal() {
 	const { t } = useAppTranslation();

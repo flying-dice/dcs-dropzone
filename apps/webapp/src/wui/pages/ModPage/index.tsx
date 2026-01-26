@@ -1,10 +1,9 @@
 import { Alert, Container, Skeleton } from "@mantine/core";
-import { DzMain } from "@packages/dzui";
+import { DzMain, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useParams } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useGetModById, useGetModReleaseById } from "../../_autogen/api.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _Page } from "./page.tsx";
 
 export function ModPage() {

@@ -1,14 +1,13 @@
 import { ActionIcon, Alert, Button, Card, Checkbox, Divider, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
-import { EmptyState } from "@packages/dzui";
+import { EmptyState, useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaCloudDownloadAlt } from "react-icons/fa";
 import { FaFile, FaTrash } from "react-icons/fa6";
 import { z } from "zod";
 import { AssetListItem } from "../../components/AssetListItem.tsx";
 import { Help } from "../../components/Help.tsx";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 const assetFormSchema = z.object({

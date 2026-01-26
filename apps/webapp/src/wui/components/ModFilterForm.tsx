@@ -1,11 +1,11 @@
 import { Button, Group, MultiSelect, SimpleGrid, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaMagnifyingGlass, FaShapes, FaTag, FaUser } from "react-icons/fa6";
 import { z } from "zod";
 import { ModDataCategory } from "../_autogen/api.ts";
 import { useBreakpoint } from "../hooks/useBreakpoint.ts";
-import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { ModCategorySelect } from "./ModCategorySelect.tsx";
 
 const categorySchema = z.codec(

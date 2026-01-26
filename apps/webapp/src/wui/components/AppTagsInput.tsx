@@ -1,11 +1,11 @@
 import { Badge, Group, Stack, Text, TextInput } from "@mantine/core";
+import { useAppTranslation } from "@packages/dzui";
 import { ze } from "@packages/zod/ze";
 import { err, ok, type Result } from "neverthrow";
 import type * as React from "react";
 import { useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { z } from "zod";
-import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 
 export type AppTagsInputProps = {
 	value: string[];

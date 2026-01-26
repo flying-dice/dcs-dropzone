@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { I18nKeys } from "../i18n/I18nKeys.ts";
+import type { I18nKeys } from "./I18nKeys.ts";
 
 export type TranslateFunction = (key: I18nKeys, options?: Record<string, string | number>) => string;
 

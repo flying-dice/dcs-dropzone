@@ -12,7 +12,7 @@ import {
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
-import { DzMain } from "@packages/dzui";
+import { DzMain, useAppTranslation } from "@packages/dzui";
 import {
 	type ModData,
 	type ModReleaseData,
@@ -22,7 +22,6 @@ import {
 import { Markdown } from "../../components/Markdown.tsx";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Installation } from "./_Installation.tsx";
 import { _Maintainers } from "./_Maintainers.tsx";

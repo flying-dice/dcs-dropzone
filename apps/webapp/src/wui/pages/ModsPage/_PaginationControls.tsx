@@ -1,6 +1,6 @@
 import { Group, Pagination, Select, Text } from "@mantine/core";
+import { useAppTranslation } from "@packages/dzui";
 import { useGetMods } from "../../_autogen/api.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 
 export function _PaginationControls(props: {
 	page: number;

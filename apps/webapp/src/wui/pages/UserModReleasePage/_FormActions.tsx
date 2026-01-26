@@ -1,10 +1,9 @@
 import { Button, Card, Divider, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
-import { showSuccessNotification } from "@packages/dzui";
+import { showSuccessNotification, useAppTranslation } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
 import { deleteUserModRelease, type ModData, type ModReleaseData, useGetUserModReleases } from "../../_autogen/api.ts";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import type { UserModReleaseForm } from "./form.ts";
 
 export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; release: ModReleaseData }) {

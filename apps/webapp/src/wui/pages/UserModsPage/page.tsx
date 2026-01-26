@@ -1,11 +1,10 @@
 import { Container, Stack } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { DzMain } from "@packages/dzui";
+import { DzMain, useAppTranslation } from "@packages/dzui";
 import type { UserData } from "../../_autogen/api.ts";
 import { useGetUserMods } from "../../_autogen/api.ts";
 import { NewModForm } from "../../components/NewModForm.tsx";
 import { useNewModModal } from "../../hooks/useNewModModal.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _UserModsHeader } from "./_UserModsHeader.tsx";
 import { _UserModsList } from "./_UserModsList.tsx";
 import { _UserModsStats } from "./_UserModsStats.tsx";

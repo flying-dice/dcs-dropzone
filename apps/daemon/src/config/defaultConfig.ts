@@ -16,7 +16,7 @@ const dcsInstallDir = await getDcsRegistryPath();
 const DCS_WORKING_DIR = join(
 	string("USERPROFILE") || "",
 	"Saved Games",
-	dcsInstallDir?.variant === "openbeta" ? "DCS OpenBeta" : "DCS",
+	dcsInstallDir?.variant === "openbeta" ? "DCS.openbeta" : "DCS",
 );
 const DCS_INSTALL_DIR = dcsInstallDir?.path || join(string("PROGRAMFILES"), "Eagle Dynamics", "DCS World");
 

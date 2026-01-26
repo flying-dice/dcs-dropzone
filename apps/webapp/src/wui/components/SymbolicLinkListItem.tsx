@@ -1,8 +1,7 @@
 import { Group, Paper, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
+import { type I18nKeys, useAppTranslation } from "@packages/dzui";
 import { FaFileCode } from "react-icons/fa";
 import { ModReleaseSymbolicLinkDataDestRoot } from "../_autogen/api.ts";
-import type { I18nKeys } from "../i18n/I18nKeys.ts";
-import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { PathWithRoot } from "./PathWithRoot.tsx";
 
 export type SymbolicLinkListItemProps = {

@@ -5,6 +5,8 @@ import {
 	FaDownload,
 	FaEye,
 	FaEyeSlash,
+	FaListCheck,
+	FaStore,
 	FaTag,
 	FaTerminal,
 	FaToggleOn,
@@ -27,6 +29,8 @@ export const AppIcons = {
 	Private: FaUser,
 	Unlisted: FaEyeSlash,
 	Error: FaTriangleExclamation,
+	Store: FaStore,
+	Library: FaListCheck,
 };
 
 export const VisibilityIcons = {

@@ -1,8 +1,8 @@
 import { ActionIcon, Indicator, Popover, Text } from "@mantine/core";
+import { useAppTranslation } from "@packages/dzui";
 import { MdFileDownload, MdFileDownloadOff } from "react-icons/md";
 import { match } from "ts-pattern";
 import { useDaemon } from "../hooks/useDaemon.ts";
-import { useAppTranslation } from "../i18n/useAppTranslation.ts";
 import { AssetListItem } from "./AssetListItem.tsx";
 
 export function AssetActivity() {

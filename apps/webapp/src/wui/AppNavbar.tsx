@@ -1,10 +1,9 @@
-import { AppShell, Divider, Stack, Text } from "@mantine/core";
-import { AppIcons, CategoryShortcut, DzNavLink } from "@packages/dzui";
+import { AppShell, Stack, Text } from "@mantine/core";
+import type { I18nKeys } from "@packages/dzui";
+import { AppIcons, CategoryShortcut, DzNavLink, useAppTranslation } from "@packages/dzui";
 import { useLocation, useNavigate } from "react-router-dom";
 import { type ModDataCategory, useGetCategories } from "./_autogen/api.ts";
 import { useDashboardMetrics } from "./hooks/useDashboardMetrics.ts";
-import type { I18nKeys } from "./i18n/I18nKeys.ts";
-import { useAppTranslation } from "./i18n/useAppTranslation.ts";
 
 export type AppNavbarProps = {
 	withMyMods: boolean;
@@ -31,22 +30,6 @@ export function AppNavbar(props: AppNavbarProps) {
 		<AppShell.Navbar>
 			<Stack p={"md"} gap={"xl"}>
 				<Stack gap={"xs"}>
-					<DzNavLink
-						icon={AppIcons.Daemon}
-						label={t("DAEMON")}
-						onClick={() => {
-							window.open("http://127.0.0.1:3001/", "_self");
-						}}
-					/>
-
-					<Divider />
-
-					<DzNavLink
-						icon={AppIcons.Home}
-						label={t("DASHBOARD")}
-						active={location.pathname === "/"}
-						onClick={() => nav("/")}
-					/>
 					<DzNavLink
 						icon={AppIcons.Mods}
 						label={t("BROWSE_MODS")}

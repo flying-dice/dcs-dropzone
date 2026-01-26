@@ -1,11 +1,10 @@
 import { Anchor, Checkbox, Progress, Table, Text, Tooltip } from "@mantine/core";
-import { ModActionsMenu } from "@packages/dzui";
+import { ModActionsMenu, useAppTranslation } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { GetLatestModReleaseById404Error, type ModReleaseData } from "../../_autogen/api.ts";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { useDaemon } from "../../hooks/useDaemon.ts";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;

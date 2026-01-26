@@ -1,8 +1,8 @@
 import { Alert, Anchor, Stack, Text } from "@mantine/core";
 import { openModal } from "@mantine/modals";
+import { useAppTranslation } from "@packages/dzui";
 import type { ModData, ModReleaseData } from "../../_autogen/api.ts";
 import { Markdown } from "../../components/Markdown.tsx";
-import { useAppTranslation } from "../../i18n/useAppTranslation.ts";
 import { _InstallationDownloadAssets } from "./_InstallationDownloadAssets.tsx";
 import { _InstallationMissionScripts } from "./_InstallationMissionScripts.tsx";
 import { _InstallationSymbolicLinks } from "./_InstallationSymbolicLinks.tsx";
