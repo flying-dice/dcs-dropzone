@@ -30,7 +30,11 @@ export function App() {
 							label={t("DAEMON")}
 							onClick={() => {
 								const url = localStorage.getItem("_dropzoneWebviewUrl");
-								if (url) window.open(url, "_self");
+								if (url) {
+									window.open(url, "_self");
+								} else {
+									console.warn("Webview URL not found in localStorage");
+								}
 							}}
 						/>
 						<Divider />
@@ -40,7 +44,11 @@ export function App() {
 							label={t("DASHBOARD")}
 							onClick={() => {
 								const url = localStorage.getItem("_dropzoneWebappUrl");
-								if (url) window.open(url, "_self");
+								if (url) {
+									window.open(url, "_self");
+								} else {
+									console.warn("Webapp URL not found in localStorage");
+								}
 							}}
 						/>
 					</Stack>
