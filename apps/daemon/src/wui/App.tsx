@@ -1,11 +1,21 @@
 import { AppShell, Divider, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { AppIcons, ColorSchemeControls, DzHeader, DzNavLink, useAppTranslation } from "@packages/dzui";
+import { useEffect, useState } from "react";
 import { DownloadedPage } from "./pages/DaemonPage";
 
 export function App() {
 	const navbar = useDisclosure();
 	const { t } = useAppTranslation();
+	const [webviewUrlAvailable, setWebviewUrlAvailable] = useState(false);
+	const [webappUrlAvailable, setWebappUrlAvailable] = useState(false);
+
+	useEffect(() => {
+		const webviewUrl = localStorage.getItem("_dropzoneWebviewUrl");
+		const webappUrl = localStorage.getItem("_dropzoneWebappUrl");
+		setWebviewUrlAvailable(webviewUrl !== null);
+		setWebappUrlAvailable(webappUrl !== null);
+	}, []);
 
 	return (
 		<AppShell
@@ -28,6 +38,7 @@ export function App() {
 							icon={AppIcons.Daemon}
 							active
 							label={t("DAEMON")}
+							disabled={!webviewUrlAvailable}
 							onClick={() => {
 								const url = localStorage.getItem("_dropzoneWebviewUrl");
 								if (url) {
@@ -42,6 +53,7 @@ export function App() {
 						<DzNavLink
 							icon={AppIcons.Home}
 							label={t("DASHBOARD")}
+							disabled={!webappUrlAvailable}
 							onClick={() => {
 								const url = localStorage.getItem("_dropzoneWebappUrl");
 								if (url) {
