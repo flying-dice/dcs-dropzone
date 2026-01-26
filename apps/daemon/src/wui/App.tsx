@@ -28,14 +28,20 @@ export function App() {
 							icon={AppIcons.Daemon}
 							active
 							label={t("DAEMON")}
-							onClick={() => window.open(window._dropzoneWebviewUrl, "_self")}
+							onClick={() => {
+								const url = localStorage.getItem("_dropzoneWebviewUrl");
+								if (url) window.open(url, "_self");
+							}}
 						/>
 						<Divider />
 
 						<DzNavLink
 							icon={AppIcons.Home}
 							label={t("DASHBOARD")}
-							onClick={() => window.open(window._dropzoneWebappUrl, "_self")}
+							onClick={() => {
+								const url = localStorage.getItem("_dropzoneWebappUrl");
+								if (url) window.open(url, "_self");
+							}}
 						/>
 					</Stack>
 				</Stack>
