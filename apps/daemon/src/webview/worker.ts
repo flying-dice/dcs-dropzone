@@ -1,4 +1,5 @@
 import { Webview } from "webview-bun";
+import { STORAGE_KEY_WEBAPP_URL, STORAGE_KEY_WEBVIEW_URL } from "../wui/constants.ts";
 import { WindowClosed } from "./messages/WindowClosed.ts";
 import { WebviewWorkerEnv } from "./WebviewWorkerEnv.ts";
 
@@ -25,25 +26,12 @@ webview.title = __DROPZONE_WEBVIEW_TITLE;
 webview.setHTML(index);
 webview.navigate(__DROPZONE_WEBVIEW_URL);
 
-declare global {
-	interface Window {
-		/**
-		 * The URL of the Dropzone webview.
-		 * This is the Local URL which is initially loaded in the webview.
-		 */
-		_dropzoneWebviewUrl: string;
-
-		/**
-		 * The URL of the Dropzone web application.
-		 * This is the Public URL where the Dropzone web application is hosted.
-		 * Used for navigation from the webview to the main web application.
-		 */
-		_dropzoneWebappUrl: string;
-	}
-}
-
-webview.eval(`window._dropzoneWebviewUrl = "${__DROPZONE_WEBVIEW_URL}"`);
-webview.eval(`window._dropzoneWebappUrl = "${__DROPZONE_WEBAPP_URL}"`);
+webview.eval(
+	`localStorage.setItem(${JSON.stringify(STORAGE_KEY_WEBVIEW_URL)}, ${JSON.stringify(__DROPZONE_WEBVIEW_URL)})`,
+);
+webview.eval(
+	`localStorage.setItem(${JSON.stringify(STORAGE_KEY_WEBAPP_URL)}, ${JSON.stringify(__DROPZONE_WEBAPP_URL)})`,
+);
 
 webview.run();
 

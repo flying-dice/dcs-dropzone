@@ -7,6 +7,7 @@ export type BaseDzNavLinkProps = {
 	icon: IconType;
 	label: string;
 	active?: boolean;
+	disabled?: boolean;
 	onClick?: () => void;
 };
 
@@ -31,6 +32,7 @@ export function DzNavLink(props: DzNavLinkProps) {
 	return (
 		<NavLink
 			active={props.active}
+			disabled={props.disabled}
 			styles={{ root: { borderRadius: "0.5rem" } }}
 			leftSection={<props.icon />}
 			rightSection={rightSection}
