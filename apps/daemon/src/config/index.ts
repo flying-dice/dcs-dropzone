@@ -6,7 +6,7 @@ import { ZodOptional, type ZodType, z } from "zod";
 import { readConfigFile, writeConfigFile } from "./configFile.ts";
 import { ConfigSchema } from "./configSchema.ts";
 import { FileConfigSchema } from "./fileConfigSchema.ts";
-import { CONFIG_FILE_PATH, defaultConfig } from "./utils.ts";
+import { CONFIG_FILE_PATH, defaultConfig } from "./defaultConfig.ts";
 
 // biome-ignore lint/style/useConst: Required for while loop below
 let appConfig: ConfigSchema;

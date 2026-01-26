@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defaultConfig } from "./utils.ts";
+import { defaultConfig } from "./defaultConfig.ts";
 
 export const FileConfigSchema = z.object({
 	server: z
