@@ -1,3 +1,16 @@
+# [1.7.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.6.1...v1.7.0) (2026-01-26)
+
+
+### Bug Fixes
+
+* update bun install command in semantic-release.yml to allow lockfile updates ([538107f](https://github.com/flying-dice/dcs-dropzone/commit/538107fa0144b1c973773e627ccfba9a2ee8b496))
+* update dependencies in bun.lock for improved compatibility ([fe3f4be](https://github.com/flying-dice/dcs-dropzone/commit/fe3f4bee7345fd4242be2b4e7ba1f4faffd93466))
+
+
+### Features
+
+* refactor configuration handling and add registry path retrieval ([1db9d05](https://github.com/flying-dice/dcs-dropzone/commit/1db9d05d51cf833dd5ac6772f0d5e1546af6078f))
+
 ## [1.6.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.6.0...v1.6.1) (2026-01-25)
 
 
