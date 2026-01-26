@@ -19,7 +19,7 @@ const index = `
 `;
 
 const { __DROPZONE_WEBVIEW_DEBUG, __DROPZONE_WEBVIEW_URL, __DROPZONE_WEBAPP_URL, __DROPZONE_WEBVIEW_TITLE } =
-	WebviewWorkerEnv.parse(process.env);
+	WebviewWorkerEnv.parse(process.env); // Injected by apps/daemon/src/webview/WebviewWorker.ts during construction
 
 const webview = new Webview(__DROPZONE_WEBVIEW_DEBUG);
 webview.title = __DROPZONE_WEBVIEW_TITLE;
