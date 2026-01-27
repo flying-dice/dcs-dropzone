@@ -23,8 +23,6 @@ const DCS_INSTALL_DIR = dcsInstallDir?.path || join(string("PROGRAMFILES"), "Eag
 const DATABASE_URL = join(DROPZONE_DAEMON_WORKING_DIR, "data.sqlite");
 const MODS_DIR = join(DROPZONE_DAEMON_WORKING_DIR, "data");
 
-const WEBAPP_URL = string("DCS_DROPZONE__WEBAPP_URL", "https://dcs-dropzone-container.flying-dice.workers.dev/");
-
 const HOST = string("DCS_DROPZONE__HOST", "127.0.0.1");
 const PORT = int("DCS_DROPZONE__PORT", 3001);
 
@@ -55,7 +53,6 @@ export const defaultConfig: ConfigSchema = {
 	},
 	app: {
 		mods_dir: MODS_DIR,
-		webapp_url: WEBAPP_URL,
 	},
 	dcs: {
 		dcs_working_dir: DCS_WORKING_DIR,

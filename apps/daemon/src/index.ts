@@ -39,7 +39,7 @@ const bunServer = serve({
 
 logger.info(`🚀 Server running at ${bunServer.url}`);
 
-const webviewWorker: WebviewWorker = new WebviewWorker(bunServer.url.toString(), appConfig.app.webapp_url, {
+const webviewWorker: WebviewWorker = new WebviewWorker({
 	debug: process.env.NODE_ENV !== "production",
 });
 

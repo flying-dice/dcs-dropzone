@@ -69,11 +69,6 @@ export const FileConfigSchema = z.object({
 				.meta({ default: defaultConfig.app.mods_dir })
 				.optional()
 				.describe("The directory where mods will be stored"),
-			webapp_url: z
-				.url()
-				.meta({ default: defaultConfig.app.webapp_url })
-				.optional()
-				.describe("The URL of the web application for the webview to load"),
 		})
 		.optional()
 		.describe("Application Configuration"),

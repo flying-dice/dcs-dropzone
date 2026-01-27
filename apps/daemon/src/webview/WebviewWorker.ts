@@ -16,14 +16,12 @@ export type WebviewWorkerOptions = {
 export class WebviewWorker {
 	worker: Worker;
 
-	constructor(url: string, webappUrl: string, opts?: WebviewWorkerOptions) {
+	constructor(opts?: WebviewWorkerOptions) {
 		this.worker = new Worker(MODULE_PATH, {
 			env: WorkerEnv.parse(
 				WebviewWorkerEnv.parse(<WebviewWorkerEnv>{
-					__DROPZONE_WEBVIEW_URL: url,
 					__DROPZONE_WEBVIEW_DEBUG: opts?.debug ?? false,
 					__DROPZONE_WEBVIEW_TITLE: opts?.title ?? "Dropzone",
-					__DROPZONE_WEBAPP_URL: webappUrl,
 				}),
 			),
 		});

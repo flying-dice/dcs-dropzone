@@ -19,7 +19,6 @@ export const ConfigSchema = z.object({
 	}),
 	app: z.object({
 		mods_dir: zen.path({ exists: "ensure", resolve: true, normalize: true, expandEnvVars: true }),
-		webapp_url: z.url(),
 	}),
 });
 

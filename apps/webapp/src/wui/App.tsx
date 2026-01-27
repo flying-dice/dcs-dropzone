@@ -23,8 +23,6 @@ export function App() {
 		<HashRouter>
 			<DzAppShell
 				variant={"webapp"}
-				webappUrl={"/"}
-				webviewUrl={"http://127.0.0.1:3001/"}
 				navbar={{
 					breakpoint: "xs",
 					width: 256,

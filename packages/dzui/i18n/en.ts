@@ -281,7 +281,7 @@ export default {
 
 		VIEW_DETAILS: "View Details",
 		COUNT_DOWNLOADS: "{{count}} Downloads",
-		STORE: "Store",
+		DISCOVER: "Discover",
 		LIBRARY: "Library",
 	},
 };

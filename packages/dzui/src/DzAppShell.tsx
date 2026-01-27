@@ -2,10 +2,13 @@ import { AppShell, type AppShellProps, Burger, Button, Group, Image, Stack } fro
 import type { UseDisclosureReturnValue } from "@mantine/hooks";
 import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
+import { useAsyncFn } from "react-use";
 import { match } from "ts-pattern";
 import icon from "./assets/icon.svg";
 import logo from "./assets/logo.svg";
+import { constants } from "./constants.ts";
 import { AppIcons } from "./icons.ts";
+import { showErrorNotification } from "./showErrorNotification.tsx";
 import { useAppTranslation } from "./useAppTranslation.ts";
 import { useBreakpoint } from "./useBreakpoint.ts";
 
@@ -16,6 +19,7 @@ type ActionMenuItemProps = {
 	active?: boolean;
 	disabled?: boolean;
 	icon: IconType;
+	loading?: boolean;
 };
 
 function ActionMenuButtonItem(props: ActionMenuItemProps) {
@@ -26,6 +30,7 @@ function ActionMenuButtonItem(props: ActionMenuItemProps) {
 			disabled={props.disabled}
 			onClick={props.onClick}
 			styles={props.active ? { label: { textDecoration: "underline" } } : undefined}
+			loading={props.loading}
 		>
 			{props.label}
 		</Button>
@@ -42,6 +47,7 @@ function ActionMenuFooterItem(props: ActionMenuItemProps) {
 			disabled={props.disabled}
 			onClick={props.onClick}
 			styles={props.active ? { label: { textDecoration: "underline" } } : undefined}
+			loading={props.loading}
 		>
 			{props.label}
 		</Button>
@@ -50,8 +56,6 @@ function ActionMenuFooterItem(props: ActionMenuItemProps) {
 
 export type DzAppShellProps = Omit<AppShellProps, "header" | "footer"> & {
 	variant: "webapp" | "daemon";
-	webappUrl?: string | null;
-	webviewUrl?: string | null;
 	headerSection?: ReactNode;
 	navbarDisclosure?: UseDisclosureReturnValue;
 };
@@ -60,30 +64,41 @@ export function DzAppShell(props: DzAppShellProps) {
 	const { t } = useAppTranslation();
 	const variant: "footer" | "button" = isSm ? "footer" : "button";
 
+	const [webappOpening, openWebapp] = useAsyncFn(async () => {
+		try {
+			await fetch(new URL("/api/health", constants.WEBAPP_URL));
+			window.open(constants.WEBAPP_URL, "_self");
+		} catch (e) {
+			showErrorNotification(e);
+		}
+	}, []);
+	const [daemonOpening, openDaemon] = useAsyncFn(async () => {
+		try {
+			await fetch(new URL("/api/health", constants.DAEMON_URL));
+			window.open(constants.DAEMON_URL, "_self");
+		} catch (e) {
+			showErrorNotification(e);
+		}
+	}, []);
+
 	const actions: ActionMenuItemProps[] = [
 		{
-			id: "store",
-			label: t("STORE"),
+			id: "webapp",
+			label: t("DISCOVER"),
 			active: props.variant === "webapp",
-			disabled: !props.webappUrl,
 			icon: AppIcons.Store,
-			onClick: () => {
-				if (props.webappUrl) {
-					window.open(props.webappUrl, "_self");
-				}
-			},
+			onClick: openWebapp,
+			loading: webappOpening.loading,
+			disabled: !!webappOpening.error,
 		},
 		{
-			id: "library",
+			id: "daemon",
 			label: t("LIBRARY"),
 			active: props.variant === "daemon",
-			disabled: !props.webviewUrl,
 			icon: AppIcons.Library,
-			onClick: () => {
-				if (props.webviewUrl) {
-					window.open(props.webviewUrl, "_self");
-				}
-			},
+			onClick: openDaemon,
+			loading: daemonOpening.loading,
+			disabled: !!daemonOpening.error,
 		},
 	];
 
