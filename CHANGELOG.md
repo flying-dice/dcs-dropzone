@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.8.0...v1.9.0) (2026-01-27)
+
+
+### Features
+
+* remove webapp URL references and centralize configuration in constants ([149ef6f](https://github.com/flying-dice/dcs-dropzone/commit/149ef6f19a026518dae706c3f1e08325310de54c))
+
 # [1.8.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.7.0...v1.8.0) (2026-01-26)
 
 
