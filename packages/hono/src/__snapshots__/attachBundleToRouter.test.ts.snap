@@ -1,0 +1,20 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`getBundle should fetch index 1`] = `
+"<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="./icon-b21afszn.svg" />
+    <title>Dropzone</title>
+<link rel="stylesheet" crossorigin href="./chunk-fawdjsmt.css"><script type="module" crossorigin src="./chunk-1cx4axm8.js"></script></head>
+<body>
+<div id="root">
+    <h1>Dropzone Test</h1>
+</div>
+
+</body>
+</html>
+"
+`;

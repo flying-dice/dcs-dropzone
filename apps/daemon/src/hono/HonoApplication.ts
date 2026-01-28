@@ -1,3 +1,4 @@
+import { attachBundleToRouter } from "@packages/hono/attachBundleToRouter";
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
@@ -13,6 +14,7 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+import index from "../wui/index.html";
 
 const logger = getLogger("HonoApplication");
 const loggingHook = getLoggingHook(logger);
@@ -24,17 +26,21 @@ type Env = {
 };
 
 export class HonoApplication extends Hono<Env> {
-	constructor(app: Application) {
+	protected constructor(protected readonly app: Application) {
 		super();
+	}
 
-		this.use("*", (c, next) => {
+	static async build(app: Application): Promise<HonoApplication> {
+		const self = new HonoApplication(app);
+
+		self.use("*", (c, next) => {
 			c.set("app", app);
 			return next();
 		});
 
 		// Handle Private Network Access (PNA) preflight requests
 		// https://developer.chrome.com/blog/private-network-access-preflight
-		this.use("*", async (c, next) => {
+		self.use("*", async (c, next) => {
 			// Check if this is a preflight request with the PNA header before processing
 			const hasPnaHeader = c.req.header("Access-Control-Request-Private-Network") === "true";
 			await next();
@@ -44,23 +50,27 @@ export class HonoApplication extends Hono<Env> {
 			}
 		});
 
-		this.use("/*", cors());
+		self.use("/*", cors());
 
-		this.use(requestId());
+		self.use(requestId());
 
-		this.use("*", requestResponseLogger);
+		self.use("*", requestResponseLogger);
 
-		this.addReleaseToDaemon();
-		this.getAllDaemonReleases();
-		this.removeReleaseFromDaemon();
-		this.getDaemonHealth();
-		this.enableRelease();
-		this.disableRelease();
+		await attachBundleToRouter({ router: self, entrypoint: index, headers: { "Cache-Control": "no-store" } });
 
-		this.getApiDocs();
-		this.getScalarUi();
+		self.addReleaseToDaemon();
+		self.getAllDaemonReleases();
+		self.removeReleaseFromDaemon();
+		self.getDaemonHealth();
+		self.enableRelease();
+		self.disableRelease();
 
-		this.onError(jsonErrorTransformer);
+		self.getApiDocs();
+		self.getScalarUi();
+
+		self.onError(jsonErrorTransformer);
+
+		return self;
 	}
 
 	private getScalarUi() {
