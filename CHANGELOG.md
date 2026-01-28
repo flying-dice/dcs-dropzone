@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.9.0...v1.10.0) (2026-01-28)
+
+
+### Bug Fixes
+
+* **Hono:** amend logging for request validation ([304c14c](https://github.com/flying-dice/dcs-dropzone/commit/304c14c36502af41f16b2a7c799733e66af7332b))
+
+
+### Features
+
+* **daemon:** refactor HonoApplication to use static build method, use hono for serving static assets to remove caching breaking webview ([fbbf496](https://github.com/flying-dice/dcs-dropzone/commit/fbbf4963f2f9e8ab30d8a29b4592708be7072df2))
+
 # [1.9.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.8.0...v1.9.0) (2026-01-27)
 
 
