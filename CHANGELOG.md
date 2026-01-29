@@ -1,3 +1,10 @@
+## [1.10.3](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.2...v1.10.3) (2026-01-29)
+
+
+### Bug Fixes
+
+* remove unused linker dependencies ([1f2405b](https://github.com/flying-dice/dcs-dropzone/commit/1f2405bdb1724fb767490f3b89ed62fd7b4bea65))
+
 ## [1.10.2](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.1...v1.10.2) (2026-01-29)
 
 
