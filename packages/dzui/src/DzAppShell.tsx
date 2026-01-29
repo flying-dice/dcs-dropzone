@@ -75,7 +75,9 @@ export function DzAppShell(props: DzAppShellProps) {
 	const [daemonOpening, openDaemon] = useAsyncFn(async () => {
 		try {
 			await fetch(new URL("/api/health", constants.DAEMON_URL));
-			window.open(constants.DAEMON_URL, "_self");
+			const daemonUrl = new URL(constants.DAEMON_URL);
+			daemonUrl.searchParams.set("nocache", Date.now().toString());
+			window.open(daemonUrl.toString(), "_self");
 		} catch (e) {
 			showErrorNotification(e);
 		}

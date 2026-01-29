@@ -5,6 +5,7 @@ import appConfig from "./config";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
 import { WebviewWorker } from "./webview";
+import index from "./wui/index.html";
 
 const logger = getLogger("bootstrap");
 
@@ -29,7 +30,10 @@ const bunServer = serve({
 	port: appConfig.server.port,
 	development: process.env.NODE_ENV !== "production",
 	routes: {
-		"/*": honoApp.fetch,
+		"/*": index,
+		"/api": honoApp.fetch,
+		"/api/**": honoApp.fetch,
+		"/v3/api-docs": honoApp.fetch,
 	},
 });
 

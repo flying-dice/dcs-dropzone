@@ -9,7 +9,9 @@ const { __DROPZONE_WEBVIEW_DEBUG, __DROPZONE_WEBVIEW_TITLE } = WebviewWorkerEnv.
 
 const webview = new Webview(__DROPZONE_WEBVIEW_DEBUG);
 webview.title = __DROPZONE_WEBVIEW_TITLE;
-webview.navigate(constants.DAEMON_URL);
+const url = new URL(constants.DAEMON_URL);
+url.searchParams.set("nocache", Date.now().toString());
+webview.navigate(url.toString());
 
 webview.run();
 

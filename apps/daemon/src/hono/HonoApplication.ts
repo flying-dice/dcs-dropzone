@@ -1,4 +1,3 @@
-import { attachBundleToRouter } from "@packages/hono/attachBundleToRouter";
 import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
@@ -14,7 +13,6 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
-import index from "../wui/index.html";
 
 const logger = getLogger("HonoApplication");
 const loggingHook = getLoggingHook(logger);
@@ -55,8 +53,6 @@ export class HonoApplication extends Hono<Env> {
 		self.use(requestId());
 
 		self.use("*", requestResponseLogger);
-
-		await attachBundleToRouter({ router: self, entrypoint: index, headers: { "Cache-Control": "no-store" } });
 
 		self.addReleaseToDaemon();
 		self.getAllDaemonReleases();
