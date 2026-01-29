@@ -3,8 +3,8 @@ import { join, resolve } from "node:path";
 import { writeManifest } from "@packages/manifest";
 
 const OUT_DIR = "./dist";
-const BUN_NAME = "appd";
-const BUN_ARCHIVE_NAME = `dcs-dropzone-daemon.tar`;
+const BUN_NAME = "Dropzone";
+const BUN_ARCHIVE_NAME = `dcs-dropzone.tar`;
 const BUN_ARCHIVE_PATH = join(OUT_DIR, BUN_ARCHIVE_NAME);
 const BUN_ARCHIVE_MANIFEST_PATH = `${BUN_ARCHIVE_PATH}.manifest`;
 
@@ -31,7 +31,10 @@ await Bun.build({
 	compile: {
 		outfile,
 		windows: {
-			title: "DCS Dropzone Daemon",
+			title: "DCS Dropzone | Daemon",
+			description: "DCS Dropzone Daemon Application for managing Dropzone releases and installations.",
+			icon: "icon.ico",
+			hideConsole: true,
 		},
 		autoloadDotenv: false,
 		autoloadBunfig: false,
@@ -57,7 +60,8 @@ const filesForArchive: Record<string, ArrayBuffer> = {};
 
 for await (const file of releaseFilesGlob.scan(OUT_DIR)) {
 	console.log("Adding file to archive:", file);
-	filesForArchive[file] = await Bun.file(join(OUT_DIR, file)).arrayBuffer();
+	const outputPath = join(OUT_DIR, file);
+	filesForArchive[file] = await Bun.file(outputPath).arrayBuffer();
 }
 
 const archive = new Bun.Archive(filesForArchive);
