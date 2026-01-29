@@ -193,7 +193,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(downloadJobs[0]?.state).toEqual(JobState.Success);
 			expect(extractJobs[0]?.state).toEqual(JobState.Success);
 
-			app.enableRelease(modAndReleaseData.releaseId);
+			await app.enableRelease(modAndReleaseData.releaseId);
 
 			const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
@@ -205,7 +205,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			app.addRelease(modAndReleaseData);
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-			app.enableRelease(modAndReleaseData.releaseId);
+			await app.enableRelease(modAndReleaseData.releaseId);
 
 			const dcsWorkingDirFiles = app.deps.fileSystem.glob(app.deps.dcsPaths.DCS_WORKING_DIR, "**/*");
 

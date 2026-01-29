@@ -217,7 +217,7 @@ export class HonoApplication extends Hono<Env> {
 			validator("param", z.object({ releaseId: z.string() }), loggingHook),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
-				c.var.app.enableRelease(releaseId);
+				await c.var.app.enableRelease(releaseId);
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);

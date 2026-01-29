@@ -10,7 +10,7 @@ export class TestFileSystem implements FileSystem {
 		this.dirs.add(path);
 	}
 
-	ensureSymlink(src: string, dest: string): void {
+	async ensureSymlink(src: string, dest: string): Promise<void> {
 		this.symlinks.set(dest, src);
 	}
 

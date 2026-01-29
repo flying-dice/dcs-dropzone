@@ -1,22 +1,11 @@
-import {
-	existsSync,
-	lstatSync,
-	mkdirSync,
-	type PathLike,
-	readlinkSync,
-	rmSync,
-	symlinkSync,
-	unlinkSync,
-	writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
+import { mklink } from "../utils/mklink.ts";
 
 const logger = getLogger("LocalFileSystemService");
-
-type SymlinkType = "dir" | "file" | "junction";
 
 export class LocalFileSystem implements FileSystem {
 	@Log(logger)
@@ -31,9 +20,8 @@ export class LocalFileSystem implements FileSystem {
 	}
 
 	@Log(logger)
-	ensureSymlink(src: string, dest: string): void {
+	async ensureSymlink(src: string, dest: string): Promise<void> {
 		logger.debug(`Ensuring symlink from ${dest} to ${src}`);
-		const type = this.getSymlinkType(src);
 		const parent = dirname(dest);
 
 		if (!existsSync(parent)) {
@@ -41,27 +29,13 @@ export class LocalFileSystem implements FileSystem {
 			mkdirSync(parent, { recursive: true });
 		}
 
-		if (existsSync(dest)) {
-			logger.debug(`Destination exists: ${dest}, checking if it's the correct symlink`);
-			try {
-				const current = lstatSync(dest);
-				if (current.isSymbolicLink()) {
-					const pointsTo = readlinkSync(dest);
-					if (pointsTo === src) {
-						logger.debug(`Symlink already exists and points to the correct source: ${pointsTo}`);
-						return;
-					}
-				}
-			} catch {
-				logger.debug(`Failed to read existing symlink at destination: ${dest}, will replace it`);
-			}
-
-			logger.debug(`Removing existing destination: ${dest}`);
-			unlinkSync(dest);
+		logger.debug(`Creating link from ${dest} to ${src}`);
+		const res = await mklink({ link: dest, target: src });
+		if (res.isErr()) {
+			const [, message] = res.error;
+			logger.error(`Failed to create symlink: ${message}`);
+			throw new Error(`Failed to create symlink from ${dest} to ${src}: ${message}`);
 		}
-
-		logger.debug(`Creating symlink from ${dest} to ${src} of type ${type}`);
-		symlinkSync(src, dest, type);
 	}
 
 	@Log(logger)
@@ -99,11 +73,5 @@ export class LocalFileSystem implements FileSystem {
 	glob(path: string, pattern: string): string[] {
 		const glob = new Bun.Glob(join(path, pattern));
 		return Array.from(glob.scanSync({ followSymlinks: true }));
-	}
-
-	private getSymlinkType(pathlike: PathLike): SymlinkType {
-		const srcStat = lstatSync(pathlike);
-		const isDir = srcStat.isDirectory();
-		return process.platform === "win32" && isDir ? "junction" : isDir ? "dir" : "file";
 	}
 }

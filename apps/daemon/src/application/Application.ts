@@ -1,5 +1,4 @@
 import type { JobRecordRepository } from "@packages/queue";
-import { BehaviorSubject, type Observable } from "rxjs";
 import type { SymbolicLinkDestRoot } from "webapp";
 import type { AttributesRepository } from "./ports/AttributesRepository.ts";
 import type { DownloadProcessor } from "./ports/DownloadProcessor.ts";
@@ -37,14 +36,6 @@ export abstract class Application {
 	private readonly releaseCatalog: ReleaseCatalog;
 	private readonly releaseAssetManager: ReleaseAssetManager;
 
-	private _release$ = new BehaviorSubject<ModAndReleaseData[]>([]);
-
-	get release$(): Observable<ModAndReleaseData[]> {
-		return this._release$.asObservable();
-	}
-
-	private readonly updateReleasesTimeout: NodeJS.Timeout;
-
 	protected constructor(public readonly deps: Deps) {
 		this.daemonInstanceId =
 			this.deps.attributesRepository.get(Application.DAEMON_INSTANCE_ID_KEY) ??
@@ -74,46 +65,34 @@ export abstract class Application {
 			releaseAssetManager: this.releaseAssetManager,
 			pathResolver,
 		});
-
-		this.updateReleasesObservable();
-		this.updateReleasesTimeout = setInterval(() => this.updateReleasesObservable(), 1000);
 	}
 
 	public close() {
 		this.releaseAssetManager.stopProcessingJobs();
-		this.updateReleasesTimeout.close();
 	}
 
 	public getDaemonInstanceId(): string {
 		return this.daemonInstanceId;
 	}
 
-	public enableRelease(releaseId: string): void {
-		this.releaseToggleService.enable(releaseId);
-		this.updateReleasesObservable();
+	public async enableRelease(releaseId: string): Promise<void> {
+		await this.releaseToggleService.enable(releaseId);
 	}
 
 	public disableRelease(releaseId: string): void {
 		this.releaseToggleService.disable(releaseId);
-		this.updateReleasesObservable();
 	}
 
 	public addRelease(data: ModAndReleaseData): void {
 		this.releaseCatalog.add(data);
-		this.updateReleasesObservable();
 	}
 
 	public removeRelease(releaseId: string): void {
 		this.releaseToggleService.disable(releaseId);
 		this.releaseCatalog.remove(releaseId);
-		this.updateReleasesObservable();
 	}
 
 	public getAllReleasesWithStatus() {
 		return this.releaseCatalog.getAllReleasesWithStatus();
-	}
-
-	private updateReleasesObservable() {
-		this._release$.next(this.releaseCatalog.getAllReleasesWithStatus());
 	}
 }
