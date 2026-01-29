@@ -1,3 +1,11 @@
+## [1.10.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.0...v1.10.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **daemon:** update routing and caching for webview navigation ([2406fd8](https://github.com/flying-dice/dcs-dropzone/commit/2406fd8d403de6b316872cd797db732018c8312a))
+* **daemon:** update routing and caching for webview navigation ([93beae1](https://github.com/flying-dice/dcs-dropzone/commit/93beae11aa880c8117a52ad40c7142160f83a2a3))
+
 # [1.10.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.9.0...v1.10.0) (2026-01-28)
 
 
