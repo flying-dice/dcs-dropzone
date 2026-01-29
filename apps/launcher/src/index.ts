@@ -1,10 +1,10 @@
-import { existsSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { fetchManifest, readManifest, writeManifest } from "@packages/manifest";
+import { fetchManifest, type ManifestData, readManifest, writeManifest } from "@packages/manifest";
 
 const RELEASE_BASEURL =
 	process.env.RELEASE_BASEURL ?? "https://github.com/flying-dice/dcs-dropzone/releases/latest/download";
-const DOWNLOAD_ASSET = "dcs-dropzone-daemon.tar";
+const DOWNLOAD_ASSET = "dcs-dropzone.tar";
 const MANIFEST_PATH = ".manifest";
 
 const stableAssetUrl = join(RELEASE_BASEURL, DOWNLOAD_ASSET);
@@ -13,20 +13,24 @@ const stableAssetManifestUrl = `${stableAssetUrl}.manifest`;
 console.info(`Checking for updates from ${stableAssetUrl}...`);
 
 console.debug("Fetching latest release manifest...");
-const latestReleaseManifest = await fetchManifest(stableAssetManifestUrl);
-const folderName = latestReleaseManifest.__version || latestReleaseManifest.createdAt.getTime().toString();
+const latestReleaseManifest: ManifestData = await fetchManifest(stableAssetManifestUrl);
 
-function getLatestReleasePath(path: string) {
-	return resolve(join(folderName, path));
+function getReleaseManifestFolderPath(manifest: ManifestData) {
+	return resolve(join(manifest.__version || manifest.createdAt.getTime().toString()));
+}
+
+function getReleasePath(manifest: ManifestData, path: string) {
+	return resolve(join(getReleaseManifestFolderPath(manifest), path));
 }
 
 console.debug("Reading installed release manifest...");
-const installedReleaseManifest = await readManifest(MANIFEST_PATH).catch((e) => {
+const installedReleaseManifest: ManifestData | undefined = await readManifest(MANIFEST_PATH).catch((e) => {
 	console.warn(`Failed to read local manifest, Err: ${e.message}`);
 	console.info("Assuming no installed version.");
+	return undefined;
 });
 
-async function applyUpdate() {
+async function applyUpdate(latest: ManifestData, existing?: ManifestData) {
 	console.info("Update available. Downloading new version...");
 	const response = await fetch(stableAssetUrl);
 	const archive = new Bun.Archive(await response.blob());
@@ -35,7 +39,12 @@ async function applyUpdate() {
 
 	for (const [path, file] of files) {
 		console.info(`- ${path}`);
-		await Bun.write(getLatestReleasePath(path), file);
+		await Bun.write(getReleasePath(latest, path), file);
+	}
+
+	if (existing) {
+		console.info("Cleaning up old version files...");
+		rmSync(getReleaseManifestFolderPath(existing), { force: true, recursive: true });
 	}
 
 	console.info("Update downloaded successfully, updating manifest.");
@@ -44,12 +53,14 @@ async function applyUpdate() {
 
 if (
 	latestReleaseManifest.etag !== installedReleaseManifest?.etag ||
-	latestReleaseManifest.files.some((it) => !existsSync(join(folderName, it)))
+	latestReleaseManifest.files.some((it) => !existsSync(getReleasePath(installedReleaseManifest, it)))
 ) {
-	await applyUpdate();
+	await applyUpdate(latestReleaseManifest, installedReleaseManifest);
 }
 
-const executablePath = resolve(`${folderName}/appd.exe`);
+const folderName = getReleaseManifestFolderPath(latestReleaseManifest);
+
+const executablePath = resolve(`${folderName}/Dropzone.exe`);
 
 Bun.spawn({
 	cmd: [executablePath],
