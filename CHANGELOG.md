@@ -1,3 +1,14 @@
+## [1.10.2](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.1...v1.10.2) (2026-01-29)
+
+
+### Bug Fixes
+
+* **daemon:** refetch all daemon releases after enabling/disabling/removing mods ([7c20199](https://github.com/flying-dice/dcs-dropzone/commit/7c20199592222d5fbc0e01fe0691b51ab2f31019))
+* **daemon:** update artifact names and improve config ignore ([b0571ed](https://github.com/flying-dice/dcs-dropzone/commit/b0571ede77db5aad3444b58c20e7d17717c61954))
+* **daemon:** update build configuration for Dropzone ([c754738](https://github.com/flying-dice/dcs-dropzone/commit/c754738e975b457461e6576f3b8d2ea9c0d2304b))
+* **daemon:** update enableRelease and ensureSymlink to async ([4b58296](https://github.com/flying-dice/dcs-dropzone/commit/4b5829649bbc1748bf35fe98148bf7a1ad32e928))
+* **launcher:** update asset naming and improve update logic ([d749a56](https://github.com/flying-dice/dcs-dropzone/commit/d749a567287b3309bbbba097f0d0cc95de4ae606))
+
 ## [1.10.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.0...v1.10.1) (2026-01-29)
 
 
