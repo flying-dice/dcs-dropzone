@@ -5,6 +5,7 @@ import {
 	type ModAndReleaseData,
 	ModAndReleaseDataStatus,
 	removeReleaseFromDaemon,
+	useGetAllDaemonReleases,
 } from "@packages/clients/daemon";
 import { ModActionsMenu, showErrorNotification, showSuccessNotification, useAppTranslation } from "@packages/dzui";
 
@@ -17,18 +18,22 @@ export type DownloadedModsTableRowProps = {
 };
 export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 	const { t } = useAppTranslation();
+	const allDaemonReleases = useGetAllDaemonReleases();
 
 	const handleToggle = () =>
 		props.mod.status === ModAndReleaseDataStatus.ENABLED
 			? disableRelease(props.mod.releaseId)
+					.then(() => allDaemonReleases.refetch())
 					.then(() => showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC")))
 					.catch(showErrorNotification)
 			: enableRelease(props.mod.releaseId)
+					.then(() => allDaemonReleases.refetch())
 					.then(() => showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC")))
 					.catch(showErrorNotification);
 
 	const handleRemove = () =>
 		removeReleaseFromDaemon(props.mod.releaseId)
+			.then(() => allDaemonReleases.refetch())
 			.then(() => {
 				showSuccessNotification(t("REMOVE_SUCCESS_TITLE"), t("REMOVE_SUCCESS_DESC"));
 			})
