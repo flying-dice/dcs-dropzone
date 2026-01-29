@@ -54,22 +54,22 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: dcs-dropzone-daemon.tar
-          path: 'apps/daemon/dist/dcs-dropzone-daemon.tar'
+          name: dcs-dropzone.tar
+          path: 'apps/daemon/dist/dcs-dropzone.tar'
 
       - name: Upload Daemon Build Artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: dcs-dropzone-daemon.tar.manifest
-          path: 'apps/daemon/dist/dcs-dropzone-daemon.tar.manifest'
+          name: dcs-dropzone.tar.manifest
+          path: 'apps/daemon/dist/dcs-dropzone.tar.manifest'
 
       - name: Upload Launcher Build Artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: launcher.exe
-          path: 'apps/launcher/dist/launcher.exe'
+          name: Dropzone_Launcher.exe
+          path: 'apps/launcher/dist/Dropzone_Launcher.exe'
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5

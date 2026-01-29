@@ -42,9 +42,9 @@
 				"@semantic-release/github",
 				{
 					"assets": [
-						"apps/daemon/dist/dcs-dropzone-daemon.tar",
-						"apps/daemon/dist/dcs-dropzone-daemon.tar.manifest",
-						"apps/launcher/dist/launcher.exe"
+						"apps/daemon/dist/dcs-dropzone.tar",
+						"apps/daemon/dist/dcs-dropzone.tar.manifest",
+						"apps/launcher/dist/Dropzone_Launcher.exe"
 					]
 				}
 			],

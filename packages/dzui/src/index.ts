@@ -1,4 +1,3 @@
-export * from "./ActionMenu.tsx";
 export * from "./CategoryShortcut.tsx";
 export * from "./ColorSchemeControls.tsx";
 export * from "./constants.ts";
