@@ -1,7 +1,12 @@
+import {
+	getGetAllDaemonReleasesUrl,
+	ModAndReleaseDataStatus,
+	removeReleaseFromDaemon,
+	useGetAllDaemonReleases,
+} from "@packages/clients/daemon";
 import { showErrorNotification, showSuccessNotification, useAppTranslation } from "@packages/dzui";
 import { useAsyncFn } from "react-use";
-import { ModAndReleaseDataStatus, removeReleaseFromDaemon, useGetAllDaemonReleases } from "../_autogen/daemon_api.ts";
-import addReleaseToDaemonById from "../commands/AddReleaseToDaemonById.ts";
+import addReleaseToDaemonById, { type AddReleaseToDaemonByIdCommand } from "../commands/AddReleaseToDaemonById.ts";
 import toggleReleaseById from "../commands/ToggleReleaseById.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
 import { useErrorModal } from "./useErrorModal.tsx";
@@ -10,6 +15,7 @@ export function useDaemon() {
 	const { t } = useAppTranslation();
 	const daemonReleases = useGetAllDaemonReleases({
 		query: {
+			queryKey: [getGetAllDaemonReleasesUrl()],
 			refetchInterval: (q) => {
 				if (
 					q.state.data?.data.some(
@@ -26,8 +32,13 @@ export function useDaemon() {
 	const showError = useErrorModal();
 
 	const [adding, add] = useAsyncFn(
-		async (modId: string, releaseId: string, form?: UserModReleaseForm) => {
-			const result = await addReleaseToDaemonById({ releaseId, modId, form });
+		async (
+			modId: string,
+			releaseId: string,
+			variant: AddReleaseToDaemonByIdCommand["variant"],
+			form?: UserModReleaseForm,
+		) => {
+			const result = await addReleaseToDaemonById({ releaseId, modId, form, variant });
 			result.match(
 				() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
 				(error) => showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error }))),
@@ -67,11 +78,16 @@ export function useDaemon() {
 	);
 
 	const [updating, update] = useAsyncFn(
-		async (modId: string, currentReleaseId: string, latestReleaseId: string) => {
+		async (
+			modId: string,
+			currentReleaseId: string,
+			latestReleaseId: string,
+			variant: AddReleaseToDaemonByIdCommand["variant"],
+		) => {
 			try {
 				await removeReleaseFromDaemon(currentReleaseId);
 
-				const result = await addReleaseToDaemonById({ releaseId: latestReleaseId, modId });
+				const result = await addReleaseToDaemonById({ releaseId: latestReleaseId, modId, variant });
 				result.match(
 					() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
 					(error) => showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error }))),

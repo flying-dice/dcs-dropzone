@@ -1,4 +1,5 @@
 import { ModDataVisibility } from "@packages/clients/webapp";
+import type { IconType } from "react-icons";
 import { FaHome, FaStar, FaSyncAlt } from "react-icons/fa";
 import {
 	FaBox,
@@ -33,7 +34,7 @@ export const AppIcons = {
 	Library: FaListCheck,
 };
 
-export const VisibilityIcons = {
+export const VisibilityIcons: Record<ModDataVisibility, IconType> = {
 	[ModDataVisibility.PUBLIC]: AppIcons.Public,
 	[ModDataVisibility.PRIVATE]: AppIcons.Private,
 	[ModDataVisibility.UNLISTED]: AppIcons.Unlisted,

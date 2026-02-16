@@ -1,7 +1,7 @@
 import { Group } from "@mantine/core";
+import { useGetUserMods } from "@packages/clients/webapp";
 import { AppIcons, StatCard, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
-import { useGetUserMods } from "../../_autogen/api.ts";
 
 export function _UserModsStats() {
 	const { t } = useAppTranslation();

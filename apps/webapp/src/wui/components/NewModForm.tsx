@@ -1,8 +1,8 @@
 import { Button, Group, Select, Stack, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { ModDataCategory } from "@packages/clients/webapp";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
-import { ModDataCategory } from "../_autogen/api.ts";
 
 export const NewModFormSchema = z.object({
 	name: z.string().min(2, { message: "Name should have at least 2 letters" }),

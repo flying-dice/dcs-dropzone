@@ -1,9 +1,9 @@
 import { Button, Card, Divider, Group, Select, Stack, Text } from "@mantine/core";
 import { modals, openModal } from "@mantine/modals";
+import { createUserModRelease, type ModData, useGetUserModReleases } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, showErrorNotification, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
-import { createUserModRelease, type ModData, useGetUserModReleases } from "../../_autogen/api.ts";
 import { NewReleaseForm } from "../../components/NewReleaseForm.tsx";
 import { UserModRelease } from "../../components/UserModRelease.tsx";
 import type { UserModForm } from "./form.ts";

@@ -1,9 +1,9 @@
 import { Stack, Text } from "@mantine/core";
+import { useGetMods } from "@packages/clients/webapp";
 import { useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { noop } from "lodash";
 import { match } from "ts-pattern";
-import { useGetMods } from "../../_autogen/api.ts";
 import type { ModFilterFormValues } from "../../components/ModFilterForm.tsx";
 import { ModFilterForm } from "../../components/ModFilterForm.tsx";
 

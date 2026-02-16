@@ -1,7 +1,7 @@
+import { ModAndReleaseDataStatus, useGetAllDaemonReleases } from "@packages/clients/daemon";
+import { useGetServerMetrics } from "@packages/clients/webapp";
 import { StatusCodes } from "http-status-codes";
 import { useAsync } from "react-use";
-import { useGetServerMetrics } from "../_autogen/api.ts";
-import { ModAndReleaseDataStatus, useGetAllDaemonReleases } from "../_autogen/daemon_api.ts";
 import { memoizedGetLatestModReleaseById } from "../utils/MemoizedGetLatestModReleaseById.ts";
 
 export type DashboardMetrics = {

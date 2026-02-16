@@ -1,8 +1,8 @@
 import { Alert, Group, Stack, Text } from "@mantine/core";
+import type { ModData, ModReleaseData } from "@packages/clients/webapp";
 import { useAppTranslation } from "@packages/dzui";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import type { ModData, ModReleaseData } from "../../_autogen/api.ts";
 
 export type _ReleaseProps = {
 	mod: ModData;

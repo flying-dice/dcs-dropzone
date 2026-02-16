@@ -52,7 +52,6 @@
         "react-use": "^17.6.0",
         "regedit-rs": "^1.0.4",
         "ringbufferjs": "^2.0.0",
-        "rxjs": "^7.8.2",
         "ts-pattern": "^5.9.0",
         "type-fest": "^5.4.1",
         "webapp": "workspace:*",
@@ -95,6 +94,7 @@
         "@mantine/modals": "8.3.10",
         "@mantine/notifications": "8.3.10",
         "@monaco-editor/react": "^4.7.0",
+        "@packages/clients": "workspace:*",
         "@packages/decorators": "workspace:*",
         "@packages/dzui": "workspace:*",
         "@packages/hono": "workspace:*",
@@ -138,10 +138,9 @@
         "@types/object-hash": "^3.0.6",
         "@types/react": "19.2.3",
         "@types/react-dom": "19.2.3",
-        "orval": "^8.0.3",
       },
     },
-    "packages/client_webapp": {
+    "packages/clients": {
       "name": "@packages/clients",
       "devDependencies": {
         "orval": "^8.0.3",
@@ -539,7 +538,7 @@
 
     "@orval/zod": ["@orval/zod@8.0.3", "", { "dependencies": { "@orval/core": "8.0.3", "remeda": "^2.32.0" } }, "sha512-mbnFvKp1HPwR9bopQiAlH3GGo9qlwFr4iwWH2zvmLjtRpP1t7Hox0/w94Yn0++HbtXf6jctm/lMUOS2F8C4eQA=="],
 
-    "@packages/clients": ["@packages/clients@workspace:packages/client_webapp"],
+    "@packages/clients": ["@packages/clients@workspace:packages/clients"],
 
     "@packages/decorators": ["@packages/decorators@workspace:packages/decorators"],
 

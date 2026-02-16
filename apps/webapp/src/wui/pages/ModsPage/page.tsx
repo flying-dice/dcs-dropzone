@@ -1,8 +1,8 @@
 import { Container, Stack } from "@mantine/core";
+import { useGetMods } from "@packages/clients/webapp";
 import { DzMain } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useEffect, useMemo, useState } from "react";
-import { useGetMods } from "../../_autogen/api.ts";
 import { useModFilters } from "../../hooks/useModFilters.ts";
 import { _ModsFilters } from "./_ModsFilters.tsx";
 import { _ModsList } from "./_ModsList.tsx";

@@ -1,11 +1,6 @@
+import { disableRelease, enableRelease, getAllDaemonReleases, ModAndReleaseDataStatus } from "@packages/clients/daemon";
 import { StatusCodes } from "http-status-codes";
 import { type Err, err, type Ok, ok, type Result } from "neverthrow";
-import {
-	disableRelease,
-	enableRelease,
-	getAllDaemonReleases,
-	ModAndReleaseDataStatus,
-} from "../_autogen/daemon_api.ts";
 
 export type ToggleReleaseByIdCommand = {
 	releaseId: string;

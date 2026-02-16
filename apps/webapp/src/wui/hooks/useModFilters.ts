@@ -1,5 +1,5 @@
+import type { ModDataCategory } from "@packages/clients/webapp";
 import { useSearchParams } from "react-router-dom";
-import type { ModDataCategory } from "../_autogen/api.ts";
 
 export type ModFilters = {
 	category?: ModDataCategory;

@@ -1,5 +1,5 @@
+import type { UserData } from "@packages/clients/webapp";
 import { createContext, useContext } from "react";
-import type { UserData } from "../_autogen/api.ts";
 
 export const UserContext = createContext<{
 	login: () => void;

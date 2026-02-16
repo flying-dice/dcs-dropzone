@@ -1,8 +1,8 @@
 import { AppShell, Stack, Text } from "@mantine/core";
+import { type ModDataCategory, useGetCategories } from "@packages/clients/webapp";
 import type { I18nKeys } from "@packages/dzui";
 import { AppIcons, CategoryShortcut, DzNavLink, useAppTranslation } from "@packages/dzui";
 import { useLocation, useNavigate } from "react-router-dom";
-import { type ModDataCategory, useGetCategories } from "./_autogen/api.ts";
 import { useDashboardMetrics } from "./hooks/useDashboardMetrics.ts";
 
 export type AppNavbarProps = {

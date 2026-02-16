@@ -1,11 +1,11 @@
 import { Stack, Table, Text } from "@mantine/core";
+import { type ModAndReleaseData, ModAndReleaseDataStatus } from "@packages/clients/daemon";
+import type { GetLatestModReleaseById404Error, ModReleaseData } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, type I18nKeys, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import type { IconType } from "react-icons";
 import { useAsync } from "react-use";
 import { match } from "ts-pattern";
-import type { GetLatestModReleaseById404Error, ModReleaseData } from "../../_autogen/api.ts";
-import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { useDaemon } from "../../hooks/useDaemon.ts";
 import { memoizedGetLatestModReleaseById } from "../../utils/MemoizedGetLatestModReleaseById.ts";
 import { _DownloadedModsTableRow } from "./_DownloadedModsTableRow.tsx";

@@ -12,13 +12,13 @@ import {
 	Text,
 	useComputedColorScheme,
 } from "@mantine/core";
-import { DzMain, useAppTranslation } from "@packages/dzui";
 import {
 	type ModData,
 	type ModReleaseData,
 	ModReleaseMissionScriptDataRunOn,
 	type UserData,
-} from "../../_autogen/api.ts";
+} from "@packages/clients/webapp";
+import { DzMain, useAppTranslation } from "@packages/dzui";
 import { Markdown } from "../../components/Markdown.tsx";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
@@ -54,7 +54,9 @@ export function _Page(props: _PageProps) {
 						<GridCol span={isSm || isMd ? 12 : 4}>
 							<Stack>
 								<_BasicInfo mod={props.mod} maintainers={props.maintainers} latestRelease={props.release} />
-								{props.release && <ModReleaseDaemonControls mod={props.mod} release={props.release} />}
+								{props.release && (
+									<ModReleaseDaemonControls mod={props.mod} release={props.release} variant={"public"} />
+								)}
 							</Stack>
 						</GridCol>
 					</Grid>

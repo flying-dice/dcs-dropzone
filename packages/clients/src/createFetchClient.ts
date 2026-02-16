@@ -1,34 +1,10 @@
 import { z } from "zod";
 
-export const DaemonSettings = z.object({
-	baseUrl: z.url(),
+export const ClientConfig = z.object({
+	baseUrl: z.url().optional(),
 });
 
-export type DaemonSettings = z.infer<typeof DaemonSettings>;
-
-const daemonSettings = DaemonSettings.parse({
-	baseUrl: "http://127.0.0.1:3001",
-});
-
-export function configureDaemon(settings: DaemonSettings) {
-	const parsedSettings = DaemonSettings.parse(settings);
-	Object.assign(daemonSettings, parsedSettings);
-}
-
-export const daemonFetch = async <T>(url: string, options: RequestInit): Promise<T> => {
-	const _url = new URL(url, daemonSettings.baseUrl);
-	const request = new Request(_url, options);
-	const response = await fetch(request);
-
-	if (!response.ok) {
-		const bodyJson = await response.json();
-		throw new Error(bodyJson?.error || bodyJson?.message || `ERR: ${response.statusText}`);
-	}
-
-	const data = await autoParseByContentType(response);
-
-	return { status: response.status, data } as T;
-};
+export type ClientConfig = z.infer<typeof ClientConfig>;
 
 async function autoParseByContentType(res: Response): Promise<any> {
 	const ct = res.headers.get("Content-Type")?.toLowerCase() || "";
@@ -78,4 +54,33 @@ async function autoParseByContentType(res: Response): Promise<any> {
 		// If *parsing* throws, last-resort fallback
 		return null;
 	}
+}
+
+export function createFetchClient(config: ClientConfig = {}) {
+	const _config = ClientConfig.parse(config);
+
+	const _fetch = async <T>(url: string, options: RequestInit): Promise<T> => {
+		const _url = _config.baseUrl ? new URL(url, _config.baseUrl) : url;
+		const request = new Request(_url, options);
+		const response = await fetch(request);
+
+		if (!response.ok) {
+			const bodyJson = await response.json();
+			throw new Error(bodyJson?.error || bodyJson?.message || `ERR: ${response.statusText}`);
+		}
+
+		const data = await autoParseByContentType(response);
+
+		return { status: response.status, data } as T;
+	};
+
+	const _configure = (settings: ClientConfig) => {
+		const parsedSettings = ClientConfig.parse(settings);
+		Object.assign(_config, parsedSettings);
+	};
+
+	return {
+		fetch: _fetch,
+		configure: _configure,
+	};
 }

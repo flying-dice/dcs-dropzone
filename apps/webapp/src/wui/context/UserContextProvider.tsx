@@ -1,5 +1,5 @@
+import { useGetAuthenticatedUser } from "@packages/clients/webapp";
 import type { ReactNode } from "react";
-import { useGetAuthenticatedUser } from "../_autogen/api.ts";
 import { UserContext } from "./UserContext.ts";
 
 export function UserContextProvider({ children }: { children: ReactNode }) {

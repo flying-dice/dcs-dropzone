@@ -1,9 +1,9 @@
 import { Anchor, Checkbox, Progress, Table, Text, Tooltip } from "@mantine/core";
+import { type ModAndReleaseData, ModAndReleaseDataStatus } from "@packages/clients/daemon";
+import { GetLatestModReleaseById404Error, type ModReleaseData } from "@packages/clients/webapp";
 import { ModActionsMenu, useAppTranslation } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import { GetLatestModReleaseById404Error, type ModReleaseData } from "../../_autogen/api.ts";
-import { type ModAndReleaseData, ModAndReleaseDataStatus } from "../../_autogen/daemon_api.ts";
 import { useDaemon } from "../../hooks/useDaemon.ts";
 
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
@@ -23,7 +23,7 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 
 	const latest = props.latest;
 	const isLatest = latest ? latest.versionHash === props.mod.versionHash : undefined;
-	const handleUpdate = latest ? () => update(props.mod.modId, props.mod.releaseId, latest.id) : undefined;
+	const handleUpdate = latest ? () => update(props.mod.modId, props.mod.releaseId, latest.id, "public") : undefined;
 	const handleRemove = () => remove(props.mod.releaseId);
 
 	return (

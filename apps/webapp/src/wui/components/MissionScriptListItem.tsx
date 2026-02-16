@@ -1,7 +1,7 @@
 import { Group, Paper, SimpleGrid, Stack, Text, ThemeIcon, useComputedColorScheme } from "@mantine/core";
+import { ModReleaseMissionScriptDataRoot, ModReleaseMissionScriptDataRunOn } from "@packages/clients/webapp";
 import { type I18nKeys, useAppTranslation } from "@packages/dzui";
 import { FaFileCode } from "react-icons/fa";
-import { ModReleaseMissionScriptDataRoot, ModReleaseMissionScriptDataRunOn } from "../_autogen/api.ts";
 import { PathWithRoot } from "./PathWithRoot.tsx";
 
 export type MissionScriptListItemProps = {

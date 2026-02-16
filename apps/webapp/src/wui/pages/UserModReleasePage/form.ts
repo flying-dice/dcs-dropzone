@@ -1,9 +1,4 @@
 import { useForm } from "@mantine/form";
-import { showErrorNotification, showSuccessNotification } from "@packages/dzui";
-import { StatusCodes } from "http-status-codes";
-import { zod4Resolver } from "mantine-form-zod-resolver";
-import { useAsyncFn } from "react-use";
-import { z } from "zod";
 import {
 	type ModData,
 	type ModReleaseData,
@@ -13,7 +8,12 @@ import {
 	ModReleaseSymbolicLinkDataDestRoot,
 	type UserData,
 	updateUserModRelease,
-} from "../../_autogen/api.ts";
+} from "@packages/clients/webapp";
+import { showErrorNotification, showSuccessNotification } from "@packages/dzui";
+import { StatusCodes } from "http-status-codes";
+import { zod4Resolver } from "mantine-form-zod-resolver";
+import { useAsyncFn } from "react-use";
+import { z } from "zod";
 
 export const userModReleaseFormValues = z.object({
 	id: z.string(),

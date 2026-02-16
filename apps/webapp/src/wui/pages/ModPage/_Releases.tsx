@@ -1,8 +1,8 @@
 import { Alert, Stack } from "@mantine/core";
+import { type ModData, type ModReleaseData, useGetModReleases } from "@packages/clients/webapp";
 import { useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { match } from "ts-pattern";
-import { type ModData, type ModReleaseData, useGetModReleases } from "../../_autogen/api.ts";
 import { _Release } from "./_Release.tsx";
 
 export type _ReleasesProps = {

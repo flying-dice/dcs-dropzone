@@ -1,11 +1,11 @@
 import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
+import { ModReleaseSymbolicLinkDataDestRoot } from "@packages/clients/webapp";
 import { EmptyState, type TranslateFunction, useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaLink } from "react-icons/fa";
 import { z } from "zod";
-import { ModReleaseSymbolicLinkDataDestRoot } from "../../_autogen/api.ts";
 import { Help } from "../../components/Help.tsx";
 import { SymbolicLinkListItem } from "../../components/SymbolicLinkListItem.tsx";
 import type { UserModReleaseForm } from "./form.ts";

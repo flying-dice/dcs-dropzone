@@ -1,5 +1,5 @@
 import { Avatar, type MantineSize, Tooltip } from "@mantine/core";
-import type { UserData } from "../_autogen/api.ts";
+import type { UserData } from "@packages/clients/webapp";
 
 export type MaintainersAvatarsProps = {
 	maintainers: UserData[];

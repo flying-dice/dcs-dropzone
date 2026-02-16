@@ -9,9 +9,9 @@ COPY ./apps/webapp/tsconfig.json ./apps/webapp/tsconfig.json
 COPY ./apps/webapp/bun-env.d.ts ./apps/webapp/bun-env.d.ts
 COPY ./apps/webapp/build.ts ./apps/webapp/build.ts
 
-COPY ./packages/client_webapp/src ./packages/client_webapp/src
-COPY ./packages/client_webapp/package.json ./packages/client_webapp/package.json
-COPY ./packages/client_webapp/tsconfig.json ./packages/client_webapp/tsconfig.json
+COPY ./packages/clients/src ./packages/clients/src
+COPY ./packages/clients/package.json ./packages/clients/package.json
+COPY ./packages/clients/tsconfig.json ./packages/clients/tsconfig.json
 
 COPY ./packages/decorators/src ./packages/decorators/src
 COPY ./packages/decorators/package.json ./packages/decorators/package.json

@@ -112,7 +112,6 @@ export class ReleaseAssetManager {
 
 		const releaseFolder = this.deps.pathResolver.resolveReleasePath(releaseId);
 		this.deps.fileSystem.removeDir(releaseFolder);
-
 		this.deps.releaseRepository.clearJobsForRelease(releaseId);
 	}
 

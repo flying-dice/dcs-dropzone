@@ -1,11 +1,11 @@
 import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
+import { ModReleaseMissionScriptDataRoot, ModReleaseMissionScriptDataRunOn } from "@packages/clients/webapp";
 import { EmptyState, type TranslateFunction, useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaFileCode } from "react-icons/fa";
 import { z } from "zod";
-import { ModReleaseMissionScriptDataRoot, ModReleaseMissionScriptDataRunOn } from "../../_autogen/api.ts";
 import { Help } from "../../components/Help.tsx";
 import { MissionScriptListItem } from "../../components/MissionScriptListItem.tsx";
 import type { UserModReleaseForm } from "./form.ts";

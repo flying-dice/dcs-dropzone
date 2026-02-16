@@ -1,12 +1,12 @@
 import { Container, Flex, Stack } from "@mantine/core";
-import { DzMain } from "@packages/dzui";
 import {
 	type ModData,
 	type ModReleaseData,
 	type UserData,
 	useGetUserModReleaseById,
 	useGetUserModReleases,
-} from "../../_autogen/api.ts";
+} from "@packages/clients/webapp";
+import { DzMain } from "@packages/dzui";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { _Assets } from "./_Assets.tsx";
 import { _BasicInfo } from "./_BasicInfo.tsx";

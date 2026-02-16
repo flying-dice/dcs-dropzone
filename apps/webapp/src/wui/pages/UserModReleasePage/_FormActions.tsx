@@ -1,8 +1,13 @@
 import { Button, Card, Divider, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
+import {
+	deleteUserModRelease,
+	type ModData,
+	type ModReleaseData,
+	useGetUserModReleases,
+} from "@packages/clients/webapp";
 import { showSuccessNotification, useAppTranslation } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
-import { deleteUserModRelease, type ModData, type ModReleaseData, useGetUserModReleases } from "../../_autogen/api.ts";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
@@ -57,7 +62,7 @@ export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; re
 					{t("DELETE_RELEASE")}
 				</Button>
 				<Divider />
-				<ModReleaseDaemonControls mod={props.mod} release={props.release} form={props.form} />
+				<ModReleaseDaemonControls mod={props.mod} release={props.release} variant={"authenticated"} form={props.form} />
 			</Stack>
 		</Card>
 	);

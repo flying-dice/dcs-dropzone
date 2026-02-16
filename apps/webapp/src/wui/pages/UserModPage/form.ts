@@ -1,11 +1,17 @@
 import { useForm } from "@mantine/form";
+import {
+	type ModData,
+	ModDataCategory,
+	ModDataVisibility,
+	type UserData,
+	updateUserMod,
+} from "@packages/clients/webapp";
 import { showErrorNotification, showSuccessNotification } from "@packages/dzui";
 import { ze } from "@packages/zod/ze";
 import { StatusCodes } from "http-status-codes";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { useAsyncFn } from "react-use";
 import { z } from "zod";
-import { type ModData, ModDataCategory, ModDataVisibility, type UserData, updateUserMod } from "../../_autogen/api.ts";
 
 export const userModFormValues = z.object({
 	name: z.string().min(2, { message: "Name should have at least 2 letters" }),

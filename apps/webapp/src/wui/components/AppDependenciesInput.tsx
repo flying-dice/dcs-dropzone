@@ -1,11 +1,11 @@
 import { Alert, Badge, Button, Modal, Stack, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useGetMods } from "@packages/clients/webapp";
 import { useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useState } from "react";
 import { FaLink } from "react-icons/fa6";
 import { match } from "ts-pattern";
-import { useGetMods } from "../_autogen/api.ts";
 import { ModCard } from "./ModCard";
 
 export type AppDependenciesInputProps = {
@@ -60,7 +60,7 @@ export function AppDependenciesInput(props: AppDependenciesInputProps) {
 
 			<Modal opened={searchModalOpen} onClose={setSearchModalOpen.close} size={"xl"}>
 				<Stack>
-					<TextInput label={"Search"} defaultValue={"one"} />
+					<TextInput label={"Search"} />
 					{match(mods.data)
 						.when(
 							(res) => res?.status === StatusCodes.OK,

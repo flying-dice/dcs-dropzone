@@ -1,6 +1,6 @@
 import { Card, Select, Stack, Text, TextInput } from "@mantine/core";
+import { ModDataCategory } from "@packages/clients/webapp";
 import { useAppTranslation } from "@packages/dzui";
-import { ModDataCategory } from "../../_autogen/api.ts";
 import type { UserModForm } from "./form.ts";
 
 export function _BasicInfo(props: { form: UserModForm }) {

@@ -1,5 +1,5 @@
 import { Card, Select, Stack, Text } from "@mantine/core";
-import { ModDataVisibility } from "../../_autogen/api.ts";
+import { ModDataVisibility } from "@packages/clients/webapp";
 import type { UserModForm } from "./form.ts";
 
 export function _VisibilityAndPermissions(props: { form: UserModForm }) {

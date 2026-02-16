@@ -1,6 +1,7 @@
 import { Button, Stack } from "@mantine/core";
-import type { ModData, ModReleaseData } from "../_autogen/api.ts";
-import { ModAndReleaseDataStatus } from "../_autogen/daemon_api.ts";
+import { ModAndReleaseDataStatus } from "@packages/clients/daemon";
+import type { ModData, ModReleaseData } from "@packages/clients/webapp";
+import type { AddReleaseToDaemonByIdCommand } from "../commands/AddReleaseToDaemonById.ts";
 import { useDaemon } from "../hooks/useDaemon.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
 
@@ -8,6 +9,7 @@ export type ModReleaseDaemonControlsProps = {
 	mod: ModData;
 	release: ModReleaseData;
 	form?: UserModReleaseForm;
+	variant: AddReleaseToDaemonByIdCommand["variant"];
 };
 export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
 	const daemon = useDaemon();
@@ -43,7 +45,7 @@ export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
 			) : (
 				<Button
 					variant={"light"}
-					onClick={() => daemon.add(props.mod.id, props.release.id, props.form)}
+					onClick={() => daemon.add(props.mod.id, props.release.id, props.variant, props.form)}
 					loading={daemon.adding.loading}
 					disabled={daemon.isUnavailable}
 				>

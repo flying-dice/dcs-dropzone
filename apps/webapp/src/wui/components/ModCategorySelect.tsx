@@ -1,6 +1,6 @@
 import { Select, type SelectProps } from "@mantine/core";
+import type { ModDataCategory } from "@packages/clients/webapp";
 import { useAppTranslation } from "@packages/dzui";
-import type { ModDataCategory } from "../_autogen/api.ts";
 
 export type ModCategorySelectProps = Omit<SelectProps, "data"> & {
 	data: ModDataCategory[];

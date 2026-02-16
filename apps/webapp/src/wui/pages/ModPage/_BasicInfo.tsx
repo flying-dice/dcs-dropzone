@@ -1,8 +1,8 @@
 import { Badge, Group, SimpleGrid, Stack, Text } from "@mantine/core";
+import type { ModData, ModReleaseData, UserData } from "@packages/clients/webapp";
 import { AppIcons, useAppTranslation } from "@packages/dzui";
 import { formatDistanceToNow } from "date-fns";
 import { FaCalendar } from "react-icons/fa6";
-import type { ModData, ModReleaseData, UserData } from "../../_autogen/api.ts";
 import { MaintainersAvatars } from "../../components/MaintainersAvatars.tsx";
 import { Stat } from "../../components/Stat.tsx";
 

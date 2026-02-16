@@ -68,7 +68,7 @@
 
 ### Bug Fixes
 
-* update Dockerfile to include client_webapp and dzui packages ([cc46f9d](https://github.com/flying-dice/dcs-dropzone/commit/cc46f9d4ab28f3caf18add00b3dc1850a39463e8))
+* update Dockerfile to include clients and dzui packages ([cc46f9d](https://github.com/flying-dice/dcs-dropzone/commit/cc46f9d4ab28f3caf18add00b3dc1850a39463e8))
 
 # [1.6.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.5.0...v1.6.0) (2026-01-25)
 

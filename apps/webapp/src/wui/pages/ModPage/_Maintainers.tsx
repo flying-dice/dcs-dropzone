@@ -1,5 +1,5 @@
 import { Avatar, Group, Stack, Text } from "@mantine/core";
-import type { UserData } from "../../_autogen/api.ts";
+import type { UserData } from "@packages/clients/webapp";
 
 export type _MaintainersProps = {
 	maintainers: UserData[];

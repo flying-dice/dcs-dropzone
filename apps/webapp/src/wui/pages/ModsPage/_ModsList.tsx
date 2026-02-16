@@ -1,10 +1,10 @@
 import { Alert, Skeleton, Stack } from "@mantine/core";
+import { useGetMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { times } from "lodash";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import { useGetMods } from "../../_autogen/api.ts";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 

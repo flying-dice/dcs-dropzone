@@ -1,9 +1,9 @@
 import { Center, Flex, Group, Stack, Text } from "@mantine/core";
+import { useGetFeaturedMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import { useGetFeaturedMods } from "../../_autogen/api.ts";
 import { ModCard } from "../../components/ModCard";
 
 export function _FeaturedMods() {

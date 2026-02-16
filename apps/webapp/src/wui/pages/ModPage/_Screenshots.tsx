@@ -1,8 +1,8 @@
 import { Carousel } from "@mantine/carousel";
 import { AspectRatio, Group, Image, Modal, Stack } from "@mantine/core";
+import type { ModData } from "@packages/clients/webapp";
 import { useState } from "react";
 import { useWindowSize } from "react-use";
-import type { ModData } from "../../_autogen/api.ts";
 
 export type _ScreenshotsProps = {
 	mod: ModData;

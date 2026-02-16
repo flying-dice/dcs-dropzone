@@ -1,7 +1,7 @@
 import { Alert, Anchor, Stack, Text } from "@mantine/core";
 import { openModal } from "@mantine/modals";
+import type { ModData, ModReleaseData } from "@packages/clients/webapp";
 import { useAppTranslation } from "@packages/dzui";
-import type { ModData, ModReleaseData } from "../../_autogen/api.ts";
 import { Markdown } from "../../components/Markdown.tsx";
 import { _InstallationDownloadAssets } from "./_InstallationDownloadAssets.tsx";
 import { _InstallationMissionScripts } from "./_InstallationMissionScripts.tsx";
