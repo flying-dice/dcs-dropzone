@@ -56,6 +56,55 @@ describe("RetryBackoffManager", () => {
 		});
 	});
 
+	describe("hasExhaustedRetries", () => {
+		it("returns false when no failures have been tracked", () => {
+			const manager = new RetryBackoffManager(new RecordingDelayCalculator());
+
+			expect(manager.hasExhaustedRetries("job1")).toBe(false);
+		});
+
+		it("returns false when attempts are below the max", () => {
+			const manager = new RetryBackoffManager(new RecordingDelayCalculator());
+
+			manager.trackFailure("job1");
+			manager.trackFailure("job1");
+
+			expect(manager.hasExhaustedRetries("job1")).toBe(false);
+		});
+
+		it("returns true when attempts reach the max", () => {
+			const manager = new RetryBackoffManager(new RecordingDelayCalculator());
+
+			manager.trackFailure("job1");
+			manager.trackFailure("job1");
+			manager.trackFailure("job1");
+
+			expect(manager.hasExhaustedRetries("job1")).toBe(true);
+		});
+
+		it("returns true when attempts exceed the max", () => {
+			const manager = new RetryBackoffManager(new RecordingDelayCalculator());
+
+			for (let i = 0; i < 5; i++) {
+				manager.trackFailure("job1");
+			}
+
+			expect(manager.hasExhaustedRetries("job1")).toBe(true);
+		});
+
+		it("tracks exhaustion independently per job", () => {
+			const manager = new RetryBackoffManager(new RecordingDelayCalculator());
+
+			manager.trackFailure("job1");
+			manager.trackFailure("job1");
+			manager.trackFailure("job1");
+			manager.trackFailure("job2");
+
+			expect(manager.hasExhaustedRetries("job1")).toBe(true);
+			expect(manager.hasExhaustedRetries("job2")).toBe(false);
+		});
+	});
+
 	describe("getAllJobIdsCurrentlyInBackoff", () => {
 		it("returns an empty array when no failures have been tracked", () => {
 			const manager = new RetryBackoffManager(new RecordingDelayCalculator());

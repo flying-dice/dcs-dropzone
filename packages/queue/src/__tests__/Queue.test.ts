@@ -578,7 +578,7 @@ describe("Queue", () => {
 				name: "test",
 				process: async () => {
 					calls++;
-					if (calls <= 3) {
+					if (calls <= 2) {
 						return err("fail");
 					}
 					return ok("done");
@@ -597,9 +597,9 @@ describe("Queue", () => {
 			await waitForJobFinish(c, job.jobId);
 			queue.stop();
 
-			expect(calls).toBe(4);
+			expect(calls).toBe(3);
 			// RetryBackoffManager tracks failures per jobId with incrementing attempts
-			expect(attemptsSeen).toEqual([1, 2, 3]);
+			expect(attemptsSeen).toEqual([1, 2]);
 		});
 
 		it("should not block other jobs when one job is in backoff", async () => {
@@ -642,6 +642,45 @@ describe("Queue", () => {
 
 			const successRun = queue.getByRunId(successJob.runId);
 			expect(successRun?.state).toBe(JobState.Success);
+		});
+
+		it("should stop retrying after max retries and remain in failed state", async () => {
+			const zeroDelay: DelayCalculator = {
+				calculateDelayMs: () => 0,
+			};
+
+			let attempts = 0;
+			const processor: Processor = {
+				name: "test",
+				process: async () => {
+					attempts++;
+					return err(`fail-${attempts}`);
+				},
+			};
+
+			const c = createTestContext({
+				processors: [processor],
+				delayCalculator: zeroDelay,
+			});
+			const queue: Queue = c.build();
+
+			const job = queue.add("test", {});
+
+			queue.start();
+			await waitForJobFinish(c, job.jobId, 5);
+			queue.stop();
+
+			expect(attempts).toBe(3);
+
+			const runs = queue.getAllByJobId(job.jobId);
+			expect(runs).toHaveLength(3);
+			expect(runs[0]?.state).toBe(JobState.Failed);
+			expect(runs[1]?.state).toBe(JobState.Failed);
+			expect(runs[2]?.state).toBe(JobState.Failed);
+
+			// No waiting run should exist — retries are exhausted
+			const waitingRuns = runs.filter((r) => r.state === JobState.Waiting);
+			expect(waitingRuns).toHaveLength(0);
 		});
 
 		it("should eventually complete a job after backoff expires", async () => {

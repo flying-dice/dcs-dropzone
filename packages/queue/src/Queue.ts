@@ -280,6 +280,12 @@ export class Queue extends EventEmitter {
 
 		this.retryBackoffManager.trackFailure(existingRun.jobId);
 
+		if (this.retryBackoffManager.hasExhaustedRetries(existingRun.jobId)) {
+			logger.info(`Job ${existingRun.jobId} has exhausted all retries (${RetryBackoffManager.MAX_RETRIES}). Not rescheduling.`);
+			this.emit(QueueEvents.Failed, existingRun);
+			return;
+		}
+
 		const newRun = this.deps.jobRecordRepository.create({
 			jobId: existingRun.jobId,
 			processorName: existingRun.processorName,
