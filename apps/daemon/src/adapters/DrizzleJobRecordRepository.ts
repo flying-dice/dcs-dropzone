@@ -80,15 +80,18 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 	}
 
 	@Log(logger)
-	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string, excludedJobIds?: string[] }): JobRecord[] {
+	findAllInState(
+		state: JobState[],
+		opts?: { limit?: number; processorName?: string; excludedJobIds?: string[] },
+	): JobRecord[] {
 		const conditions = [inArray(T_JOBS.state, state)];
 		if (opts?.processorName) {
 			conditions.push(eq(T_JOBS.processorName, opts.processorName));
-    }
+		}
 
-    if (opts?.excludedJobIds && opts.excludedJobIds.length > 0) {
-      conditions.push(notInArray(T_JOBS.jobId, opts.excludedJobIds));
-    }
+		if (opts?.excludedJobIds && opts.excludedJobIds.length > 0) {
+			conditions.push(notInArray(T_JOBS.jobId, opts.excludedJobIds));
+		}
 
 		const query = this.db
 			.select()

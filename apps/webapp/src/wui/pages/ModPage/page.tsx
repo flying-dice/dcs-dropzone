@@ -55,7 +55,7 @@ export function _Page(props: _PageProps) {
 							<Stack>
 								<_BasicInfo mod={props.mod} maintainers={props.maintainers} latestRelease={props.release} />
 								{props.release && (
-									<ModReleaseDaemonControls mod={props.mod} release={props.release} variant={"public"} />
+									<ModReleaseDaemonControls mod={props.mod} release={props.release} isUserModRelease={false} />
 								)}
 							</Stack>
 						</GridCol>
@@ -100,8 +100,8 @@ export function _Page(props: _PageProps) {
 				<Container size={"xl"} p={"md"}>
 					<Tabs.Panel value="description">
 						<Flex direction={isSm ? "column-reverse" : isMd ? "column-reverse" : "row"} gap={"md"}>
-							<Card radius={"md"} withBorder>
-								<Stack>
+							<Card radius={"md"} withBorder flex={"auto"}>
+								<Stack flex={"auto"}>
 									<Text fw={"bold"}>{t("DESCRIPTION")}</Text>
 									<Markdown content={props.mod.content} />
 								</Stack>

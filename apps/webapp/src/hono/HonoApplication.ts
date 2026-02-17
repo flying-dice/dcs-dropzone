@@ -286,9 +286,9 @@ export class HonoApplication extends Hono<Env> {
 							"If the session is missing or invalid, the cookie is simply not present; redirect still occurs.",
 					},
 				},
-      }),
-      (c) => {
-        deleteCookie(c, appConfig.userCookieName);
+			}),
+			(c) => {
+				deleteCookie(c, appConfig.userCookieName);
 				return c.redirect(appConfig.homepageUrl ?? "http://localhost:3000");
 			},
 		);

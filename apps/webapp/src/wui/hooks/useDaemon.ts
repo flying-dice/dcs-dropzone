@@ -1,3 +1,4 @@
+import { addReleaseToDaemonById, calculateDashboardMetrics } from "@packages/clients";
 import {
 	getGetAllDaemonReleasesUrl,
 	ModAndReleaseDataStatus,
@@ -5,8 +6,7 @@ import {
 	useGetAllDaemonReleases,
 } from "@packages/clients/daemon";
 import { showErrorNotification, showSuccessNotification, useAppTranslation } from "@packages/dzui";
-import { useAsyncFn } from "react-use";
-import addReleaseToDaemonById, { type AddReleaseToDaemonByIdCommand } from "../commands/AddReleaseToDaemonById.ts";
+import { useAsync, useAsyncFn } from "react-use";
 import toggleReleaseById from "../commands/ToggleReleaseById.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
 import { useErrorModal } from "./useErrorModal.tsx";
@@ -29,20 +29,24 @@ export function useDaemon() {
 			},
 		},
 	});
+
+	const metrics = useAsync(
+		() => calculateDashboardMetrics(daemonReleases.data?.status === 200 ? daemonReleases.data.data : undefined),
+		[daemonReleases?.data?.data.map((it) => `${it.releaseId}_${it.status}`).join(",")],
+	);
+
 	const showError = useErrorModal();
 
 	const [adding, add] = useAsyncFn(
-		async (
-			modId: string,
-			releaseId: string,
-			variant: AddReleaseToDaemonByIdCommand["variant"],
-			form?: UserModReleaseForm,
-		) => {
-			const result = await addReleaseToDaemonById({ releaseId, modId, form, variant });
-			result.match(
-				() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
-				(error) => showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error }))),
-			);
+		async (isUserMod: boolean, modId: string, releaseId: string, form?: UserModReleaseForm) => {
+			const result = await addReleaseToDaemonById(isUserMod, { releaseId, modId, data: form?.values });
+
+			if (result) {
+				showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error: result })));
+			} else {
+				showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
+			}
+
 			await daemonReleases.refetch();
 		},
 		[t, daemonReleases],
@@ -78,20 +82,16 @@ export function useDaemon() {
 	);
 
 	const [updating, update] = useAsyncFn(
-		async (
-			modId: string,
-			currentReleaseId: string,
-			latestReleaseId: string,
-			variant: AddReleaseToDaemonByIdCommand["variant"],
-		) => {
+		async (isUserMod: boolean, modId: string, currentReleaseId: string, latestReleaseId: string) => {
 			try {
 				await removeReleaseFromDaemon(currentReleaseId);
 
-				const result = await addReleaseToDaemonById({ releaseId: latestReleaseId, modId, variant });
-				result.match(
-					() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
-					(error) => showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error }))),
-				);
+				const result = await addReleaseToDaemonById(isUserMod, { releaseId: latestReleaseId, modId });
+				if (result) {
+					showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error: result })));
+				} else {
+					showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
+				}
 
 				await daemonReleases.refetch();
 			} catch (e) {
@@ -102,6 +102,7 @@ export function useDaemon() {
 	);
 
 	return {
+		metrics,
 		downloads: daemonReleases.data?.data,
 		active: daemonReleases.data?.data.filter((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS),
 		isActive: daemonReleases.data?.data.some((it) => it.status === ModAndReleaseDataStatus.IN_PROGRESS) ?? false,

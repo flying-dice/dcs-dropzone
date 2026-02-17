@@ -1,14 +1,14 @@
-import "@packages/dzui/i18n";
-import "./index.css";
 import { MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { theme } from "@packages/dzui";
+import "@packages/dzui/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
 import { UserContextProvider } from "./context/UserContextProvider.tsx";
+import "./index.css";
 
 const queryClient = new QueryClient({
 	defaultOptions: {

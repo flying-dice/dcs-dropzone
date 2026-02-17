@@ -1,6 +1,6 @@
 import { Container, Stack } from "@mantine/core";
 import { DownloadedStatsCards, DzMain } from "@packages/dzui";
-import { useDashboardMetrics } from "../../hooks/useDashboardMetrics.ts";
+import { useDaemon } from "../../hooks/useDaemon.ts";
 import { _DownloadedModsTable } from "./_DownloadedModsTable.tsx";
 
 export type DownloadedPageProps = {
@@ -8,13 +8,17 @@ export type DownloadedPageProps = {
 };
 
 export function _DownloadedPage(props: DownloadedPageProps) {
-	const { enabled, outdated, downloads } = useDashboardMetrics();
+	const { metrics } = useDaemon();
 
 	return (
 		<DzMain>
 			<Container>
 				<Stack py={"md"} gap={"xl"}>
-					<DownloadedStatsCards enabled={enabled} downloaded={downloads} updates={outdated} />
+					<DownloadedStatsCards
+						enabled={metrics.value?.enabled}
+						downloaded={metrics.value?.downloads}
+						updates={metrics.value?.outdated}
+					/>
 					<_DownloadedModsTable variant={props.variant} />
 				</Stack>
 			</Container>

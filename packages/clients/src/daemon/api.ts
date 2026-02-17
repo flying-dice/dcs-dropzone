@@ -7,9 +7,14 @@
  */
 
 import type {
+	DataTag,
+	DefinedInitialDataOptions,
+	DefinedUseQueryResult,
 	MutationFunction,
+	QueryClient,
 	QueryFunction,
 	QueryKey,
+	UndefinedInitialDataOptions,
 	UseMutationOptions,
 	UseMutationResult,
 	UseQueryOptions,
@@ -149,6 +154,18 @@ export interface ErrorData {
 	error: string;
 }
 
+export type GetQueueData200JobsItem = {
+	key: string;
+	label: string;
+	progress: number;
+};
+
+export type GetQueueData200 = {
+	key: string;
+	label: string;
+	jobs: GetQueueData200JobsItem[];
+};
+
 export type GetDaemonHealth200 = {
 	status: "UP";
 	daemonInstanceId: string;
@@ -165,6 +182,117 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * Retrieves the current state of the processing queue, including all pending, running, and completed jobs for each release.
+ * @summary Get the current state of the processing queue
+ */
+export type getQueueDataResponse200 = {
+	data: GetQueueData200;
+	status: 200;
+};
+
+export type getQueueDataResponseSuccess = getQueueDataResponse200 & {
+	headers: Headers;
+};
+
+export type getQueueDataResponse = getQueueDataResponseSuccess;
+
+export const getGetQueueDataUrl = () => {
+	return `/api/queue`;
+};
+
+export const getQueueData = async (options?: RequestInit): Promise<getQueueDataResponse> => {
+	return fetch<getQueueDataResponse>(getGetQueueDataUrl(), {
+		...options,
+		method: "GET",
+	});
+};
+
+export const getGetQueueDataQueryKey = () => {
+	return [`/api/queue`] as const;
+};
+
+export const getGetQueueDataQueryOptions = <
+	TData = Awaited<ReturnType<typeof getQueueData>>,
+	TError = unknown,
+>(options?: {
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>>;
+	request?: SecondParameter<typeof fetch>;
+}) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetQueueDataQueryKey();
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getQueueData>>> = ({ signal }) =>
+		getQueueData({ signal, ...requestOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getQueueData>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetQueueDataQueryResult = NonNullable<Awaited<ReturnType<typeof getQueueData>>>;
+export type GetQueueDataQueryError = unknown;
+
+export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
+	options: {
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getQueueData>>,
+					TError,
+					Awaited<ReturnType<typeof getQueueData>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getQueueData>>,
+					TError,
+					Awaited<ReturnType<typeof getQueueData>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+/**
+ * @summary Get the current state of the processing queue
+ */
+
+export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+	const queryOptions = getGetQueueDataQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData>;
+	};
+
+	return { ...query, queryKey: queryOptions.queryKey };
+}
 
 export type addReleaseToDaemonResponse200 = {
 	data: void;
@@ -229,21 +357,19 @@ export type AddReleaseToDaemonMutationResult = NonNullable<Awaited<ReturnType<ty
 export type AddReleaseToDaemonMutationBody = ModAndReleaseData;
 export type AddReleaseToDaemonMutationError = unknown;
 
-export const useAddReleaseToDaemon = <TError = unknown, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof addReleaseToDaemon>>,
-		TError,
-		{ data: ModAndReleaseData },
-		TContext
-	>;
-	request?: SecondParameter<typeof fetch>;
-}): UseMutationResult<
-	Awaited<ReturnType<typeof addReleaseToDaemon>>,
-	TError,
-	{ data: ModAndReleaseData },
-	TContext
-> => {
-	return useMutation(getAddReleaseToDaemonMutationOptions(options));
+export const useAddReleaseToDaemon = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof addReleaseToDaemon>>,
+			TError,
+			{ data: ModAndReleaseData },
+			TContext
+		>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof addReleaseToDaemon>>, TError, { data: ModAndReleaseData }, TContext> => {
+	return useMutation(getAddReleaseToDaemonMutationOptions(options), queryClient);
 };
 
 export type getAllDaemonReleasesResponse200 = {
@@ -276,7 +402,7 @@ export const getGetAllDaemonReleasesQueryOptions = <
 	TData = Awaited<ReturnType<typeof getAllDaemonReleases>>,
 	TError = unknown,
 >(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>;
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>>;
 	request?: SecondParameter<typeof fetch>;
 }) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -290,22 +416,62 @@ export const getGetAllDaemonReleasesQueryOptions = <
 		Awaited<ReturnType<typeof getAllDaemonReleases>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData> };
 };
 
 export type GetAllDaemonReleasesQueryResult = NonNullable<Awaited<ReturnType<typeof getAllDaemonReleases>>>;
 export type GetAllDaemonReleasesQueryError = unknown;
 
-export function useGetAllDaemonReleases<
-	TData = Awaited<ReturnType<typeof getAllDaemonReleases>>,
-	TError = unknown,
->(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>;
-	request?: SecondParameter<typeof fetch>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
+	options: {
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getAllDaemonReleases>>,
+					TError,
+					Awaited<ReturnType<typeof getAllDaemonReleases>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getAllDaemonReleases>>,
+					TError,
+					Awaited<ReturnType<typeof getAllDaemonReleases>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
 	const queryOptions = getGetAllDaemonReleasesQueryOptions(options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData>;
+	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -371,16 +537,19 @@ export type RemoveReleaseFromDaemonMutationResult = NonNullable<Awaited<ReturnTy
 
 export type RemoveReleaseFromDaemonMutationError = unknown;
 
-export const useRemoveReleaseFromDaemon = <TError = unknown, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof removeReleaseFromDaemon>>,
-		TError,
-		{ releaseId: string },
-		TContext
-	>;
-	request?: SecondParameter<typeof fetch>;
-}): UseMutationResult<Awaited<ReturnType<typeof removeReleaseFromDaemon>>, TError, { releaseId: string }, TContext> => {
-	return useMutation(getRemoveReleaseFromDaemonMutationOptions(options));
+export const useRemoveReleaseFromDaemon = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof removeReleaseFromDaemon>>,
+			TError,
+			{ releaseId: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof removeReleaseFromDaemon>>, TError, { releaseId: string }, TContext> => {
+	return useMutation(getRemoveReleaseFromDaemonMutationOptions(options), queryClient);
 };
 
 /**
@@ -425,7 +594,7 @@ export const getGetDaemonHealthQueryOptions = <
 	TData = Awaited<ReturnType<typeof getDaemonHealth>>,
 	TError = GetDaemonHealth503,
 >(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>;
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
 	request?: SecondParameter<typeof fetch>;
 }) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -439,26 +608,65 @@ export const getGetDaemonHealthQueryOptions = <
 		Awaited<ReturnType<typeof getDaemonHealth>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData> };
 };
 
 export type GetDaemonHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getDaemonHealth>>>;
 export type GetDaemonHealthQueryError = GetDaemonHealth503;
 
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options: {
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getDaemonHealth>>,
+					TError,
+					Awaited<ReturnType<typeof getDaemonHealth>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getDaemonHealth>>,
+					TError,
+					Awaited<ReturnType<typeof getDaemonHealth>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
 /**
  * @summary Daemon health check
  */
 
-export function useGetDaemonHealth<
-	TData = Awaited<ReturnType<typeof getDaemonHealth>>,
-	TError = GetDaemonHealth503,
->(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>;
-	request?: SecondParameter<typeof fetch>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
 	const queryOptions = getGetDaemonHealthQueryOptions(options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData>;
+	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -523,11 +731,14 @@ export type EnableReleaseMutationError = ErrorData;
 /**
  * @summary Enable a release by creating its symbolic links
  */
-export const useEnableRelease = <TError = ErrorData, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
-	request?: SecondParameter<typeof fetch>;
-}): UseMutationResult<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext> => {
-	return useMutation(getEnableReleaseMutationOptions(options));
+export const useEnableRelease = <TError = ErrorData, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext> => {
+	return useMutation(getEnableReleaseMutationOptions(options), queryClient);
 };
 
 /**
@@ -590,9 +801,12 @@ export type DisableReleaseMutationError = ErrorData;
 /**
  * @summary Disable a release by removing its symbolic links
  */
-export const useDisableRelease = <TError = ErrorData, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
-	request?: SecondParameter<typeof fetch>;
-}): UseMutationResult<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext> => {
-	return useMutation(getDisableReleaseMutationOptions(options));
+export const useDisableRelease = <TError = ErrorData, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext> => {
+	return useMutation(getDisableReleaseMutationOptions(options), queryClient);
 };

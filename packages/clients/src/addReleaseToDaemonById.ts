@@ -1,4 +1,5 @@
-import { addReleaseToDaemon, getDaemonHealth } from "@packages/clients/daemon";
+import { StatusCodes } from "http-status-codes";
+import { addReleaseToDaemon, getDaemonHealth, type ModAndReleaseData } from "./daemon";
 import {
 	getModById,
 	getModReleaseById,
@@ -7,56 +8,50 @@ import {
 	type ModData,
 	type ModReleaseData,
 	registerModReleaseDownloadById,
-} from "@packages/clients/webapp";
-import { StatusCodes } from "http-status-codes";
-import { err, ok, type Result } from "neverthrow";
-import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
+} from "./webapp";
 
-export type AddReleaseToDaemonByIdCommand = {
+export type AddReleaseToDaemonByIdProps = {
 	modId: string;
 	releaseId: string;
-	form?: UserModReleaseForm;
-	variant: "public" | "authenticated";
+	data?: Pick<ModAndReleaseData, "version" | "assets" | "missionScripts" | "symbolicLinks">;
 };
 
-export type AddReleaseToDaemonByIdResult = Result<
-	void,
-	"FailedToGetHealth" | "FailedToGetMod" | "FailedToGetRelease" | "FailedToAddReleaseToDaemon"
->;
-
-export default async function (command: AddReleaseToDaemonByIdCommand): Promise<AddReleaseToDaemonByIdResult> {
-	const { modId, releaseId, form } = command;
+export async function addReleaseToDaemonById(
+	isUserMod = false,
+	props: AddReleaseToDaemonByIdProps,
+): Promise<"FailedToGetHealth" | "FailedToGetMod" | "FailedToGetRelease" | "FailedToAddReleaseToDaemon" | void> {
+	const { modId, releaseId, data } = props;
 
 	const health = await getDaemonHealth();
 	let modData: ModData;
 	let releaseData: ModReleaseData;
 
 	if (health.status !== StatusCodes.OK || !health.data) {
-		return err("FailedToGetHealth");
+		return "FailedToGetHealth";
 	}
 
-	if (command.variant === "authenticated") {
+	if (isUserMod) {
 		const userMod = await getUserModById(modId);
 		if (userMod.status !== StatusCodes.OK || !userMod.data) {
-			return err("FailedToGetMod");
+			return "FailedToGetMod";
 		}
 		modData = userMod.data;
 
 		const userRelease = await getUserModReleaseById(modId, releaseId);
 		if (userRelease.status !== StatusCodes.OK || !userRelease.data) {
-			return err("FailedToGetRelease");
+			return "FailedToGetRelease";
 		}
 		releaseData = userRelease.data;
 	} else {
 		const mod = await getModById(modId);
 		if (mod.status !== StatusCodes.OK || !mod.data) {
-			return err("FailedToGetMod");
+			return "FailedToGetMod";
 		}
 		modData = mod.data.mod;
 
 		const release = await getModReleaseById(modId, releaseId);
 		if (release.status !== StatusCodes.OK || !release.data) {
-			return err("FailedToGetRelease");
+			return "FailedToGetRelease";
 		}
 		releaseData = release.data;
 	}
@@ -65,23 +60,21 @@ export default async function (command: AddReleaseToDaemonByIdCommand): Promise<
 		modId: modData.id,
 		releaseId: releaseData.id,
 		modName: modData.name,
-		version: form?.values.version || releaseData.version,
+		version: data?.version || releaseData.version,
 		versionHash: releaseData.versionHash,
-		assets: form?.values.assets || releaseData.assets,
+		assets: data?.assets || releaseData.assets,
 		dependencies: modData.dependencies,
-		missionScripts: form?.values.missionScripts || releaseData.missionScripts,
-		symbolicLinks: form?.values.symbolicLinks || releaseData.symbolicLinks,
+		missionScripts: data?.missionScripts || releaseData.missionScripts,
+		symbolicLinks: data?.symbolicLinks || releaseData.symbolicLinks,
 	});
 
 	if (result.status !== StatusCodes.OK) {
-		return err("FailedToAddReleaseToDaemon");
+		return "FailedToAddReleaseToDaemon";
 	}
 
-	if (!form) {
+	if (!data) {
 		await registerModReleaseDownloadById(modData.id, releaseData.id, {
 			daemonInstanceId: health.data.daemonInstanceId,
 		});
 	}
-
-	return ok(undefined);
 }

@@ -23,7 +23,7 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 
 	const latest = props.latest;
 	const isLatest = latest ? latest.versionHash === props.mod.versionHash : undefined;
-	const handleUpdate = latest ? () => update(props.mod.modId, props.mod.releaseId, latest.id, "public") : undefined;
+	const handleUpdate = latest ? () => update(false, props.mod.modId, props.mod.releaseId, latest.id) : undefined;
 	const handleRemove = () => remove(props.mod.releaseId);
 
 	return (
@@ -39,15 +39,23 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 					size={"sm"}
 					onClick={(e) => {
 						e.preventDefault();
-						nav(`/mods/${props.mod.modId}/${props.mod.releaseId}`);
+						nav(
+							latest === undefined
+								? `/user-mods/${props.mod.modId}/releases/${props.mod.releaseId}`
+								: `/mods/${props.mod.modId}/${props.mod.releaseId}`,
+						);
 					}}
 				>
 					{props.mod.modName}
 				</Anchor>
 			</Table.Td>
 			<Table.Td>
-				<Tooltip label={isLatest ? t("UP_TO_DATE") : t("OUT_OF_DATE")}>
-					<Text size={"sm"} c={isLatest ? "green" : "orange"} fw={isLatest ? "normal" : "bold"}>
+				<Tooltip disabled={isLatest === undefined} label={isLatest ? t("UP_TO_DATE") : t("OUT_OF_DATE")}>
+					<Text
+						size={"sm"}
+						c={isLatest === undefined ? "gray" : isLatest ? "green" : "orange"}
+						fw={isLatest ? "normal" : "bold"}
+					>
 						{props.mod?.version}
 					</Text>
 				</Tooltip>

@@ -1,6 +1,6 @@
 import { Stack, Table, Text } from "@mantine/core";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "@packages/clients/daemon";
-import type { GetLatestModReleaseById404Error, ModReleaseData } from "@packages/clients/webapp";
+import type { ModReleaseData } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, type I18nKeys, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import type { IconType } from "react-icons";
@@ -54,14 +54,27 @@ export function _DownloadedModsTable(props: DownloadedModsTableProps) {
 				): Promise<{
 					mod: ModAndReleaseData;
 					latest?: ModReleaseData;
-					latestError?: GetLatestModReleaseById404Error | string;
+					latestError?: "ModNotFound" | "ReleaseNotFound" | string;
 				}> => {
-					const latest = await memoizedGetLatestModReleaseById.call(mod.modId);
+					let latest: ModReleaseData | undefined;
+					let latestError: "ModNotFound" | "ReleaseNotFound" | string | undefined;
+
+					try {
+						const res = await memoizedGetLatestModReleaseById.call(mod.modId);
+						if (res.status === StatusCodes.OK) {
+							latest = res.data;
+						}
+						if (res.status !== StatusCodes.OK && res.data?.error) {
+							latestError = res.data.error as "ModNotFound" | "ReleaseNotFound" | string;
+						}
+					} catch (err) {
+						latestError = (err as Error).message;
+					}
 
 					return {
 						mod,
-						latest: latest?.status === StatusCodes.OK ? latest.data : undefined,
-						latestError: latest?.status !== StatusCodes.OK ? latest.data.error : undefined,
+						latest,
+						latestError,
 					};
 				},
 			),

@@ -60,7 +60,10 @@ export class InMemoryJobRecordRepository implements JobRecordRepository {
 		return this.jobRecords.filter((record) => record.processorName === processorName);
 	}
 
-	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string; excludedJobIds?: string[] }): JobRecord[] {
+	findAllInState(
+		state: JobState[],
+		opts?: { limit?: number; processorName?: string; excludedJobIds?: string[] },
+	): JobRecord[] {
 		return this.filterJobRecordsByState(state)
 			.filter((record) => !opts?.processorName || record.processorName === opts.processorName)
 			.filter((record) => !opts?.excludedJobIds || !opts.excludedJobIds.includes(record.jobId))

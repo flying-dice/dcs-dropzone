@@ -30,7 +30,7 @@
 		"@packages/queue": "workspace:*",
 		"@packages/zod": "workspace:*",
 		"@scalar/hono-api-reference": "^0.9.30",
-		"@tanstack/react-query": "^5.90.12",
+		"@tanstack/react-query": "5.90.21",
 		"@types/lodash": "^4.17.21",
 		"date-fns": "^4.1.0",
 		"drizzle-kit": "^0.31.8",

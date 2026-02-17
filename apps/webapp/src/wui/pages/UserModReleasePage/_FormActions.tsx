@@ -62,7 +62,7 @@ export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; re
 					{t("DELETE_RELEASE")}
 				</Button>
 				<Divider />
-				<ModReleaseDaemonControls mod={props.mod} release={props.release} variant={"authenticated"} form={props.form} />
+				<ModReleaseDaemonControls mod={props.mod} release={props.release} isUserModRelease={true} form={props.form} />
 			</Stack>
 		</Card>
 	);

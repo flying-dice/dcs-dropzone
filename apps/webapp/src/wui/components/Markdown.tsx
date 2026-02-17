@@ -11,6 +11,7 @@ export function Markdown(props: MarkdownProps) {
 	return (
 		<Typography className="readme">
 			<div
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: This is necessary to render the markdown content. The content should be sanitized before being passed to this component.
 				dangerouslySetInnerHTML={{
 					__html: __html.value || "",
 				}}

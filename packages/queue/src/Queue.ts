@@ -1,12 +1,12 @@
 import * as assert from "node:assert";
 import { EventEmitter } from "node:events";
 import { getLogger } from "log4js";
+import type { DelayCalculator } from "./DelayCalculator.ts";
+import { ExponentialDelayCalculator } from "./ExponentialDelayCalculator.ts";
 import { JobErrorCode, type JobRecord, type JobRecordRepository, JobState } from "./JobRecordRepository.ts";
 import { JobRun } from "./JobRun.ts";
 import type { Processor } from "./Processor.ts";
-import type { DelayCalculator } from "./DelayCalculator.ts";
 import { RetryBackoffManager } from "./RetryBackoffManager.ts";
-import { ExponentialDelayCalculator } from "./ExponentialDelayCalculator.ts";
 
 export enum QueueEvents {
 	Added = "added",
@@ -83,7 +83,9 @@ export class Queue extends EventEmitter {
 		this.pollInterval = options.pollIntervalMs ?? 1000;
 		this.processors = [...options.processors];
 		this.jobRuns = new Map();
-		this.retryBackoffManager = new RetryBackoffManager(options.delayCalculator ?? new ExponentialDelayCalculator(1000, 60000));
+		this.retryBackoffManager = new RetryBackoffManager(
+			options.delayCalculator ?? new ExponentialDelayCalculator(1000, 60000),
+		);
 	}
 
 	override on<TData, TResult>(event: QueueEvents.Added, listener: (job: JobRecord<TData, TResult>) => void): this;
@@ -281,7 +283,9 @@ export class Queue extends EventEmitter {
 		this.retryBackoffManager.trackFailure(existingRun.jobId);
 
 		if (this.retryBackoffManager.hasExhaustedRetries(existingRun.jobId)) {
-			logger.info(`Job ${existingRun.jobId} has exhausted all retries (${RetryBackoffManager.MAX_RETRIES}). Not rescheduling.`);
+			logger.info(
+				`Job ${existingRun.jobId} has exhausted all retries (${RetryBackoffManager.MAX_RETRIES}). Not rescheduling.`,
+			);
 			this.emit(QueueEvents.Failed, existingRun);
 			return;
 		}
