@@ -9,7 +9,7 @@ import {
 } from "@packages/queue";
 import { and, desc, eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import { inArray } from "drizzle-orm/sql/expressions/conditions";
+import { inArray, notInArray } from "drizzle-orm/sql/expressions/conditions";
 import { getLogger } from "log4js";
 import { T_JOBS } from "../database/schema.ts";
 
@@ -80,11 +80,15 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 	}
 
 	@Log(logger)
-	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string }): JobRecord[] {
+	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string, excludedJobIds?: string[] }): JobRecord[] {
 		const conditions = [inArray(T_JOBS.state, state)];
 		if (opts?.processorName) {
 			conditions.push(eq(T_JOBS.processorName, opts.processorName));
-		}
+    }
+
+    if (opts?.excludedJobIds && opts.excludedJobIds.length > 0) {
+      conditions.push(notInArray(T_JOBS.jobId, opts.excludedJobIds));
+    }
 
 		const query = this.db
 			.select()
