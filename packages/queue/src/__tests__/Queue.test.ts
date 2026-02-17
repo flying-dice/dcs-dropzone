@@ -2,6 +2,7 @@ import "./log4js.ts";
 import { describe, expect, it } from "bun:test";
 import * as assert from "node:assert";
 import { err, ok, type Result } from "neverthrow";
+import type { DelayCalculator } from "../DelayCalculator.ts";
 import { JobErrorCode, JobState } from "../JobRecordRepository.ts";
 import type { Processor } from "../Processor.ts";
 import type { Queue } from "../Queue.ts";
@@ -488,6 +489,198 @@ describe("Queue", () => {
 			expect(updatedJob?.state).toBe(JobState.Cancelled);
 			expect(started).toBe(true);
 			expect(finished).toBe(false);
+		});
+	});
+
+	describe("retry backoff", () => {
+		it("should delay retrying a failed job based on the delay calculator", async () => {
+			// Use a long delay so the job stays in backoff for the duration of the test
+			const longDelay: DelayCalculator = {
+				calculateDelayMs: () => 60_000,
+			};
+
+			let attempts = 0;
+			const processor: Processor = {
+				name: "test",
+				process: async () => {
+					attempts++;
+					return err("fail");
+				},
+			};
+
+			const c = createTestContext({
+				processors: [processor],
+				delayCalculator: longDelay,
+			});
+			const queue: Queue = c.build();
+
+			queue.add("test", {});
+
+			queue.start();
+			// Wait long enough for the first attempt and a few poll cycles
+			await delay(200);
+			queue.stop();
+
+			// Only the first run should have been attempted; the rescheduled job
+			// should be blocked by the 60s backoff
+			expect(attempts).toBe(1);
+		});
+
+		it("should retry immediately when the delay calculator returns 0", async () => {
+			const zeroDelay: DelayCalculator = {
+				calculateDelayMs: () => 0,
+			};
+
+			let attempts = 0;
+			const processor: Processor = {
+				name: "test",
+				process: async () => {
+					attempts++;
+					if (attempts < 3) {
+						return err(`fail-${attempts}`);
+					}
+					return ok("done");
+				},
+			};
+
+			const c = createTestContext({
+				processors: [processor],
+				delayCalculator: zeroDelay,
+			});
+			const queue: Queue = c.build();
+
+			const job = queue.add("test", {});
+
+			queue.start();
+			await waitForJobFinish(c, job.jobId);
+			queue.stop();
+
+			expect(attempts).toBe(3);
+
+			const runs = queue.getAllByJobId(job.jobId);
+			expect(runs).toHaveLength(3);
+			expect(runs[0]?.state).toBe(JobState.Failed);
+			expect(runs[1]?.state).toBe(JobState.Failed);
+			expect(runs[2]?.state).toBe(JobState.Success);
+		});
+
+		it("should pass increasing attempt numbers to the delay calculator", async () => {
+			const attemptsSeen: number[] = [];
+			const trackingDelay: DelayCalculator = {
+				calculateDelayMs: (attempt: number) => {
+					attemptsSeen.push(attempt);
+					return 0; // no actual delay so retries happen immediately
+				},
+			};
+
+			let calls = 0;
+			const processor: Processor = {
+				name: "test",
+				process: async () => {
+					calls++;
+					if (calls <= 3) {
+						return err("fail");
+					}
+					return ok("done");
+				},
+			};
+
+			const c = createTestContext({
+				processors: [processor],
+				delayCalculator: trackingDelay,
+			});
+			const queue: Queue = c.build();
+
+			const job = queue.add("test", {});
+
+			queue.start();
+			await waitForJobFinish(c, job.jobId);
+			queue.stop();
+
+			expect(calls).toBe(4);
+			// RetryBackoffManager tracks failures per jobId with incrementing attempts
+			expect(attemptsSeen).toEqual([1, 2, 3]);
+		});
+
+		it("should not block other jobs when one job is in backoff", async () => {
+			const longDelay: DelayCalculator = {
+				calculateDelayMs: () => 60_000,
+			};
+
+			const processed: string[] = [];
+			const processor: Processor<{ id: string }, string> = {
+				name: "test",
+				process: async ({ id }) => {
+					processed.push(id);
+					if (id === "failing") {
+						return err("fail");
+					}
+					return ok("done");
+				},
+			};
+
+			const c = createTestContext({
+				processors: [processor],
+				delayCalculator: longDelay,
+			});
+			const queue: Queue = c.build();
+
+			// Add a job that will fail and enter backoff
+			queue.add("test", { id: "failing" });
+
+			queue.start();
+			// Wait for the failing job to be attempted once
+			await delay(200);
+
+			// Add a second job that should succeed immediately
+			const successJob = queue.add("test", { id: "success" });
+			await waitForJobRunFinish(c, successJob.runId);
+			queue.stop();
+
+			expect(processed).toContain("failing");
+			expect(processed).toContain("success");
+
+			const successRun = queue.getByRunId(successJob.runId);
+			expect(successRun?.state).toBe(JobState.Success);
+		});
+
+		it("should eventually complete a job after backoff expires", async () => {
+			// Use a very short backoff so it expires within the test
+			const shortDelay: DelayCalculator = {
+				calculateDelayMs: () => 50,
+			};
+
+			let attempts = 0;
+			const processor: Processor = {
+				name: "test",
+				process: async () => {
+					attempts++;
+					if (attempts === 1) {
+						return err("transient failure");
+					}
+					return ok("recovered");
+				},
+			};
+
+			const c = createTestContext({
+				processors: [processor],
+				delayCalculator: shortDelay,
+			});
+			const queue: Queue = c.build();
+
+			const job = queue.add("test", {});
+
+			queue.start();
+			await waitForJobFinish(c, job.jobId, 5);
+			queue.stop();
+
+			expect(attempts).toBe(2);
+
+			const runs = queue.getAllByJobId(job.jobId);
+			expect(runs).toHaveLength(2);
+			expect(runs[0]?.state).toBe(JobState.Failed);
+			expect(runs[1]?.state).toBe(JobState.Success);
+			expect(runs[1]?.result).toBe("recovered");
 		});
 	});
 });
