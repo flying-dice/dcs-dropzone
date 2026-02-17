@@ -36,17 +36,19 @@ export function AppNavbar(props: AppNavbarProps) {
 						active={location.pathname === "/mods"}
 						onClick={() => nav("/mods")}
 					/>
-					<DzNavLink
+          <DzNavLink
 						icon={AppIcons.Downloaded}
 						label={t("DOWNLOADED")}
 						active={location.pathname === "/downloaded"}
-						count={m.downloads}
+            count={m.downloads}
+            disabled={m.downloads === undefined}
 						onClick={() => nav("/downloaded")}
 					/>
 					<DzNavLink
 						icon={AppIcons.Enabled}
 						label={t("ENABLED")}
-						count={m.enabled}
+            count={m.enabled}
+						disabled={m.enabled === undefined}
 						countColor={"green"}
 						active={location.pathname === "/enabled"}
 						onClick={() => nav("/enabled")}
@@ -54,7 +56,8 @@ export function AppNavbar(props: AppNavbarProps) {
 					<DzNavLink
 						icon={AppIcons.Updates}
 						label={t("UPDATES")}
-						count={m.outdated}
+            count={m.outdated}
+            disabled={m.outdated === undefined}
 						countColor={"red"}
 						active={location.pathname === "/updates"}
 						onClick={() => nav("/updates")}

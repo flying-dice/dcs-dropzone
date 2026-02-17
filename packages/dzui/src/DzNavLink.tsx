@@ -20,7 +20,7 @@ function isDzNavLinkWithRightSectionProps(props: DzNavLinkProps): props is DzNav
 }
 
 function isDzNavLinkWithCountProps(props: DzNavLinkProps): props is DzNavLinkWithCountProps {
-	return "count" in props;
+	return "count" in props && typeof props.count === "number" && props.count !== undefined;
 }
 
 export function DzNavLink(props: DzNavLinkProps) {
