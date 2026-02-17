@@ -5,7 +5,7 @@ import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { ze } from "@packages/zod/ze";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
-import { setSignedCookie } from "hono/cookie";
+import { deleteCookie, setSignedCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { describeRoute, openAPIRouteHandler, validator } from "hono-openapi";
@@ -30,8 +30,7 @@ import { TypedErrorData } from "../application/schemas/TypedErrorData.ts";
 import { UserData } from "../application/schemas/UserData.ts";
 import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
 import type { AuthenticationProvider } from "../authentication/AuthenticationProvider.ts";
-import Database from "../database";
-import database from "../database";
+import { default as Database, default as database } from "../database";
 import { cookieAuth } from "./middleware/cookieAuth.ts";
 
 const logger = getLogger("HonoApplication");
@@ -287,8 +286,9 @@ export class HonoApplication extends Hono<Env> {
 							"If the session is missing or invalid, the cookie is simply not present; redirect still occurs.",
 					},
 				},
-			}),
-			(c) => {
+      }),
+      (c) => {
+        deleteCookie(c, appConfig.userCookieName);
 				return c.redirect(appConfig.homepageUrl ?? "http://localhost:3000");
 			},
 		);
