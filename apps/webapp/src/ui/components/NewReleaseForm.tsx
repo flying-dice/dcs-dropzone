@@ -31,9 +31,13 @@ export function NewReleaseForm(props: NewReleaseFormProps) {
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel
 						</Button>
+<<<<<<< HEAD
 						<Button data-testid="create-release-submit" type="submit">
 							Create Release
 						</Button>
+=======
+						<Button data-testid="create-release-submit" type="submit">Create Release</Button>
+>>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 					</Group>
 				</Stack>
 			</form>

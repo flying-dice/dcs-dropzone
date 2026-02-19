@@ -32,6 +32,7 @@ export function NewModForm(props: NewModFormProps) {
 			<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 				<Stack>
 					<TextInput data-testid="new-mod-name" {...form.getInputProps("name")} label="Mod Name" />
+<<<<<<< HEAD
 					<Textarea
 						data-testid="new-mod-description"
 						autosize
@@ -45,13 +46,21 @@ export function NewModForm(props: NewModFormProps) {
 						label="Category"
 						data={Object.values(ModDataCategory)}
 					/>
+=======
+					<Textarea data-testid="new-mod-description" autosize minRows={3} {...form.getInputProps("description")} label="Short Description" />
+					<Select data-testid="new-mod-category" {...form.getInputProps("category")} label="Category" data={Object.values(ModDataCategory)} />
+>>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 					<Group>
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel
 						</Button>
+<<<<<<< HEAD
 						<Button data-testid="new-mod-submit" type="submit">
 							Create Mod
 						</Button>
+=======
+						<Button data-testid="new-mod-submit" type="submit">Create Mod</Button>
+>>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 					</Group>
 				</Stack>
 			</form>

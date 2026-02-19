@@ -91,9 +91,13 @@ function _SymbolicLinkForm(props: {
 							{t("REMOVE")}
 						</Button>
 					)) || <span />}
+<<<<<<< HEAD
 					<Button data-testid="symlink-save" type={"submit"}>
 						{t("SAVE")}
 					</Button>
+=======
+					<Button data-testid="symlink-save" type={"submit"}>{t("SAVE")}</Button>
+>>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 				</Group>
 			</Stack>
 		</form>
@@ -152,12 +156,16 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 						{t("SYMBOLIC_LINKS_TITLE")}
 					</Text>
 					<Group gap={"xs"}>
+<<<<<<< HEAD
 						<Button
 							data-testid="add-symlink-button"
 							size={"xs"}
 							variant={"light"}
 							onClick={() => handleAddSymbolicLink(t, props.form)}
 						>
+=======
+						<Button data-testid="add-symlink-button" size={"xs"} variant={"light"} onClick={() => handleAddSymbolicLink(t, props.form)}>
+>>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 							{t("ADD_SYMBOLIC_LINK")}
 						</Button>
 						<Help title={<Text fw={"bold"}>{t("SYMBOLIC_LINKS_TITLE")}</Text>} markdown={t("SYMBOLIC_LINK_HELP_MD")} />

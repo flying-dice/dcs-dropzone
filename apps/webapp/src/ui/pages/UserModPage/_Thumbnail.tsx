@@ -44,9 +44,13 @@ function _ThumbnailForm(props: {
 					<Button onClick={props.onCancel} variant={"outline"}>
 						Cancel
 					</Button>
+<<<<<<< HEAD
 					<Button data-testid="thumbnail-save" type="submit">
 						Save
 					</Button>
+=======
+					<Button data-testid="thumbnail-save" type="submit">Save</Button>
+>>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 				</Group>
 			</Stack>
 		</form>
