@@ -41,13 +41,13 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 	return (
 		<Card withBorder>
 			<Stack>
-				<Button type="submit">{t("SAVE_CHANGES")}</Button>
+				<Button data-testid="mod-save-changes" type="submit">{t("SAVE_CHANGES")}</Button>
 				{props.form.isTouched() ? (
 					<Button variant={"default"} onClick={handleDiscard}>
 						{t("DISCARD_CHANGES")}
 					</Button>
 				) : (
-					<Button variant={"default"} onClick={() => nav(`/user-mods/${props.mod.id}`)}>
+					<Button data-testid="mod-back-to-mods" variant={"default"} onClick={() => nav("/user-mods")}>
 						{t("BACK_TO_MODS_PAGE")}
 					</Button>
 				)}

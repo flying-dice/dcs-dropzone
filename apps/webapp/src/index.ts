@@ -9,7 +9,7 @@ import { MockAuthService } from "./authentication/MockAuthService.ts";
 import { MongoUrl } from "./database/MongoUrl.ts";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
-import index from "./wui/index.html";
+import index from "./ui/index.html";
 
 const logger = getLogger("bootstrap");
 

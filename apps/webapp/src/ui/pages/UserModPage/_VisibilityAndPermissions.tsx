@@ -10,6 +10,7 @@ export function _VisibilityAndPermissions(props: { form: UserModForm }) {
 					Visibility & Permissions
 				</Text>
 				<Select
+					data-testid="mod-visibility"
 					label={"Visibility"}
 					{...props.form.getInputProps("visibility")}
 					data={Object.values(ModDataVisibility)}

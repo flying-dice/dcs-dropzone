@@ -18,6 +18,7 @@ export type AssetListItemProps = {
 	onClick?: () => void;
 	progressPercent?: number;
 	status?: ModReleaseAssetStatusDataStatus;
+	"data-testid"?: string;
 };
 export function AssetListItem(props: AssetListItemProps) {
 	const { t } = useAppTranslation();
@@ -27,6 +28,7 @@ export function AssetListItem(props: AssetListItemProps) {
 			withBorder
 			color="blue"
 			variant="light"
+			data-testid={props["data-testid"]}
 			style={props.onClick ? { cursor: "pointer" } : {}}
 			onClick={props.onClick}
 			p={"md"}

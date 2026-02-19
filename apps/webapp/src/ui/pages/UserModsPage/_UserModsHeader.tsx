@@ -7,7 +7,7 @@ export function _UserModsHeader(props: { onNewMod: () => void }) {
 
 	return (
 		<Group justify={"end"}>
-			<Button leftSection={<FaPlus />} onClick={props.onNewMod}>
+			<Button data-testid="publish-new-mod-button" leftSection={<FaPlus />} onClick={props.onNewMod}>
 				{t("PUBLISH_NEW_MOD")}
 			</Button>
 		</Group>

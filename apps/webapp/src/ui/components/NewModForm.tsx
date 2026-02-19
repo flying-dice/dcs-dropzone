@@ -31,14 +31,14 @@ export function NewModForm(props: NewModFormProps) {
 		<Stack>
 			<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 				<Stack>
-					<TextInput {...form.getInputProps("name")} label="Mod Name" />
-					<Textarea autosize minRows={3} {...form.getInputProps("description")} label="Short Description" />
-					<Select {...form.getInputProps("category")} label="Category" data={Object.values(ModDataCategory)} />
+					<TextInput data-testid="new-mod-name" {...form.getInputProps("name")} label="Mod Name" />
+					<Textarea data-testid="new-mod-description" autosize minRows={3} {...form.getInputProps("description")} label="Short Description" />
+					<Select data-testid="new-mod-category" {...form.getInputProps("category")} label="Category" data={Object.values(ModDataCategory)} />
 					<Group>
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel
 						</Button>
-						<Button type="submit">Create Mod</Button>
+						<Button data-testid="new-mod-submit" type="submit">Create Mod</Button>
 					</Group>
 				</Stack>
 			</form>

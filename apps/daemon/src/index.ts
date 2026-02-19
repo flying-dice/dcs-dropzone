@@ -4,8 +4,8 @@ import { getLogger } from "log4js";
 import appConfig from "./config";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
+import index from "./ui/index.html";
 import { WebviewWorker } from "./webview";
-import index from "./wui/index.html";
 
 const logger = getLogger("bootstrap");
 

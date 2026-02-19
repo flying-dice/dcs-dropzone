@@ -84,6 +84,7 @@ export function AppTagsInput(props: AppTagsInputProps) {
 			<Group gap={"xs"}>
 				{props.value?.map((tag) => (
 					<Badge
+						data-testid={`tag-badge-${tag}`}
 						variant={"light"}
 						key={tag}
 						rightSection={<AiOutlineClose />}
