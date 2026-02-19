@@ -58,7 +58,7 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 					<Text size={"lg"} fw={"bold"}>
 						Releases
 					</Text>
-					<Button size={"xs"} variant={"light"} onClick={handleNewRelease}>
+					<Button data-testid="new-release-button" size={"xs"} variant={"light"} onClick={handleNewRelease}>
 						New Release
 					</Button>
 				</Group>

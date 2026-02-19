@@ -45,6 +45,7 @@ export function AppNavbar(props: AppNavbarProps) {
 					/>
 
 					<DzNavLink
+						data-testid="nav-my-mods"
 						disabled={!props.withMyMods}
 						icon={AppIcons.UserMods}
 						label={t("MY_MODS")}

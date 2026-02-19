@@ -51,6 +51,7 @@ function _SymbolicLinkForm(props: {
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
 				<TextInput
+					data-testid="symlink-name"
 					label={t("SYMBOLIC_LINK_NAME_LABEL")}
 					description={t("SYMBOLIC_LINK_NAME_DESCRIPTION")}
 					placeholder={t("SYMBOLIC_LINK_NAME_PLACEHOLDER")}
@@ -59,6 +60,7 @@ function _SymbolicLinkForm(props: {
 				/>
 
 				<TextInput
+					data-testid="symlink-src"
 					label={t("SYMBOLIC_LINK_SRC_LABEL")}
 					description={t("SYMBOLIC_LINK_SRC_DESCRIPTION")}
 					placeholder={t("SYMBOLIC_LINK_SRC_PLACEHOLDER")}
@@ -67,6 +69,7 @@ function _SymbolicLinkForm(props: {
 				/>
 
 				<Select
+					data-testid="symlink-dest-root"
 					label={t("SYMBOLIC_LINK_DEST_ROOT_LABEL")}
 					description={t("SYMBOLIC_LINK_DEST_ROOT_DESCRIPTION")}
 					data={destRootOptions}
@@ -74,6 +77,7 @@ function _SymbolicLinkForm(props: {
 				/>
 
 				<TextInput
+					data-testid="symlink-dest"
 					label={t("SYMBOLIC_LINK_DEST_LABEL")}
 					description={t("SYMBOLIC_LINK_DEST_DESCRIPTION")}
 					placeholder={t("SYMBOLIC_LINK_DEST_PLACEHOLDER")}
@@ -87,7 +91,9 @@ function _SymbolicLinkForm(props: {
 							{t("REMOVE")}
 						</Button>
 					)) || <span />}
-					<Button type={"submit"}>{t("SAVE")}</Button>
+					<Button data-testid="symlink-save" type={"submit"}>
+						{t("SAVE")}
+					</Button>
 				</Group>
 			</Stack>
 		</form>
@@ -146,7 +152,12 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 						{t("SYMBOLIC_LINKS_TITLE")}
 					</Text>
 					<Group gap={"xs"}>
-						<Button size={"xs"} variant={"light"} onClick={() => handleAddSymbolicLink(t, props.form)}>
+						<Button
+							data-testid="add-symlink-button"
+							size={"xs"}
+							variant={"light"}
+							onClick={() => handleAddSymbolicLink(t, props.form)}
+						>
 							{t("ADD_SYMBOLIC_LINK")}
 						</Button>
 						<Help title={<Text fw={"bold"}>{t("SYMBOLIC_LINKS_TITLE")}</Text>} markdown={t("SYMBOLIC_LINK_HELP_MD")} />
@@ -156,6 +167,7 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 				{props.form.values.symbolicLinks.map((it, index) => (
 					<SymbolicLinkListItem
 						key={`${it.src}-${it.dest}-${index}`}
+						data-testid={`symlink-item-${it.name}`}
 						onClick={() => handleEditSymbolicLink(t, props.form, index)}
 						name={it.name}
 						src={it.src}

@@ -55,3 +55,6 @@ packages/cloudflare/.wrangler
 apps/*/config.json
 apps/*/config.schema.json
 apps/*/.manifest
+
+.test-results/
+.playwright-report/

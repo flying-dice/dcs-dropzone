@@ -9,6 +9,7 @@ export type BaseDzNavLinkProps = {
 	active?: boolean;
 	disabled?: boolean;
 	onClick?: () => void;
+	"data-testid"?: string;
 };
 
 export type DzNavLinkWithRightSectionProps = BaseDzNavLinkProps & { rightSection: ReactNode };
@@ -33,6 +34,7 @@ export function DzNavLink(props: DzNavLinkProps) {
 		<NavLink
 			active={props.active}
 			disabled={props.disabled}
+			data-testid={props["data-testid"]}
 			styles={{ root: { borderRadius: "0.5rem" } }}
 			leftSection={<props.icon />}
 			rightSection={rightSection}

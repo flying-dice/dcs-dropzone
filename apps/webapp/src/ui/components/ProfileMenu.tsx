@@ -39,14 +39,14 @@ export function ProfileMenu() {
 	return (
 		<Stack pr="md">
 			{!user && (
-				<Button variant="default" onClick={login}>
+				<Button data-testid="login-button" variant="default" onClick={login}>
 					{t("LOGIN")}
 				</Button>
 			)}
 			{user && (
 				<Menu>
 					<Menu.Target>
-						<Avatar src={user.avatarUrl} style={{ cursor: "pointer" }} />
+						<Avatar data-testid="user-avatar" src={user.avatarUrl} style={{ cursor: "pointer" }} />
 					</Menu.Target>
 					<Menu.Dropdown>
 						<Stack gap={0} p="xs">

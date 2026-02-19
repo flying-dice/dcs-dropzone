@@ -1,5 +1,15 @@
 {
-	"permissions": {
-		"allow": ["mcp__acp__Bash", "mcp__acp__Write", "mcp__acp__Edit"]
-	}
+  "permissions": {
+    "allow": [
+      "mcp__acp__Bash",
+      "mcp__acp__Write",
+      "mcp__acp__Edit",
+      "mcp__mongodb__list-databases",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_navigate",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(bun run:*)"
+    ]
+  }
 }

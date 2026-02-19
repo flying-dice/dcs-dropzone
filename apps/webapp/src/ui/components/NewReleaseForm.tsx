@@ -26,12 +26,14 @@ export function NewReleaseForm(props: NewReleaseFormProps) {
 		<Stack>
 			<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 				<Stack>
-					<TextInput {...form.getInputProps("version")} label="Release Version" />
+					<TextInput data-testid="new-release-version" {...form.getInputProps("version")} label="Release Version" />
 					<Group>
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel
 						</Button>
-						<Button type="submit">Create Release</Button>
+						<Button data-testid="create-release-submit" type="submit">
+							Create Release
+						</Button>
 					</Group>
 				</Stack>
 			</form>

@@ -47,14 +47,20 @@ export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; re
 	return (
 		<Card withBorder>
 			<Stack>
-				<Button type="submit">{t("SAVE_CHANGES")}</Button>
+				<Button data-testid="release-save-changes" type="submit">
+					{t("SAVE_CHANGES")}
+				</Button>
 				<Divider />
 				{props.form.isTouched() ? (
 					<Button variant={"default"} onClick={handleDiscard}>
 						{t("DISCARD_CHANGES")}
 					</Button>
 				) : (
-					<Button variant={"default"} onClick={() => nav(`/user-mods/${props.mod.id}`)}>
+					<Button
+						data-testid="release-back-to-mod"
+						variant={"default"}
+						onClick={() => nav(`/user-mods/${props.mod.id}`)}
+					>
 						{t("BACK_TO_MOD_PAGE")}
 					</Button>
 				)}

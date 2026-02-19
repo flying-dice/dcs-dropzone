@@ -27,6 +27,7 @@ function _ThumbnailForm(props: {
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
 				<Textarea
+					data-testid="thumbnail-url"
 					label={"Image URL"}
 					placeholder="Enter image URL"
 					name={"thumbnail"}
@@ -43,7 +44,9 @@ function _ThumbnailForm(props: {
 					<Button onClick={props.onCancel} variant={"outline"}>
 						Cancel
 					</Button>
-					<Button type="submit">Save</Button>
+					<Button data-testid="thumbnail-save" type="submit">
+						Save
+					</Button>
 				</Group>
 			</Stack>
 		</form>
@@ -79,6 +82,7 @@ export function _Thumbnail(props: { form: UserModForm }) {
 				<Button
 					fw={"normal"}
 					variant={"default"}
+					data-testid="change-thumbnail"
 					leftSection={<FaCamera />}
 					onClick={() =>
 						openThumbnailModal(props.form.values.thumbnail, (newUrl) => {

@@ -32,4 +32,7 @@ await $`bunx biome ci`;
 console.log("Running Global Tests...");
 await $`bun test`;
 
+console.log("Running playwright tests...");
+await $`bun run test:playwright`;
+
 console.log("Code checks completed successfully.");

@@ -44,6 +44,7 @@ function _AssetForm(props: {
 		<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 			<Stack gap={"lg"}>
 				<TextInput
+					data-testid="asset-name"
 					label={t("ASSET_NAME_LABEL")}
 					description={t("ASSET_NAME_DESCRIPTION")}
 					name={"name"}
@@ -59,6 +60,7 @@ function _AssetForm(props: {
 							</Text>
 						</Stack>
 						<Button
+							data-testid="asset-add-url"
 							size={"xs"}
 							variant={"subtle"}
 							onClick={() => form.insertListItem("urls", { id: crypto.randomUUID(), url: "" })}
@@ -77,6 +79,7 @@ function _AssetForm(props: {
 					{form.values.urls.map((url, i) => (
 						<TextInput
 							key={url.id}
+							data-testid={`asset-url-${i}`}
 							name={`urls[${i}]`}
 							rightSection={
 								<ActionIcon
@@ -96,6 +99,7 @@ function _AssetForm(props: {
 
 				<Divider />
 				<Checkbox
+					data-testid="asset-is-archive"
 					label={t("ASSET_IS_ARCHIVE_LABEL")}
 					description={t("ASSET_IS_ARCHIVE_DESCRIPTION")}
 					{...form.getInputProps("isArchive", { type: "checkbox" })}
@@ -107,7 +111,9 @@ function _AssetForm(props: {
 							{t("REMOVE")}
 						</Button>
 					)) || <span />}
-					<Button type={"submit"}>{t("SAVE")}</Button>
+					<Button data-testid="asset-save" type={"submit"}>
+						{t("SAVE")}
+					</Button>
 				</Group>
 			</Stack>
 		</form>
@@ -169,7 +175,12 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						Assets
 					</Text>
 					<Group gap={"xs"}>
-						<Button size={"xs"} variant={"light"} onClick={() => handleAddAsset(props.form)}>
+						<Button
+							data-testid="add-asset-button"
+							size={"xs"}
+							variant={"light"}
+							onClick={() => handleAddAsset(props.form)}
+						>
 							Add Asset
 						</Button>
 						<Help title={<Text fw={"bold"}>Assets</Text>} markdown={t("ASSET_HELP_MD")} />
@@ -179,6 +190,7 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 				{props.form.values.assets.map((it) => (
 					<AssetListItem
 						key={it.id}
+						data-testid={`asset-item-${it.name}`}
 						name={it.name}
 						urls={it.urls}
 						isArchive={it.isArchive}

@@ -10,6 +10,7 @@ export type SymbolicLinkListItemProps = {
 	dest: string;
 	destRoot: ModReleaseSymbolicLinkDataDestRoot;
 	onClick?: () => void;
+	"data-testid"?: string;
 };
 
 const destRootLabels: Record<ModReleaseSymbolicLinkDataDestRoot, I18nKeys> = {
@@ -24,6 +25,7 @@ export function SymbolicLinkListItem(props: SymbolicLinkListItemProps) {
 		<Paper
 			withBorder
 			variant="outline"
+			data-testid={props["data-testid"]}
 			style={props.onClick ? { cursor: "pointer" } : {}}
 			onClick={props.onClick}
 			p={"md"}
