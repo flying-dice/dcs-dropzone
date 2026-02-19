@@ -111,13 +111,9 @@ function _AssetForm(props: {
 							{t("REMOVE")}
 						</Button>
 					)) || <span />}
-<<<<<<< HEAD
 					<Button data-testid="asset-save" type={"submit"}>
 						{t("SAVE")}
 					</Button>
-=======
-					<Button data-testid="asset-save" type={"submit"}>{t("SAVE")}</Button>
->>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 				</Group>
 			</Stack>
 		</form>
@@ -179,16 +175,12 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						Assets
 					</Text>
 					<Group gap={"xs"}>
-<<<<<<< HEAD
 						<Button
 							data-testid="add-asset-button"
 							size={"xs"}
 							variant={"light"}
 							onClick={() => handleAddAsset(props.form)}
 						>
-=======
-						<Button data-testid="add-asset-button" size={"xs"} variant={"light"} onClick={() => handleAddAsset(props.form)}>
->>>>>>> 891964443c001ee6fd0171fc8dda99b23f15eb50
 							Add Asset
 						</Button>
 						<Help title={<Text fw={"bold"}>Assets</Text>} markdown={t("ASSET_HELP_MD")} />
