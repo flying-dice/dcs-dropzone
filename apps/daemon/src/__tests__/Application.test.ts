@@ -89,6 +89,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				version: "1.0.0",
 				versionHash: modAndReleaseData.versionHash,
 				dependencies: [],
+				enabled: false,
 			});
 
 			expect(assetsForRelease.length).toEqual(modAndReleaseData.assets.length);

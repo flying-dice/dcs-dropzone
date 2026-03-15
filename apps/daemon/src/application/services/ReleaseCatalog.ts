@@ -63,7 +63,7 @@ export class ReleaseCatalog {
 				missionScripts,
 				status: inferReleaseStatusFromAssets(
 					assets.map((it) => it.statusData?.status ?? AssetStatus.PENDING),
-					symbolicLinks,
+					release.enabled,
 				),
 				overallPercentProgress: totalPercentProgress(
 					assets.flatMap((it) => it.statusData?.overallPercentProgress ?? 0),

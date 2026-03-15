@@ -11,6 +11,10 @@ it("applies migrations once and skips already-applied ones", () => {
 	      "filename": "_0000_init_sql",
 	      "hash": "4427d6751820d8e114e94fe6b59772b5e7326909d0a1c6e3e6b994246f0781fb",
 	    },
+	    {
+	      "filename": "_0001_add_enabled_sql",
+	      "hash": "0024f4cb30e6863f515ac6f541f65ed63de5ae47334f022e980d18c374516922",
+	    },
 	  ]
 	`);
 });
