@@ -46,14 +46,14 @@ describe("inferReleaseStatusFromAssets", () => {
 		expect(result).toBe(DownloadedReleaseStatus.DISABLED);
 	});
 
-	it("returns DISABLED when all assets are COMPLETED with empty assets and enabled is false", () => {
+	it("returns DISABLED when there are no assets and enabled is false", () => {
 		const assetStatus: AssetStatus[] = [];
 
 		const result = inferReleaseStatusFromAssets(assetStatus, false);
 		expect(result).toBe(DownloadedReleaseStatus.DISABLED);
 	});
 
-	it("returns ENABLED when all assets are COMPLETED with empty assets and enabled is true", () => {
+	it("returns ENABLED when there are no assets and enabled is true", () => {
 		const assetStatus: AssetStatus[] = [];
 
 		const result = inferReleaseStatusFromAssets(assetStatus, true);
