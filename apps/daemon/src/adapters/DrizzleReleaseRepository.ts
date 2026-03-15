@@ -152,6 +152,11 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 	}
 
 	@Log(logger)
+	setEnabled(releaseId: string, enabled: boolean): void {
+		this.db.update(T_MOD_RELEASES).set({ enabled }).where(eq(T_MOD_RELEASES.releaseId, releaseId)).run();
+	}
+
+	@Log(logger)
 	getMissionScriptsForRelease(releaseId: string): MissionScript[] {
 		return this.db
 			.select()
