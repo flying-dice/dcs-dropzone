@@ -12,6 +12,7 @@ export class TestReleaseRepository implements ReleaseRepository {
 	private releases = new Map<string, ModAndReleaseData>();
 	private installedPaths = new Map<string, string | null>();
 	private jobsForReleases = new Map<string, Set<JobRecord["jobId"]>>();
+	private enabledReleases = new Map<string, boolean>();
 
 	saveRelease(data: ModAndReleaseData): void {
 		this.releases.set(data.releaseId, data);
@@ -28,6 +29,7 @@ export class TestReleaseRepository implements ReleaseRepository {
 				version: releaseData.version,
 				versionHash: releaseData.versionHash,
 				dependencies: releaseData.dependencies,
+				enabled: this.enabledReleases.get(releaseData.releaseId) ?? false,
 			});
 		}
 
@@ -78,6 +80,10 @@ export class TestReleaseRepository implements ReleaseRepository {
 
 	setInstalledPathForSymbolicLink(symbolicLinkId: string, installedPath: string | null): void {
 		this.installedPaths.set(symbolicLinkId, installedPath);
+	}
+
+	setEnabled(releaseId: string, enabled: boolean): void {
+		this.enabledReleases.set(releaseId, enabled);
 	}
 
 	getMissionScriptsForRelease(releaseId: string): MissionScript[] {

@@ -40,6 +40,8 @@ export class ReleaseToggle {
 
 		logger.info(`Rebuilding mission scripting files after enabling release ${releaseId}`);
 		this.deps.missionScriptingFilesManager.rebuild();
+
+		this.deps.releaseRepository.setEnabled(releaseId, true);
 		logger.info(`Finished enabling Release ${releaseId}`);
 	}
 
@@ -67,6 +69,8 @@ export class ReleaseToggle {
 
 		logger.info(`Rebuilding mission scripting files after disabling release ${releaseId}`);
 		this.deps.missionScriptingFilesManager.rebuild();
+
+		this.deps.releaseRepository.setEnabled(releaseId, false);
 		logger.info(`Finished disabling Release ${releaseId}`);
 	}
 

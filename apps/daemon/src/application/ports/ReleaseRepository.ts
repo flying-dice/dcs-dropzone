@@ -22,6 +22,8 @@ export interface ReleaseRepository {
 
 	setInstalledPathForSymbolicLink(symbolicLinkId: string, installedPath: string | null): void;
 
+	setEnabled(releaseId: string, enabled: boolean): void;
+
 	getMissionScriptsForRelease(releaseId: string): MissionScript[];
 
 	addJobForRelease(releaseId: string, jobId: JobRecord["jobId"]): void;
