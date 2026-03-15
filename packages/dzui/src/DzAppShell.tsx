@@ -6,7 +6,6 @@ import { useAsyncFn } from "react-use";
 import { match } from "ts-pattern";
 import icon from "./assets/icon.svg";
 import logo from "./assets/logo.svg";
-import { constants } from "./constants.ts";
 import { AppIcons } from "./icons.ts";
 import { showErrorNotification } from "./showErrorNotification.tsx";
 import { useAppTranslation } from "./useAppTranslation.ts";
@@ -58,6 +57,8 @@ export type DzAppShellProps = Omit<AppShellProps, "header" | "footer"> & {
 	variant: "webapp" | "daemon";
 	headerSection?: ReactNode;
 	navbarDisclosure?: UseDisclosureReturnValue;
+	daemonUrl: string;
+	webappUrl: string;
 };
 export function DzAppShell(props: DzAppShellProps) {
 	const { isSm, isXs } = useBreakpoint();
@@ -66,16 +67,16 @@ export function DzAppShell(props: DzAppShellProps) {
 
 	const [webappOpening, openWebapp] = useAsyncFn(async () => {
 		try {
-			await fetch(new URL("/api/health", constants.WEBAPP_URL));
-			window.open(constants.WEBAPP_URL, "_self");
+			await fetch(new URL("/api/health", props.webappUrl));
+			window.open(props.webappUrl, "_self");
 		} catch (e) {
 			showErrorNotification(e);
 		}
 	}, []);
 	const [daemonOpening, openDaemon] = useAsyncFn(async () => {
 		try {
-			await fetch(new URL("/api/health", constants.DAEMON_URL));
-			const daemonUrl = new URL(constants.DAEMON_URL);
+			await fetch(new URL("/api/health", props.daemonUrl));
+			const daemonUrl = new URL(props.daemonUrl);
 			daemonUrl.searchParams.set("nocache", Date.now().toString());
 			window.open(daemonUrl.toString(), "_self");
 		} catch (e) {

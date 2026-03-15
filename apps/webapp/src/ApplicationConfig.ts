@@ -27,7 +27,7 @@ const cookieSecretFromEnv = string("USER_COOKIE_SECRET", randomBytes(32).toStrin
 const appConfig = configSchema.parse({
 	nodeEnv: string("NODE_ENV", "development"),
 	port: int("PORT", 3000),
-	mongoUri: string("MONGO_URI", "mongodb://memory:27017/dcs-dropzone"),
+	mongoUri: string("MONGO_URI", "mongodb://localhost:27017/dcs-dropzone"),
 	userCookieSecret: cookieSecretFromEnv,
 	userCookieName: string("USER_COOKIE_NAME", "USERID"),
 	userCookieMaxAge: int("USER_COOKIE_MAX_AGE", 86400), // default to 1 day

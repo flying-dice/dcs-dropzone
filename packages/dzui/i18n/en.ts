@@ -30,6 +30,9 @@ export default {
 		...modCategoryContent,
 		...modAndReleaseDataStatusContent,
 
+		ROUTER_ERROR_TITLE: "Oops! Nothing to see here.",
+		ROUTER_ERROR_DESC: "We couldn't find what you were looking for.",
+		GO_BACK: "Go Back",
 		ADD_DEPENDENCY: "Add dependency",
 		ADD_MISSION_SCRIPT: "Add Mission Script",
 		ADD_SYMBOLIC_LINK: "Add Symbolic Link",

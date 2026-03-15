@@ -6,6 +6,8 @@ export function App() {
 		<DzAppShell
 			variant={"daemon"}
 			headerSection={<ColorSchemeControls lightLabel={"Light"} autoLabel={"Auto"} darkLabel={"Dark"} />}
+			webappUrl={"http://localhost:3000"}
+			daemonUrl={"http://localhost:3001"}
 		>
 			<DownloadedPage />
 		</DzAppShell>

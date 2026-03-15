@@ -9,8 +9,7 @@
 		"biome": "biome check --write",
 		"build": "bun build.ts",
 		"depcheck": "bunx depcheck",
-		"dev": "bun --hot src/index.ts",
-		"dev:docker": "MONGO_URI=mongodb://localhost:27017/dcs-dropzone bun --hot src/index.ts",
+		"dev": "docker compose up -d mongodb && NODE_ENV=development bun --hot src/index.ts",
 		"start": "docker compose up --build",
 		"tests": "bun test",
 		"tsc": "tsc --noEmit"
