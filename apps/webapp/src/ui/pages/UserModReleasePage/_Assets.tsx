@@ -1,13 +1,11 @@
 import { ActionIcon, Alert, Button, Card, Checkbox, Divider, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
-import { EmptyState, useAppTranslation } from "@packages/dzui";
+import { AssetListItem, EmptyState, Help, NoAssets, useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { FaCloudDownloadAlt } from "react-icons/fa";
-import { FaFile, FaTrash } from "react-icons/fa6";
+import { FaTrash } from "react-icons/fa6";
 import { z } from "zod";
-import { AssetListItem } from "../../components/AssetListItem.tsx";
-import { Help } from "../../components/Help.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
 const assetFormSchema = z.object({
@@ -155,16 +153,6 @@ function handleEditAsset(form: UserModReleaseForm, index: number) {
 	});
 }
 
-function _NoAssets() {
-	return (
-		<EmptyState
-			title="No assets added"
-			description="Add Assets & URLs for your mod files. These will be downloaded and extracted by the desktop client."
-			icon={FaFile}
-		/>
-	);
-}
-
 export function _Assets(props: { form: UserModReleaseForm }) {
 	const { t } = useAppTranslation();
 	return (
@@ -186,7 +174,7 @@ export function _Assets(props: { form: UserModReleaseForm }) {
 						<Help title={<Text fw={"bold"}>Assets</Text>} markdown={t("ASSET_HELP_MD")} />
 					</Group>
 				</Group>
-				{props.form.values.assets.length === 0 && <_NoAssets />}
+				{props.form.values.assets.length === 0 && <NoAssets />}
 				{props.form.values.assets.map((it) => (
 					<AssetListItem
 						key={it.id}

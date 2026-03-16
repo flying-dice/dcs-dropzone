@@ -1,4 +1,5 @@
 import { Checkbox, Progress, Table, Text } from "@mantine/core";
+import { openModal } from "@mantine/modals";
 import {
 	disableRelease,
 	enableRelease,
@@ -7,7 +8,13 @@ import {
 	removeReleaseFromDaemon,
 	useGetAllDaemonReleases,
 } from "@packages/clients/daemon";
-import { ModActionsMenu, showErrorNotification, showSuccessNotification, useAppTranslation } from "@packages/dzui";
+import {
+	DownloadedModInformation,
+	ModActionsMenu,
+	showErrorNotification,
+	showSuccessNotification,
+	useAppTranslation,
+} from "@packages/dzui";
 
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
 	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
@@ -39,6 +46,14 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 			})
 			.catch(showErrorNotification);
 
+	function handleShowSymlinks() {
+		openModal({
+			size: "xl",
+			title: props.mod.modName,
+			children: <DownloadedModInformation mod={props.mod} />,
+		});
+	}
+
 	return (
 		<Table.Tr>
 			<Table.Th>
@@ -61,7 +76,12 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 				)}
 			</Table.Td>
 			<Table.Td>
-				<ModActionsMenu mod={props.mod} onRemove={handleRemove} onToggle={handleToggle} />
+				<ModActionsMenu
+					mod={props.mod}
+					onRemove={handleRemove}
+					onToggle={handleToggle}
+					onShowSymlinks={handleShowSymlinks}
+				/>
 			</Table.Td>
 		</Table.Tr>
 	);

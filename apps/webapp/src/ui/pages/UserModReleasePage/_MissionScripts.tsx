@@ -2,12 +2,10 @@ import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/co
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { ModReleaseMissionScriptDataRoot, ModReleaseMissionScriptDataRunOn } from "@packages/clients/webapp";
-import { EmptyState, type TranslateFunction, useAppTranslation } from "@packages/dzui";
+import { MissionScriptListItem, NoMissionScripts, type TranslateFunction, useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { FaFileCode } from "react-icons/fa";
 import { z } from "zod";
 import { Help } from "../../components/Help.tsx";
-import { MissionScriptListItem } from "../../components/MissionScriptListItem.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
 const missionScriptFormSchema = z.object({
@@ -146,17 +144,6 @@ function handleEditMissionScript(t: TranslateFunction, form: UserModReleaseForm,
 	});
 }
 
-function _NoMissionScripts() {
-	const { t } = useAppTranslation();
-	return (
-		<EmptyState
-			title={t("NO_MISSION_SCRIPTS_TITLE")}
-			description={t("NO_MISSION_SCRIPTS_DESCRIPTION")}
-			icon={FaFileCode}
-		/>
-	);
-}
-
 export function _MissionScripts(props: { form: UserModReleaseForm }) {
 	const { t } = useAppTranslation();
 	return (
@@ -176,7 +163,7 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 						/>
 					</Group>
 				</Group>
-				{props.form.values.missionScripts.length === 0 && <_NoMissionScripts />}
+				{props.form.values.missionScripts.length === 0 && <NoMissionScripts />}
 				{props.form.values.missionScripts.map((it, index) => (
 					<MissionScriptListItem
 						key={`${it.path}-${it.root}-${it.runOn}-${index}`}

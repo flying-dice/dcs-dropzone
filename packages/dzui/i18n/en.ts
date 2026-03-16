@@ -180,6 +180,7 @@ export default {
 		DOWNLOADED: "Downloaded",
 		SYMBOLIC_LINK_DEST_DESCRIPTION: "Path relative to the selected destination root",
 		SYMBOLIC_LINK_DEST_LABEL: "Destination Path",
+		SYMBOLIC_LINK_INSTALLED_PATH_LABEL: "Local Path",
 		SYMBOLIC_LINK_DEST_PLACEHOLDER: "e.g., Mods/MyMod or Scripts/MyScript.lua",
 		SYMBOLIC_LINK_DEST_ROOT_DESCRIPTION: "Select the DCS directory root where the link will be created",
 		SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR: "DCS Install Directory",

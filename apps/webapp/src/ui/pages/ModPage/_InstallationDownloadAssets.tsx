@@ -1,7 +1,6 @@
 import { Card, Stack, Text } from "@mantine/core";
 import type { ModReleaseAssetData } from "@packages/clients/webapp";
-import { useAppTranslation } from "@packages/dzui";
-import { AssetListItem } from "../../components/AssetListItem.tsx";
+import { AssetListItem, useAppTranslation } from "@packages/dzui";
 
 export type _InstallationDownloadAssetsProps = {
 	assets: ModReleaseAssetData[];

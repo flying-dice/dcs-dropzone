@@ -2,12 +2,10 @@ import { Button, Card, Group, Select, Stack, Text, TextInput } from "@mantine/co
 import { useForm } from "@mantine/form";
 import { modals, openModal } from "@mantine/modals";
 import { ModReleaseSymbolicLinkDataDestRoot } from "@packages/clients/webapp";
-import { EmptyState, type TranslateFunction, useAppTranslation } from "@packages/dzui";
+import { NoSymbolicLinks, SymbolicLinkListItem, type TranslateFunction, useAppTranslation } from "@packages/dzui";
 import { zod4Resolver } from "mantine-form-zod-resolver";
-import { FaLink } from "react-icons/fa";
 import { z } from "zod";
 import { Help } from "../../components/Help.tsx";
-import { SymbolicLinkListItem } from "../../components/SymbolicLinkListItem.tsx";
 import type { UserModReleaseForm } from "./form.ts";
 
 const symbolicLinkFormSchema = z.object({
@@ -135,13 +133,6 @@ function handleEditSymbolicLink(t: TranslateFunction, form: UserModReleaseForm, 
 	});
 }
 
-function _NoSymbolicLinks() {
-	const { t } = useAppTranslation();
-	return (
-		<EmptyState title={t("NO_SYMBOLIC_LINKS_TITLE")} description={t("NO_SYMBOLIC_LINKS_DESCRIPTION")} icon={FaLink} />
-	);
-}
-
 export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 	const { t } = useAppTranslation();
 	return (
@@ -163,7 +154,7 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 						<Help title={<Text fw={"bold"}>{t("SYMBOLIC_LINKS_TITLE")}</Text>} markdown={t("SYMBOLIC_LINK_HELP_MD")} />
 					</Group>
 				</Group>
-				{props.form.values.symbolicLinks.length === 0 && <_NoSymbolicLinks />}
+				{props.form.values.symbolicLinks.length === 0 && <NoSymbolicLinks />}
 				{props.form.values.symbolicLinks.map((it, index) => (
 					<SymbolicLinkListItem
 						key={`${it.src}-${it.dest}-${index}`}

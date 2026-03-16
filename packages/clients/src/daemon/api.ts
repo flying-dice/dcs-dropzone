@@ -80,6 +80,7 @@ export interface ModReleaseSymbolicLinkData {
 	/** @minLength 1 */
 	dest: string;
 	destRoot: ModReleaseSymbolicLinkDataDestRoot;
+	installedPath?: string | null;
 }
 
 export type ModReleaseMissionScriptDataRoot =
@@ -154,18 +155,6 @@ export interface ErrorData {
 	error: string;
 }
 
-export type GetQueueData200JobsItem = {
-	key: string;
-	label: string;
-	progress: number;
-};
-
-export type GetQueueData200 = {
-	key: string;
-	label: string;
-	jobs: GetQueueData200JobsItem[];
-};
-
 export type GetDaemonHealth200 = {
 	status: "UP";
 	daemonInstanceId: string;
@@ -182,117 +171,6 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-/**
- * Retrieves the current state of the processing queue, including all pending, running, and completed jobs for each release.
- * @summary Get the current state of the processing queue
- */
-export type getQueueDataResponse200 = {
-	data: GetQueueData200;
-	status: 200;
-};
-
-export type getQueueDataResponseSuccess = getQueueDataResponse200 & {
-	headers: Headers;
-};
-
-export type getQueueDataResponse = getQueueDataResponseSuccess;
-
-export const getGetQueueDataUrl = () => {
-	return `/api/queue`;
-};
-
-export const getQueueData = async (options?: RequestInit): Promise<getQueueDataResponse> => {
-	return fetch<getQueueDataResponse>(getGetQueueDataUrl(), {
-		...options,
-		method: "GET",
-	});
-};
-
-export const getGetQueueDataQueryKey = () => {
-	return [`/api/queue`] as const;
-};
-
-export const getGetQueueDataQueryOptions = <
-	TData = Awaited<ReturnType<typeof getQueueData>>,
-	TError = unknown,
->(options?: {
-	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>>;
-	request?: SecondParameter<typeof fetch>;
-}) => {
-	const { query: queryOptions, request: requestOptions } = options ?? {};
-
-	const queryKey = queryOptions?.queryKey ?? getGetQueueDataQueryKey();
-
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getQueueData>>> = ({ signal }) =>
-		getQueueData({ signal, ...requestOptions });
-
-	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-		Awaited<ReturnType<typeof getQueueData>>,
-		TError,
-		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
-};
-
-export type GetQueueDataQueryResult = NonNullable<Awaited<ReturnType<typeof getQueueData>>>;
-export type GetQueueDataQueryError = unknown;
-
-export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
-	options: {
-		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>> &
-			Pick<
-				DefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getQueueData>>,
-					TError,
-					Awaited<ReturnType<typeof getQueueData>>
-				>,
-				"initialData"
-			>;
-		request?: SecondParameter<typeof fetch>;
-	},
-	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
-	options?: {
-		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>> &
-			Pick<
-				UndefinedInitialDataOptions<
-					Awaited<ReturnType<typeof getQueueData>>,
-					TError,
-					Awaited<ReturnType<typeof getQueueData>>
-				>,
-				"initialData"
-			>;
-		request?: SecondParameter<typeof fetch>;
-	},
-	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
-	options?: {
-		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>>;
-		request?: SecondParameter<typeof fetch>;
-	},
-	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
-/**
- * @summary Get the current state of the processing queue
- */
-
-export function useGetQueueData<TData = Awaited<ReturnType<typeof getQueueData>>, TError = unknown>(
-	options?: {
-		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getQueueData>>, TError, TData>>;
-		request?: SecondParameter<typeof fetch>;
-	},
-	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
-	const queryOptions = getGetQueueDataQueryOptions(options);
-
-	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
-	};
-
-	return { ...query, queryKey: queryOptions.queryKey };
-}
 
 export type addReleaseToDaemonResponse200 = {
 	data: void;
@@ -416,7 +294,7 @@ export const getGetAllDaemonReleasesQueryOptions = <
 		Awaited<ReturnType<typeof getAllDaemonReleases>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetAllDaemonReleasesQueryResult = NonNullable<Awaited<ReturnType<typeof getAllDaemonReleases>>>;
@@ -436,7 +314,7 @@ export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAll
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>> &
@@ -451,14 +329,14 @@ export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAll
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllDaemonReleases>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
 export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAllDaemonReleases>>, TError = unknown>(
 	options?: {
@@ -466,11 +344,11 @@ export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAll
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetAllDaemonReleasesQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -608,7 +486,7 @@ export const getGetDaemonHealthQueryOptions = <
 		Awaited<ReturnType<typeof getDaemonHealth>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetDaemonHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getDaemonHealth>>>;
@@ -628,7 +506,7 @@ export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHe
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>> &
@@ -643,14 +521,14 @@ export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHe
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHealth>>, TError = GetDaemonHealth503>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDaemonHealth>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Daemon health check
  */
@@ -661,11 +539,11 @@ export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHe
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetDaemonHealthQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };

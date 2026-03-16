@@ -1,7 +1,6 @@
 import { Card, Stack, Text } from "@mantine/core";
 import type { ModReleaseSymbolicLinkData } from "@packages/clients/webapp";
-import { useAppTranslation } from "@packages/dzui";
-import { SymbolicLinkListItem } from "../../components/SymbolicLinkListItem.tsx";
+import { SymbolicLinkListItem, useAppTranslation } from "@packages/dzui";
 
 export type _InstallationSymbolicLinksProps = {
 	symbolicLinks: ModReleaseSymbolicLinkData[];

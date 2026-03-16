@@ -514,7 +514,7 @@ export const getAuthProviderCallbackQueryOptions = <
 		Awaited<ReturnType<typeof authProviderCallback>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type AuthProviderCallbackQueryResult = NonNullable<Awaited<ReturnType<typeof authProviderCallback>>>;
@@ -535,7 +535,7 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authProviderCallback>>, TError = void>(
 	params: AuthProviderCallbackParams,
 	options?: {
@@ -551,7 +551,7 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authProviderCallback>>, TError = void>(
 	params: AuthProviderCallbackParams,
 	options?: {
@@ -559,7 +559,7 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary OAuth provider callback
  */
@@ -571,11 +571,11 @@ export function useAuthProviderCallback<TData = Awaited<ReturnType<typeof authPr
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getAuthProviderCallbackQueryOptions(params, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -628,7 +628,7 @@ export const getAuthProviderLoginQueryOptions = <
 		Awaited<ReturnType<typeof authProviderLogin>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type AuthProviderLoginQueryResult = NonNullable<Awaited<ReturnType<typeof authProviderLogin>>>;
@@ -648,7 +648,7 @@ export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProvi
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProviderLogin>>, TError = void>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof authProviderLogin>>, TError, TData>> &
@@ -663,14 +663,14 @@ export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProvi
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProviderLogin>>, TError = void>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof authProviderLogin>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Start OAuth login
  */
@@ -681,11 +681,11 @@ export function useAuthProviderLogin<TData = Awaited<ReturnType<typeof authProvi
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getAuthProviderLoginQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -747,7 +747,7 @@ export const getGetAuthenticatedUserQueryOptions = <
 		Awaited<ReturnType<typeof getAuthenticatedUser>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetAuthenticatedUserQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthenticatedUser>>>;
@@ -767,7 +767,7 @@ export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAut
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthenticatedUser>>, TError, TData>> &
@@ -782,14 +782,14 @@ export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAut
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAuthenticatedUser>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthenticatedUser>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get authenticated user
  */
@@ -800,11 +800,11 @@ export function useGetAuthenticatedUser<TData = Awaited<ReturnType<typeof getAut
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetAuthenticatedUserQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -859,7 +859,7 @@ export const getLogoutQueryOptions = <TData = Awaited<ReturnType<typeof logout>>
 		Awaited<ReturnType<typeof logout>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type LogoutQueryResult = NonNullable<Awaited<ReturnType<typeof logout>>>;
@@ -875,7 +875,7 @@ export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = v
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = void>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>> &
@@ -886,14 +886,14 @@ export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = v
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = void>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Logout
  */
@@ -904,11 +904,11 @@ export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = v
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getLogoutQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -970,7 +970,7 @@ export const getCheckHealthQueryOptions = <
 		Awaited<ReturnType<typeof checkHealth>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type CheckHealthQueryResult = NonNullable<Awaited<ReturnType<typeof checkHealth>>>;
@@ -990,7 +990,7 @@ export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, 
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>> &
@@ -1005,14 +1005,14 @@ export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, 
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof checkHealth>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Health Check
  */
@@ -1023,11 +1023,11 @@ export function useCheckHealth<TData = Awaited<ReturnType<typeof checkHealth>>, 
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getCheckHealthQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -1099,7 +1099,7 @@ export const getGetModsQueryOptions = <TData = Awaited<ReturnType<typeof getMods
 		Awaited<ReturnType<typeof getMods>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetModsQueryResult = NonNullable<Awaited<ReturnType<typeof getMods>>>;
@@ -1116,7 +1116,7 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = ErrorData>(
 	params: GetModsParams,
 	options?: {
@@ -1128,7 +1128,7 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError = ErrorData>(
 	params: GetModsParams,
 	options?: {
@@ -1136,7 +1136,7 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mods
  */
@@ -1148,11 +1148,11 @@ export function useGetMods<TData = Awaited<ReturnType<typeof getMods>>, TError =
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModsQueryOptions(params, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -1222,7 +1222,7 @@ export const getGetModByIdQueryOptions = <
 		Awaited<ReturnType<typeof getModById>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getModById>>>;
@@ -1243,7 +1243,7 @@ export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TE
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404 | ErrorData>(
 	id: string,
 	options?: {
@@ -1259,7 +1259,7 @@ export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TE
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TError = GetModById404 | ErrorData>(
 	id: string,
 	options?: {
@@ -1267,7 +1267,7 @@ export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TE
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mod by ID
  */
@@ -1279,11 +1279,11 @@ export function useGetModById<TData = Awaited<ReturnType<typeof getModById>>, TE
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModByIdQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -1350,7 +1350,7 @@ export const getGetModReleasesQueryOptions = <TData = Awaited<ReturnType<typeof 
 		Awaited<ReturnType<typeof getModReleases>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetModReleasesQueryResult = NonNullable<Awaited<ReturnType<typeof getModReleases>>>;
@@ -1371,7 +1371,7 @@ export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleas
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
@@ -1387,7 +1387,7 @@ export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleas
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
@@ -1395,7 +1395,7 @@ export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleas
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mod releases
  */
@@ -1407,11 +1407,11 @@ export function useGetModReleases<TData = Awaited<ReturnType<typeof getModReleas
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModReleasesQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -1489,7 +1489,7 @@ export const getGetLatestModReleaseByIdQueryOptions = <
 		Awaited<ReturnType<typeof getLatestModReleaseById>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetLatestModReleaseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getLatestModReleaseById>>>;
@@ -1513,7 +1513,7 @@ export function useGetLatestModReleaseById<
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetLatestModReleaseById<
 	TData = Awaited<ReturnType<typeof getLatestModReleaseById>>,
 	TError = GetLatestModReleaseById404 | ErrorData,
@@ -1532,7 +1532,7 @@ export function useGetLatestModReleaseById<
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetLatestModReleaseById<
 	TData = Awaited<ReturnType<typeof getLatestModReleaseById>>,
 	TError = GetLatestModReleaseById404 | ErrorData,
@@ -1543,7 +1543,7 @@ export function useGetLatestModReleaseById<
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get latest mod release by ID
  */
@@ -1558,11 +1558,11 @@ export function useGetLatestModReleaseById<
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetLatestModReleaseByIdQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -1637,7 +1637,7 @@ export const getGetModReleaseByIdQueryOptions = <
 		Awaited<ReturnType<typeof getModReleaseById>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetModReleaseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getModReleaseById>>>;
@@ -1659,7 +1659,7 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
@@ -1676,7 +1676,7 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
@@ -1685,7 +1685,7 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get mod release by ID
  */
@@ -1698,11 +1698,11 @@ export function useGetModReleaseById<TData = Awaited<ReturnType<typeof getModRel
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetModReleaseByIdQueryOptions(id, releaseId, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -1877,7 +1877,7 @@ export const getGetServerMetricsQueryOptions = <
 		Awaited<ReturnType<typeof getServerMetrics>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetServerMetricsQueryResult = NonNullable<Awaited<ReturnType<typeof getServerMetrics>>>;
@@ -1897,7 +1897,7 @@ export function useGetServerMetrics<TData = Awaited<ReturnType<typeof getServerM
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetServerMetrics<TData = Awaited<ReturnType<typeof getServerMetrics>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getServerMetrics>>, TError, TData>> &
@@ -1912,14 +1912,14 @@ export function useGetServerMetrics<TData = Awaited<ReturnType<typeof getServerM
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetServerMetrics<TData = Awaited<ReturnType<typeof getServerMetrics>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getServerMetrics>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Server Metrics
  */
@@ -1930,11 +1930,11 @@ export function useGetServerMetrics<TData = Awaited<ReturnType<typeof getServerM
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetServerMetricsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -1996,7 +1996,7 @@ export const getGetFeaturedModsQueryOptions = <
 		Awaited<ReturnType<typeof getFeaturedMods>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetFeaturedModsQueryResult = NonNullable<Awaited<ReturnType<typeof getFeaturedMods>>>;
@@ -2016,7 +2016,7 @@ export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeatured
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>> &
@@ -2031,14 +2031,14 @@ export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeatured
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeaturedMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeaturedMods>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Featured mods
  */
@@ -2049,11 +2049,11 @@ export function useGetFeaturedMods<TData = Awaited<ReturnType<typeof getFeatured
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetFeaturedModsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -2115,7 +2115,7 @@ export const getGetPopularModsQueryOptions = <
 		Awaited<ReturnType<typeof getPopularMods>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetPopularModsQueryResult = NonNullable<Awaited<ReturnType<typeof getPopularMods>>>;
@@ -2135,7 +2135,7 @@ export function useGetPopularMods<TData = Awaited<ReturnType<typeof getPopularMo
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPopularMods<TData = Awaited<ReturnType<typeof getPopularMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPopularMods>>, TError, TData>> &
@@ -2150,14 +2150,14 @@ export function useGetPopularMods<TData = Awaited<ReturnType<typeof getPopularMo
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPopularMods<TData = Awaited<ReturnType<typeof getPopularMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPopularMods>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Popular mods
  */
@@ -2168,11 +2168,11 @@ export function useGetPopularMods<TData = Awaited<ReturnType<typeof getPopularMo
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetPopularModsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -2234,7 +2234,7 @@ export const getGetCategoriesQueryOptions = <
 		Awaited<ReturnType<typeof getCategories>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof getCategories>>>;
@@ -2254,7 +2254,7 @@ export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>> &
@@ -2269,14 +2269,14 @@ export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCategories>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Categories
  */
@@ -2287,11 +2287,11 @@ export function useGetCategories<TData = Awaited<ReturnType<typeof getCategories
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetCategoriesQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -2350,7 +2350,7 @@ export const getGetTagsQueryOptions = <TData = Awaited<ReturnType<typeof getTags
 		Awaited<ReturnType<typeof getTags>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetTagsQueryResult = NonNullable<Awaited<ReturnType<typeof getTags>>>;
@@ -2366,7 +2366,7 @@ export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError =
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>> &
@@ -2377,14 +2377,14 @@ export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError =
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get Tags
  */
@@ -2395,11 +2395,11 @@ export function useGetTags<TData = Awaited<ReturnType<typeof getTags>>, TError =
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetTagsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -2466,7 +2466,7 @@ export const getGetUserModsQueryOptions = <
 		Awaited<ReturnType<typeof getUserMods>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserMods>>>;
@@ -2486,7 +2486,7 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>> &
@@ -2501,14 +2501,14 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, TError = ErrorData>(
 	options?: {
 		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUserMods>>, TError, TData>>;
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mods
  */
@@ -2519,11 +2519,11 @@ export function useGetUserMods<TData = Awaited<ReturnType<typeof getUserMods>>, 
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModsQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -2680,7 +2680,7 @@ export const getGetUserModByIdQueryOptions = <TData = Awaited<ReturnType<typeof 
 		Awaited<ReturnType<typeof getUserModById>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModById>>>;
@@ -2701,7 +2701,7 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = ErrorData>(
 	id: string,
 	options?: {
@@ -2717,7 +2717,7 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModById>>, TError = ErrorData>(
 	id: string,
 	options?: {
@@ -2725,7 +2725,7 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mod by ID
  */
@@ -2737,11 +2737,11 @@ export function useGetUserModById<TData = Awaited<ReturnType<typeof getUserModBy
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModByIdQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -3019,7 +3019,7 @@ export const getGetUserModReleasesQueryOptions = <
 		Awaited<ReturnType<typeof getUserModReleases>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModReleasesQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModReleases>>>;
@@ -3040,7 +3040,7 @@ export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserM
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
@@ -3056,7 +3056,7 @@ export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserM
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserModReleases>>, TError = ErrorData>(
 	id: string,
 	options?: {
@@ -3064,7 +3064,7 @@ export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserM
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mod releases
  */
@@ -3076,11 +3076,11 @@ export function useGetUserModReleases<TData = Awaited<ReturnType<typeof getUserM
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModReleasesQueryOptions(id, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };
@@ -3278,7 +3278,7 @@ export const getGetUserModReleaseByIdQueryOptions = <
 		Awaited<ReturnType<typeof getUserModReleaseById>>,
 		TError,
 		TData
-	> & { queryKey: DataTag<QueryKey, TData> };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type GetUserModReleaseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUserModReleaseById>>>;
@@ -3300,7 +3300,7 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
@@ -3317,7 +3317,7 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUserModReleaseById>>, TError = ErrorData>(
 	id: string,
 	releaseId: string,
@@ -3326,7 +3326,7 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user mod release by ID
  */
@@ -3339,11 +3339,11 @@ export function useGetUserModReleaseById<TData = Awaited<ReturnType<typeof getUs
 		request?: SecondParameter<typeof fetch>;
 	},
 	queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetUserModReleaseByIdQueryOptions(id, releaseId, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-		queryKey: DataTag<QueryKey, TData>;
+		queryKey: DataTag<QueryKey, TData, TError>;
 	};
 
 	return { ...query, queryKey: queryOptions.queryKey };

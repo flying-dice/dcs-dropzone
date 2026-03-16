@@ -6,7 +6,6 @@
 		"biome": "biome check --write",
 		"build": "bun build.ts",
 		"build:serve": "npx http-server ./dist -p 8081",
-		"clientgen": "bun run --bun orval --config orval.config.cjs",
 		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",
 		"drizzle": "drizzle-kit generate --config drizzle.config.ts --name=init",
@@ -63,7 +62,6 @@
 		"@types/fs-extra": "^11.0.4",
 		"@types/react": "19.2.3",
 		"@types/react-dom": "19.2.3",
-		"@types/ringbufferjs": "^1.1.2",
-		"orval": "^8.0.3"
+		"@types/ringbufferjs": "^1.1.2"
 	}
 }

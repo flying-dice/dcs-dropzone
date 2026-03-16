@@ -1,7 +1,8 @@
 import { Anchor, Checkbox, Progress, Table, Text, Tooltip } from "@mantine/core";
+import { openModal } from "@mantine/modals";
 import { type ModAndReleaseData, ModAndReleaseDataStatus } from "@packages/clients/daemon";
 import { GetLatestModReleaseById404Error, type ModReleaseData } from "@packages/clients/webapp";
-import { ModActionsMenu, useAppTranslation } from "@packages/dzui";
+import { DownloadedModInformation, ModActionsMenu, useAppTranslation } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useDaemon } from "../../hooks/useDaemon.ts";
@@ -25,6 +26,14 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 	const isLatest = latest ? latest.versionHash === props.mod.versionHash : undefined;
 	const handleUpdate = latest ? () => update(false, props.mod.modId, props.mod.releaseId, latest.id) : undefined;
 	const handleRemove = () => remove(props.mod.releaseId);
+
+	function handleShowSymlinks() {
+		openModal({
+			size: "xl",
+			title: props.mod.modName,
+			children: <DownloadedModInformation mod={props.mod} />,
+		});
+	}
 
 	return (
 		<Table.Tr>
@@ -103,6 +112,7 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 					onUpdate={handleUpdate}
 					onRemove={handleRemove}
 					onToggle={handleToggle}
+					onShowSymlinks={handleShowSymlinks}
 				/>
 			</Table.Td>
 		</Table.Tr>

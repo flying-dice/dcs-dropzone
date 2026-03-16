@@ -1,8 +1,8 @@
 import { Badge, Group, type MantineColor, Paper, Progress, Stack, Text, ThemeIcon } from "@mantine/core";
 import { ModReleaseAssetStatusDataStatus } from "@packages/clients/daemon";
-import { useAppTranslation } from "@packages/dzui";
 import { FaFileArchive } from "react-icons/fa";
 import { FaFile } from "react-icons/fa6";
+import { useAppTranslation } from "./useAppTranslation.ts";
 
 const colors: Record<ModReleaseAssetStatusDataStatus, MantineColor> = {
 	[ModReleaseAssetStatusDataStatus.PENDING]: "gray",

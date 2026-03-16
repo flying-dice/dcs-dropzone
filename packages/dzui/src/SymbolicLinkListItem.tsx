@@ -1,8 +1,10 @@
-import { Group, Paper, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Group, Paper, SimpleGrid, Stack, Text, TextInput, ThemeIcon } from "@mantine/core";
 import { ModReleaseSymbolicLinkDataDestRoot } from "@packages/clients/webapp";
-import { type I18nKeys, useAppTranslation } from "@packages/dzui";
 import { FaFileCode } from "react-icons/fa";
+import { TbFileSymlink } from "react-icons/tb";
+import type { I18nKeys } from "./I18nKeys.ts";
 import { PathWithRoot } from "./PathWithRoot.tsx";
+import { useAppTranslation } from "./useAppTranslation.ts";
 
 export type SymbolicLinkListItemProps = {
 	name: string;
@@ -11,6 +13,7 @@ export type SymbolicLinkListItemProps = {
 	destRoot: ModReleaseSymbolicLinkDataDestRoot;
 	onClick?: () => void;
 	"data-testid"?: string;
+	installedPath?: string | null;
 };
 
 const destRootLabels: Record<ModReleaseSymbolicLinkDataDestRoot, I18nKeys> = {
@@ -52,6 +55,16 @@ export function SymbolicLinkListItem(props: SymbolicLinkListItemProps) {
 						<PathWithRoot size={"xs"} path={props.dest} root={t(destRootLabels[props.destRoot])} />
 					</Stack>
 				</SimpleGrid>
+
+				{props.installedPath && (
+					<TextInput
+						size={"sm"}
+						leftSection={<TbFileSymlink />}
+						value={props.installedPath ?? ""}
+						label={t("SYMBOLIC_LINK_INSTALLED_PATH_LABEL")}
+						readOnly
+					/>
+				)}
 			</Stack>
 		</Paper>
 	);
