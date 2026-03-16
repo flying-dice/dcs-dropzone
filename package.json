@@ -30,7 +30,7 @@
 			[
 				"@semantic-release/exec",
 				{
-					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; bun run daemon:build\""
+					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; iscc /DMyAppVersion=${nextRelease.version} apps/launcher/installer.iss; if (!$?) { exit 1 }; bun run daemon:build\""
 				}
 			],
 			[
@@ -45,7 +45,8 @@
 					"assets": [
 						"apps/daemon/dist/dcs-dropzone.tar",
 						"apps/daemon/dist/dcs-dropzone.tar.manifest",
-						"apps/launcher/dist/Dropzone_Launcher.exe"
+						"apps/launcher/dist/Dropzone_Launcher.exe",
+						"apps/launcher/dist/Dropzone_Setup.exe"
 					]
 				}
 			],
