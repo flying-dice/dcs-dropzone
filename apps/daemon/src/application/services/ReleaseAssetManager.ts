@@ -2,6 +2,7 @@ import { basename, join } from "node:path";
 import { Log } from "@packages/decorators";
 import { type JobRecord, type JobRecordRepository, JobState, Queue, QueueEvents } from "@packages/queue";
 import { getLogger } from "log4js";
+import { err, ok, type Result } from "neverthrow";
 import { inferAssetStatusFromJobs } from "../functions/inferAssetStatusFromJobs.ts";
 import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import type { DownloadJobData, DownloadJobResult, DownloadProcessor } from "../ports/DownloadProcessor.ts";
@@ -10,7 +11,7 @@ import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import { ModReleaseAssetStatusData } from "../schemas/ModAndReleaseData.ts";
 import type { ReleaseAsset } from "../schemas/ReleaseAsset.ts";
-import type { PathResolver } from "./PathResolver.ts";
+import type { DropzoneModsDirNotConfigured, PathResolver } from "./PathResolver.ts";
 
 const logger = getLogger("ReleaseAssetCoordinator");
 
@@ -80,29 +81,34 @@ export class ReleaseAssetManager {
 	}
 
 	@Log(logger)
-	addRelease(releaseId: string) {
-		const releaseFolder = this.deps.pathResolver.resolveReleasePath(releaseId);
+	addRelease(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
+		const releaseFolderResult = this.deps.pathResolver.resolveReleasePath(releaseId);
+		if (releaseFolderResult.isErr()) return err(releaseFolderResult.error);
+
+		const releaseFolder = releaseFolderResult.value;
 		this.deps.fileSystem.ensureDir(releaseFolder);
 
 		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(releaseId);
 
 		for (const asset of assets) {
 			for (const url of asset.urls) {
-				const downloadJobData = this.getDownloadJobData(asset, url);
+				const downloadJobData = this.getDownloadJobData(releaseFolder, asset, url);
 				const downloadJob = this.queue.add(this.deps.downloadProcessor.name, downloadJobData);
 				this.deps.releaseRepository.addJobForRelease(releaseId, downloadJob.jobId);
 			}
 
-			const extractJobData = this.getExtractJobData(asset);
+			const extractJobData = this.getExtractJobData(releaseFolder, asset);
 			if (extractJobData) {
 				const extractJob = this.queue.add(this.deps.extractProcessor.name, extractJobData, JobState.Pending);
 				this.deps.releaseRepository.addJobForRelease(releaseId, extractJob.jobId);
 			}
 		}
+
+		return ok(undefined);
 	}
 
 	@Log(logger)
-	removeRelease(releaseId: string) {
+	removeRelease(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
 		for (const jobId of this.deps.releaseRepository.getJobIdsForRelease(releaseId)) {
 			const job = this.queue.getLatestByJobId(jobId);
 			if (job && [JobState.Pending, JobState.Waiting, JobState.Running].includes(job.state)) {
@@ -110,9 +116,13 @@ export class ReleaseAssetManager {
 			}
 		}
 
-		const releaseFolder = this.deps.pathResolver.resolveReleasePath(releaseId);
-		this.deps.fileSystem.removeDir(releaseFolder);
+		const releaseFolderResult = this.deps.pathResolver.resolveReleasePath(releaseId);
+		if (releaseFolderResult.isErr()) return err(releaseFolderResult.error);
+
+		this.deps.fileSystem.removeDir(releaseFolderResult.value);
 		this.deps.releaseRepository.clearJobsForRelease(releaseId);
+
+		return ok(undefined);
 	}
 
 	@Log(logger)
@@ -166,19 +176,22 @@ export class ReleaseAssetManager {
 		};
 	}
 
-	private getDownloadJobData(asset: ReleaseAsset, url: ReleaseAsset["urls"][number]): DownloadJobData {
+	private getDownloadJobData(
+		releaseFolder: string,
+		asset: ReleaseAsset,
+		url: ReleaseAsset["urls"][number],
+	): DownloadJobData {
 		return {
 			url: url.url,
 			urlId: url.id,
-			destinationFolder: this.deps.pathResolver.resolveReleasePath(asset.releaseId),
+			destinationFolder: releaseFolder,
 			releaseId: asset.releaseId,
 			assetId: asset.id,
 		};
 	}
 
-	private getExtractJobData(asset: ReleaseAsset): ExtractJobData | undefined {
+	private getExtractJobData(releaseFolder: string, asset: ReleaseAsset): ExtractJobData | undefined {
 		if (asset.isArchive) {
-			const releaseFolder = this.deps.pathResolver.resolveReleasePath(asset.releaseId);
 			const firstUrl = asset.urls[0]?.url;
 			if (firstUrl) {
 				const archivePath = join(releaseFolder, decodeURIComponent(basename(firstUrl)));

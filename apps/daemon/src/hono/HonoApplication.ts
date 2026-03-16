@@ -67,6 +67,9 @@ export class HonoApplication extends Hono<Env> {
 		self.use("*", requestResponseLogger);
 		self.config();
 
+		self.getSettings();
+		self.putSettings();
+
 		self.addReleaseToDaemon();
 		self.getAllDaemonReleases();
 		self.removeReleaseFromDaemon();
@@ -121,6 +124,7 @@ export class HonoApplication extends Hono<Env> {
 				tags: ["Downloads"],
 				responses: {
 					[StatusCodes.OK]: null,
+					[StatusCodes.UNPROCESSABLE_ENTITY]: ErrorData,
 				},
 			}),
 			validator("json", ModAndReleaseData, loggingHook),
@@ -128,7 +132,10 @@ export class HonoApplication extends Hono<Env> {
 			(c) => {
 				const modAndRelease = c.req.valid("json");
 
-				c.var.app.addRelease(modAndRelease);
+				const result = c.var.app.addRelease(modAndRelease);
+				if (result.isErr()) {
+					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+				}
 
 				return c.json(null, StatusCodes.OK);
 			},
@@ -160,6 +167,7 @@ export class HonoApplication extends Hono<Env> {
 				tags: ["Downloads"],
 				responses: {
 					[StatusCodes.OK]: null,
+					[StatusCodes.UNPROCESSABLE_ENTITY]: ErrorData,
 				},
 			}),
 			validator(
@@ -172,7 +180,10 @@ export class HonoApplication extends Hono<Env> {
 			(c) => {
 				const { releaseId } = c.req.valid("param");
 
-				c.var.app.removeRelease(releaseId);
+				const result = c.var.app.removeRelease(releaseId);
+				if (result.isErr()) {
+					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+				}
 
 				return c.json(null, StatusCodes.OK);
 			},
@@ -230,6 +241,89 @@ export class HonoApplication extends Hono<Env> {
 		);
 	}
 
+	private getSettings() {
+		const SettingsResponse = z.object({
+			dcsWorkingDir: z.string().optional(),
+			dcsInstallDir: z.string().optional(),
+			dropzoneModsDir: z.string().optional(),
+		});
+
+		this.get(
+			"/api/settings",
+			describeJsonRoute({
+				operationId: "getSettings",
+				summary: "Get Settings",
+				description: "Retrieves the current daemon path settings.",
+				tags: ["Settings"],
+				responses: {
+					[StatusCodes.OK]: SettingsResponse,
+				},
+			}),
+			(c) => {
+				return c.json(
+					{
+						dcsWorkingDir: c.var.app.settings.getDcsWorkingDir(),
+						dcsInstallDir: c.var.app.settings.getDcsInstallDir(),
+						dropzoneModsDir: c.var.app.settings.getDropzoneModsDir(),
+					},
+					StatusCodes.OK,
+				);
+			},
+		);
+	}
+
+	private putSettings() {
+		const SettingsBody = z.object({
+			dcsWorkingDir: z.string().optional(),
+			dcsInstallDir: z.string().optional(),
+			dropzoneModsDir: z.string().optional(),
+		});
+
+		const SettingsResponse = z.object({
+			dcsWorkingDir: z.string().optional(),
+			dcsInstallDir: z.string().optional(),
+			dropzoneModsDir: z.string().optional(),
+		});
+
+		this.put(
+			"/api/settings",
+			describeJsonRoute({
+				operationId: "putSettings",
+				summary: "Update Settings",
+				description: "Updates the daemon path settings. Only provided fields are updated.",
+				tags: ["Settings"],
+				responses: {
+					[StatusCodes.OK]: SettingsResponse,
+				},
+			}),
+			validator("json", SettingsBody, loggingHook),
+			(c) => {
+				const body = c.req.valid("json");
+
+				if (body.dcsWorkingDir !== undefined) {
+					c.var.app.settings.setDcsWorkingDir(body.dcsWorkingDir);
+				}
+
+				if (body.dcsInstallDir !== undefined) {
+					c.var.app.settings.setDcsInstallDir(body.dcsInstallDir);
+				}
+
+				if (body.dropzoneModsDir !== undefined) {
+					c.var.app.settings.setDropzoneModsDir(body.dropzoneModsDir);
+				}
+
+				return c.json(
+					{
+						dcsWorkingDir: c.var.app.settings.getDcsWorkingDir(),
+						dcsInstallDir: c.var.app.settings.getDcsInstallDir(),
+						dropzoneModsDir: c.var.app.settings.getDropzoneModsDir(),
+					},
+					StatusCodes.OK,
+				);
+			},
+		);
+	}
+
 	private enableRelease() {
 		this.post(
 			"/api/toggle/:releaseId/enable",
@@ -237,12 +331,19 @@ export class HonoApplication extends Hono<Env> {
 				operationId: "enableRelease",
 				tags: ["Toggle"],
 				summary: "Enable a release by creating its symbolic links",
-				responses: { [StatusCodes.OK]: OkData, [StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData },
+				responses: {
+					[StatusCodes.OK]: OkData,
+					[StatusCodes.UNPROCESSABLE_ENTITY]: ErrorData,
+					[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
+				},
 			}),
 			validator("param", z.object({ releaseId: z.string() }), loggingHook),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
-				await c.var.app.enableRelease(releaseId);
+				const result = await c.var.app.enableRelease(releaseId);
+				if (result.isErr()) {
+					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+				}
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
@@ -255,12 +356,19 @@ export class HonoApplication extends Hono<Env> {
 				operationId: "disableRelease",
 				tags: ["Toggle"],
 				summary: "Disable a release by removing its symbolic links",
-				responses: { [StatusCodes.OK]: OkData, [StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData },
+				responses: {
+					[StatusCodes.OK]: OkData,
+					[StatusCodes.UNPROCESSABLE_ENTITY]: ErrorData,
+					[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
+				},
 			}),
 			validator("param", z.object({ releaseId: z.string() }), loggingHook),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
-				c.var.app.disableRelease(releaseId);
+				const result = c.var.app.disableRelease(releaseId);
+				if (result.isErr()) {
+					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+				}
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);

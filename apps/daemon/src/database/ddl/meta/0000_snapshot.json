@@ -1,33 +1,9 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "20a44a67-1a40-46d9-9251-15ab827885da",
+	"id": "5fe2cc68-b6bb-4676-ad08-2fd8e32c079a",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
-		"APP_ATTRIBUTES": {
-			"name": "APP_ATTRIBUTES",
-			"columns": {
-				"key": {
-					"name": "key",
-					"type": "text",
-					"primaryKey": true,
-					"notNull": true,
-					"autoincrement": false
-				},
-				"value": {
-					"name": "value",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false
-				}
-			},
-			"indexes": {},
-			"foreignKeys": {},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
-			"checkConstraints": {}
-		},
 		"JOBS": {
 			"name": "JOBS",
 			"columns": {
@@ -179,6 +155,30 @@
 			"uniqueConstraints": {},
 			"checkConstraints": {}
 		},
+		"KEY_VALUE": {
+			"name": "KEY_VALUE",
+			"columns": {
+				"key": {
+					"name": "key",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"value": {
+					"name": "value",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
 		"MOD_RELEASES": {
 			"name": "MOD_RELEASES",
 			"columns": {
@@ -223,6 +223,14 @@
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
+				},
+				"enabled": {
+					"name": "enabled",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": false
 				}
 			},
 			"indexes": {},

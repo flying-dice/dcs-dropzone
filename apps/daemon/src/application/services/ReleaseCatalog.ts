@@ -1,12 +1,13 @@
 import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
+import { err, ok, type Result } from "neverthrow";
 import { AssetStatus } from "../enums/AssetStatus.ts";
 import { inferReleaseStatusFromAssets } from "../functions/inferReleaseStatusFromAssets.ts";
 import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import type { PathResolver } from "./PathResolver.ts";
+import type { DropzoneModsDirNotConfigured, PathResolver } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 
 const logger = getLogger("ReleaseCatalog");
@@ -22,19 +23,24 @@ export class ReleaseCatalog {
 	constructor(protected deps: Deps) {}
 
 	@Log(logger)
-	add(data: ModAndReleaseData) {
+	add(data: ModAndReleaseData): Result<void, DropzoneModsDirNotConfigured> {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
 		this.deps.releaseRepository.saveRelease(data);
-		this.deps.releaseAssetManager.addRelease(data.releaseId);
+		const addResult = this.deps.releaseAssetManager.addRelease(data.releaseId);
+		if (addResult.isErr()) return err(addResult.error);
 
 		logger.info(`Successfully added releaseId: ${data.releaseId}`);
+		return ok(undefined);
 	}
 
 	@Log(logger)
-	remove(releaseId: string): void {
-		this.deps.releaseAssetManager.removeRelease(releaseId);
+	remove(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
+		const removeResult = this.deps.releaseAssetManager.removeRelease(releaseId);
+		if (removeResult.isErr()) return err(removeResult.error);
+
 		this.deps.releaseRepository.deleteRelease(releaseId);
+		return ok(undefined);
 	}
 
 	@Log(logger)

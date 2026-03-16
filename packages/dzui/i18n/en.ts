@@ -287,5 +287,10 @@ export default {
 		COUNT_DOWNLOADS: "{{count}} Downloads",
 		DISCOVER: "Discover",
 		LIBRARY: "Library",
+
+		DropzoneModsDirNotConfigured:
+			"Dropzone mods directory is not configured. Please set it in Settings before managing releases.",
+		DcsPathNotConfigured:
+			"DCS path is not configured. Please set your DCS directories in Settings before enabling releases.",
 	},
 };

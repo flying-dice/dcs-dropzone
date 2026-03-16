@@ -1,9 +1,10 @@
 import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
+import { err, ok, type Result } from "neverthrow";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import type { PathResolver } from "./PathResolver.ts";
+import type { DcsPathNotConfigured, PathResolver, PathResolverError } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 
 const logger = getLogger("ReleaseToggle");
@@ -20,7 +21,7 @@ export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
 	@Log(logger)
-	async enable(releaseId: string): Promise<void> {
+	async enable(releaseId: string): Promise<Result<void, PathResolverError>> {
 		logger.info(`Enabling Release ${releaseId}`);
 		this.ensureReleaseIsReady(releaseId);
 
@@ -28,8 +29,14 @@ export class ReleaseToggle {
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
 
 		for (const link of links) {
-			const srcAbs = this.deps.pathResolver.resolveReleasePath(releaseId, link.src);
-			const destAbs = this.deps.pathResolver.resolveSymbolicLinkPath(link.destRoot, link.dest);
+			const srcAbsResult = this.deps.pathResolver.resolveReleasePath(releaseId, link.src);
+			if (srcAbsResult.isErr()) return err(srcAbsResult.error);
+
+			const destAbsResult = this.deps.pathResolver.resolveSymbolicLinkPath(link.destRoot, link.dest);
+			if (destAbsResult.isErr()) return err(destAbsResult.error);
+
+			const srcAbs = srcAbsResult.value;
+			const destAbs = destAbsResult.value;
 
 			logger.debug(`Creating symlink (release=${releaseId}, linkId=${link.id}, src=${srcAbs}, dest=${destAbs})`);
 			await this.deps.fileSystem.ensureSymlink(srcAbs, destAbs);
@@ -41,13 +48,15 @@ export class ReleaseToggle {
 		this.deps.releaseRepository.setEnabled(releaseId, true);
 
 		logger.info(`Rebuilding mission scripting files after enabling release ${releaseId}`);
-		this.deps.missionScriptingFilesManager.rebuild();
+		const rebuildResult = this.deps.missionScriptingFilesManager.rebuild();
+		if (rebuildResult.isErr()) return err(rebuildResult.error);
 
 		logger.info(`Finished enabling Release ${releaseId}`);
+		return ok(undefined);
 	}
 
 	@Log(logger)
-	disable(releaseId: string): void {
+	disable(releaseId: string): Result<void, DcsPathNotConfigured> {
 		logger.info(`Disabling Release ${releaseId}`);
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
@@ -60,8 +69,8 @@ export class ReleaseToggle {
 					this.deps.fileSystem.removeDir(link.installedPath);
 					this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, null);
 					logger.debug(`Cleared installed symlink path for linkId ${link.id}`);
-				} catch (err) {
-					logger.error(`Failed to remove path for linkId ${link.id} at ${link.installedPath}: ${err}`);
+				} catch (e) {
+					logger.error(`Failed to remove path for linkId ${link.id} at ${link.installedPath}: ${e}`);
 				}
 			} else {
 				logger.trace(`Skipping linkId ${link.id} (no installedPath)`);
@@ -71,9 +80,11 @@ export class ReleaseToggle {
 		this.deps.releaseRepository.setEnabled(releaseId, false);
 
 		logger.info(`Rebuilding mission scripting files after disabling release ${releaseId}`);
-		this.deps.missionScriptingFilesManager.rebuild();
+		const rebuildResult = this.deps.missionScriptingFilesManager.rebuild();
+		if (rebuildResult.isErr()) return err(rebuildResult.error);
 
 		logger.info(`Finished disabling Release ${releaseId}`);
+		return ok(undefined);
 	}
 
 	private ensureReleaseIsReady(releaseId: string): void {

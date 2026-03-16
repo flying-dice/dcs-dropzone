@@ -1,13 +1,32 @@
 import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
+import { err, ok, type Result } from "neverthrow";
 import type { SymbolicLinkDestRoot } from "webapp";
 import type { FileSystem } from "../ports/FileSystem.ts";
 
 const logger = getLogger("PathResolver");
 
+export class DropzoneModsDirNotConfigured extends Error {
+	readonly type = "DropzoneModsDirNotConfigured" as const;
+	constructor() {
+		super("Dropzone mods directory is not configured");
+		this.name = "DropzoneModsDirNotConfigured";
+	}
+}
+
+export class DcsPathNotConfigured extends Error {
+	readonly type = "DcsPathNotConfigured" as const;
+	constructor() {
+		super("DCS path is not configured");
+		this.name = "DcsPathNotConfigured";
+	}
+}
+
+export type PathResolverError = DropzoneModsDirNotConfigured | DcsPathNotConfigured;
+
 type Deps = {
-	dropzoneModsFolder: string;
-	dcsPaths: Record<SymbolicLinkDestRoot, string>;
+	getDropzoneModsFolder: () => string | undefined;
+	getDcsPathForSymbolicLinkDestRoot: (root: SymbolicLinkDestRoot) => string | undefined;
 	fileSystem: FileSystem;
 };
 
@@ -15,26 +34,32 @@ export class PathResolver {
 	constructor(protected deps: Deps) {}
 
 	@Log(logger)
-	resolveReleasePath(releaseId: string, path?: string): string {
-		if (path) {
-			return this.deps.fileSystem.resolve(this.deps.dropzoneModsFolder, releaseId, path);
+	resolveReleasePath(releaseId: string, path?: string): Result<string, DropzoneModsDirNotConfigured> {
+		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
+
+		if (!dropzoneModsFolder) {
+			return err(new DropzoneModsDirNotConfigured());
 		}
 
-		return this.deps.fileSystem.resolve(this.deps.dropzoneModsFolder, releaseId);
+		if (path) {
+			return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId, path));
+		}
+
+		return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId));
 	}
 
 	@Log(logger)
-	resolveSymbolicLinkPath(root: SymbolicLinkDestRoot, path?: string): string {
-		const rootPath = this.deps.dcsPaths[root];
+	resolveSymbolicLinkPath(root: SymbolicLinkDestRoot, path?: string): Result<string, DcsPathNotConfigured> {
+		const rootPath = this.deps.getDcsPathForSymbolicLinkDestRoot(root);
 
 		if (!rootPath) {
-			throw new Error(`Path for destRoot ${root} is not configured`);
+			return err(new DcsPathNotConfigured());
 		}
 
 		if (path) {
-			return this.deps.fileSystem.resolve(rootPath, path);
+			return ok(this.deps.fileSystem.resolve(rootPath, path));
 		}
 
-		return this.deps.fileSystem.resolve(rootPath);
+		return ok(this.deps.fileSystem.resolve(rootPath));
 	}
 }

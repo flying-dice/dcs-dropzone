@@ -2,12 +2,12 @@ import { Log } from "@packages/decorators";
 import { eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
-import type { AttributesRepository } from "../application/ports/AttributesRepository.ts";
-import { T_APP_ATTRIBUTES } from "../database/schema.ts";
+import type { KeyValueRepository } from "../application/ports/KeyValueRepository.ts";
+import { T_KEY_VALUE } from "../database/schema.ts";
 
-const logger = getLogger("DrizzleAttributesRepository");
+const logger = getLogger("DrizzleKeyValueRepository");
 
-export class DrizzleAttributesRepository implements AttributesRepository {
+export class DrizzleKeyValueRepository implements KeyValueRepository {
 	protected readonly db: BunSQLiteDatabase;
 
 	constructor(deps: {
@@ -18,7 +18,7 @@ export class DrizzleAttributesRepository implements AttributesRepository {
 
 	@Log(logger)
 	get(key: string): string | undefined {
-		const res = this.db.select().from(T_APP_ATTRIBUTES).where(eq(T_APP_ATTRIBUTES.key, key)).get();
+		const res = this.db.select().from(T_KEY_VALUE).where(eq(T_KEY_VALUE.key, key)).get();
 
 		if (res) {
 			return res.value as string;
@@ -28,10 +28,14 @@ export class DrizzleAttributesRepository implements AttributesRepository {
 	@Log(logger)
 	save(key: string, value: string): string {
 		const res = this.db
-			.insert(T_APP_ATTRIBUTES)
+			.insert(T_KEY_VALUE)
 			.values({
 				key,
 				value,
+			})
+			.onConflictDoUpdate({
+				target: T_KEY_VALUE.key,
+				set: { value },
 			})
 			.returning()
 			.get();

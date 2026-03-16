@@ -6,10 +6,16 @@ import { GithubAuthenticationProviderConfig } from "./authentication/GithubAuthe
 // https://bun.com/docs/guides/runtime/build-time-constants
 declare const __WEBAPP_URL: string;
 declare const __DAEMON_URL: string;
+declare const __ENABLE_SERVE_DEVELOPMENT: string;
+declare const __ENABLE_UI_DEBUG: string;
+declare const __ENABLE_GENERATE_SCHEMA: string;
 
 export const Constants = z.object({
 	WebappUrl: z.url().default("http://localhost:3000/"),
 	DaemonUrl: z.url().default("http://localhost:56499/"),
+	EnableServeDevelopment: z.coerce.boolean().default(true),
+	EnableUiDebug: z.coerce.boolean().default(true),
+	EnableGenerateSchema: z.coerce.boolean().default(true),
 });
 
 export type Constants = z.infer<typeof Constants>;
@@ -17,6 +23,9 @@ export type Constants = z.infer<typeof Constants>;
 export const constants = Constants.parse({
 	WebappUrl: typeof __WEBAPP_URL !== "undefined" ? __WEBAPP_URL : undefined,
 	DaemonUrl: typeof __DAEMON_URL !== "undefined" ? __DAEMON_URL : undefined,
+	EnableServeDevelopment: typeof __ENABLE_SERVE_DEVELOPMENT !== "undefined" ? __ENABLE_SERVE_DEVELOPMENT : undefined,
+	EnableUiDebug: typeof __ENABLE_UI_DEBUG !== "undefined" ? __ENABLE_UI_DEBUG : undefined,
+	EnableGenerateSchema: typeof __ENABLE_GENERATE_SCHEMA !== "undefined" ? __ENABLE_GENERATE_SCHEMA : undefined,
 });
 
 export const AppConfig = z.object({
@@ -49,7 +58,7 @@ export const appConfig = new RcConfig<AppConfig>("DropzoneWebapp", AppConfig, {
 	webappUrl: constants.WebappUrl,
 	daemonUrl: constants.DaemonUrl,
 
-	enableServeDevelopment: false,
-	enableUiDebug: false,
-	enableGenerateSchema: false,
+	enableServeDevelopment: constants.EnableServeDevelopment,
+	enableUiDebug: constants.EnableUiDebug,
+	enableGenerateSchema: constants.EnableGenerateSchema,
 });

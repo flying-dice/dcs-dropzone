@@ -9,7 +9,8 @@
 		"biome": "biome check --write",
 		"build": "bun build.ts",
 		"depcheck": "bunx depcheck",
-		"dev": "docker compose up -d mongodb && NODE_ENV=development bun --hot src/index.ts",
+		"dev": "bun --hot src/index.ts",
+		"dev:docker": "docker compose up -d mongodb && NODE_ENV=development bun --hot src/index.ts",
 		"start": "docker compose up --build",
 		"tests": "bun test",
 		"tsc": "tsc --noEmit"

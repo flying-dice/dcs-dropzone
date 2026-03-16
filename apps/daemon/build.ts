@@ -45,6 +45,9 @@ await Bun.build({
 		__WEBVIEW_WORKER_MODULE_PATH: JSON.stringify("./webview/worker.ts"),
 		__WEBAPP_URL: JSON.stringify(string("WEBAPP_URL", "http://localhost:3000/")),
 		__DAEMON_URL: JSON.stringify(string("DAEMON_URL", "http://localhost:56499/")),
+		__ENABLE_SERVE_DEVELOPMENT: JSON.stringify("false"),
+		__ENABLE_WEBVIEW_WORKER_DEBUG: JSON.stringify("false"),
+		__ENABLE_GENERATE_SCHEMA: JSON.stringify("false"),
 	},
 });
 

@@ -2,7 +2,7 @@ import type { JobErrorCode, JobState } from "@packages/queue";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 
-export const T_APP_ATTRIBUTES = sqliteTable("APP_ATTRIBUTES", {
+export const T_KEY_VALUE = sqliteTable("KEY_VALUE", {
 	key: text("key").primaryKey(),
 	value: text("value", { mode: "json" }).$type<any>().notNull(),
 });

@@ -23,19 +23,17 @@ export const TestCases: TestCase[] = [
 			const tempDir = new TestTempDir();
 			logger.info("Creating ProdApplication test case with temporary directory:", tempDir.path);
 
-			return {
-				app: new ProdApplication({
-					databaseUrl: ":memory:",
-					wgetExecutablePath: SYSTEM_WGET_PATH,
-					sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
-					dropzoneModsFolder: tempDir.join("dcs-dropzone", "mods"),
-					dcsPaths: {
-						DCS_WORKING_DIR: tempDir.join("dcs-dropzone", "dcs", "working"),
-						DCS_INSTALL_DIR: tempDir.join("dcs-dropzone", "dcs", "install"),
-					},
-				}),
-				tempDir,
-			};
+			const app = new ProdApplication({
+				databaseUrl: ":memory:",
+				wgetExecutablePath: SYSTEM_WGET_PATH,
+				sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
+			});
+
+			app.settings.setDropzoneModsDir(tempDir.join("dcs-dropzone", "mods"));
+			app.settings.setDcsWorkingDir(tempDir.join("dcs-dropzone", "dcs", "working"));
+			app.settings.setDcsInstallDir(tempDir.join("dcs-dropzone", "dcs", "install"));
+
+			return { app, tempDir };
 		},
 	},
 ];

@@ -1,7 +1,6 @@
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import { SymbolicLinkDestRoot } from "webapp";
 import { appConfig } from "./AppConfig.ts";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
@@ -15,11 +14,6 @@ const app = new ProdApplication({
 	databaseUrl: appConfig.config.databasePath,
 	wgetExecutablePath: appConfig.config.wgetPath,
 	sevenZipExecutablePath: appConfig.config.sevenzipPath,
-	dropzoneModsFolder: "C:\\Users\\jonat\\AppData\\Local\\DCSDropzone\\data",
-	dcsPaths: {
-		[SymbolicLinkDestRoot.DCS_INSTALL_DIR]: "D:\\Program Files\\Eagle Dynamics\\DCS World OpenBeta",
-		[SymbolicLinkDestRoot.DCS_WORKING_DIR]: "C:\\Users\\jonat\\Saved Games\\DCS.openbeta",
-	},
 });
 
 logger.debug("Creating Hono application wrapper...");

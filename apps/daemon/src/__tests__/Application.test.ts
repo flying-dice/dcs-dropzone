@@ -69,7 +69,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 	describe("addRelease", () => {
 		it("should add the release, assets, symlinks, mission scripts to the repository and create jobs", () => {
-			app.addRelease(modAndReleaseData);
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 
 			const allReleases = app.deps.releaseRepository.getAllReleases();
 			const assetsForRelease = app.deps.releaseRepository.getReleaseAssetsForRelease(modAndReleaseData.releaseId);
@@ -131,10 +131,13 @@ describe.each(TestCases)("$label", ({ build }) => {
 			});
 
 			expect(downloadJobs.length).toEqual(1);
+			const dropzoneModsDir = app.settings.getDropzoneModsDir();
+			ok(dropzoneModsDir);
+
 			expect(downloadJobs[0]).toMatchObject({
 				jobData: {
 					url: "https://github.com/flying-dice/hello-world-mod/raw/refs/heads/main/sample-1.zip",
-					destinationFolder: join(app.deps.dropzoneModsFolder, "test-release-id"),
+					destinationFolder: join(dropzoneModsDir, "test-release-id"),
 					releaseId: "test-release-id",
 					assetId: "test-release-id__asset-1",
 					urlId: "test-release-id__asset-1__url-1",
@@ -144,8 +147,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(extractJobs.length).toEqual(1);
 			expect(extractJobs[0]).toMatchObject({
 				jobData: {
-					archivePath: join(app.deps.dropzoneModsFolder, "test-release-id", "sample-1.zip"),
-					destinationFolder: join(app.deps.dropzoneModsFolder, "test-release-id"),
+					archivePath: join(dropzoneModsDir, "test-release-id", "sample-1.zip"),
+					destinationFolder: join(dropzoneModsDir, "test-release-id"),
 					releaseId: "test-release-id",
 					assetId: "test-release-id__asset-1",
 				},
@@ -155,8 +158,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 	describe("RemoveRelease", () => {
 		it("should remove the release and all associated data from the repository", () => {
-			app.addRelease(modAndReleaseData);
-			app.removeRelease(modAndReleaseData.releaseId);
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			app.removeRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
 
 			const allReleases = app.deps.releaseRepository.getAllReleases();
 			const assetsForRelease = app.deps.releaseRepository.getReleaseAssetsForRelease(modAndReleaseData.releaseId);
@@ -182,7 +185,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 	describe("EnableRelease", () => {
 		it("should enable the release successfully when all jobs are completed", async () => {
-			app.addRelease(modAndReleaseData);
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
@@ -195,7 +198,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(downloadJobs[0]?.state).toEqual(JobState.Success);
 			expect(extractJobs[0]?.state).toEqual(JobState.Success);
 
-			await app.enableRelease(modAndReleaseData.releaseId);
+			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
 			const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
@@ -204,12 +207,14 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should write Mission Scripting Files", async () => {
-			app.addRelease(modAndReleaseData);
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-			await app.enableRelease(modAndReleaseData.releaseId);
+			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
-			const dcsWorkingDirFiles = app.deps.fileSystem.glob(app.deps.dcsPaths.DCS_WORKING_DIR, "**/*");
+			const dcsWorkingDir = app.settings.getDcsWorkingDir();
+			ok(dcsWorkingDir);
+			const dcsWorkingDirFiles = app.deps.fileSystem.glob(dcsWorkingDir, "**/*");
 
 			const missionStartAfterSanitizeFile = dcsWorkingDirFiles.find((f) => f.endsWith(MISSION_START_AFTER_SANITIZE));
 
@@ -220,10 +225,10 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should reflect ENABLED status in getAllReleasesWithStatus after enabling", async () => {
-			app.addRelease(modAndReleaseData);
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-			await app.enableRelease(modAndReleaseData.releaseId);
+			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
 			const releases = app.getAllReleasesWithStatus();
 			expect(releases.length).toEqual(1);
@@ -231,11 +236,11 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should reflect DISABLED status in getAllReleasesWithStatus after disabling", async () => {
-			app.addRelease(modAndReleaseData);
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-			await app.enableRelease(modAndReleaseData.releaseId);
-			app.disableRelease(modAndReleaseData.releaseId);
+			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
 
 			const releases = app.getAllReleasesWithStatus();
 			expect(releases.length).toEqual(1);

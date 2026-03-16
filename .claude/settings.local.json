@@ -11,7 +11,11 @@
 			"Bash(findstr:*)",
 			"Bash(bun run:*)",
 			"Bash(bun checks.ts)",
-			"Bash(bun install:*)"
+			"Bash(bun install:*)",
+			"Skill(archgate:architect)",
+			"Skill(archgate:quality-manager)",
+			"Skill(archgate:adr-author)"
 		]
-	}
+	},
+	"agent": "archgate:developer"
 }

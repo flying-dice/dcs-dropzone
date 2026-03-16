@@ -10,11 +10,17 @@ import { which } from "./utils/which.ts";
 declare const __WEBAPP_URL: string;
 declare const __DAEMON_URL: string;
 declare const __WEBVIEW_WORKER_MODULE_PATH: string;
+declare const __ENABLE_SERVE_DEVELOPMENT: string;
+declare const __ENABLE_WEBVIEW_WORKER_DEBUG: string;
+declare const __ENABLE_GENERATE_SCHEMA: string;
 
 export const Constants = z.object({
 	WebappUrl: z.url().default("http://localhost:3000/"),
 	DaemonUrl: z.url().default("http://localhost:56499/"),
 	WebviewWorkerModulePath: z.string().default("./src/webview/worker.ts"),
+	EnableServeDevelopment: z.coerce.boolean().default(true),
+	EnableWebviewWorkerDebug: z.coerce.boolean().default(true),
+	EnableGenerateSchema: z.coerce.boolean().default(true),
 });
 
 export type Constants = z.infer<typeof Constants>;
@@ -24,6 +30,10 @@ export const constants = Constants.parse({
 	DaemonUrl: typeof __DAEMON_URL !== "undefined" ? __DAEMON_URL : undefined,
 	WebviewWorkerModulePath:
 		typeof __WEBVIEW_WORKER_MODULE_PATH !== "undefined" ? __WEBVIEW_WORKER_MODULE_PATH : undefined,
+	EnableServeDevelopment: typeof __ENABLE_SERVE_DEVELOPMENT !== "undefined" ? __ENABLE_SERVE_DEVELOPMENT : undefined,
+	EnableWebviewWorkerDebug:
+		typeof __ENABLE_WEBVIEW_WORKER_DEBUG !== "undefined" ? __ENABLE_WEBVIEW_WORKER_DEBUG : undefined,
+	EnableGenerateSchema: typeof __ENABLE_GENERATE_SCHEMA !== "undefined" ? __ENABLE_GENERATE_SCHEMA : undefined,
 });
 
 export const AppConfig = z.object({
@@ -53,9 +63,9 @@ export const appConfig = new RcConfig<AppConfig>("DropzoneDaemon", AppConfig, {
 	webappUrl: constants.WebappUrl,
 	daemonUrl: constants.DaemonUrl,
 
-	enableServeDevelopment: false,
-	enableWebviewWorkerDebug: false,
-	enableGenerateSchema: false,
+	enableServeDevelopment: constants.EnableServeDevelopment,
+	enableWebviewWorkerDebug: constants.EnableWebviewWorkerDebug,
+	enableGenerateSchema: constants.EnableGenerateSchema,
 
 	wgetPath: WGET_BINARIES.map(which).find(Boolean)!,
 	sevenzipPath: SEVEN_ZIP_BINARIES.map(which).find(Boolean)!,
