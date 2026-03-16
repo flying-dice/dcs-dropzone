@@ -9,7 +9,9 @@
 			"mcp__playwright__browser_navigate",
 			"Bash(netstat:*)",
 			"Bash(findstr:*)",
-			"Bash(bun run:*)"
+			"Bash(bun run:*)",
+			"Bash(bun checks.ts)",
+			"Bash(bun install:*)"
 		]
 	}
 }

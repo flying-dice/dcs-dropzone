@@ -18,7 +18,7 @@ describe("RcConfig", () => {
 	it("should use defaults when no env vars are set", () => {
 		const config = new RcConfig("testapp", schema, defaults);
 
-		expect(config["config"]).toMatchObject({ host: "0.0.0.0", port: 8080 });
+		expect(config.config).toMatchObject({ host: "0.0.0.0", port: 8080 });
 	});
 
 	it("should override defaults with env vars", () => {
