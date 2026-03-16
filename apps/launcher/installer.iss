@@ -3,6 +3,7 @@
 #endif
 
 [Setup]
+AppId={{561d4505-556e-4198-8f35-99c6e08d475d}
 AppName=DCS Dropzone
 AppVersion={#MyAppVersion}
 AppPublisher=Flying Dice
@@ -19,10 +20,11 @@ ArchitecturesInstallIn64BitMode=x64compatible
 
 [Files]
 Source: "dist\Dropzone_Launcher.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "uninstall.bat"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\DCS Dropzone"; Filename: "{app}\Dropzone_Launcher.exe"; IconFilename: "{app}\Dropzone_Launcher.exe"
-Name: "{userdesktop}\DCS Dropzone"; Filename: "{app}\Dropzone_Launcher.exe"; IconFilename: "{app}\Dropzone_Launcher.exe"; Tasks: desktopicon
+Name: "{group}\DCS Dropzone"; Filename: "{app}\Dropzone_Launcher.exe"; WorkingDir: "{app}"; IconFilename: "{app}\Dropzone_Launcher.exe"
+Name: "{userdesktop}\DCS Dropzone"; Filename: "{app}\Dropzone_Launcher.exe"; WorkingDir: "{app}"; IconFilename: "{app}\Dropzone_Launcher.exe"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
@@ -30,8 +32,12 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 [Run]
 Filename: "{app}\Dropzone_Launcher.exe"; Description: "Launch DCS Dropzone"; Flags: nowait postinstall skipifsilent
 
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}\*"
+Type: dirifempty; Name: "{app}"
+
 [UninstallRun]
-Filename: "{cmd}"; Parameters: "/c ""{app}\uninstall.bat"""; WorkingDir: "{app}"; Flags: runhidden waituntilterminated; Check: UninstallBatExists
+Filename: "{cmd}"; Parameters: "/c ""{app}\uninstall.bat"" ""{app}"""; WorkingDir: "{%TEMP}"; Flags: runhidden waituntilterminated; RunOnceId: "CleanupAppData"; Check: UninstallBatExists
 
 [Code]
 function UninstallBatExists(): Boolean;

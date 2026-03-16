@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
-import appConfig from "../../ApplicationConfig.ts";
+import { appConfig } from "../../AppConfig.ts";
 import type { Application } from "../../application/Application.ts";
 import type { UserData } from "../../application/schemas/UserData.ts";
 
@@ -22,7 +22,7 @@ export const cookieAuth = () =>
 		logger.debug({ requestId }, "Authenticating via cookie");
 
 		logger.debug({ requestId }, "Retrieving token from cookie");
-		const userId = await getSignedCookie(c, appConfig.userCookieSecret!, appConfig.userCookieName);
+		const userId = await getSignedCookie(c, appConfig.config.userCookieSecret!, appConfig.config.userCookieName);
 
 		if (!userId) {
 			logger.warn({ requestId }, "No signed cookie found");
@@ -40,7 +40,7 @@ export const cookieAuth = () =>
 				},
 				(error: string) => {
 					logger.warn({ requestId, error }, "User not found for token");
-					deleteCookie(c, appConfig.userCookieName);
+					deleteCookie(c, appConfig.config.userCookieName);
 					throw new HTTPException(StatusCodes.UNAUTHORIZED);
 				},
 			);
@@ -49,7 +49,7 @@ export const cookieAuth = () =>
 				throw error;
 			}
 			logger.warn({ requestId, error }, "Error loading user for token");
-			deleteCookie(c, appConfig.userCookieName);
+			deleteCookie(c, appConfig.config.userCookieName);
 			throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR);
 		}
 

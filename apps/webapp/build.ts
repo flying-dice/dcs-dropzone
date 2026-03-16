@@ -1,4 +1,5 @@
 import { join, resolve } from "node:path";
+import { string } from "getenv";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "app";
@@ -18,6 +19,7 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		"process.env.NODE_ENV": `"production"`,
+		__WEBAPP_URL: JSON.stringify(string("WEBAPP_URL", "http://localhost:3000/")),
+		__DAEMON_URL: JSON.stringify(string("DAEMON_URL", "http://localhost:56499/")),
 	},
 });

@@ -1,6 +1,7 @@
 import { exists, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { writeManifest } from "@packages/manifest";
+import { string } from "getenv";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone";
@@ -41,8 +42,9 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		"process.env.NODE_ENV": `"production"`,
-		"process.env.__DROPZONE_WEBVIEW_WORKER_MODULE_PATH": `"./webview/worker.ts"`,
+		__WEBVIEW_WORKER_MODULE_PATH: JSON.stringify("./webview/worker.ts"),
+		__WEBAPP_URL: JSON.stringify(string("WEBAPP_URL", "http://localhost:3000/")),
+		__DAEMON_URL: JSON.stringify(string("DAEMON_URL", "http://localhost:56499/")),
 	},
 });
 

@@ -4,9 +4,6 @@
   "workspaces": {
     "": {
       "name": "bun-react-template",
-      "dependencies": {
-        "playwright": "^1.58.2",
-      },
       "devDependencies": {
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/commit-analyzer": "^13.0.0",
@@ -14,6 +11,7 @@
         "@semantic-release/git": "^10.0.1",
         "@semantic-release/github": "^10.1.3",
         "@semantic-release/release-notes-generator": "^14.0.1",
+        "playwright": "^1.58.2",
         "semantic-release": "^24.0.0",
       },
     },
@@ -217,6 +215,18 @@
       "peerDependencies": {
         "log4js": "^6.9.1",
         "neverthrow": "^8.2.0",
+      },
+    },
+    "packages/rc-config": {
+      "name": "@packages/rc-config",
+      "dependencies": {
+        "rc": "^1.2.8",
+      },
+      "devDependencies": {
+        "@types/rc": "^1.2.4",
+      },
+      "peerDependencies": {
+        "zod": ">=4",
       },
     },
     "packages/zod": {
@@ -557,6 +567,8 @@
 
     "@packages/queue": ["@packages/queue@workspace:packages/queue"],
 
+    "@packages/rc-config": ["@packages/rc-config@workspace:packages/rc-config"],
+
     "@packages/zod": ["@packages/zod@workspace:packages/zod"],
 
     "@pnpm/config.env-replace": ["@pnpm/config.env-replace@1.1.0", "", {}, "sha512-htyl8TWnKL7K/ESFa1oW2UB5lVDxuF5DpM7tBi6Hu2LNL3mWkIzNLG6N4zoCUP1lCKNxWy/3iu8mS8MvToGd6w=="],
@@ -651,11 +663,15 @@
 
     "@types/lodash": ["@types/lodash@4.17.21", "", {}, "sha512-FOvQ0YPD5NOfPgMzJihoT+Za5pdkDJWcbpuj1DjaKZIr/gxodQjY/uWEFlTNqW2ugXHUiL8lRQgw63dzKHZdeQ=="],
 
+    "@types/minimist": ["@types/minimist@1.2.5", "", {}, "sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag=="],
+
     "@types/node": ["@types/node@24.9.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-QoiaXANRkSXK6p0Duvt56W208du4P9Uye9hWLWgGMDTEoKPhuenzNcC4vGUmrNkiOKTlIrBoyNQYNpSwfEZXSg=="],
 
     "@types/normalize-package-data": ["@types/normalize-package-data@2.4.4", "", {}, "sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA=="],
 
     "@types/object-hash": ["@types/object-hash@3.0.6", "", {}, "sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w=="],
+
+    "@types/rc": ["@types/rc@1.2.4", "", { "dependencies": { "@types/minimist": "*" } }, "sha512-xD6+epQoMH79A1uwmJIq25D+XZ57jUzCQ1DGSvs3tGKdx7QDYOOaMh6m5KBkEIW4+Cy5++bZ7NLDfdpNiYVKYA=="],
 
     "@types/react": ["@types/react@19.2.3", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-k5dJVszUiNr1DSe8Cs+knKR6IrqhqdhpUwzqhkS8ecQTSf3THNtbfIp/umqHMpX2bv+9dkx3fwDv/86LcSfvSg=="],
 

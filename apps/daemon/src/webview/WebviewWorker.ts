@@ -1,12 +1,11 @@
 import { getLogger } from "log4js";
+import { constants } from "../AppConfig.ts";
 import { MainToWorker, WorkerToMain } from "./messages";
 import { WebviewWorkerEnv, WorkerEnv } from "./WebviewWorkerEnv.ts";
 
 const logger = getLogger("WebviewWorker");
 
-const MODULE_PATH = process.env.__DROPZONE_WEBVIEW_WORKER_MODULE_PATH ?? "./src/webview/worker.ts";
-
-logger.debug("WebviewWorker module path:", MODULE_PATH);
+logger.debug("WebviewWorker module path:", constants.WebviewWorkerModulePath);
 
 export type WebviewWorkerOptions = {
 	debug?: boolean;
@@ -17,7 +16,7 @@ export class WebviewWorker {
 	worker: Worker;
 
 	constructor(opts?: WebviewWorkerOptions) {
-		this.worker = new Worker(MODULE_PATH, {
+		this.worker = new Worker(constants.WebviewWorkerModulePath, {
 			env: WorkerEnv.parse(
 				WebviewWorkerEnv.parse(<WebviewWorkerEnv>{
 					__DROPZONE_WEBVIEW_DEBUG: opts?.debug ?? false,

@@ -1,6 +1,7 @@
 import { Anchor, Code, Container, Group, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { openModal } from "@mantine/modals";
+import { useGetConfig } from "@packages/clients/webapp";
 import {
 	AppIcons,
 	ColorSchemeControls,
@@ -73,12 +74,13 @@ export function App() {
 	const { user } = useUserContext();
 	const navbarDisclosure = useDisclosure();
 	const { t } = useAppTranslation();
+	const config = useGetConfig();
 
 	return (
 		<HashRouter>
 			<DzAppShell
-				webappUrl={"http://localhost:3000"}
-				daemonUrl={"http://localhost:3001"}
+				webappUrl={config.data?.data.webappUrl ?? ""}
+				daemonUrl={config.data?.data.daemonUrl ?? ""}
 				variant={"webapp"}
 				navbar={{
 					breakpoint: "xs",
@@ -87,7 +89,7 @@ export function App() {
 				}}
 				headerSection={
 					<Group>
-						{process.env.NODE_ENV === "development" ? <AppDebugMenu /> : null}
+						{config.data?.data.enableUiDebug ? <AppDebugMenu /> : null}
 						<AssetActivity />
 						<ColorSchemeControls lightLabel={t("LIGHT")} autoLabel={t("AUTO")} darkLabel={t("DARK")} />
 						<ProfileMenu />

@@ -1,14 +1,11 @@
 import { existsSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fetchManifest, type ManifestData, readManifest, writeManifest } from "@packages/manifest";
+import { appConfig } from "./AppConfig.ts";
 
-const RELEASE_BASEURL =
-	process.env.RELEASE_BASEURL ?? "https://github.com/flying-dice/dcs-dropzone/releases/latest/download";
-const DOWNLOAD_ASSET = "dcs-dropzone.tar";
-const MANIFEST_PATH = ".manifest";
-
-const stableAssetUrl = join(RELEASE_BASEURL, DOWNLOAD_ASSET);
-const stableAssetManifestUrl = `${stableAssetUrl}.manifest`;
+const stableAssetUrl = appConfig.config.dropzoneTarFile;
+const stableAssetManifestUrl = appConfig.config.dropzoneTarFileManifest;
+const manifestPath = appConfig.config.manifestPath;
 
 console.info(`Checking for updates from ${stableAssetUrl}...`);
 
@@ -24,7 +21,7 @@ function getReleasePath(manifest: ManifestData, path: string) {
 }
 
 console.debug("Reading installed release manifest...");
-const installedReleaseManifest: ManifestData | undefined = await readManifest(MANIFEST_PATH).catch((e) => {
+const installedReleaseManifest: ManifestData | undefined = await readManifest(manifestPath).catch((e) => {
 	console.warn(`Failed to read local manifest, Err: ${e.message}`);
 	console.info("Assuming no installed version.");
 	return undefined;
@@ -48,7 +45,7 @@ async function applyUpdate(latest: ManifestData, existing?: ManifestData) {
 	}
 
 	console.info("Update downloaded successfully, updating manifest.");
-	await writeManifest(MANIFEST_PATH, latestReleaseManifest);
+	await writeManifest(manifestPath, latestReleaseManifest);
 }
 
 if (
@@ -65,7 +62,7 @@ const executablePath = resolve(`${folderName}/Dropzone.exe`);
 Bun.spawn({
 	cmd: [executablePath],
 	cwd: folderName,
-	env: { ...process.env, DCS_DROPZONE__INSTALL_DIR: resolve(folderName), DCS_DROPZONE__WORKING_DIR: process.cwd() },
+	env: { DropzoneDaemon_databasePath: join(process.cwd(), "data.sqlite"), ...process.env },
 	stdout: "inherit",
 	stdin: "inherit",
 	stderr: "inherit",

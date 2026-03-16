@@ -31,6 +31,10 @@ COPY ./packages/zod/src ./packages/zod/src
 COPY ./packages/zod/package.json ./packages/zod/package.json
 COPY ./packages/zod/tsconfig.json ./packages/zod/tsconfig.json
 
+COPY ./packages/rc-config/src ./packages/rc-config/src
+COPY ./packages/rc-config/package.json ./packages/rc-config/package.json
+COPY ./packages/rc-config/tsconfig.json ./packages/rc-config/tsconfig.json
+
 COPY ./package.json ./package.json
 COPY ./bun.lock ./bun.lock
 COPY ./bunfig.toml ./bunfig.toml

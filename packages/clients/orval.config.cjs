@@ -11,7 +11,7 @@ module.exports = {
 			},
 		},
 		input: {
-			target: "http://localhost:3000/v3/api-docs",
+			target: "../../apps/webapp/openapi.schema.json",
 		},
 	},
 	daemon: {
@@ -26,7 +26,7 @@ module.exports = {
 			},
 		},
 		input: {
-			target: "http://localhost:3001/v3/api-docs",
+			target: "../../apps/daemon/openapi.schema.json",
 		},
 	},
 };

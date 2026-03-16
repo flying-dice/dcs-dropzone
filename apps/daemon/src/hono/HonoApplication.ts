@@ -7,12 +7,24 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
-import { describeRoute, openAPIRouteHandler, resolver, validator } from "hono-openapi";
+import type { BlankSchema } from "hono/types";
+import { describeRoute, generateSpecs, openAPIRouteHandler, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
+import { appConfig, UiAppConfig } from "../AppConfig.ts";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+
+const openapiSchema: BlankSchema = {
+	documentation: {
+		info: {
+			title: "DCS Dropzone Daemon API",
+			version: "1.0.0",
+			description: "API documentation for the DCS Dropzone Daemon.",
+		},
+	},
+};
 
 const logger = getLogger("HonoApplication");
 const loggingHook = getLoggingHook(logger);
@@ -53,6 +65,7 @@ export class HonoApplication extends Hono<Env> {
 		self.use(requestId());
 
 		self.use("*", requestResponseLogger);
+		self.config();
 
 		self.addReleaseToDaemon();
 		self.getAllDaemonReleases();
@@ -66,7 +79,30 @@ export class HonoApplication extends Hono<Env> {
 
 		self.onError(jsonErrorTransformer);
 
+		if (appConfig.config.enableGenerateSchema) {
+			const spec = await generateSpecs(self, openapiSchema);
+			await Bun.write("openapi.schema.json", JSON.stringify(spec, undefined, 2));
+		}
+
 		return self;
+	}
+
+	private config() {
+		this.get(
+			"/api/config",
+			describeJsonRoute({
+				operationId: "getConfig",
+				summary: "Get Config",
+				description: "Retrieves the current application configuration.",
+				tags: ["Config"],
+				responses: {
+					[StatusCodes.OK]: UiAppConfig,
+				},
+			}),
+			async (c) => {
+				return c.json(UiAppConfig.parse(appConfig.config));
+			},
+		);
 	}
 
 	private getScalarUi() {
@@ -74,18 +110,7 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private getApiDocs() {
-		this.get(
-			"/v3/api-docs",
-			openAPIRouteHandler(this, {
-				documentation: {
-					info: {
-						title: "DCS Dropzone Daemon API",
-						version: "1.0.0",
-						description: "API documentation for the DCS Dropzone Daemon.",
-					},
-				},
-			}),
-		);
+		this.get("/v3/api-docs", openAPIRouteHandler(this, openapiSchema));
 	}
 
 	private addReleaseToDaemon() {

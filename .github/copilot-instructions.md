@@ -18,28 +18,28 @@
 │   ├── daemon/        # Backend daemon for DCS mod management
 │   │   ├── src/
 │   │   ├── bin/       # Third-party binaries (wget.exe, 7za.exe, etc.)
-│   │   ├── config.toml
+│   │   ├── dzConfig.toml
 │   │   ├── build.ts
 │   │   ├── drizzle.ze.ts
 │   │   └── package.json
 │   └── webapp/        # Web UI for mod management
 │       ├── src/
-│       ├── orval.config.cjs
+│       ├── orval.dzConfig.cjs
 │       └── package.json
 ├── packages/
 │   ├── decorators/    # Shared decorators (e.g., @Log)
 │   ├── hono/          # Shared Hono utilities
 │   ├── queue/         # Job queue library (single-instance only)
 │   └── zod/           # Shared Zod schemas and validators
-├── biome.json         # Code formatting and linting config
+├── biome.json         # Code formatting and linting dzConfig
 ├── bunfig.toml        # Bun configuration
-└── package.json       # Root workspace config
+└── package.json       # Root workspace dzConfig
 ```
 
 ### Key Configuration Files
 
 - **biome.json**: Linting and formatting (tabs, 120 char line width, double quotes)
-- **bunfig.toml**: Test coverage config (text + lcov), JUnit output (unit.junit.xml)
+- **bunfig.toml**: Test coverage dzConfig (text + lcov), JUnit output (unit.junit.xml)
 - **tsconfig.json**: Per-workspace TypeScript configs
 - **.editorconfig**: LF line endings, UTF-8, 120 char max line length
 

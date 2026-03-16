@@ -72,7 +72,8 @@ export function DzAppShell(props: DzAppShellProps) {
 		} catch (e) {
 			showErrorNotification(e);
 		}
-	}, []);
+	}, [props.webappUrl]);
+
 	const [daemonOpening, openDaemon] = useAsyncFn(async () => {
 		try {
 			await fetch(new URL("/api/health", props.daemonUrl));
@@ -82,7 +83,7 @@ export function DzAppShell(props: DzAppShellProps) {
 		} catch (e) {
 			showErrorNotification(e);
 		}
-	}, []);
+	}, [props.daemonUrl]);
 
 	const actions: ActionMenuItemProps[] = [
 		{

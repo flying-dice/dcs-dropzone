@@ -70,7 +70,15 @@ Consult individual mod documentation for exact scripting entry points and expect
 
 ## Getting started
 
-> TBC
+### Prerequisites
+
+Install [Inno Setup](https://jrsoftware.org/isinfo.php) to get the `iscc` command required by the `installer:build` script in `package.json`:
+
+```sh
+winget install jrsoftware.innosetup
+```
+
+> **Note:** winget does not add `iscc` to `PATH` automatically. After installing, add `C:\Users\<you>\AppData\Local\Programs\Inno Setup 6` to your PATH manually, then restart your terminal.
 
 ## Security and safety
 

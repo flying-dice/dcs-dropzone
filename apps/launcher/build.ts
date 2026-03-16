@@ -1,4 +1,5 @@
 import { join, resolve } from "node:path";
+import { string } from "getenv";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone_Launcher";
@@ -24,6 +25,6 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		"process.env.NODE_ENV": `"production"`,
+		__RELEASES_BASE_URL: JSON.stringify(string("RELEASES_BASE_URL", "http://localhost:8081/")),
 	},
 });

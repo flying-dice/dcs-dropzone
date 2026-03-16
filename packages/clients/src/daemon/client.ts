@@ -1,7 +1,7 @@
 import { createFetchClient } from "../createFetchClient.ts";
 
 export const client = createFetchClient({
-	baseUrl: "http://127.0.0.1:3001/",
+	baseUrl: "http://127.0.0.1:56499/",
 });
 
 // Exposed as an explicit function due to orval not supporting direct client.fetch usage

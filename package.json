@@ -18,6 +18,8 @@
 		"webapp:build": "bun run --filter webapp build",
 		"webapp:deploy": "bun run --filter cloudflare deploy",
 		"webapp:dev": "cd apps/webapp && bun run dev",
+		"installer:build": "bun run --filter launcher build:installer",
+		"build": "bun run webapp:build && bun run daemon:build && bun run launcher:build && bun run installer:build",
 		"test:playwright": "bunx playwright test"
 	},
 	"release": {
@@ -68,9 +70,7 @@
 		"@semantic-release/git": "^10.0.1",
 		"@semantic-release/github": "^10.1.3",
 		"@semantic-release/release-notes-generator": "^14.0.1",
-		"semantic-release": "^24.0.0"
-	},
-	"dependencies": {
+		"semantic-release": "^24.0.0",
 		"playwright": "^1.58.2"
 	}
 }

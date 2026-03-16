@@ -30,7 +30,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # IntelliJ based IDEs
 .idea
 
-# Finder (MacOS) folder config
+# Finder (MacOS) folder dzConfig
 .DS_Store
 
 .vscode/

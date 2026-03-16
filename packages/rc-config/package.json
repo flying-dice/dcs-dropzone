@@ -1,0 +1,23 @@
+{
+	"name": "@packages/rc-config",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"biome": "biome check --write",
+		"depcheck": "bunx depcheck",
+		"tests": "bun test",
+		"tsc": "tsc --noEmit"
+	},
+	"dependencies": {
+		"rc": "^1.2.8"
+	},
+	"peerDependencies": {
+		"zod": ">=4"
+	},
+	"devDependencies": {
+		"@types/rc": "^1.2.4"
+	}
+}

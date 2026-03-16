@@ -8,7 +8,7 @@ const { __DROPZONE_WEBVIEW_DEBUG, __DROPZONE_WEBVIEW_TITLE } = WebviewWorkerEnv.
 
 const webview = new Webview(__DROPZONE_WEBVIEW_DEBUG);
 webview.title = __DROPZONE_WEBVIEW_TITLE;
-const url = new URL("http://localhost:3001");
+const url = new URL("http://localhost:56499");
 url.searchParams.set("nocache", Date.now().toString());
 webview.navigate(url.toString());
 

@@ -5,8 +5,10 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"build": "bun build.ts",
+		"build:installer": "iscc installer.iss",
 		"depcheck": "bunx depcheck",
-		"dev": "RELEASE_BASEURL='http://localhost:8081/' bun --watch src/index.ts",
+		"dev": "bun --watch src/index.ts",
+		"start": "dist/Dropzone_Launcher.exe",
 		"tests": "bun test --coverage",
 		"tsc": "tsc --noEmit"
 	},

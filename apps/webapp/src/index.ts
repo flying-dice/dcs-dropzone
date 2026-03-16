@@ -1,7 +1,7 @@
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import appConfig from "./ApplicationConfig.ts";
+import { appConfig } from "./AppConfig.ts";
 import type { AuthenticationProvider } from "./authentication/AuthenticationProvider.ts";
 import { GithubAuthenticationProvider } from "./authentication/GithubAuthenticationProvider.ts";
 import { MockAuthService } from "./authentication/MockAuthService.ts";
@@ -14,17 +14,15 @@ const logger = getLogger("bootstrap");
 logger.info(`🌍 DCS Dropzone Registry Webapp Starting...`);
 
 logger.debug("Creating ProdApplication instance...");
-const app = new ProdApplication({
-	mongoUri: appConfig.mongoUri,
-});
+const app = new ProdApplication({ mongoUri: appConfig.config.mongoUri });
 
 await app.init();
 
 logger.debug("Creating Authentication provider...");
 let authenticationProvider: AuthenticationProvider | null = null;
 
-if (appConfig.authServiceGh) {
-	authenticationProvider = new GithubAuthenticationProvider(appConfig.authServiceGh);
+if (appConfig.config.authServiceGh) {
+	authenticationProvider = new GithubAuthenticationProvider(appConfig.config.authServiceGh);
 }
 
 if (!authenticationProvider) {
@@ -32,12 +30,12 @@ if (!authenticationProvider) {
 }
 
 logger.debug("Creating Hono application wrapper...");
-const honoApp = new HonoApplication(app, authenticationProvider);
+const honoApp = await HonoApplication.build(app, authenticationProvider);
 
 logger.debug("Starting Bun server...");
 const bunServer = serve({
-	port: appConfig.port,
-	development: process.env.NODE_ENV !== "production",
+	port: appConfig.config.port,
+	development: appConfig.config.enableServeDevelopment,
 	routes: {
 		"/*": index,
 		"/auth": honoApp.fetch,

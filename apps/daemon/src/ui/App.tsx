@@ -1,13 +1,16 @@
+import { useGetConfig } from "@packages/clients/daemon";
 import { ColorSchemeControls, DzAppShell } from "@packages/dzui";
 import { DownloadedPage } from "./pages/DaemonPage";
 
 export function App() {
+	const config = useGetConfig();
+
 	return (
 		<DzAppShell
 			variant={"daemon"}
 			headerSection={<ColorSchemeControls lightLabel={"Light"} autoLabel={"Auto"} darkLabel={"Dark"} />}
-			webappUrl={"http://localhost:3000"}
-			daemonUrl={"http://localhost:3001"}
+			webappUrl={config.data?.data.webappUrl || ""}
+			daemonUrl={config.data?.data.daemonUrl || ""}
 		>
 			<DownloadedPage />
 		</DzAppShell>

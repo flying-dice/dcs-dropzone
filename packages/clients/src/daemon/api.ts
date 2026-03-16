@@ -155,6 +155,12 @@ export interface ErrorData {
 	error: string;
 }
 
+export type GetConfig200 = {
+	enableUiDebug: boolean;
+	webappUrl: string;
+	daemonUrl: string;
+};
+
 export type GetDaemonHealth200 = {
 	status: "UP";
 	daemonInstanceId: string;
@@ -171,6 +177,110 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * Retrieves the current application configuration.
+ * @summary Get Config
+ */
+export type getConfigResponse200 = {
+	data: GetConfig200;
+	status: 200;
+};
+
+export type getConfigResponseSuccess = getConfigResponse200 & {
+	headers: Headers;
+};
+
+export type getConfigResponse = getConfigResponseSuccess;
+
+export const getGetConfigUrl = () => {
+	return `/api/config`;
+};
+
+export const getConfig = async (options?: RequestInit): Promise<getConfigResponse> => {
+	return fetch<getConfigResponse>(getGetConfigUrl(), {
+		...options,
+		method: "GET",
+	});
+};
+
+export const getGetConfigQueryKey = () => {
+	return [`/api/config`] as const;
+};
+
+export const getGetConfigQueryOptions = <TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(options?: {
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>>;
+	request?: SecondParameter<typeof fetch>;
+}) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetConfigQueryKey();
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getConfig>>> = ({ signal }) =>
+		getConfig({ signal, ...requestOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getConfig>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getConfig>>>;
+export type GetConfigQueryError = unknown;
+
+export function useGetConfig<TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(
+	options: {
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>> &
+			Pick<
+				DefinedInitialDataOptions<Awaited<ReturnType<typeof getConfig>>, TError, Awaited<ReturnType<typeof getConfig>>>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetConfig<TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getConfig>>,
+					TError,
+					Awaited<ReturnType<typeof getConfig>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetConfig<TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get Config
+ */
+
+export function useGetConfig<TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getGetConfigQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	return { ...query, queryKey: queryOptions.queryKey };
+}
 
 export type addReleaseToDaemonResponse200 = {
 	data: void;

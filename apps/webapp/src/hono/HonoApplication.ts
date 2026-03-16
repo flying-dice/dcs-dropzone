@@ -8,11 +8,12 @@ import { Hono } from "hono";
 import { deleteCookie, setSignedCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
-import { describeRoute, openAPIRouteHandler, validator } from "hono-openapi";
+import type { BlankSchema } from "hono/types";
+import { describeRoute, generateSpecs, openAPIRouteHandler, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import appConfig from "../ApplicationConfig.ts";
+import { appConfig, UiAppConfig } from "../AppConfig.ts";
 import type { Application } from "../application/Application.ts";
 import { ErrorData } from "../application/schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../application/schemas/ModAvailableFilterData.ts";
@@ -33,6 +34,48 @@ import type { AuthenticationProvider } from "../authentication/AuthenticationPro
 import { default as Database, default as database } from "../database";
 import { cookieAuth } from "./middleware/cookieAuth.ts";
 
+const openapiSchema: BlankSchema = {
+	documentation: {
+		info: {
+			title: "DCS Dropzone Registry API",
+			version: "1.0.0",
+			description: "API documentation for the DCS Dropzone Registry.",
+		},
+		tags: [
+			{ name: "Auth", description: "Authentication and session management" },
+			{ name: "Health", description: "Service health and readiness" },
+			{ name: "Dashboard", description: "Dashboard and metrics endpoints" },
+			{ name: "Categories", description: "Mod category endpoints" },
+			{ name: "Tags", description: "Mod tag endpoints" },
+			{ name: "Mods", description: "Public mod catalogue endpoints" },
+			{ name: "Mod Releases", description: "Public mod release endpoints" },
+			{ name: "Mod Release Downloads", description: "Mod release download endpoints" },
+			{
+				name: "User Mods",
+				description: "Manage mods owned by the authenticated user",
+			},
+			{
+				name: "User Mod Releases",
+				description: "Manage releases for user-owned mods",
+			},
+			{
+				name: "Migration",
+				description: "Administrative data migration endpoints",
+			},
+		],
+		components: {
+			securitySchemes: {
+				cookieAuth: {
+					type: "apiKey",
+					in: "cookie",
+					name: appConfig.config.userCookieName,
+					description: "Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
+				},
+			},
+		},
+	},
+};
+
 const logger = getLogger("HonoApplication");
 const loggingHook = getLoggingHook(logger);
 
@@ -44,116 +87,84 @@ type Env = {
 };
 
 export class HonoApplication extends Hono<Env> {
-	private readonly authProvider: AuthenticationProvider;
-
-	constructor(app: Application, authProvider: AuthenticationProvider) {
+	constructor(
+		protected readonly app: Application,
+		protected readonly authProvider: AuthenticationProvider,
+	) {
 		super();
+	}
 
-		this.authProvider = authProvider;
+	static async build(app: Application, authProvider: AuthenticationProvider): Promise<HonoApplication> {
+		const self = new HonoApplication(app, authProvider);
 
-		this.use("*", (c, next) => {
+		self.use("*", (c, next) => {
 			c.set("app", app);
 			return next();
 		});
 
-		this.use("/*", cors());
+		self.use("/*", cors());
 
-		this.use(requestId());
+		self.use(requestId());
 
-		this.use("*", requestResponseLogger);
+		self.use("*", requestResponseLogger);
 
 		// Auth routes
-		this.authProviderCallback();
-		this.authProviderLogin();
-		this.getAuthenticatedUser();
-		this.logout();
+		self.authProviderCallback();
+		self.authProviderLogin();
+		self.getAuthenticatedUser();
+		self.logout();
 
-		// Health route
-		this.health();
+		// Health & Config route
+		self.health();
+		self.config();
 
 		// Public mod routes
-		this.getMods();
-		this.getModById();
-		this.getModReleases();
-		this.getLatestModRelease();
-		this.getModReleaseById();
-		this.registerModReleaseDownload();
+		self.getMods();
+		self.getModById();
+		self.getModReleases();
+		self.getLatestModRelease();
+		self.getModReleaseById();
+		self.registerModReleaseDownload();
 
 		// Dashboard routes
-		this.getServerMetrics();
-		this.getFeaturedMods();
-		this.getPopularMods();
+		self.getServerMetrics();
+		self.getFeaturedMods();
+		self.getPopularMods();
 
 		// Category and tag routes
-		this.getCategories();
-		this.getTags();
+		self.getCategories();
+		self.getTags();
 
 		// User mod routes
-		this.getUserMods();
-		this.getUserModById();
-		this.createUserMod();
-		this.updateUserMod();
-		this.deleteUserMod();
+		self.getUserMods();
+		self.getUserModById();
+		self.createUserMod();
+		self.updateUserMod();
+		self.deleteUserMod();
 
 		// User mod release routes
-		this.getUserModReleases();
-		this.getUserModReleaseById();
-		this.createUserModRelease();
-		this.updateUserModRelease();
-		this.deleteUserModRelease();
+		self.getUserModReleases();
+		self.getUserModReleaseById();
+		self.createUserModRelease();
+		self.updateUserModRelease();
+		self.deleteUserModRelease();
 
 		// API docs
-		this.getApiDocs();
-		this.getScalarUi();
+		self.getApiDocs();
+		self.getScalarUi();
 
-		this.onError(jsonErrorTransformer);
+		self.onError(jsonErrorTransformer);
+
+		if (appConfig.config.enableGenerateSchema) {
+			const spec = await generateSpecs(self, openapiSchema);
+			await Bun.write("openapi.schema.json", JSON.stringify(spec, undefined, 2));
+		}
+
+		return self;
 	}
 
 	private getApiDocs() {
-		this.get(
-			"/v3/api-docs",
-			openAPIRouteHandler(this, {
-				documentation: {
-					info: {
-						title: "DCS Dropzone Registry API",
-						version: "1.0.0",
-						description: "API documentation for the DCS Dropzone Registry.",
-					},
-					tags: [
-						{ name: "Auth", description: "Authentication and session management" },
-						{ name: "Health", description: "Service health and readiness" },
-						{ name: "Dashboard", description: "Dashboard and metrics endpoints" },
-						{ name: "Categories", description: "Mod category endpoints" },
-						{ name: "Tags", description: "Mod tag endpoints" },
-						{ name: "Mods", description: "Public mod catalogue endpoints" },
-						{ name: "Mod Releases", description: "Public mod release endpoints" },
-						{ name: "Mod Release Downloads", description: "Mod release download endpoints" },
-						{
-							name: "User Mods",
-							description: "Manage mods owned by the authenticated user",
-						},
-						{
-							name: "User Mod Releases",
-							description: "Manage releases for user-owned mods",
-						},
-						{
-							name: "Migration",
-							description: "Administrative data migration endpoints",
-						},
-					],
-					components: {
-						securitySchemes: {
-							cookieAuth: {
-								type: "apiKey",
-								in: "cookie",
-								name: appConfig.userCookieName,
-								description: "Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
-							},
-						},
-					},
-				},
-			}),
-		);
+		this.get("/v3/api-docs", openAPIRouteHandler(this, openapiSchema));
 	}
 
 	private getScalarUi() {
@@ -166,7 +177,7 @@ export class HonoApplication extends Hono<Env> {
 			describeJsonRoute({
 				operationId: "checkHealth",
 				summary: "Health Check",
-				description: "Checks the health status of the application.",
+				description: "Checks the health status of the applications.",
 				tags: ["Health"],
 				responses: {
 					[StatusCodes.OK]: z.object({
@@ -189,6 +200,24 @@ export class HonoApplication extends Hono<Env> {
 				} catch (error) {
 					return c.json(ErrorData.parse({ error: String(error) }), StatusCodes.SERVICE_UNAVAILABLE);
 				}
+			},
+		);
+	}
+
+	private config() {
+		this.get(
+			"/api/config",
+			describeJsonRoute({
+				operationId: "getConfig",
+				summary: "Get Config",
+				description: "Retrieves the current application configuration.",
+				tags: ["Config"],
+				responses: {
+					[StatusCodes.OK]: UiAppConfig,
+				},
+			}),
+			async (c) => {
+				return c.json(UiAppConfig.parse(appConfig.config));
 			},
 		);
 	}
@@ -217,11 +246,11 @@ export class HonoApplication extends Hono<Env> {
 				const userData = await c.var.app.users.saveUserDetails(authResult);
 
 				logger.debug("Setting signed cookie for user:", userData.id);
-				await setSignedCookie(c, appConfig.userCookieName, userData.id, appConfig.userCookieSecret, {
-					maxAge: appConfig.userCookieMaxAge,
+				await setSignedCookie(c, appConfig.config.userCookieName, userData.id, appConfig.config.userCookieSecret, {
+					maxAge: appConfig.config.userCookieMaxAge,
 				});
 
-				return c.redirect(appConfig.homepageUrl);
+				return c.redirect(appConfig.config.authRedirectUrl);
 			},
 		);
 	}
@@ -288,8 +317,8 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			(c) => {
-				deleteCookie(c, appConfig.userCookieName);
-				return c.redirect(appConfig.homepageUrl ?? "http://localhost:3000");
+				deleteCookie(c, appConfig.config.userCookieName);
+				return c.redirect(appConfig.config.authRedirectUrl);
 			},
 		);
 	}

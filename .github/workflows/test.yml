@@ -6,7 +6,7 @@ jobs:
     name: build-app
     runs-on: windows-latest
     env:
-      BUN_INSTALL_CACHE_DIR: ${{ github.workspace }}\.cache\bun
+      BUN_INSTALL_CACHE_DIR: ${{ github.workspace }}\.bun\install\cache
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,12 +33,18 @@ jobs:
 
       - name: Build Webapp
         run: bun run webapp:build
+        env:
+          WEBAPP_URL: https://dcs-dropzone-container.flying-dice.workers.dev/
 
       - name: Build Daemon
         run: bun run daemon:build
+        env:
+          WEBAPP_URL: https://dcs-dropzone-container.flying-dice.workers.dev/
 
       - name: Build Launcher
         run: bun run launcher:build
+        env:
+          RELEASES_BASE_URL: https://github.com/flying-dice/dcs-dropzone/releases/latest/download/
 
       - name: Build Setup Installer
         run: iscc apps/launcher/installer.iss
