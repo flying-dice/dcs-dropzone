@@ -29,3 +29,12 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 
 [Run]
 Filename: "{app}\Dropzone_Launcher.exe"; Description: "Launch DCS Dropzone"; Flags: nowait postinstall skipifsilent
+
+[UninstallRun]
+Filename: "{cmd}"; Parameters: "/c ""{app}\uninstall.bat"""; WorkingDir: "{app}"; Flags: runhidden waituntilterminated; Check: UninstallBatExists
+
+[Code]
+function UninstallBatExists(): Boolean;
+begin
+  Result := FileExists(ExpandConstant('{app}\uninstall.bat'));
+end;
