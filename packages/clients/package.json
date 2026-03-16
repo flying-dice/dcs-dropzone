@@ -1,0 +1,28 @@
+{
+	"name": "@packages/clients",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./webapp": "./src/webapp/index.ts",
+		"./daemon": "./src/daemon/index.ts"
+	},
+	"scripts": {
+		"biome": "biome check --write",
+		"depcheck": "bunx depcheck",
+		"generate": "orval --config orval.config.cjs",
+		"tests": "bun test",
+		"tsc": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"orval": "^8.0.3"
+	},
+	"peerDependencies": {
+		"@tanstack/react-query": "5.90.21",
+		"log4js": "6",
+		"zod": "4"
+	},
+	"dependencies": {
+		"http-status-codes": "^2.3.0"
+	}
+}

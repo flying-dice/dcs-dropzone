@@ -6,7 +6,6 @@
 		"biome": "biome check --write",
 		"build": "bun build.ts",
 		"build:serve": "npx http-server ./dist -p 8081",
-		"clientgen": "bun run --bun orval --config orval.config.cjs",
 		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",
 		"drizzle": "drizzle-kit generate --config drizzle.config.ts --name=init",
@@ -30,7 +29,7 @@
 		"@packages/queue": "workspace:*",
 		"@packages/zod": "workspace:*",
 		"@scalar/hono-api-reference": "^0.9.30",
-		"@tanstack/react-query": "^5.90.12",
+		"@tanstack/react-query": "5.90.21",
 		"@types/lodash": "^4.17.21",
 		"date-fns": "^4.1.0",
 		"drizzle-kit": "^0.31.8",
@@ -51,7 +50,6 @@
 		"react-use": "^17.6.0",
 		"regedit-rs": "^1.0.4",
 		"ringbufferjs": "^2.0.0",
-		"rxjs": "^7.8.2",
 		"ts-pattern": "^5.9.0",
 		"type-fest": "^5.4.1",
 		"webapp": "workspace:*",
@@ -64,7 +62,6 @@
 		"@types/fs-extra": "^11.0.4",
 		"@types/react": "19.2.3",
 		"@types/react-dom": "19.2.3",
-		"@types/ringbufferjs": "^1.1.2",
-		"orval": "^8.0.3"
+		"@types/ringbufferjs": "^1.1.2"
 	}
 }

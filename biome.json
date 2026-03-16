@@ -19,6 +19,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"correctness": {
+				"useHookAtTopLevel": "off"
+			},
 			"suspicious": {
 				"noExplicitAny": "off",
 				"noConfusingVoidType": "off"

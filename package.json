@@ -17,7 +17,8 @@
 		"tsc": "bun run --workspaces tsc",
 		"webapp:build": "bun run --filter webapp build",
 		"webapp:deploy": "bun run --filter cloudflare deploy",
-		"webapp:dev": "cd apps/webapp && bun run dev"
+		"webapp:dev": "cd apps/webapp && bun run dev",
+		"test:playwright": "bunx playwright test"
 	},
 	"release": {
 		"branches": [
@@ -29,7 +30,7 @@
 			[
 				"@semantic-release/exec",
 				{
-					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; bun run daemon:build\""
+					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; iscc /DMyAppVersion=${nextRelease.version} apps/launcher/installer.iss; if (!$?) { exit 1 }; bun run daemon:build\""
 				}
 			],
 			[
@@ -44,7 +45,8 @@
 					"assets": [
 						"apps/daemon/dist/dcs-dropzone.tar",
 						"apps/daemon/dist/dcs-dropzone.tar.manifest",
-						"apps/launcher/dist/Dropzone_Launcher.exe"
+						"apps/launcher/dist/Dropzone_Launcher.exe",
+						"apps/launcher/dist/Dropzone_Setup.exe"
 					]
 				}
 			],
@@ -67,5 +69,8 @@
 		"@semantic-release/github": "^10.1.3",
 		"@semantic-release/release-notes-generator": "^14.0.1",
 		"semantic-release": "^24.0.0"
+	},
+	"dependencies": {
+		"playwright": "^1.58.2"
 	}
 }

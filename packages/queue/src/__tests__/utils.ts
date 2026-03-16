@@ -1,5 +1,12 @@
 import * as assert from "node:assert";
+import type { DelayCalculator } from "../DelayCalculator.ts";
 import { InMemoryJobRecordRepository, type JobRecord, JobState, type Processor, Queue } from "../index.ts";
+
+class ZeroDelayCalculator implements DelayCalculator {
+	calculateDelayMs(_attempt: number): number {
+		return 0;
+	}
+}
 
 export type TestContext = {
 	deps: { jobRecordRepository: InMemoryJobRecordRepository };
@@ -10,6 +17,7 @@ export function createTestContext(
 	options: Partial<{
 		jobRecordRepository: InMemoryJobRecordRepository;
 		pollInterval: number;
+		delayCalculator: DelayCalculator;
 	}> & {
 		processors?: Processor[];
 	} = {},
@@ -24,6 +32,7 @@ export function createTestContext(
 				{
 					processors: options.processors ?? [],
 					pollIntervalMs: options.pollInterval ?? 10,
+					delayCalculator: options.delayCalculator ?? new ZeroDelayCalculator(),
 				},
 			),
 	};

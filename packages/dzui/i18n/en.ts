@@ -30,6 +30,9 @@ export default {
 		...modCategoryContent,
 		...modAndReleaseDataStatusContent,
 
+		ROUTER_ERROR_TITLE: "Oops! Nothing to see here.",
+		ROUTER_ERROR_DESC: "We couldn't find what you were looking for.",
+		GO_BACK: "Go Back",
 		ADD_DEPENDENCY: "Add dependency",
 		ADD_MISSION_SCRIPT: "Add Mission Script",
 		ADD_SYMBOLIC_LINK: "Add Symbolic Link",
@@ -177,6 +180,7 @@ export default {
 		DOWNLOADED: "Downloaded",
 		SYMBOLIC_LINK_DEST_DESCRIPTION: "Path relative to the selected destination root",
 		SYMBOLIC_LINK_DEST_LABEL: "Destination Path",
+		SYMBOLIC_LINK_INSTALLED_PATH_LABEL: "Local Path",
 		SYMBOLIC_LINK_DEST_PLACEHOLDER: "e.g., Mods/MyMod or Scripts/MyScript.lua",
 		SYMBOLIC_LINK_DEST_ROOT_DESCRIPTION: "Select the DCS directory root where the link will be created",
 		SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR: "DCS Install Directory",

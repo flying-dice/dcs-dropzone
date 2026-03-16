@@ -1,0 +1,1 @@
+ALTER TABLE `MOD_RELEASES` ADD `enabled` integer DEFAULT false NOT NULL;

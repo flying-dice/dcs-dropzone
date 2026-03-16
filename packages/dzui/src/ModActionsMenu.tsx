@@ -14,6 +14,7 @@ export type ModActionsMenuProps = {
 
 	onToggle: () => Promise<void>;
 	onRemove: () => Promise<void>;
+	onShowSymlinks: () => void;
 
 	latest?: ModReleaseData;
 	isLatest?: boolean | undefined;
@@ -56,6 +57,9 @@ export function ModActionsMenu(props: ModActionsMenuProps) {
 				<Menu.Item disabled={toggleDisabled} onClick={handleToggle}>
 					{props.mod.status === ModAndReleaseDataStatus.ENABLED ? t("DISABLE") : t("ENABLE")}
 				</Menu.Item>
+				{props.mod.status === ModAndReleaseDataStatus.ENABLED && (
+					<Menu.Item onClick={props.onShowSymlinks}>Info</Menu.Item>
+				)}
 				<Menu.Item disabled={removeDisabled} onClick={handleRemove}>
 					{t("REMOVE")}
 				</Menu.Item>

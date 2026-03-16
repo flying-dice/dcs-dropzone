@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { JobState } from "@packages/queue";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import type { Application } from "../application/Application.ts";
+import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
 import { TestCases } from "./TestCases.ts";
@@ -89,6 +90,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				version: "1.0.0",
 				versionHash: modAndReleaseData.versionHash,
 				dependencies: [],
+				enabled: false,
 			});
 
 			expect(assetsForRelease.length).toEqual(modAndReleaseData.assets.length);
@@ -215,6 +217,29 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 			expect(missionStartBeforeSanitizeFile).toBeDefined();
 			expect(missionStartAfterSanitizeFile).toBeDefined();
+		});
+
+		it("should reflect ENABLED status in getAllReleasesWithStatus after enabling", async () => {
+			app.addRelease(modAndReleaseData);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+
+			await app.enableRelease(modAndReleaseData.releaseId);
+
+			const releases = app.getAllReleasesWithStatus();
+			expect(releases.length).toEqual(1);
+			expect(releases[0]?.status).toBe(DownloadedReleaseStatus.ENABLED);
+		});
+
+		it("should reflect DISABLED status in getAllReleasesWithStatus after disabling", async () => {
+			app.addRelease(modAndReleaseData);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+
+			await app.enableRelease(modAndReleaseData.releaseId);
+			app.disableRelease(modAndReleaseData.releaseId);
+
+			const releases = app.getAllReleasesWithStatus();
+			expect(releases.length).toEqual(1);
+			expect(releases[0]?.status).toBe(DownloadedReleaseStatus.DISABLED);
 		});
 	});
 });

@@ -46,6 +46,7 @@ export const ModReleaseSymbolicLinkData = z
 		src: z.string().min(1, "Source path is required"),
 		dest: z.string().min(1, "Destination path is required"),
 		destRoot: z.enum(SymbolicLinkDestRoot),
+		installedPath: z.string().optional().nullable(),
 	})
 	.meta({
 		ref: "ModReleaseSymbolicLinkData",

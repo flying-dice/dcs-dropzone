@@ -1,4 +1,3 @@
-import { constants } from "@packages/dzui";
 import { Webview } from "webview-bun";
 import { WindowClosed } from "./messages/WindowClosed.ts";
 import { WebviewWorkerEnv } from "./WebviewWorkerEnv.ts";
@@ -9,7 +8,7 @@ const { __DROPZONE_WEBVIEW_DEBUG, __DROPZONE_WEBVIEW_TITLE } = WebviewWorkerEnv.
 
 const webview = new Webview(__DROPZONE_WEBVIEW_DEBUG);
 webview.title = __DROPZONE_WEBVIEW_TITLE;
-const url = new URL(constants.DAEMON_URL);
+const url = new URL("http://localhost:3001");
 url.searchParams.set("nocache", Date.now().toString());
 webview.navigate(url.toString());
 

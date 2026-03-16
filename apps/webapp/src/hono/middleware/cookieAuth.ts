@@ -1,4 +1,4 @@
-import { getSignedCookie } from "hono/cookie";
+import { deleteCookie, getSignedCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
@@ -40,6 +40,7 @@ export const cookieAuth = () =>
 				},
 				(error: string) => {
 					logger.warn({ requestId, error }, "User not found for token");
+					deleteCookie(c, appConfig.userCookieName);
 					throw new HTTPException(StatusCodes.UNAUTHORIZED);
 				},
 			);
@@ -48,6 +49,7 @@ export const cookieAuth = () =>
 				throw error;
 			}
 			logger.warn({ requestId, error }, "Error loading user for token");
+			deleteCookie(c, appConfig.userCookieName);
 			throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR);
 		}
 
