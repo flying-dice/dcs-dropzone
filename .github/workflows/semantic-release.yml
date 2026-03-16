@@ -51,10 +51,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to WinGet
-        if: steps.semantic.outputs.new_release_published == 'true'
-        uses: vedantmgoyal2009/winget-releaser@v2
-        with:
-          identifier: FlyingDice.DCSDropzone
-          installers-regex: '\.exe$'
-          token: ${{ secrets.WINGET_TOKEN }}
