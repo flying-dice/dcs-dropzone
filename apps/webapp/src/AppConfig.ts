@@ -30,7 +30,7 @@ export const constants = Constants.parse({
 
 export const AppConfig = z.object({
 	port: z.number().int().min(1).max(65535),
-	mongoUri: z.string(),
+	mongoUri: z.string().nonempty(),
 	userCookieSecret: z.string().nonempty(),
 	userCookieName: z.string(),
 	userCookieMaxAge: z.number().int(),
@@ -54,6 +54,9 @@ export const appConfig = new RcConfig<AppConfig>("DropzoneWebapp", AppConfig, {
 	userCookieName: "USERID",
 	userCookieMaxAge: 86400,
 	authRedirectUrl: constants.WebappUrl,
+
+	userCookieSecret: undefined,
+	mongoUri: undefined,
 
 	webappUrl: constants.WebappUrl,
 	daemonUrl: constants.DaemonUrl,

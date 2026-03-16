@@ -1,7 +1,0 @@
-enableServeDevelopment=true
-enableWebviewWorkerDebug=true
-enableGenerateSchema=true
-enableUiDebug=true
-
-userCookieSecret=local-cookie-secret
-mongoUri=mongodb://localhost:27017/dcs-dropzone
