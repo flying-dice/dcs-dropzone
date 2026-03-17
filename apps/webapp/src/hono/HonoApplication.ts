@@ -188,18 +188,18 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			async (c) => {
-				try {
-					await Database.ping();
-					return c.json(
-						{
-							status: "ok",
-							mongoStatus: await database.ping(),
-						},
-						StatusCodes.OK,
-					);
-				} catch (error) {
-					return c.json(ErrorData.parse({ error: String(error) }), StatusCodes.SERVICE_UNAVAILABLE);
-				}
+				return Database.ping()
+					.then(() => database.ping())
+					.then((mongoStatus) =>
+						c.json(
+							{
+								status: "ok",
+								mongoStatus,
+							},
+							StatusCodes.OK,
+						),
+					)
+					.catch((error) => c.json(ErrorData.parse({ error: String(error) }), StatusCodes.SERVICE_UNAVAILABLE));
 			},
 		);
 	}

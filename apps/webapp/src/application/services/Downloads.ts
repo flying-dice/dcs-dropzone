@@ -14,13 +14,8 @@ export class Downloads {
 	@Log(logger)
 	async registerModReleaseDownload(modId: string, releaseId: string, daemonInstanceId: string): Promise<void> {
 		logger.info("Registering download", { modId, releaseId, daemonInstanceId });
-		try {
-			await this.deps.downloadsRepository.addModReleaseDownload(modId, releaseId, daemonInstanceId);
-			logger.debug("Download registered successfully", { modId, releaseId });
-		} catch (error) {
-			logger.error("Failed to register download", { modId, releaseId, error });
-			throw error;
-		}
+		await this.deps.downloadsRepository.addModReleaseDownload(modId, releaseId, daemonInstanceId);
+		logger.debug("Download registered successfully", { modId, releaseId });
 	}
 
 	@Log(logger)

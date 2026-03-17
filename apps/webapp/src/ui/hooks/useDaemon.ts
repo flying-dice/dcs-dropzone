@@ -54,13 +54,10 @@ export function useDaemon() {
 
 	const [removing, remove] = useAsyncFn(
 		async (releaseId: string) => {
-			try {
-				await removeReleaseFromDaemon(releaseId);
-				await daemonReleases.refetch();
-				showSuccessNotification(t("REMOVE_SUCCESS_TITLE"), t("REMOVE_SUCCESS_DESC"));
-			} catch (e) {
-				showErrorNotification(e);
-			}
+			await removeReleaseFromDaemon(releaseId)
+				.then(() => daemonReleases.refetch())
+				.then(() => showSuccessNotification(t("REMOVE_SUCCESS_TITLE"), t("REMOVE_SUCCESS_DESC")))
+				.catch((e) => showErrorNotification(e));
 		},
 		[t, daemonReleases],
 	);
@@ -83,20 +80,17 @@ export function useDaemon() {
 
 	const [updating, update] = useAsyncFn(
 		async (isUserMod: boolean, modId: string, currentReleaseId: string, latestReleaseId: string) => {
-			try {
-				await removeReleaseFromDaemon(currentReleaseId);
-
-				const result = await addReleaseToDaemonById(isUserMod, { releaseId: latestReleaseId, modId });
-				if (result) {
-					showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error: result })));
-				} else {
-					showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
-				}
-
-				await daemonReleases.refetch();
-			} catch (e) {
-				showErrorNotification(e);
-			}
+			await removeReleaseFromDaemon(currentReleaseId)
+				.then(() => addReleaseToDaemonById(isUserMod, { releaseId: latestReleaseId, modId }))
+				.then(async (result) => {
+					if (result) {
+						showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error: result })));
+					} else {
+						showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
+					}
+					await daemonReleases.refetch();
+				})
+				.catch((e) => showErrorNotification(e));
 		},
 		[t, daemonReleases],
 	);

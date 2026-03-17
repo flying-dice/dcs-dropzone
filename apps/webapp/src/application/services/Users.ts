@@ -16,14 +16,9 @@ export class Users {
 	@Log(logger)
 	async saveUserDetails(user: UserData): Promise<UserData> {
 		logger.info("Saving user details", { userId: user.id, username: user.username });
-		try {
-			const saved = await this.deps.userRepository.saveUserDetails(UserData.parse(user));
-			logger.debug("User details saved", { userId: user.id });
-			return UserData.parse(saved);
-		} catch (error) {
-			logger.error("Failed to save user details", { userId: user.id, error });
-			throw error;
-		}
+		const saved = await this.deps.userRepository.saveUserDetails(UserData.parse(user));
+		logger.debug("User details saved", { userId: user.id });
+		return UserData.parse(saved);
 	}
 
 	@Log(logger)

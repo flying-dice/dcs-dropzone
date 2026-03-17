@@ -1,6 +1,7 @@
 import { subSeconds } from "date-fns";
 import { getLogger } from "log4js";
 import type { QueryFilter } from "mongoose";
+import { ResultAsync } from "neverthrow";
 import { MigrationStatus } from "../application/enums/MigrationStatus.ts";
 import { Migration } from "./entities/Migration.ts";
 
@@ -50,14 +51,16 @@ export class MongoMigration {
 
 		logger.info(this.context, "Lock acquired, starting migration");
 
-		try {
-			await this.migrationFunction();
-			logger.info(this.context, "Migration completed successfully, marking as complete.");
-			await this.complete();
-		} catch (error) {
-			logger.error(this.context, `Migration failed with error: ${error}, marking as failed.`);
-			await this.fail(error?.toString() || "Unknown error");
-		}
+		await ResultAsync.fromPromise(this.migrationFunction(), (error) => error).match(
+			async () => {
+				logger.info(this.context, "Migration completed successfully, marking as complete.");
+				await this.complete();
+			},
+			async (error) => {
+				logger.error(this.context, `Migration failed with error: ${error}, marking as failed.`);
+				await this.fail(error?.toString() || "Unknown error");
+			},
+		);
 	}
 
 	private async ensureExists(): Promise<void> {

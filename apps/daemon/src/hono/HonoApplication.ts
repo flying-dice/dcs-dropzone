@@ -229,14 +229,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			async (c) => {
-				try {
-					return c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId() }, StatusCodes.OK);
-				} catch (error) {
-					return c.json(
-						{ status: "DOWN", daemonInstanceId: c.var.app.getDaemonInstanceId(), error: String(error) },
-						StatusCodes.SERVICE_UNAVAILABLE,
-					);
-				}
+				return c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId() }, StatusCodes.OK);
 			},
 		);
 	}

@@ -171,6 +171,7 @@
       "name": "@packages/decorators",
       "peerDependencies": {
         "log4js": ">=6",
+        "neverthrow": ">=8",
       },
     },
     "packages/dz-config": {
@@ -231,6 +232,7 @@
     "packages/zod": {
       "name": "@packages/zod",
       "peerDependencies": {
+        "neverthrow": ">=8",
         "zod": ">=4",
       },
     },

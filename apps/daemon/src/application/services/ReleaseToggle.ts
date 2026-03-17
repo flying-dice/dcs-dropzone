@@ -1,6 +1,6 @@
 import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
+import { err, ok, Result } from "neverthrow";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
@@ -71,13 +71,18 @@ export class ReleaseToggle {
 		for (const link of links) {
 			if (link.installedPath) {
 				logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
-				try {
-					this.deps.fileSystem.removeDir(link.installedPath);
-					this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, null);
-					logger.debug(`Cleared installed symlink path for linkId ${link.id}`);
-				} catch (e) {
-					logger.error(`Failed to remove path for linkId ${link.id} at ${link.installedPath}: ${e}`);
-				}
+				Result.fromThrowable(
+					() => this.deps.fileSystem.removeDir(link.installedPath!),
+					(e) => (e instanceof Error ? e : new Error(String(e))),
+				)().match(
+					() => {
+						this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, null);
+						logger.debug(`Cleared installed symlink path for linkId ${link.id}`);
+					},
+					(e) => {
+						logger.error(`Failed to remove path for linkId ${link.id} at ${link.installedPath}: ${e}`);
+					},
+				);
 			} else {
 				logger.trace(`Skipping linkId ${link.id} (no installedPath)`);
 			}

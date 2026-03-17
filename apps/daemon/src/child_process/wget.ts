@@ -3,7 +3,7 @@ import { statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { mkdirSync, pathExistsSync } from "fs-extra";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
+import { err, ok, Result } from "neverthrow";
 import { z } from "zod";
 import { extractPercentage } from "../application/functions/extract-percentage.ts";
 
@@ -60,33 +60,34 @@ const SpawnWgetProps = z
 		};
 	})
 	.superRefine((it, ctx) => {
-		try {
-			if (!pathExistsSync(it.exePath)) {
+		if (!pathExistsSync(it.exePath)) {
+			ctx.addIssue({
+				code: "custom",
+				message: `Executable path does not exist: ${it.exePath}`,
+			});
+		} else {
+			const stat = statSync(it.exePath, { throwIfNoEntry: false });
+			if (!stat) {
 				ctx.addIssue({
 					code: "custom",
-					message: `Executable path does not exist: ${it.exePath}`,
+					message: `Failed to stat executable path: ${it.exePath}`,
 				});
-			}
-
-			if (statSync(it.exePath).isDirectory()) {
+			} else if (stat.isDirectory()) {
 				ctx.addIssue({
 					code: "custom",
 					message: `Executable path is a directory: ${it.exePath}`,
 				});
 			}
-		} catch (e) {
-			ctx.addIssue({
-				code: "custom",
-				message: `Failed to validate executable path: ${it.exePath} - ${e}`,
-			});
 		}
 
-		try {
-			mkdirSync(it.target, { recursive: true });
-		} catch (e) {
+		const mkdirResult = Result.fromThrowable(
+			() => mkdirSync(it.target, { recursive: true }),
+			(e) => (e instanceof Error ? e : new Error(String(e))),
+		)();
+		if (mkdirResult.isErr()) {
 			ctx.addIssue({
 				code: "custom",
-				message: `Failed to create target directory: ${it.target} - ${e}`,
+				message: `Failed to create target directory: ${it.target} - ${mkdirResult.error}`,
 			});
 		}
 	});

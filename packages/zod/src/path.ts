@@ -1,7 +1,16 @@
-import { existsSync, mkdirSync, statSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { normalize, resolve } from "node:path";
+import { Result } from "neverthrow";
 import { z } from "zod";
 import { expandEnvVars } from "./expandEnvVars.ts";
+
+/**
+ * Executes a sync function, returning the error if it throws, or undefined on success.
+ */
+function safeSync(fn: () => void): Error | undefined {
+	const result = Result.fromThrowable(fn, (e) => (e instanceof Error ? e : new Error(String(e))))();
+	return result.isErr() ? result.error : undefined;
+}
 
 export default (props: { exists?: "ensure" | "check"; resolve: boolean; normalize: boolean; expandEnvVars: boolean }) =>
 	z
@@ -22,26 +31,21 @@ export default (props: { exists?: "ensure" | "check"; resolve: boolean; normaliz
 		})
 		.superRefine((value, ctx) => {
 			if (props.exists === "ensure" && !existsSync(value)) {
-				try {
-					mkdirSync(value);
-				} catch (e) {
+				const result = safeSync(() => mkdirSync(value));
+				if (result !== undefined) {
 					ctx.addIssue({
 						code: "custom",
-						message: e.message,
+						message: result.message,
 						values: [value],
 					});
 				}
 			}
 
 			if (props.exists === "check" && !existsSync(value)) {
-				try {
-					statSync(value);
-				} catch (e) {
-					ctx.addIssue({
-						code: "custom",
-						message: e.message,
-						values: [value],
-					});
-				}
+				ctx.addIssue({
+					code: "custom",
+					message: `Path does not exist: ${value}`,
+					values: [value],
+				});
 			}
 		});

@@ -1,3 +1,5 @@
+import { Result } from "neverthrow";
+
 /**
  * A type representing a value that can either be a promise or a direct value.
  */
@@ -113,13 +115,16 @@ export class Memoize<F extends (...args: any[]) => any> {
 
 		const expiresAt = ttl === Infinity ? Infinity : t + ttl;
 
-		let result: ReturnType<F>;
-		try {
-			result = this.fnImpl(...args);
-		} catch (err) {
-			this.cache.delete(key);
-			throw err;
-		}
+		const result = Result.fromThrowable(
+			(...callArgs: Parameters<F>) => this.fnImpl(...callArgs) as ReturnType<F>,
+			(e) => e,
+		)(...args).match(
+			(value) => value,
+			(err) => {
+				this.cache.delete(key);
+				throw err;
+			},
+		);
 
 		const entry: CacheEntry<Awaited<ReturnType<F>>> = {
 			value: result as any,
