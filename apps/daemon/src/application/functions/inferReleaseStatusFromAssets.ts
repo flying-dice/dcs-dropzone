@@ -1,7 +1,11 @@
 import { AssetStatus } from "../enums/AssetStatus.ts";
 import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 
-export function inferReleaseStatusFromAssets(assetStatus: AssetStatus[], enabled: boolean): DownloadedReleaseStatus {
+export function inferReleaseStatusFromAssets(
+	assetStatus: AssetStatus[],
+	enabled: boolean,
+	symlinkIntegrityValid: boolean = true,
+): DownloadedReleaseStatus {
 	if (assetStatus.length > 0 && assetStatus.every((it) => it === AssetStatus.PENDING)) {
 		return DownloadedReleaseStatus.PENDING;
 	}
@@ -11,6 +15,9 @@ export function inferReleaseStatusFromAssets(assetStatus: AssetStatus[], enabled
 	}
 
 	if (assetStatus.every((it) => it === AssetStatus.COMPLETED)) {
+		if (enabled && !symlinkIntegrityValid) {
+			return DownloadedReleaseStatus.INCONSISTENT;
+		}
 		return enabled ? DownloadedReleaseStatus.ENABLED : DownloadedReleaseStatus.DISABLED;
 	}
 

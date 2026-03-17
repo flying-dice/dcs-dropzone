@@ -8,7 +8,11 @@ import { match } from "ts-pattern";
 import { useDaemon } from "../../hooks/useDaemon.ts";
 
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
-	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
+	return (
+		status === ModAndReleaseDataStatus.ENABLED ||
+		status === ModAndReleaseDataStatus.DISABLED ||
+		status === ModAndReleaseDataStatus.INCONSISTENT
+	);
 }
 
 export type DownloadedModsTableRowProps = {

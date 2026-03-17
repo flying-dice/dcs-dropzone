@@ -3,5 +3,6 @@ export enum DownloadedReleaseStatus {
 	IN_PROGRESS = "IN_PROGRESS",
 	DISABLED = "DISABLED",
 	ENABLED = "ENABLED",
+	INCONSISTENT = "INCONSISTENT",
 	ERROR = "ERROR",
 }

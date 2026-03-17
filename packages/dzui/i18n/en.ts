@@ -23,6 +23,7 @@ const modAndReleaseDataStatusContent: Record<ModAndReleaseDataStatus, string> = 
 	[ModAndReleaseDataStatus.DISABLED]: "Disabled",
 	[ModAndReleaseDataStatus.ERROR]: "Error",
 	[ModAndReleaseDataStatus.IN_PROGRESS]: "Fetching...",
+	[ModAndReleaseDataStatus.INCONSISTENT]: "Inconsistent",
 };
 
 export default {
@@ -64,6 +65,10 @@ export default {
 
 		DAEMON_RELEASES_ERROR_TITLE: "Error fetching daemon releases",
 		DAEMON_RELEASES_ERROR_DESC: "There was an error fetching the daemon releases. Please try again later.",
+
+		MOD_INCONSISTENT_TITLE: "Mod in Inconsistent State",
+		MOD_INCONSISTENT_DESC:
+			"This mod is marked as enabled but one or more symlinks are missing. Please disable and re-enable it, or remove and re-download it.",
 
 		MODS_FETCH_ERROR_TITLE: "Error fetching mods",
 		MODS_FETCH_ERROR_DESC: "There was an error fetching the mods. Please try again later.",

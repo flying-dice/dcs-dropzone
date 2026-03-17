@@ -6,7 +6,11 @@ import { useAsyncFn } from "react-use";
 import { useAppTranslation } from "./useAppTranslation.ts";
 
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
-	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
+	return (
+		status === ModAndReleaseDataStatus.ENABLED ||
+		status === ModAndReleaseDataStatus.DISABLED ||
+		status === ModAndReleaseDataStatus.INCONSISTENT
+	);
 }
 
 export type ModActionsMenuProps = {

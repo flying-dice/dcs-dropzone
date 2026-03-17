@@ -121,6 +121,7 @@ export const ModAndReleaseDataStatus = {
 	IN_PROGRESS: "IN_PROGRESS",
 	DISABLED: "DISABLED",
 	ENABLED: "ENABLED",
+	INCONSISTENT: "INCONSISTENT",
 	ERROR: "ERROR",
 } as const;
 
