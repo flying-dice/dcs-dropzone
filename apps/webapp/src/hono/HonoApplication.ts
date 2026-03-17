@@ -507,7 +507,11 @@ export class HonoApplication extends Hono<Env> {
 
 				return result.match(
 					(mod) => c.json(mod, StatusCodes.OK),
-					(error) => c.json(ErrorData.parse(<ErrorData>{ code: StatusCodes.NOT_FOUND, error }), StatusCodes.NOT_FOUND),
+					(error) =>
+						c.json(
+							ErrorData.parse(<ErrorData>{ code: StatusCodes.NOT_FOUND, error: error._tag }),
+							StatusCodes.NOT_FOUND,
+						),
 				);
 			},
 		);
@@ -544,7 +548,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),
@@ -589,7 +593,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse(<ErrorData>{
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),
@@ -633,7 +637,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse(<ErrorData>{
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),
@@ -682,7 +686,7 @@ export class HonoApplication extends Hono<Env> {
 						return c.json(
 							ErrorData.parse(<ErrorData>{
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 						);
 					},
@@ -755,7 +759,7 @@ export class HonoApplication extends Hono<Env> {
 						return c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						);
@@ -828,7 +832,7 @@ export class HonoApplication extends Hono<Env> {
 						return c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						);
@@ -870,7 +874,7 @@ export class HonoApplication extends Hono<Env> {
 						return c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						);
@@ -915,7 +919,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),
@@ -963,7 +967,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),
@@ -1006,7 +1010,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),
@@ -1066,7 +1070,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),
@@ -1120,7 +1124,7 @@ export class HonoApplication extends Hono<Env> {
 						c.json(
 							ErrorData.parse({
 								code: StatusCodes.NOT_FOUND,
-								error,
+								error: error._tag,
 							}),
 							StatusCodes.NOT_FOUND,
 						),

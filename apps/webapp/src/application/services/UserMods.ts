@@ -3,6 +3,7 @@ import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import objectHash from "object-hash";
 import { ModVisibility } from "../enums/ModVisibility.ts";
+import { ModNotFoundError, NotMaintainerError, ReleaseNotFoundError } from "../errors.ts";
 import type { ModRepository } from "../ports/ModRepository.ts";
 import type { UUIDGenerator } from "../ports/UUIDGenerator.ts";
 import type { ModCreateData } from "../schemas/ModCreateData.ts";
@@ -55,7 +56,7 @@ export class UserMods {
 	async updateMod(
 		user: UserData,
 		updateData: ModUpdateData,
-	): Promise<Result<ModData, "ModNotFound" | "NotMaintainer">> {
+	): Promise<Result<ModData, ModNotFoundError | NotMaintainerError>> {
 		logger.info("Updating mod", { userId: user.id, modId: updateData.id });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, updateData.id);
 		return checkResult.match(
@@ -63,7 +64,7 @@ export class UserMods {
 				const updated = await this.deps.modRepository.updateMod(updateData);
 				if (!updated) {
 					logger.warn("Mod update failed - not found", { modId: updateData.id, userId: user.id });
-					return err("ModNotFound");
+					return err(new ModNotFoundError());
 				}
 				logger.info("Mod updated successfully", { modId: updateData.id, userId: user.id });
 				return ok(ModData.parse(updated));
@@ -73,7 +74,7 @@ export class UserMods {
 	}
 
 	@Log(logger)
-	async deleteMod(user: UserData, modId: string): Promise<Result<ModData, "ModNotFound" | "NotMaintainer">> {
+	async deleteMod(user: UserData, modId: string): Promise<Result<ModData, ModNotFoundError | NotMaintainerError>> {
 		logger.info("Deleting mod", { userId: user.id, modId });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, modId);
 		return checkResult.match(
@@ -81,7 +82,7 @@ export class UserMods {
 				const deleted = await this.deps.modRepository.deleteMod(modId);
 				if (!deleted) {
 					logger.warn("Mod deletion failed - not found", { modId, userId: user.id });
-					return err("ModNotFound");
+					return err(new ModNotFoundError());
 				}
 				logger.info("Mod deleted successfully", { modId, userId: user.id, modName: deleted.name });
 				return ok(ModData.parse(deleted));
@@ -91,7 +92,7 @@ export class UserMods {
 	}
 
 	@Log(logger)
-	async findById(user: UserData, modId: string): Promise<Result<ModData, "ModNotFound" | "NotMaintainer">> {
+	async findById(user: UserData, modId: string): Promise<Result<ModData, ModNotFoundError | NotMaintainerError>> {
 		logger.debug("Fetching user mod", { userId: user.id, modId });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, modId);
 		return checkResult.match(
@@ -99,7 +100,7 @@ export class UserMods {
 				const mod = await this.deps.modRepository.findModById(modId);
 				if (!mod) {
 					logger.debug("Mod not found for user", { modId, userId: user.id });
-					return err("ModNotFound");
+					return err(new ModNotFoundError());
 				}
 
 				logger.debug("User mod fetched", { modId, userId: user.id });
@@ -114,7 +115,7 @@ export class UserMods {
 	async createRelease(
 		user: UserData,
 		createData: ModReleaseCreateData,
-	): Promise<Result<ModReleaseData, "ModNotFound" | "NotMaintainer">> {
+	): Promise<Result<ModReleaseData, ModNotFoundError | NotMaintainerError>> {
 		logger.info("Creating release", { userId: user.id, modId: createData.modId, version: createData.version });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, createData.modId);
 		return checkResult.match(
@@ -149,7 +150,7 @@ export class UserMods {
 	async updateRelease(
 		user: UserData,
 		updateData: ModReleaseUpdateData,
-	): Promise<Result<ModReleaseData, "ModNotFound" | "ReleaseNotFound" | "NotMaintainer">> {
+	): Promise<Result<ModReleaseData, ModNotFoundError | ReleaseNotFoundError | NotMaintainerError>> {
 		logger.info("Updating release", { userId: user.id, modId: updateData.modId, releaseId: updateData.id });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, updateData.modId);
 		return checkResult.match(
@@ -160,7 +161,7 @@ export class UserMods {
 
 				if (!updated) {
 					logger.warn("Release update failed - not found", { releaseId: updateData.id, userId: user.id });
-					return err("ReleaseNotFound");
+					return err(new ReleaseNotFoundError());
 				}
 
 				logger.info("Release updated successfully", { releaseId: updateData.id, modId: updateData.modId });
@@ -175,7 +176,7 @@ export class UserMods {
 		user: UserData,
 		modId: string,
 		releaseId: string,
-	): Promise<Result<ModReleaseData, "ModNotFound" | "ReleaseNotFound" | "NotMaintainer">> {
+	): Promise<Result<ModReleaseData, ModNotFoundError | ReleaseNotFoundError | NotMaintainerError>> {
 		logger.info("Deleting release", { userId: user.id, modId, releaseId });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, modId);
 
@@ -185,7 +186,7 @@ export class UserMods {
 
 				if (!deleted) {
 					logger.warn("Release deletion failed - not found", { releaseId, modId, userId: user.id });
-					return err("ReleaseNotFound");
+					return err(new ReleaseNotFoundError());
 				}
 
 				logger.info("Release deleted successfully", { releaseId, modId, version: deleted.version });
@@ -201,7 +202,7 @@ export class UserMods {
 		user: UserData,
 		modId: string,
 		releaseId: string,
-	): Promise<Result<ModReleaseData, "ModNotFound" | "ReleaseNotFound" | "NotMaintainer">> {
+	): Promise<Result<ModReleaseData, ModNotFoundError | ReleaseNotFoundError | NotMaintainerError>> {
 		logger.debug("Fetching release", { userId: user.id, modId, releaseId });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, modId);
 
@@ -211,7 +212,7 @@ export class UserMods {
 
 				if (!release) {
 					logger.debug("Release not found for user", { releaseId, modId, userId: user.id });
-					return err("ReleaseNotFound");
+					return err(new ReleaseNotFoundError());
 				}
 
 				logger.debug("Release fetched", { releaseId, modId });
@@ -226,7 +227,7 @@ export class UserMods {
 	async findReleases(
 		user: UserData,
 		modId: string,
-	): Promise<Result<ModReleaseData[], "ModNotFound" | "NotMaintainer">> {
+	): Promise<Result<ModReleaseData[], ModNotFoundError | NotMaintainerError>> {
 		logger.debug("Fetching mod releases", { userId: user.id, modId });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, modId);
 		return checkResult.match(
@@ -269,16 +270,16 @@ export class UserMods {
 	private async checkExistsAndUserAllowedToModify(
 		user: UserData,
 		modId: string,
-	): Promise<Result<true, "ModNotFound" | "NotMaintainer">> {
+	): Promise<Result<true, ModNotFoundError | NotMaintainerError>> {
 		const isMaintainer = await this.deps.modRepository.isMaintainerForMod(user.id, modId);
 		if (isMaintainer === undefined) {
 			logger.warn("Access denied - mod not found", { modId, userId: user.id });
-			return err("ModNotFound");
+			return err(new ModNotFoundError());
 		}
 
 		if (!isMaintainer) {
 			logger.warn("Access denied - not maintainer", { modId, userId: user.id });
-			return err("NotMaintainer");
+			return err(new NotMaintainerError());
 		}
 
 		return ok(true);

@@ -3,6 +3,12 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import type { Application } from "../application/Application.ts";
 import { ModCategory } from "../application/enums/ModCategory.ts";
 import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import {
+	ModNotFoundError,
+	NotMaintainerError,
+	ReleaseNotFoundError,
+	UserNotFoundError,
+} from "../application/errors.ts";
 import type { UserData } from "../application/schemas/UserData.ts";
 import { TestCases } from "./TestCases.ts";
 
@@ -50,7 +56,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			result.match(
 				() => {},
 				(error) => {
-					expect(error).toBe("UserNotFound");
+					expect(error).toBeInstanceOf(UserNotFoundError);
 				},
 			);
 		});
@@ -125,7 +131,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				result.match(
 					() => {},
 					(error) => {
-						expect(error).toBe("ModNotFound");
+						expect(error).toBeInstanceOf(ModNotFoundError);
 					},
 				);
 			});
@@ -153,7 +159,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				result.match(
 					() => {},
 					(error) => {
-						expect(error).toBe("NotMaintainer");
+						expect(error).toBeInstanceOf(NotMaintainerError);
 					},
 				);
 			});
@@ -220,7 +226,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				result.match(
 					() => {},
 					(error) => {
-						expect(error).toBe("ModNotFound");
+						expect(error).toBeInstanceOf(ModNotFoundError);
 					},
 				);
 			});
@@ -309,7 +315,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				result.match(
 					() => {},
 					(error) => {
-						expect(error).toBe("ModNotFound");
+						expect(error).toBeInstanceOf(ModNotFoundError);
 					},
 				);
 			});
@@ -411,7 +417,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				result.match(
 					() => {},
 					(error) => {
-						expect(error).toBe("ReleaseNotFound");
+						expect(error).toBeInstanceOf(ReleaseNotFoundError);
 					},
 				);
 			});

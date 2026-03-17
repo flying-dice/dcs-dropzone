@@ -77,4 +77,25 @@ export default defineRules({
 			}
 		},
 	},
+
+	"no-raw-string-err": {
+		description: "err() must not be called with raw string literals — use Error class instances instead.",
+		severity: "error",
+		async check(ctx) {
+			const matches = await ctx.grepFiles(/\berr\(\s*["'`]/, "{apps,packages}/*/src/**/*.ts");
+			const filtered = matches.filter((m) => {
+				if (m.file.includes(".test.") || m.file.includes("__tests__")) return false;
+				return true;
+			});
+
+			for (const match of filtered) {
+				ctx.report.violation({
+					message: `err() called with a raw string literal. Use an Error class instance instead: err(new SomeError()).`,
+					file: match.file,
+					line: match.line,
+					fix: "Create an Error class extending Error with a readonly _tag discriminant, and pass an instance to err().",
+				});
+			}
+		},
+	},
 });
