@@ -18,6 +18,7 @@ import { ReleaseAssetManager } from "./services/ReleaseAssetManager.ts";
 import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
 import { ReleaseToggle } from "./services/ReleaseToggle.ts";
 import { Settings } from "./services/Settings.ts";
+import { UninstallScriptManager } from "./services/UninstallScriptManager.ts";
 
 type Deps = {
 	downloadProcessor: DownloadProcessor;
@@ -59,6 +60,12 @@ export abstract class Application {
 			pathResolver,
 		});
 
+		const uninstallScriptManager = new UninstallScriptManager({
+			...this.deps,
+			pathResolver,
+			getDropzoneModsFolder: () => this.settings.getDropzoneModsDir(),
+		});
+
 		this.releaseAssetManager = new ReleaseAssetManager({
 			...this.deps,
 			pathResolver,
@@ -69,6 +76,7 @@ export abstract class Application {
 			releaseAssetManager: this.releaseAssetManager,
 			pathResolver,
 			missionScriptingFilesManager,
+			uninstallScriptManager,
 		});
 
 		this.releaseCatalog = new ReleaseCatalog({

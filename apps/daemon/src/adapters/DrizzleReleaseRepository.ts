@@ -1,6 +1,6 @@
 import { Log } from "@packages/decorators";
 import type { JobRecord } from "@packages/queue";
-import { eq } from "drizzle-orm";
+import { eq, isNotNull } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getLogger } from "log4js";
 import type { MissionScriptRunOn } from "webapp";
@@ -72,6 +72,16 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.from(T_MOD_RELEASE_SYMBOLIC_LINKS)
 			.where(eq(T_MOD_RELEASE_SYMBOLIC_LINKS.releaseId, releaseId))
 			.all();
+	}
+
+	@Log(logger)
+	getAllInstalledSymbolicLinkPaths(): string[] {
+		return this.db
+			.select({ installedPath: T_MOD_RELEASE_SYMBOLIC_LINKS.installedPath })
+			.from(T_MOD_RELEASE_SYMBOLIC_LINKS)
+			.where(isNotNull(T_MOD_RELEASE_SYMBOLIC_LINKS.installedPath))
+			.all()
+			.map((row) => row.installedPath!);
 	}
 
 	@Log(logger)
