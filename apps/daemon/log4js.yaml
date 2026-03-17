@@ -14,4 +14,4 @@ appenders:
 categories:
   default:
     appenders: [console, onlyErrors]
-    level: info
+    level: debug

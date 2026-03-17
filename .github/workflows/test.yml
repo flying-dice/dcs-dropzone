@@ -50,7 +50,7 @@ jobs:
         run: iscc apps/launcher/installer.iss
 
       - name: Run tests
-        run: bun test
+        run: bun --env-file=apps/daemon/.env.local --env-file=apps/launcher/.env.local --env-file=apps/webapp/.env.local test
 
       - name: Upload log artifact
         if: always()

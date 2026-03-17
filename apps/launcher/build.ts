@@ -1,10 +1,12 @@
 import { join, resolve } from "node:path";
-import { string } from "getenv";
+import env from "./env.ts";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone_Launcher";
 
 const outfile = join(resolve(OUT_DIR), BUN_NAME);
+
+console.log("_BUILD_DZ_ENV", env);
 
 await Bun.build({
 	entrypoints: ["./src/index.ts"],
@@ -25,6 +27,6 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		__RELEASES_BASE_URL: JSON.stringify(string("RELEASES_BASE_URL", "http://localhost:8081/")),
+		_BUILD_DZ_ENV: JSON.stringify(env),
 	},
 });

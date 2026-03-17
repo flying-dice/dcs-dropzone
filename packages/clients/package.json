@@ -11,7 +11,7 @@
 		"biome": "biome check --write",
 		"depcheck": "bunx depcheck",
 		"generate": "orval --config orval.config.cjs",
-		"tests": "bun test",
+		"tests": "bun test --pass-with-no-tests",
 		"tsc": "tsc --noEmit"
 	},
 	"devDependencies": {

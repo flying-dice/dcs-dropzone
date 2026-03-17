@@ -1,17 +1,22 @@
 import { Webview } from "webview-bun";
+import { appConfig } from "../AppConfig.ts";
 import { WindowClosed } from "./messages/WindowClosed.ts";
-import { WebviewWorkerEnv } from "./WebviewWorkerEnv.ts";
 
 declare var self: Worker;
 
-const { __DROPZONE_WEBVIEW_DEBUG, __DROPZONE_WEBVIEW_TITLE } = WebviewWorkerEnv.parse(process.env); // Injected by apps/daemon/src/webview/WebviewWorker.ts during construction
+const webview = new Webview(appConfig.enableWebviewWorkerDebug);
+webview.title = appConfig.webviewWindowTitle;
 
-const webview = new Webview(__DROPZONE_WEBVIEW_DEBUG);
-webview.title = __DROPZONE_WEBVIEW_TITLE;
-const url = new URL("http://localhost:56499");
+const url = new URL(appConfig.daemonUrl);
 url.searchParams.set("nocache", Date.now().toString());
+
+console.log(`Webview worker navigating to: ${url.toString()}`);
 webview.navigate(url.toString());
 
-webview.run();
+try {
+	webview.run();
+} catch (e) {
+	console.error("Error running webview:", e);
+}
 
 postMessage(WindowClosed.parse(<WindowClosed>{ type: "window-closed" }));

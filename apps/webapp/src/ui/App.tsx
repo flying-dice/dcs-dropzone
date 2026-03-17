@@ -1,18 +1,8 @@
-import { Anchor, Code, Container, Group, Stack } from "@mantine/core";
+import { Anchor, Container, Group, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { openModal } from "@mantine/modals";
 import { useGetConfig } from "@packages/clients/webapp";
-import {
-	AppIcons,
-	ColorSchemeControls,
-	DebugMenu,
-	DzAppShell,
-	DzMain,
-	ErrorState,
-	useAppTranslation,
-} from "@packages/dzui";
-import { CiRoute } from "react-icons/ci";
-import { HashRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { AppIcons, ColorSchemeControls, DzAppShell, DzMain, ErrorState, useAppTranslation } from "@packages/dzui";
+import { HashRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { AppNavbar } from "./AppNavbar.tsx";
 import { AssetActivity } from "./components/AssetActivity.tsx";
 import { ProfileMenu } from "./components/ProfileMenu.tsx";
@@ -48,28 +38,6 @@ function FallbackError() {
 	);
 }
 
-function AppDebugMenu() {
-	const location = useLocation();
-
-	return (
-		<DebugMenu
-			items={[
-				{
-					id: "location",
-					icon: CiRoute,
-					onClick: () =>
-						openModal({
-							size: "xl",
-							title: "Current Location",
-							children: <Code block>{JSON.stringify(location, undefined, 2)}</Code>,
-						}),
-					label: "View Location",
-				},
-			]}
-		/>
-	);
-}
-
 export function App() {
 	const { user } = useUserContext();
 	const navbarDisclosure = useDisclosure();
@@ -89,7 +57,6 @@ export function App() {
 				}}
 				headerSection={
 					<Group>
-						{config.data?.data.enableUiDebug ? <AppDebugMenu /> : null}
 						<AssetActivity />
 						<ColorSchemeControls lightLabel={t("LIGHT")} autoLabel={t("AUTO")} darkLabel={t("DARK")} />
 						<ProfileMenu />

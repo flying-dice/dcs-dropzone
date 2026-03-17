@@ -82,7 +82,7 @@ export class HonoApplication extends Hono<Env> {
 
 		self.onError(jsonErrorTransformer);
 
-		if (appConfig.config.enableGenerateSchema) {
+		if (appConfig.enableGenerateSchema) {
 			const spec = await generateSpecs(self, openapiSchema);
 			await Bun.write("openapi.schema.json", JSON.stringify(spec, undefined, 2));
 		}
@@ -103,7 +103,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			async (c) => {
-				return c.json(UiAppConfig.parse(appConfig.config));
+				return c.json(UiAppConfig.parse(appConfig));
 			},
 		);
 	}

@@ -14,15 +14,15 @@ const logger = getLogger("bootstrap");
 logger.info(`🌍 DCS Dropzone Registry Webapp Starting...`);
 
 logger.debug("Creating ProdApplication instance...");
-const app = new ProdApplication({ mongoUri: appConfig.config.mongoUri });
+const app = new ProdApplication({ mongoUri: appConfig.mongoUri });
 
 await app.init();
 
 logger.debug("Creating Authentication provider...");
 let authenticationProvider: AuthenticationProvider | null = null;
 
-if (appConfig.config.authServiceGh) {
-	authenticationProvider = new GithubAuthenticationProvider(appConfig.config.authServiceGh);
+if (appConfig.authServiceGh) {
+	authenticationProvider = new GithubAuthenticationProvider(appConfig.authServiceGh);
 }
 
 if (!authenticationProvider) {
@@ -34,8 +34,8 @@ const honoApp = await HonoApplication.build(app, authenticationProvider);
 
 logger.debug("Starting Bun server...");
 const bunServer = serve({
-	port: appConfig.config.port,
-	development: appConfig.config.enableServeDevelopment,
+	port: appConfig.port,
+	development: appConfig.enableServeDevelopment,
 	routes: {
 		"/*": index,
 		"/auth": honoApp.fetch,

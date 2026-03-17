@@ -3,14 +3,18 @@ import { join, resolve } from "node:path";
 import { fetchManifest, type ManifestData, readManifest, writeManifest } from "@packages/manifest";
 import { appConfig } from "./AppConfig.ts";
 
-const stableAssetUrl = appConfig.config.dropzoneTarFile;
-const stableAssetManifestUrl = appConfig.config.dropzoneTarFileManifest;
-const manifestPath = appConfig.config.manifestPath;
+const stableAssetUrl = appConfig.dropzoneTarFile;
+const stableAssetManifestUrl = appConfig.dropzoneTarFileManifest;
+const manifestPath = appConfig.manifestPath;
 
 console.info(`Checking for updates from ${stableAssetUrl}...`);
 
 console.debug("Fetching latest release manifest...");
-const latestReleaseManifest: ManifestData = await fetchManifest(stableAssetManifestUrl);
+const latestReleaseManifest: ManifestData = await fetchManifest(stableAssetManifestUrl).catch((e) => {
+	console.error(`Failed to fetch latest release manifest from ${stableAssetManifestUrl}, Err: ${e.message}`);
+	prompt("Press Enter to exit...");
+	process.exit(1);
+});
 
 function getReleaseManifestFolderPath(manifest: ManifestData) {
 	return resolve(join(manifest.__version || manifest.createdAt.getTime().toString()));
@@ -62,7 +66,7 @@ const executablePath = resolve(`${folderName}/Dropzone.exe`);
 Bun.spawn({
 	cmd: [executablePath],
 	cwd: folderName,
-	env: { DropzoneDaemon_databasePath: join(process.cwd(), "data.sqlite"), ...process.env },
+	env: { DZ_DAEMON_DATABASE_PATH: join(process.cwd(), "data.sqlite"), ...process.env },
 	stdout: "inherit",
 	stdin: "inherit",
 	stderr: "inherit",

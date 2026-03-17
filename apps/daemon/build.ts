@@ -1,7 +1,7 @@
 import { exists, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { writeManifest } from "@packages/manifest";
-import { string } from "getenv";
+import env from "./env.ts";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone";
@@ -24,6 +24,7 @@ const ASSETS: [string, string][] = [
 
 const outfile = join(resolve(OUT_DIR), BUN_NAME);
 
+console.log("_BUILD_DZ_ENV", env);
 console.log("Building Project with Bun...");
 await Bun.build({
 	entrypoints: ["./src/index.ts", "./src/webview/worker.ts"],
@@ -42,12 +43,7 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		__WEBVIEW_WORKER_MODULE_PATH: JSON.stringify("./webview/worker.ts"),
-		__WEBAPP_URL: JSON.stringify(string("WEBAPP_URL", "http://localhost:3000/")),
-		__DAEMON_URL: JSON.stringify(string("DAEMON_URL", "http://localhost:56499/")),
-		__ENABLE_SERVE_DEVELOPMENT: JSON.stringify("false"),
-		__ENABLE_WEBVIEW_WORKER_DEBUG: JSON.stringify("false"),
-		__ENABLE_GENERATE_SCHEMA: JSON.stringify("false"),
+		_BUILD_DZ_ENV: JSON.stringify(env),
 	},
 });
 

@@ -22,7 +22,7 @@ export const cookieAuth = () =>
 		logger.debug({ requestId }, "Authenticating via cookie");
 
 		logger.debug({ requestId }, "Retrieving token from cookie");
-		const userId = await getSignedCookie(c, appConfig.config.userCookieSecret!, appConfig.config.userCookieName);
+		const userId = await getSignedCookie(c, appConfig.userCookieSecret!, appConfig.userCookieName);
 
 		if (!userId) {
 			logger.warn({ requestId }, "No signed cookie found");
@@ -40,7 +40,7 @@ export const cookieAuth = () =>
 				},
 				(error: string) => {
 					logger.warn({ requestId, error }, "User not found for token");
-					deleteCookie(c, appConfig.config.userCookieName);
+					deleteCookie(c, appConfig.userCookieName);
 					throw new HTTPException(StatusCodes.UNAUTHORIZED);
 				},
 			);
@@ -49,7 +49,7 @@ export const cookieAuth = () =>
 				throw error;
 			}
 			logger.warn({ requestId, error }, "Error loading user for token");
-			deleteCookie(c, appConfig.config.userCookieName);
+			deleteCookie(c, appConfig.userCookieName);
 			throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR);
 		}
 

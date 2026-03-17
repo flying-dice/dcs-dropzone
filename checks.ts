@@ -24,13 +24,15 @@ for (const _path of packageJsons) {
 		console.log(`Running depcheck for ${pkg.name}...`);
 		await $`cd "${_parent}" && bun run depcheck`;
 	}
+
+	if ("tests" in pkg.scripts) {
+		console.log(`Running tests for ${pkg.name}...`);
+		await $`cd "${_parent}" && bun run tests`;
+	}
 }
 
 console.log("Running Global Biome checks...");
 await $`bunx biome ci`;
-
-console.log("Running Global Tests...");
-await $`bun test`;
 
 console.log("Running playwright tests...");
 await $`bun run test:playwright`;

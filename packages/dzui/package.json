@@ -9,7 +9,7 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"depcheck": "bunx depcheck",
-		"tests": "bun test",
+		"tests": "bun test --pass-with-no-tests",
 		"tsc": "tsc --noEmit"
 	},
 	"dependencies": {

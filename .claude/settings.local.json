@@ -14,7 +14,8 @@
 			"Bash(bun install:*)",
 			"Skill(archgate:architect)",
 			"Skill(archgate:quality-manager)",
-			"Skill(archgate:adr-author)"
+			"Skill(archgate:adr-author)",
+			"Bash(find . -type f \\\\\\(-name *.spec-pw.ts -o -name *.spec.ts \\\\\\))"
 		]
 	},
 	"agent": "archgate:developer"
