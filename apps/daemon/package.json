@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"biome": "biome check --write",
-		"build": "bun env.ts",
+		"build": "bun build.ts",
 		"build:serve": "npx http-server ./dist -p 8081",
 		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",
@@ -27,7 +27,7 @@
 		"@packages/hono": "workspace:*",
 		"@packages/manifest": "workspace:*",
 		"@packages/queue": "workspace:*",
-		"@packages/rc-config": "workspace:*",
+		"@packages/dz-config": "workspace:*",
 		"@packages/zod": "workspace:*",
 		"@scalar/hono-api-reference": "^0.9.30",
 		"@tanstack/react-query": "5.90.21",

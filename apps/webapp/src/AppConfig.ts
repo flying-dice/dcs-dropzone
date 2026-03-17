@@ -1,7 +1,6 @@
-import { RcConfig } from "@packages/rc-config";
+import { RcConfig, env } from "@packages/dz-config";
 import { z } from "zod";
 import { GithubAuthenticationProviderConfig } from "./authentication/GithubAuthenticationProvider.ts";
-import { env } from "../env.ts";
 
 export const Constants = z.object({
 	WebappUrl: z.url().default("http://localhost:3000/"),

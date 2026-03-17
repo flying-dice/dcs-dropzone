@@ -1,7 +1,6 @@
-import { RcConfig } from "@packages/rc-config";
+import { RcConfig, env } from "@packages/dz-config";
 import { zen } from "@packages/zod/zen";
 import { z } from "zod";
-import { env } from "../env.ts";
 
 export const Constants = z.object({
 	ReleasesBaseUrl: z.url().default("http://localhost:8081/"),

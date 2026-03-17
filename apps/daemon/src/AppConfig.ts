@@ -1,9 +1,8 @@
 import { join } from "node:path";
-import { RcConfig } from "@packages/rc-config";
+import { RcConfig, env } from "@packages/dz-config";
 import { zen } from "@packages/zod/zen";
 import { z } from "zod";
 import { SEVEN_ZIP_BINARIES, WGET_BINARIES } from "./constants.ts";
-import { env } from "../env.ts";
 import { which } from "./utils/which.ts";
 
 export const Constants = z.object({

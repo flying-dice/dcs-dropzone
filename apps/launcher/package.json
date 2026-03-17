@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"biome": "biome check --write",
-		"build": "bun env.ts",
+		"build": "bun build.ts",
 		"build:installer": "iscc installer.iss",
 		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",
@@ -14,7 +14,7 @@
 	},
 	"dependencies": {
 		"@packages/manifest": "workspace:*",
-		"@packages/rc-config": "workspace:*",
+		"@packages/dz-config": "workspace:*",
 		"@packages/zod": "workspace:*",
 		"zod": "^4.2.1"
 	},
