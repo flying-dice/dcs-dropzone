@@ -68,7 +68,7 @@ In a new terminal, compile the Launcher into a standalone executable:
 bun run launcher:build
 ```
 
-This runs `apps/launcher/build.ts` which compiles `apps/launcher/src/index.ts` into `apps/launcher/dist/Dropzone_Launcher.exe`. Because no `RELEASES_BASE_URL` env var is set, the build-time constant falls back to `http://localhost:8081/`, pointing at the local `http-server` from step 2.
+This runs `apps/launcher/build.ts` which compiles `apps/launcher/src/index.ts` into `apps/launcher/dist/Dropzone_Launcher.exe`. The build loads `apps/launcher/.env.prod` which points `DZ_LAUNCHER_RELEASE_TAR_PATH` at the GitHub releases URL. For local development, run `bun run launcher:build:local` instead to load `.env.local`, which points at the local `http-server` from step 2 (`http://localhost:8081/`).
 
 ### 4. Build the Setup Installer
 
@@ -128,17 +128,24 @@ bun run webapp:dev
 
 This starts MongoDB via Docker Compose and runs the webapp with `bun --hot`. You need Docker running for the MongoDB container.
 
-## RC files for local overrides
+## Environment files for local overrides
 
-Each app has a checked-in `.rc` file that configures development-friendly defaults. These are automatically picked up at runtime by the `rc` module:
+Each app has two checked-in `.env` files that provide configuration defaults for different environments. Bun's `--env-file` flag loads these files before the process starts:
 
-| App        | File                               | Key overrides                                       |
-|------------|------------------------------------|-----------------------------------------------------|
-| **Daemon** | `apps/daemon/.DropzoneDaemonrc`    | Enables dev serving, webview debug, schema generation |
-| **Webapp** | `apps/webapp/.DropzoneWebapprc`    | Enables dev serving, UI debug, sets local MongoDB URI |
-| **Launcher** | `apps/launcher/.DropzoneLauncherrc` | Points tar URLs at `localhost:8081`               |
+| App          | Local                          | Production                         | Key overrides                                                |
+|--------------|--------------------------------|------------------------------------|--------------------------------------------------------------|
+| **Daemon**   | `apps/daemon/.env.local`       | `apps/daemon/.env.prod`            | Host, port, webview debug, schema generation, database path  |
+| **Webapp**   | `apps/webapp/.env.local`       | `apps/webapp/.env.prod`            | Port, MongoDB URI, cookie secret, dev serving, UI debug      |
+| **Launcher** | `apps/launcher/.env.local`     | `apps/launcher/.env.prod`          | Points tar URLs at `localhost:8081` (local) or GitHub (prod)  |
 
-See [app-configuration.md](./app-configuration.md) for full details on how configuration layering works.
+Scripts in each app's `package.json` select the appropriate env file:
+
+- `bun run dev` loads `.env.local` for development.
+- `bun run build` loads `.env.prod` for production builds.
+- `bun run build:local` loads `.env.local` for local builds.
+- `bun test` (at root) loads all `.env.local` files at once.
+
+See the [ARC-002 ADR](../.archgate/adrs/ARC-002-layered-app-configuration.md) for full details on how configuration layering works.
 
 ## Quick reference
 
