@@ -1,7 +1,7 @@
 import { exists, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { writeManifest } from "@packages/manifest";
 import { getBuildDzEnv } from "@packages/dz-config";
+import { writeManifest } from "@packages/manifest";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone";
