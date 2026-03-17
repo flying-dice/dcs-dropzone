@@ -63,6 +63,8 @@ describe("generateUninstallScript", () => {
 	it("should use CRLF line endings for Windows compatibility", () => {
 		const result = generateUninstallScript([], []);
 
-		expect(result).toContain("\r\n");
+		// Verify all line endings are CRLF (no standalone LF characters)
+		const withoutCrlf = result.replaceAll("\r\n", "");
+		expect(withoutCrlf).not.toContain("\n");
 	});
 });

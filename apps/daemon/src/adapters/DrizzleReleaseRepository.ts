@@ -81,7 +81,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 			.from(T_MOD_RELEASE_SYMBOLIC_LINKS)
 			.where(isNotNull(T_MOD_RELEASE_SYMBOLIC_LINKS.installedPath))
 			.all()
-			.map((row) => row.installedPath!);
+			.map((row) => row.installedPath as string);
 	}
 
 	@Log(logger)
