@@ -27,11 +27,11 @@
         "@mantine/notifications": "8.3.10",
         "@packages/clients": "workspace:*",
         "@packages/decorators": "workspace:*",
+        "@packages/dz-config": "workspace:*",
         "@packages/dzui": "workspace:*",
         "@packages/hono": "workspace:*",
         "@packages/manifest": "workspace:*",
         "@packages/queue": "workspace:*",
-        "@packages/rc-config": "workspace:*",
         "@packages/zod": "workspace:*",
         "@scalar/hono-api-reference": "^0.9.30",
         "@tanstack/react-query": "5.90.21",
@@ -71,8 +71,8 @@
     "apps/launcher": {
       "name": "launcher",
       "dependencies": {
+        "@packages/dz-config": "workspace:*",
         "@packages/manifest": "workspace:*",
-        "@packages/rc-config": "workspace:*",
         "@packages/zod": "workspace:*",
         "zod": "^4.2.1",
       },
@@ -100,9 +100,9 @@
         "@monaco-editor/react": "^4.7.0",
         "@packages/clients": "workspace:*",
         "@packages/decorators": "workspace:*",
+        "@packages/dz-config": "workspace:*",
         "@packages/dzui": "workspace:*",
         "@packages/hono": "workspace:*",
-        "@packages/rc-config": "workspace:*",
         "@packages/zod": "workspace:*",
         "@scalar/hono-api-reference": "^0.9.30",
         "@tanstack/react-query": "5.90.21",
@@ -177,6 +177,16 @@
         "log4js": ">=6",
       },
     },
+    "packages/dz-config": {
+      "name": "@packages/dz-config",
+      "devDependencies": {
+        "@types/bun": "1.3.6",
+        "zod": "^4.2.1",
+      },
+      "peerDependencies": {
+        "zod": ">=4",
+      },
+    },
     "packages/dzui": {
       "name": "@packages/dzui",
       "dependencies": {
@@ -220,18 +230,6 @@
       "peerDependencies": {
         "log4js": "^6.9.1",
         "neverthrow": "^8.2.0",
-      },
-    },
-    "packages/rc-config": {
-      "name": "@packages/rc-config",
-      "dependencies": {
-        "rc": "^1.2.8",
-      },
-      "devDependencies": {
-        "@types/rc": "^1.2.4",
-      },
-      "peerDependencies": {
-        "zod": ">=4",
       },
     },
     "packages/zod": {
@@ -532,6 +530,8 @@
 
     "@packages/decorators": ["@packages/decorators@workspace:packages/decorators"],
 
+    "@packages/dz-config": ["@packages/dz-config@workspace:packages/dz-config"],
+
     "@packages/dzui": ["@packages/dzui@workspace:packages/dzui"],
 
     "@packages/hono": ["@packages/hono@workspace:packages/hono"],
@@ -539,8 +539,6 @@
     "@packages/manifest": ["@packages/manifest@workspace:packages/manifest"],
 
     "@packages/queue": ["@packages/queue@workspace:packages/queue"],
-
-    "@packages/rc-config": ["@packages/rc-config@workspace:packages/rc-config"],
 
     "@packages/zod": ["@packages/zod@workspace:packages/zod"],
 
@@ -636,15 +634,11 @@
 
     "@types/lodash": ["@types/lodash@4.17.21", "", {}, "sha512-FOvQ0YPD5NOfPgMzJihoT+Za5pdkDJWcbpuj1DjaKZIr/gxodQjY/uWEFlTNqW2ugXHUiL8lRQgw63dzKHZdeQ=="],
 
-    "@types/minimist": ["@types/minimist@1.2.5", "", {}, "sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag=="],
-
     "@types/node": ["@types/node@24.9.1", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-QoiaXANRkSXK6p0Duvt56W208du4P9Uye9hWLWgGMDTEoKPhuenzNcC4vGUmrNkiOKTlIrBoyNQYNpSwfEZXSg=="],
 
     "@types/normalize-package-data": ["@types/normalize-package-data@2.4.4", "", {}, "sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA=="],
 
     "@types/object-hash": ["@types/object-hash@3.0.6", "", {}, "sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w=="],
-
-    "@types/rc": ["@types/rc@1.2.4", "", { "dependencies": { "@types/minimist": "*" } }, "sha512-xD6+epQoMH79A1uwmJIq25D+XZ57jUzCQ1DGSvs3tGKdx7QDYOOaMh6m5KBkEIW4+Cy5++bZ7NLDfdpNiYVKYA=="],
 
     "@types/react": ["@types/react@19.2.3", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-k5dJVszUiNr1DSe8Cs+knKR6IrqhqdhpUwzqhkS8ecQTSf3THNtbfIp/umqHMpX2bv+9dkx3fwDv/86LcSfvSg=="],
 

@@ -10,7 +10,11 @@
 		"depcheck": "bunx depcheck",
 		"tsc": "tsc --noEmit"
 	},
+	"peerDependencies": {
+		"zod": ">=4"
+	},
 	"devDependencies": {
-		"@types/bun": "1.3.6"
+		"@types/bun": "1.3.6",
+		"zod": "^4.2.1"
 	}
 }
