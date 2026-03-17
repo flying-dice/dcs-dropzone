@@ -82,6 +82,16 @@ export class TestReleaseRepository implements ReleaseRepository {
 		this.installedPaths.set(symbolicLinkId, installedPath);
 	}
 
+	getAllInstalledSymbolicLinkPaths(): string[] {
+		const paths: string[] = [];
+		for (const [, path] of this.installedPaths) {
+			if (path !== null) {
+				paths.push(path);
+			}
+		}
+		return paths;
+	}
+
 	setEnabled(releaseId: string, enabled: boolean): void {
 		this.enabledReleases.set(releaseId, enabled);
 	}

@@ -6,11 +6,13 @@ import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
 import type { DcsPathNotConfigured, PathResolver, PathResolverError } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
+import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
 const logger = getLogger("ReleaseToggle");
 
 type Deps = {
 	missionScriptingFilesManager: MissionScriptingFilesManager;
+	removeSymlinksScriptManager: RemoveSymlinksScriptManager;
 	pathResolver: PathResolver;
 	releaseRepository: ReleaseRepository;
 	fileSystem: FileSystem;
@@ -51,6 +53,10 @@ export class ReleaseToggle {
 		const rebuildResult = this.deps.missionScriptingFilesManager.rebuild();
 		if (rebuildResult.isErr()) return err(rebuildResult.error);
 
+		logger.info(`Rebuilding remove-symlinks script after enabling release ${releaseId}`);
+		const removeSymlinksRebuildResult = this.deps.removeSymlinksScriptManager.rebuild();
+		if (removeSymlinksRebuildResult.isErr()) return err(removeSymlinksRebuildResult.error);
+
 		logger.info(`Finished enabling Release ${releaseId}`);
 		return ok(undefined);
 	}
@@ -82,6 +88,10 @@ export class ReleaseToggle {
 		logger.info(`Rebuilding mission scripting files after disabling release ${releaseId}`);
 		const rebuildResult = this.deps.missionScriptingFilesManager.rebuild();
 		if (rebuildResult.isErr()) return err(rebuildResult.error);
+
+		logger.info(`Rebuilding remove-symlinks script after disabling release ${releaseId}`);
+		const removeSymlinksRebuildResult = this.deps.removeSymlinksScriptManager.rebuild();
+		if (removeSymlinksRebuildResult.isErr()) return err(removeSymlinksRebuildResult.error);
 
 		logger.info(`Finished disabling Release ${releaseId}`);
 		return ok(undefined);

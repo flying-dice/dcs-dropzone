@@ -20,6 +20,8 @@ export interface ReleaseRepository {
 
 	getSymbolicLinksForRelease(releaseId: string): SymbolicLink[];
 
+	getAllInstalledSymbolicLinkPaths(): string[];
+
 	setInstalledPathForSymbolicLink(symbolicLinkId: string, installedPath: string | null): void;
 
 	setEnabled(releaseId: string, enabled: boolean): void;

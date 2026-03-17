@@ -246,5 +246,32 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(releases.length).toEqual(1);
 			expect(releases[0]?.status).toBe(DownloadedReleaseStatus.DISABLED);
 		});
+
+		it("should generate removeSymlinks.bat after enabling a release", async () => {
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+
+			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+
+			const dropzoneModsDir = app.settings.getDropzoneModsDir();
+			ok(dropzoneModsDir);
+			const removeSymlinksBatFiles = app.deps.fileSystem.glob(join(dropzoneModsDir, ".."), "**/removeSymlinks.bat");
+
+			expect(removeSymlinksBatFiles.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it("should regenerate removeSymlinks.bat after disabling a release", async () => {
+			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+
+			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
+
+			const dropzoneModsDir = app.settings.getDropzoneModsDir();
+			ok(dropzoneModsDir);
+			const removeSymlinksBatFiles = app.deps.fileSystem.glob(join(dropzoneModsDir, ".."), "**/removeSymlinks.bat");
+
+			expect(removeSymlinksBatFiles.length).toBeGreaterThanOrEqual(1);
+		});
 	});
 });

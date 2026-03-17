@@ -17,6 +17,7 @@ import {
 import { ReleaseAssetManager } from "./services/ReleaseAssetManager.ts";
 import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
 import { ReleaseToggle } from "./services/ReleaseToggle.ts";
+import { RemoveSymlinksScriptManager } from "./services/RemoveSymlinksScriptManager.ts";
 import { Settings } from "./services/Settings.ts";
 
 type Deps = {
@@ -59,6 +60,12 @@ export abstract class Application {
 			pathResolver,
 		});
 
+		const removeSymlinksScriptManager = new RemoveSymlinksScriptManager({
+			...this.deps,
+			pathResolver,
+			getDropzoneModsFolder: () => this.settings.getDropzoneModsDir(),
+		});
+
 		this.releaseAssetManager = new ReleaseAssetManager({
 			...this.deps,
 			pathResolver,
@@ -69,6 +76,7 @@ export abstract class Application {
 			releaseAssetManager: this.releaseAssetManager,
 			pathResolver,
 			missionScriptingFilesManager,
+			removeSymlinksScriptManager,
 		});
 
 		this.releaseCatalog = new ReleaseCatalog({
