@@ -30,14 +30,14 @@ export const env: Record<string, string> = {
 };
 
 /**
- * Returns the snapshot object to bake into the compiled binary via Bun.build define.
- * Keys containing "SECRET" are stripped to prevent leaking sensitive values.
- * Pass the result to: define: { _BUILD_DZ_ENV: JSON.stringify(createBuildSnapshot()) }
+ * Returns a JSON string of the current DZ_* environment variables to bake into
+ * the compiled binary via Bun.build define. Keys containing "SECRET" are stripped.
+ * Pass the result to: define: { _BUILD_DZ_ENV: getBuildDzEnv() }
  */
-export function createBuildSnapshot(): Record<string, string> {
+export function getBuildDzEnv(): string {
 	const snapshot = { ...liveBunEnv, ...liveCliArgs };
 	for (const key in snapshot) {
 		if (key.includes("SECRET")) delete snapshot[key];
 	}
-	return snapshot;
+	return JSON.stringify(snapshot);
 }

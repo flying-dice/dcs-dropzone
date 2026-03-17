@@ -1,7 +1,7 @@
 import { exists, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { writeManifest } from "@packages/manifest";
-import { createBuildSnapshot } from "@packages/dz-config";
+import { getBuildDzEnv } from "@packages/dz-config";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone";
@@ -23,9 +23,9 @@ const ASSETS: [string, string][] = [
 ];
 
 const outfile = join(resolve(OUT_DIR), BUN_NAME);
-const snapshotToBake = createBuildSnapshot();
+const buildDzEnv = getBuildDzEnv();
 
-console.log("Baking _BUILD_DZ_ENV snapshot:", snapshotToBake);
+console.log("Baking _BUILD_DZ_ENV:", buildDzEnv);
 console.log("Building Project with Bun...");
 await Bun.build({
 	entrypoints: ["./src/index.ts", "./src/webview/worker.ts"],
@@ -44,7 +44,7 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		_BUILD_DZ_ENV: JSON.stringify(snapshotToBake),
+		_BUILD_DZ_ENV: buildDzEnv,
 	},
 });
 

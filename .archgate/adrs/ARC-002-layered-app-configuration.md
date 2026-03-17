@@ -40,7 +40,7 @@ During the build step, `build.ts` calls `createBuildSnapshot()` from `@packages/
 The `@packages/dz-config` workspace package is the central home for all environment resolution utilities. It exports:
 
 - **`env`** — the resolved `Record<string, string>` following the hierarchy CLI args > `Bun.env` > `_BUILD_DZ_ENV` snapshot. Imported directly by `AppConfig.ts` in each app.
-- **`createBuildSnapshot()`** — returns the `DZ_`-prefixed variables present at build time (with `SECRET` keys stripped). Imported by `build.ts` in each app.
+- **`getBuildDzEnv()`** — returns a JSON string of the `DZ_`-prefixed variables present at build time (with `SECRET` keys stripped). Imported by `build.ts` in each app.
 
 ```ts
 // packages/dz-config/src/env.ts (simplified)
@@ -50,12 +50,12 @@ export const env: Record<string, string> = {
   ...liveCliArgs,     // --DZ_* from CLI
 };
 
-export function createBuildSnapshot(): Record<string, string> {
+export function getBuildDzEnv(): string {
   const snapshot = { ...liveBunEnv, ...liveCliArgs };
   for (const key in snapshot) {
     if (key.includes("SECRET")) delete snapshot[key];
   }
-  return snapshot;
+  return JSON.stringify(snapshot);
 }
 ```
 
@@ -132,7 +132,7 @@ In CI workflows the `DZ_`-prefixed variables are set on the relevant build steps
 
 - **Do** prefix all new configuration variables with `DZ_` — `createBuildSnapshot()` and `env` pick them up automatically with no build script changes required.
 - **Do** import `env` from `@packages/dz-config` in `AppConfig.ts` and pass `DZ_` values directly into `AppConfig.parse()`.
-- **Do** import `createBuildSnapshot` from `@packages/dz-config` in `build.ts` and pass the result to `define: { _BUILD_DZ_ENV: JSON.stringify(snapshotToBake) }`.
+- **Do** import `getBuildDzEnv` from `@packages/dz-config` in `build.ts` and pass the result to `define: { _BUILD_DZ_ENV: getBuildDzEnv() }`.
 - **Do** suffix secret variable names with `SECRET` (e.g. `DZ_USER_COOKIE_SECRET`, `DZ_AUTH_GH_CLIENT_SECRET`) so they are automatically excluded from the build snapshot.
 - **Do** declare Zod `.default()` values on all optional `AppConfig` fields so the schema is self-documenting and parse always succeeds for local dev.
 
