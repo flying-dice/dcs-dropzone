@@ -30,6 +30,7 @@ export const cookieAuth = () =>
 			throw new HTTPException(StatusCodes.UNAUTHORIZED);
 		}
 
+		logger.debug({ requestId, userId }, "Loading authenticated user");
 		await ResultAsync.fromPromise(c.var.app.users.getUserById(userId), (error) => error).match(
 			(result) => {
 				result.match(

@@ -1,4 +1,5 @@
 import { getLogger } from "log4js";
+import { Result } from "neverthrow";
 import { posixpath } from "./posixpath.ts";
 
 const logger = getLogger("generateDropzoneMissionScriptingScript");
@@ -39,8 +40,15 @@ export function generateDropzoneMissionScriptingScript(name: string, paths: { id
 	// eslint-disable-next-line prefer-const
 	for (let { id, path } of paths) {
 		path = posixpath(path); // Must convert to posix path for lua script as windows paths would need to be escaped
-		logger.debug(`Adding dofile for: ${path}`);
-		content.push(getLineForScript(id, path));
+		Result.fromThrowable(
+			() => {
+				logger.debug(`Adding dofile for: ${path}`);
+				content.push(getLineForScript(id, path));
+			},
+			(e) => (e instanceof Error ? e : new Error(String(e))),
+		)().mapErr((error) => {
+			logger.error(`Failed to get stats for path: ${path}`, error);
+		});
 	}
 
 	return `-- ${name}\n${FILE_HEADER}\n-- ## Start of Scripts ##\n${content.join("\n")}-- ## End of Scripts ##\n`;
