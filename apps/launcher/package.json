@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"biome": "biome check --write",
-		"build": "bun build.ts",
+		"build": "bun env.ts",
 		"build:installer": "iscc installer.iss",
 		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",

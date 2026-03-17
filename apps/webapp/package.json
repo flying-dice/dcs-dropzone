@@ -7,7 +7,7 @@
 	},
 	"scripts": {
 		"biome": "biome check --write",
-		"build": "bun build.ts",
+		"build": "bun env.ts",
 		"depcheck": "bunx depcheck",
 		"dev": "DropzoneWebapp_userCookieSecret=local-cookie-secret DropzoneWebapp_mongoUri=mongodb://localhost:27017/dcs-dropzone bun --hot src/index.ts",
 		"dev:docker": "docker compose up -d mongodb && DropzoneWebapp_userCookieSecret=local-cookie-secret DropzoneWebapp_mongoUri=mongodb://localhost:27017/dcs-dropzone bun --hot src/index.ts",

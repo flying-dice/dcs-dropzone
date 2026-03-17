@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"biome": "biome check --write",
-		"build": "bun build.ts",
+		"build": "bun env.ts",
 		"build:serve": "npx http-server ./dist -p 8081",
 		"depcheck": "bunx depcheck",
 		"dev": "bun --watch src/index.ts",

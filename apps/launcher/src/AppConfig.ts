@@ -1,10 +1,7 @@
 import { RcConfig } from "@packages/rc-config";
 import { zen } from "@packages/zod/zen";
 import { z } from "zod";
-
-// These constants are replaced at build time see apps/launcher/build.ts
-// https://bun.com/docs/guides/runtime/build-time-constants
-declare const __RELEASES_BASE_URL: string;
+import { env } from "../env.ts";
 
 export const Constants = z.object({
 	ReleasesBaseUrl: z.url().default("http://localhost:8081/"),
@@ -13,7 +10,7 @@ export const Constants = z.object({
 export type Constants = z.infer<typeof Constants>;
 
 export const constants = Constants.parse({
-	ReleasesBaseUrl: typeof __RELEASES_BASE_URL !== "undefined" ? __RELEASES_BASE_URL : undefined,
+	ReleasesBaseUrl: env.DZ_RELEASES_BASE_URL,
 });
 
 export const AppConfig = z.object({

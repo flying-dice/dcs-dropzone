@@ -1,14 +1,7 @@
 import { RcConfig } from "@packages/rc-config";
 import { z } from "zod";
 import { GithubAuthenticationProviderConfig } from "./authentication/GithubAuthenticationProvider.ts";
-
-// These constants are replaced at build time see apps/webapp/build.ts
-// https://bun.com/docs/guides/runtime/build-time-constants
-declare const __WEBAPP_URL: string;
-declare const __DAEMON_URL: string;
-declare const __ENABLE_SERVE_DEVELOPMENT: string;
-declare const __ENABLE_UI_DEBUG: string;
-declare const __ENABLE_GENERATE_SCHEMA: string;
+import { env } from "../env.ts";
 
 export const Constants = z.object({
 	WebappUrl: z.url().default("http://localhost:3000/"),
@@ -21,11 +14,11 @@ export const Constants = z.object({
 export type Constants = z.infer<typeof Constants>;
 
 export const constants = Constants.parse({
-	WebappUrl: typeof __WEBAPP_URL !== "undefined" ? __WEBAPP_URL : undefined,
-	DaemonUrl: typeof __DAEMON_URL !== "undefined" ? __DAEMON_URL : undefined,
-	EnableServeDevelopment: typeof __ENABLE_SERVE_DEVELOPMENT !== "undefined" ? __ENABLE_SERVE_DEVELOPMENT : undefined,
-	EnableUiDebug: typeof __ENABLE_UI_DEBUG !== "undefined" ? __ENABLE_UI_DEBUG : undefined,
-	EnableGenerateSchema: typeof __ENABLE_GENERATE_SCHEMA !== "undefined" ? __ENABLE_GENERATE_SCHEMA : undefined,
+	WebappUrl: env.DZ_WEBAPP_URL,
+	DaemonUrl: env.DZ_DAEMON_URL,
+	EnableServeDevelopment: env.DZ_ENABLE_SERVE_DEVELOPMENT,
+	EnableUiDebug: env.DZ_ENABLE_UI_DEBUG,
+	EnableGenerateSchema: env.DZ_ENABLE_GENERATE_SCHEMA,
 });
 
 export const AppConfig = z.object({
