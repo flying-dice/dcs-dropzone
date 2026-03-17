@@ -70,9 +70,10 @@ export class ReleaseToggle {
 
 		for (const link of links) {
 			if (link.installedPath) {
-				logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
+				const installedPath = link.installedPath;
+				logger.debug(`Removing symlink for linkId ${link.id} at ${installedPath}`);
 				Result.fromThrowable(
-					() => this.deps.fileSystem.removeDir(link.installedPath!),
+					() => this.deps.fileSystem.removeDir(installedPath),
 					(e) => (e instanceof Error ? e : new Error(String(e))),
 				)().match(
 					() => {
@@ -80,7 +81,7 @@ export class ReleaseToggle {
 						logger.debug(`Cleared installed symlink path for linkId ${link.id}`);
 					},
 					(e) => {
-						logger.error(`Failed to remove path for linkId ${link.id} at ${link.installedPath}: ${e}`);
+						logger.error(`Failed to remove path for linkId ${link.id} at ${installedPath}: ${e}`);
 					},
 				);
 			} else {
