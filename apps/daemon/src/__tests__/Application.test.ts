@@ -247,7 +247,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(releases[0]?.status).toBe(DownloadedReleaseStatus.DISABLED);
 		});
 
-		it("should generate uninstall.bat after enabling a release", async () => {
+		it("should generate removeSymlinks.bat after enabling a release", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
@@ -255,12 +255,12 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 			const dropzoneModsDir = app.settings.getDropzoneModsDir();
 			ok(dropzoneModsDir);
-			const uninstallBatFiles = app.deps.fileSystem.glob(join(dropzoneModsDir, ".."), "**/uninstall.bat");
+			const removeSymlinksBatFiles = app.deps.fileSystem.glob(join(dropzoneModsDir, ".."), "**/removeSymlinks.bat");
 
-			expect(uninstallBatFiles.length).toBeGreaterThanOrEqual(1);
+			expect(removeSymlinksBatFiles.length).toBeGreaterThanOrEqual(1);
 		});
 
-		it("should regenerate uninstall.bat after disabling a release", async () => {
+		it("should regenerate removeSymlinks.bat after disabling a release", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
@@ -269,9 +269,9 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 			const dropzoneModsDir = app.settings.getDropzoneModsDir();
 			ok(dropzoneModsDir);
-			const uninstallBatFiles = app.deps.fileSystem.glob(join(dropzoneModsDir, ".."), "**/uninstall.bat");
+			const removeSymlinksBatFiles = app.deps.fileSystem.glob(join(dropzoneModsDir, ".."), "**/removeSymlinks.bat");
 
-			expect(uninstallBatFiles.length).toBeGreaterThanOrEqual(1);
+			expect(removeSymlinksBatFiles.length).toBeGreaterThanOrEqual(1);
 		});
 	});
 });

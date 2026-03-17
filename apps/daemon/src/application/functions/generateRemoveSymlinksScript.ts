@@ -1,6 +1,6 @@
 import { getLogger } from "log4js";
 
-const logger = getLogger("generateUninstallScript");
+const logger = getLogger("generateRemoveSymlinksScript");
 
 /**
  * Generates a Windows batch script that removes all Dropzone filesystem changes.
@@ -8,15 +8,18 @@ const logger = getLogger("generateUninstallScript");
  * The script removes all tracked symbolic links/junctions and the two generated
  * mission scripting Lua files. It handles missing paths gracefully and is idempotent.
  *
+ * This script is intended to be called by the installer's uninstall.bat during
+ * application uninstallation.
+ *
  * @param installedPaths - Absolute paths of all currently installed symbolic links/junctions
  * @param missionScriptPaths - Absolute paths of the generated mission scripting Lua files
- * @returns The generated uninstall.bat content
+ * @returns The generated removeSymlinks.bat content
  */
-export function generateUninstallScript(installedPaths: string[], missionScriptPaths: string[]): string {
+export function generateRemoveSymlinksScript(installedPaths: string[], missionScriptPaths: string[]): string {
 	const lines: string[] = [];
 
 	lines.push("@echo off");
-	lines.push("echo Running DCS Dropzone uninstall...");
+	lines.push("echo Removing DCS Dropzone symlinks and generated files...");
 	lines.push("");
 
 	lines.push("echo Removing symbolic links...");
@@ -35,7 +38,7 @@ export function generateUninstallScript(installedPaths: string[], missionScriptP
 	}
 	lines.push("");
 
-	lines.push("echo Uninstall complete.");
+	lines.push("echo Symlink removal complete.");
 	lines.push("pause");
 	lines.push("");
 

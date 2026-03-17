@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { generateUninstallScript } from "./generateUninstallScript.ts";
+import { generateRemoveSymlinksScript } from "./generateRemoveSymlinksScript.ts";
 
-describe("generateUninstallScript", () => {
+describe("generateRemoveSymlinksScript", () => {
 	it("should generate a valid script with symlinks and mission scripts", () => {
 		const installedPaths = [
 			"C:\\Users\\Username\\Saved Games\\DCS\\Mods\\aircraft\\MyMod",
@@ -13,10 +13,10 @@ describe("generateUninstallScript", () => {
 			"C:\\Users\\Username\\Saved Games\\DCS\\Scripts\\DropzoneMissionScriptsAfterSanitize.lua",
 		];
 
-		const result = generateUninstallScript(installedPaths, missionScriptPaths);
+		const result = generateRemoveSymlinksScript(installedPaths, missionScriptPaths);
 
 		expect(result).toContain("@echo off");
-		expect(result).toContain("echo Running DCS Dropzone uninstall...");
+		expect(result).toContain("echo Removing DCS Dropzone symlinks and generated files...");
 		expect(result).toContain("echo Removing symbolic links...");
 		expect(result).toContain('if exist "C:\\Users\\Username\\Saved Games\\DCS\\Mods\\aircraft\\MyMod"');
 		expect(result).toContain('rmdir /s /q "C:\\Users\\Username\\Saved Games\\DCS\\Mods\\aircraft\\MyMod"');
@@ -28,7 +28,7 @@ describe("generateUninstallScript", () => {
 		expect(result).toContain(
 			'if exist "C:\\Users\\Username\\Saved Games\\DCS\\Scripts\\DropzoneMissionScriptsAfterSanitize.lua" del /f /q',
 		);
-		expect(result).toContain("echo Uninstall complete.");
+		expect(result).toContain("echo Symlink removal complete.");
 		expect(result).toContain("pause");
 	});
 
@@ -38,7 +38,7 @@ describe("generateUninstallScript", () => {
 			"C:\\Users\\Username\\Saved Games\\DCS\\Scripts\\DropzoneMissionScriptsAfterSanitize.lua",
 		];
 
-		const result = generateUninstallScript([], missionScriptPaths);
+		const result = generateRemoveSymlinksScript([], missionScriptPaths);
 
 		expect(result).toContain("@echo off");
 		expect(result).toContain("echo Removing symbolic links...");
@@ -46,22 +46,22 @@ describe("generateUninstallScript", () => {
 		expect(result).toContain(
 			'if exist "C:\\Users\\Username\\Saved Games\\DCS\\Scripts\\DropzoneMissionScriptsBeforeSanitize.lua" del /f /q',
 		);
-		expect(result).toContain("echo Uninstall complete.");
+		expect(result).toContain("echo Symlink removal complete.");
 		expect(result).not.toContain("rmdir");
 	});
 
 	it("should generate a valid script with no symlinks and no mission scripts", () => {
-		const result = generateUninstallScript([], []);
+		const result = generateRemoveSymlinksScript([], []);
 
 		expect(result).toContain("@echo off");
 		expect(result).toContain("echo Removing symbolic links...");
 		expect(result).toContain("echo Removing Dropzone mission scripting files...");
-		expect(result).toContain("echo Uninstall complete.");
+		expect(result).toContain("echo Symlink removal complete.");
 		expect(result).toContain("pause");
 	});
 
 	it("should use CRLF line endings for Windows compatibility", () => {
-		const result = generateUninstallScript([], []);
+		const result = generateRemoveSymlinksScript([], []);
 
 		// Verify all line endings are CRLF (no standalone LF characters)
 		const withoutCrlf = result.replaceAll("\r\n", "");

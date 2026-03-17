@@ -3,14 +3,14 @@ import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { SymbolicLinkDestRoot } from "webapp";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../../constants.ts";
-import { generateUninstallScript } from "../functions/generateUninstallScript.ts";
+import { generateRemoveSymlinksScript } from "../functions/generateRemoveSymlinksScript.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { DcsPathNotConfigured, PathResolver } from "./PathResolver.ts";
 
-const logger = getLogger("UninstallScriptManager");
+const logger = getLogger("RemoveSymlinksScriptManager");
 
-export class UninstallScriptManager {
+export class RemoveSymlinksScriptManager {
 	constructor(
 		protected deps: {
 			fileSystem: FileSystem;
@@ -22,7 +22,7 @@ export class UninstallScriptManager {
 
 	@Log(logger)
 	rebuild(): Result<void, DcsPathNotConfigured> {
-		logger.info("Regenerating uninstall.bat");
+		logger.info("Regenerating removeSymlinks.bat");
 
 		const installedPaths = this.deps.releaseRepository.getAllInstalledSymbolicLinkPaths();
 		logger.debug(`Found ${installedPaths.length} installed symbolic link paths`);
@@ -43,18 +43,18 @@ export class UninstallScriptManager {
 		if (afterAbsPathResult.isErr()) return err(afterAbsPathResult.error);
 		missionScriptPaths.push(afterAbsPathResult.value);
 
-		const content = generateUninstallScript(installedPaths, missionScriptPaths);
+		const content = generateRemoveSymlinksScript(installedPaths, missionScriptPaths);
 
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 		const outputDir = dropzoneModsFolder
 			? this.deps.fileSystem.resolve(dropzoneModsFolder, "..")
 			: this.deps.fileSystem.resolve(".");
 
-		const outputPath = this.deps.fileSystem.resolve(outputDir, "uninstall.bat");
-		logger.debug(`Writing uninstall.bat to ${outputPath}`);
+		const outputPath = this.deps.fileSystem.resolve(outputDir, "removeSymlinks.bat");
+		logger.debug(`Writing removeSymlinks.bat to ${outputPath}`);
 		this.deps.fileSystem.writeFile(outputPath, content);
 
-		logger.info("Regenerated uninstall.bat");
+		logger.info("Regenerated removeSymlinks.bat");
 		return ok(undefined);
 	}
 }
