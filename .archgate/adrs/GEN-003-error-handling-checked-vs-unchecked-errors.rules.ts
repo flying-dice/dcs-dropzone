@@ -93,7 +93,7 @@ export default defineRules({
 					message: `err() called with a raw string literal. Use an Error class instance instead: err(new SomeError()).`,
 					file: match.file,
 					line: match.line,
-					fix: "Create an Error class extending Error with a readonly _tag discriminant, and pass an instance to err().",
+					fix: "Create an Error class extending Error, and pass an instance to err().",
 				});
 			}
 		},
