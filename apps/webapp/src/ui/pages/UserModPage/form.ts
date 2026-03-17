@@ -54,28 +54,29 @@ export type UserModForm = ReturnType<typeof useUserModForm>;
 export const useUserModFormSubmit = (mod: ModData, user: UserData, onSuccess: () => Promise<void> | void) =>
 	useAsyncFn(
 		async (values: UserModFormValues) => {
-			await updateUserMod(mod.id, {
-				category: values.category,
-				content: values.content,
-				dependencies: values.dependencies,
-				description: values.description,
-				maintainers: [user.id],
-				name: values.name,
-				screenshots: values.screenshots,
-				tags: values.tags,
-				thumbnail: values.thumbnail,
-				visibility: values.visibility,
-				latestReleaseId: values.latestReleaseId,
-			})
-				.then(async (res) => {
-					if (res.status === StatusCodes.OK) {
-						await onSuccess();
-						showSuccessNotification("Mod updated successfully!", "Your mod has been updated.");
-					} else {
-						showErrorNotification(new Error(`Error updating user mod with status code ${res.status}`));
-					}
-				})
-				.catch((e) => showErrorNotification(e));
+			try {
+				const res = await updateUserMod(mod.id, {
+					category: values.category,
+					content: values.content,
+					dependencies: values.dependencies,
+					description: values.description,
+					maintainers: [user.id],
+					name: values.name,
+					screenshots: values.screenshots,
+					tags: values.tags,
+					thumbnail: values.thumbnail,
+					visibility: values.visibility,
+					latestReleaseId: values.latestReleaseId,
+				});
+				if (res.status === StatusCodes.OK) {
+					await onSuccess();
+					showSuccessNotification("Mod updated successfully!", "Your mod has been updated.");
+				} else {
+					showErrorNotification(new Error(`Error updating user mod with status code ${res.status}`));
+				}
+			} catch (e) {
+				showErrorNotification(e);
+			}
 		},
 		[mod, user, onSuccess],
 	);

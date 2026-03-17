@@ -37,10 +37,12 @@ export async function calculateDashboardMetrics(allDaemonReleases?: ModAndReleas
 	const outdatedMods: ModAndReleaseData[] = [];
 
 	for (const release of allDaemonReleases) {
-		const latestReleaseRes = await getLatestModReleaseById(release.modId).catch(() => null);
-		if (latestReleaseRes?.status === 200 && latestReleaseRes.data.id !== release.releaseId) {
-			outdatedMods.push(release);
-		}
+		try {
+			const latestReleaseRes = await getLatestModReleaseById(release.modId);
+			if (latestReleaseRes.status === 200 && latestReleaseRes.data.id !== release.releaseId) {
+				outdatedMods.push(release);
+			}
+		} catch (_e) {}
 	}
 
 	return {

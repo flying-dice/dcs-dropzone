@@ -1,5 +1,4 @@
 import { getLogger, type Logger } from "log4js";
-import { Result } from "neverthrow";
 
 function isThenable<T = unknown>(v: any): v is PromiseLike<T> {
 	return v != null && (typeof v === "object" || typeof v === "function") && typeof v.then === "function";
@@ -17,38 +16,32 @@ export const Log =
 			const startTime = Date.now();
 			_logger.trace(`Method ${propertyKey} called`, args);
 
-			const safeCall = Result.fromThrowable(
-				() => originalMethod.apply(this, args),
-				(e) => e,
-			);
+			try {
+				const result = originalMethod.apply(this, args);
 
-			return safeCall().match(
-				(result) => {
-					if (isThenable(result)) {
-						return result.then(
-							(value) => {
-								const endTime = Date.now();
-								_logger.trace(`Method ${propertyKey} executed successfully in ${endTime - startTime}ms`);
-								return value;
-							},
-							(error) => {
-								const endTime = Date.now();
-								_logger.error(`Method ${propertyKey} failed after ${endTime - startTime}ms with error`, error);
-								throw error;
-							},
-						);
-					}
+				if (isThenable(result)) {
+					return result.then(
+						(value) => {
+							const endTime = Date.now();
+							_logger.trace(`Method ${propertyKey} executed successfully in ${endTime - startTime}ms`);
+							return value;
+						},
+						(error) => {
+							const endTime = Date.now();
+							_logger.error(`Method ${propertyKey} failed after ${endTime - startTime}ms with error`, error);
+							throw error;
+						},
+					);
+				}
 
-					const endTime = Date.now();
-					_logger.trace(`Method ${propertyKey} executed successfully in ${endTime - startTime}ms`);
-					return result;
-				},
-				(error) => {
-					const endTime = Date.now();
-					_logger.error(`Method ${propertyKey} failed after ${endTime - startTime}ms with error`, error);
-					throw error;
-				},
-			);
+				const endTime = Date.now();
+				_logger.trace(`Method ${propertyKey} executed successfully in ${endTime - startTime}ms`);
+				return result;
+			} catch (error) {
+				const endTime = Date.now();
+				_logger.error(`Method ${propertyKey} failed after ${endTime - startTime}ms with error`, error);
+				throw error;
+			}
 		};
 
 		return descriptor;

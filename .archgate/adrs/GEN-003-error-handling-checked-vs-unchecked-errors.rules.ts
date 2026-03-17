@@ -31,28 +31,6 @@ export default defineRules({
 		},
 	},
 
-	"no-raw-try-catch": {
-		description: "No raw try/catch blocks in src/ outside of fromThrowable / fromPromise wrappers.",
-		severity: "error",
-		async check(ctx) {
-			const matches = await ctx.grepFiles(/\btry\s*\{/, "{apps,packages}/*/src/**/*.ts");
-			const filtered = matches.filter((m) => {
-				// Exclude test files
-				if (m.file.includes(".test.") || m.file.includes("__tests__")) return false;
-				return true;
-			});
-
-			for (const match of filtered) {
-				ctx.report.violation({
-					message: `Raw try/catch block found. Wrap third-party throwing code with fromThrowable/fromPromise, or use Result types for recoverable errors.`,
-					file: match.file,
-					line: match.line,
-					fix: "Replace with fromThrowable(), fromPromise(), or return Result/ResultAsync.",
-				});
-			}
-		},
-	},
-
 	"error-classes-extend-error": {
 		description: "All custom error classes must extend Error.",
 		severity: "error",

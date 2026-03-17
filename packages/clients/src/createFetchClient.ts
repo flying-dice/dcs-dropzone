@@ -10,43 +10,51 @@ export type ClientConfig = z.infer<typeof ClientConfig>;
 async function autoParseByContentType(res: Response): Promise<any> {
 	const ct = res.headers.get("Content-Type")?.toLowerCase() || "";
 
-	if (ct.includes("application/json") || ct.endsWith("+json")) {
-		return res.json().catch(() => null);
-	}
+	try {
+		if (ct.includes("application/json") || ct.endsWith("+json")) {
+			return await res.json();
+		}
 
-	if (
-		ct.startsWith("text/") ||
-		ct === "" // Some APIs omit Content-Type; treat as text by default
-	) {
-		return res.text().catch(() => null);
-	}
+		if (
+			ct.startsWith("text/") ||
+			ct === "" // Some APIs omit Content-Type; treat as text by default
+		) {
+			return await res.text();
+		}
 
-	if (ct.includes("application/x-www-form-urlencoded")) {
-		return res
-			.text()
-			.then((text) => new URLSearchParams(text))
-			.catch(() => null);
-	}
+		if (ct.includes("application/x-www-form-urlencoded")) {
+			const text = await res.text();
+			return new URLSearchParams(text);
+		}
 
-	if (ct.includes("multipart/form-data")) {
-		return res.formData().catch(() => null);
-	}
+		if (ct.includes("multipart/form-data")) {
+			return await res.formData();
+		}
 
-	if (ct.startsWith("image/") || ct.startsWith("video/") || ct.startsWith("audio/")) {
-		// Media -> blob
-		return res.blob().catch(() => null);
-	}
+		if (ct.startsWith("image/") || ct.startsWith("video/") || ct.startsWith("audio/")) {
+			// Media -> blob
+			return await res.blob();
+		}
 
-	if (ct.includes("application/octet-stream") || ct.includes("application/pdf") || ct.includes("application/zip")) {
-		// Binary formats -> arrayBuffer
-		return res.arrayBuffer().catch(() => null);
-	}
+		if (ct.includes("application/octet-stream") || ct.includes("application/pdf") || ct.includes("application/zip")) {
+			// Binary formats -> arrayBuffer
+			return await res.arrayBuffer();
+		}
 
-	// Fallback: try JSON, then text, then null
-	return res
-		.json()
-		.catch(() => res.text())
-		.catch(() => null);
+		// Fallback: try JSON, then text, then null
+		try {
+			return await res.json();
+		} catch {
+			try {
+				return await res.text();
+			} catch {
+				return null;
+			}
+		}
+	} catch {
+		// If *parsing* throws, last-resort fallback
+		return null;
+	}
 }
 
 export function createFetchClient(config: ClientConfig = {}) {

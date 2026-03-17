@@ -12,7 +12,6 @@
 		"tsc": "tsc --noEmit"
 	},
 	"peerDependencies": {
-		"neverthrow": ">=8",
 		"zod": ">=4"
 	}
 }

@@ -12,7 +12,6 @@
 		"tsc": "tsc --noEmit"
 	},
 	"peerDependencies": {
-		"log4js": ">=6",
-		"neverthrow": ">=8"
+		"log4js": ">=6"
 	}
 }

@@ -82,23 +82,24 @@ export const useUserModReleaseFormSubmit = (
 ) =>
 	useAsyncFn(
 		async (values: UserModReleaseFormValues) => {
-			await updateUserModRelease(mod.id, release.id, {
-				version: values.version,
-				visibility: values.visibility,
-				changelog: values.changelog,
-				assets: values.assets,
-				symbolicLinks: values.symbolicLinks,
-				missionScripts: values.missionScripts,
-			})
-				.then(async (res) => {
-					if (res.status === StatusCodes.OK) {
-						await onSuccess();
-						showSuccessNotification("Release updated successfully!", "Your release has been updated.");
-					} else {
-						showErrorNotification(new Error(`Error updating release with status code ${res.status}`));
-					}
-				})
-				.catch((e) => showErrorNotification(e));
+			try {
+				const res = await updateUserModRelease(mod.id, release.id, {
+					version: values.version,
+					visibility: values.visibility,
+					changelog: values.changelog,
+					assets: values.assets,
+					symbolicLinks: values.symbolicLinks,
+					missionScripts: values.missionScripts,
+				});
+				if (res.status === StatusCodes.OK) {
+					await onSuccess();
+					showSuccessNotification("Release updated successfully!", "Your release has been updated.");
+				} else {
+					showErrorNotification(new Error(`Error updating release with status code ${res.status}`));
+				}
+			} catch (e) {
+				showErrorNotification(e);
+			}
 		},
 		[mod, user, onSuccess],
 	);

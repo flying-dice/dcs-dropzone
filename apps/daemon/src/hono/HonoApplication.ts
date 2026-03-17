@@ -11,7 +11,6 @@ import type { BlankSchema } from "hono/types";
 import { describeRoute, generateSpecs, openAPIRouteHandler, resolver, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
-import { Result } from "neverthrow";
 import { z } from "zod";
 import { appConfig, UiAppConfig } from "../AppConfig.ts";
 import type { Application } from "../application/Application.ts";
@@ -230,17 +229,14 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			async (c) => {
-				return Result.fromThrowable(
-					() => c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId() }, StatusCodes.OK),
-					(e) => (e instanceof Error ? e : new Error(String(e))),
-				)().match(
-					(response) => response,
-					(error) =>
-						c.json(
-							{ status: "DOWN", daemonInstanceId: c.var.app.getDaemonInstanceId(), error: String(error) },
-							StatusCodes.SERVICE_UNAVAILABLE,
-						),
-				);
+				try {
+					return c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId() }, StatusCodes.OK);
+				} catch (error) {
+					return c.json(
+						{ status: "DOWN", daemonInstanceId: c.var.app.getDaemonInstanceId(), error: String(error) },
+						StatusCodes.SERVICE_UNAVAILABLE,
+					);
+				}
 			},
 		);
 	}

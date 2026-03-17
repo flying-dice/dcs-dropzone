@@ -15,18 +15,19 @@ export function useNewModModal(onSuccess?: () => void | Promise<void>): {
 	const nav = useNavigate();
 
 	const handleNewModSubmit = async (values: NewModFormValues) => {
-		await createUserMod(values)
-			.then(async (res) => {
-				if (res.status !== StatusCodes.CREATED) {
-					throw new Error(`Failed to create mod: ${res.status}`);
-				}
-				if (onSuccess) {
-					await onSuccess();
-				}
-				modals.closeAll();
-				nav(res.data.id);
-			})
-			.catch((e) => showErrorNotification(e));
+		try {
+			const res = await createUserMod(values);
+			if (res.status !== StatusCodes.CREATED) {
+				throw new Error(`Failed to create mod: ${res.status}`);
+			}
+			if (onSuccess) {
+				await onSuccess();
+			}
+			modals.closeAll();
+			nav(res.data.id);
+		} catch (e) {
+			showErrorNotification(e);
+		}
 	};
 
 	const openNewModModal = (modalTitle: string, formComponent: React.ReactNode) => {
