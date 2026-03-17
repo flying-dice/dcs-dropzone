@@ -109,9 +109,7 @@ export const appConfig = AppConfig.parse({
 | **Webapp**   | `DZ_USER_COOKIE_NAME`             | `USERID`                              |
 | **Webapp**   | `DZ_USER_COOKIE_MAX_AGE`          | `86400`                               |
 | **Webapp**   | `DZ_AUTH_REDIRECT_URL`            | falls back to `DZ_WEBAPP_URL`         |
-| **Webapp**   | `DZ_AUTH_GH_CLIENT_ID`            | _(optional, activates GitHub OAuth)_  |
-| **Webapp**   | `DZ_AUTH_GH_CLIENT_SECRET`        | _(optional, excluded from snapshot)_  |
-| **Webapp**   | `DZ_AUTH_GH_REDIRECT_URL`         | _(optional)_                          |
+| **Webapp**   | `DZ_AUTH_SERVICE_GH`              | _(optional JSON string, activates GitHub OAuth)_ |
 | **Webapp**   | `DZ_WEBAPP_URL`                   | `http://localhost:3000/`              |
 | **Webapp**   | `DZ_DAEMON_URL`                   | `http://localhost:56499/`             |
 | **Webapp**   | `DZ_ENABLE_SERVE_DEVELOPMENT`     | `true`                                |

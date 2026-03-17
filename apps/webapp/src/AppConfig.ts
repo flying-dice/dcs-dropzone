@@ -31,14 +31,7 @@ export const appConfig = AppConfig.parse({
 	userCookieMaxAge: env.DZ_USER_COOKIE_MAX_AGE,
 	authRedirectUrl: env.DZ_AUTH_REDIRECT_URL ?? env.DZ_WEBAPP_URL,
 
-	authServiceGh:
-		env.DZ_AUTH_GH_CLIENT_ID && env.DZ_AUTH_GH_CLIENT_SECRET && env.DZ_AUTH_GH_REDIRECT_URL
-			? {
-					clientId: env.DZ_AUTH_GH_CLIENT_ID,
-					clientSecret: env.DZ_AUTH_GH_CLIENT_SECRET,
-					redirectUrl: env.DZ_AUTH_GH_REDIRECT_URL,
-				}
-			: undefined,
+	authServiceGh: env.DZ_AUTH_SERVICE_GH ? JSON.parse(env.DZ_AUTH_SERVICE_GH) : undefined,
 
 	webappUrl: env.DZ_WEBAPP_URL,
 	daemonUrl: env.DZ_DAEMON_URL,
