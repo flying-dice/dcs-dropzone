@@ -8,6 +8,7 @@ COPY ./apps/webapp/package.json ./apps/webapp/package.json
 COPY ./apps/webapp/tsconfig.json ./apps/webapp/tsconfig.json
 COPY ./apps/webapp/bun-env.d.ts ./apps/webapp/bun-env.d.ts
 COPY ./apps/webapp/build.ts ./apps/webapp/build.ts
+COPY ./apps/webapp/env.ts ./apps/webapp/env.ts
 
 COPY ./packages/clients/src ./packages/clients/src
 COPY ./packages/clients/package.json ./packages/clients/package.json
@@ -31,13 +32,14 @@ COPY ./packages/zod/src ./packages/zod/src
 COPY ./packages/zod/package.json ./packages/zod/package.json
 COPY ./packages/zod/tsconfig.json ./packages/zod/tsconfig.json
 
-COPY ./packages/rc-config/src ./packages/rc-config/src
-COPY ./packages/rc-config/package.json ./packages/rc-config/package.json
-COPY ./packages/rc-config/tsconfig.json ./packages/rc-config/tsconfig.json
+COPY ./packages/dz-config/src ./packages/dz-config/src
+COPY ./packages/dz-config/package.json ./packages/dz-config/package.json
+COPY ./packages/dz-config/tsconfig.json ./packages/dz-config/tsconfig.json
 
 COPY ./package.json ./package.json
 COPY ./bun.lock ./bun.lock
 COPY ./bunfig.toml ./bunfig.toml
+COPY ./.env.prod ./.env.prod
 
 # Install dependencies and build
 RUN bun install

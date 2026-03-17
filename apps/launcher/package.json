@@ -4,12 +4,13 @@
 	"type": "module",
 	"scripts": {
 		"biome": "biome check --write",
-		"build": "bun build.ts",
+		"build": "bun --env-file=.env.prod build.ts",
+		"build:local": "bun --env-file=.env.local build.ts",
 		"build:installer": "iscc installer.iss",
 		"depcheck": "bunx depcheck",
-		"dev": "bun --watch src/index.ts",
-		"start": "dist/Dropzone_Launcher.exe",
-		"tests": "bun test --coverage",
+		"dev": "bun --env-file=.env.local --watch src/index.ts",
+		"start": "cmd /c start \"\" \".\\dist\\Dropzone_Launcher.exe\"",
+		"tests": "bun --env-file=.env.local test --pass-with-no-tests --coverage",
 		"tsc": "tsc --noEmit"
 	},
 	"dependencies": {

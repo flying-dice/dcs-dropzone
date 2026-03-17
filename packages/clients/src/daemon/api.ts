@@ -157,7 +157,6 @@ export interface ErrorData {
 }
 
 export type GetConfig200 = {
-	enableUiDebug: boolean;
 	webappUrl: string;
 	daemonUrl: string;
 };

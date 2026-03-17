@@ -4,14 +4,15 @@
 	"type": "module",
 	"scripts": {
 		"biome": "biome check --write",
-		"build": "bun build.ts",
+		"build": "DZ_DAEMON_WEBVIEW_WORKER_MODULE_PATH='./webview/worker.ts' bun --env-file=.env.prod build.ts",
+		"build:local": "DZ_DAEMON_WEBVIEW_WORKER_MODULE_PATH='./webview/worker.ts' bun --env-file=.env.local build.ts",
 		"build:serve": "npx http-server ./dist -p 8081",
 		"depcheck": "bunx depcheck",
-		"dev": "bun --watch src/index.ts",
+		"dev": "bun --env-file=.env.local --watch src/index.ts",
 		"drizzle": "drizzle-kit generate --config drizzle.config.ts --name=init",
 		"postdrizzle": "bun drizzle-migration.setup.ts",
-		"start": "docker compose up",
-		"tests": "bun test --coverage",
+		"start": "cmd /c start \"\" \".\\dist\\Dropzone.exe\"",
+		"tests": "bun --env-file=.env.local test --coverage",
 		"tsc": "tsc --noEmit"
 	},
 	"dependencies": {

@@ -8,6 +8,7 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"depcheck": "bunx depcheck",
+		"tests": "bun test",
 		"tsc": "tsc --noEmit"
 	},
 	"peerDependencies": {

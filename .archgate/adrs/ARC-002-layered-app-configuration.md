@@ -96,20 +96,20 @@ export const appConfig = AppConfig.parse({
 | **Daemon**   | `DZ_PORT`                         | `56499`                               |
 | **Daemon**   | `DZ_WEBAPP_URL`                   | `http://localhost:3000/`              |
 | **Daemon**   | `DZ_DAEMON_URL`                   | `http://localhost:56499/`             |
-| **Daemon**   | `DZ_WEBVIEW_WORKER_MODULE_PATH`   | `./src/webview/worker.ts`             |
+| **Daemon**   | `DZ_DAEMON_WEBVIEW_WORKER_MODULE_PATH`   | `./src/webview/worker.ts`             |
 | **Daemon**   | `DZ_ENABLE_SERVE_DEVELOPMENT`     | `true`                                |
-| **Daemon**   | `DZ_ENABLE_WEBVIEW_WORKER_DEBUG`  | `true`                                |
+| **Daemon**   | `DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG`  | `true`                                |
 | **Daemon**   | `DZ_ENABLE_GENERATE_SCHEMA`       | `true`                                |
-| **Daemon**   | `DZ_WGET_PATH`                    | auto-detected from PATH               |
-| **Daemon**   | `DZ_SEVENZIP_PATH`                | auto-detected from PATH               |
-| **Daemon**   | `DZ_DATABASE_PATH`                | `<cwd>/data.sqlite`                   |
+| **Daemon**   | `DZ_DAEMON_WGET_PATH`                    | auto-detected from PATH               |
+| **Daemon**   | `DZ_DAEMON_SEVENZIP_PATH`                | auto-detected from PATH               |
+| **Daemon**   | `DZ_DAEMON_DATABASE_PATH`                | `<cwd>/data.sqlite`                   |
 | **Webapp**   | `DZ_PORT`                         | `3000`                                |
 | **Webapp**   | `DZ_MONGO_URI`                    | _(required)_                          |
 | **Webapp**   | `DZ_USER_COOKIE_SECRET`           | _(required, excluded from snapshot)_  |
 | **Webapp**   | `DZ_USER_COOKIE_NAME`             | `USERID`                              |
 | **Webapp**   | `DZ_USER_COOKIE_MAX_AGE`          | `86400`                               |
 | **Webapp**   | `DZ_AUTH_REDIRECT_URL`            | falls back to `DZ_WEBAPP_URL`         |
-| **Webapp**   | `DZ_AUTH_SERVICE_GH`              | _(optional JSON string, activates GitHub OAuth)_ |
+| **Webapp**   | `DZ_WEBAPP_AUTH_SERVICE_GH`              | _(optional JSON string, activates GitHub OAuth)_ |
 | **Webapp**   | `DZ_WEBAPP_URL`                   | `http://localhost:3000/`              |
 | **Webapp**   | `DZ_DAEMON_URL`                   | `http://localhost:56499/`             |
 | **Webapp**   | `DZ_ENABLE_SERVE_DEVELOPMENT`     | `true`                                |

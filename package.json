@@ -15,7 +15,7 @@
 		"depcheck": "bun run --workspaces depcheck",
 		"launcher:build": "bun run --filter launcher build",
 		"launcher:dev": "cd apps/launcher && bun run dev",
-		"test": "bun run test",
+		"test": "bun --env-file=apps/daemon/.env.local --env-file=apps/launcher/.env.local --env-file=apps/webapp/.env.local test",
 		"tests": "bun run --workspaces tests",
 		"tsc": "bun run --workspaces tsc",
 		"webapp:build": "bun run --filter webapp build",

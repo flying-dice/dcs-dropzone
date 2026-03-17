@@ -34,9 +34,7 @@ const bunServer = serve({
 
 logger.info(`🚀 Server running at ${bunServer.url}`);
 
-const webviewWorker: WebviewWorker = new WebviewWorker({
-	debug: appConfig.enableWebviewWorkerDebug,
-});
+const webviewWorker: WebviewWorker = new WebviewWorker(appConfig.webviewWorkerModulePath);
 
 webviewWorker.onMessage(async (message) => {
 	switch (message.type) {

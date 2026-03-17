@@ -1,8 +1,6 @@
-import { env } from "@packages/dz-config";
 import { zen } from "@packages/zod/zen";
 import { z } from "zod";
-
-const releasesBaseUrl = env.DZ_RELEASES_BASE_URL ?? "http://localhost:8081/";
+import env from "../env.ts";
 
 export const AppConfig = z.object({
 	dropzoneTarFile: z.url(),
@@ -13,7 +11,7 @@ export const AppConfig = z.object({
 export type AppConfig = z.infer<typeof AppConfig>;
 
 export const appConfig = AppConfig.parse({
-	dropzoneTarFile: env.DZ_DROPZONE_TAR_FILE ?? `${releasesBaseUrl}/dcs-dropzone.tar`,
-	dropzoneTarFileManifest: env.DZ_DROPZONE_TAR_FILE_MANIFEST ?? `${releasesBaseUrl}/dcs-dropzone.tar.manifest`,
-	manifestPath: env.DZ_MANIFEST_PATH ?? ".manifest",
+	dropzoneTarFile: env.DZ_LAUNCHER_RELEASE_TAR_PATH,
+	dropzoneTarFileManifest: env.DZ_LAUNCHER_RELEASE_TAR_MANIFEST_PATH,
+	manifestPath: env.DZ_LAUNCHER_MANIFEST,
 });

@@ -286,7 +286,6 @@ export type CheckHealth200 = {
 };
 
 export type GetConfig200 = {
-	enableUiDebug: boolean;
 	webappUrl: string;
 	daemonUrl: string;
 };
