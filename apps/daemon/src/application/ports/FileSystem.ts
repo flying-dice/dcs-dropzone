@@ -5,4 +5,5 @@ export interface FileSystem {
 	writeFile(filePath: string, content: string): void;
 	resolve(...paths: string[]): string;
 	glob(path: string, pattern: string): string[];
+	exists(path: string): boolean;
 }

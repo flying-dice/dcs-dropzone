@@ -80,4 +80,32 @@ describe("inferReleaseStatusFromAssets", () => {
 		const result = inferReleaseStatusFromAssets(assetStatus, false);
 		expect(result).toBe(DownloadedReleaseStatus.IN_PROGRESS);
 	});
+
+	it("returns INCONSISTENT when all assets are COMPLETED, enabled is true, but symlink integrity is invalid", () => {
+		const assetStatus = [AssetStatus.COMPLETED, AssetStatus.COMPLETED];
+
+		const result = inferReleaseStatusFromAssets(assetStatus, true, false);
+		expect(result).toBe(DownloadedReleaseStatus.INCONSISTENT);
+	});
+
+	it("returns DISABLED when all assets are COMPLETED, enabled is false, even with invalid symlink integrity", () => {
+		const assetStatus = [AssetStatus.COMPLETED, AssetStatus.COMPLETED];
+
+		const result = inferReleaseStatusFromAssets(assetStatus, false, false);
+		expect(result).toBe(DownloadedReleaseStatus.DISABLED);
+	});
+
+	it("returns ENABLED when all assets are COMPLETED, enabled is true, and symlink integrity is valid", () => {
+		const assetStatus = [AssetStatus.COMPLETED, AssetStatus.COMPLETED];
+
+		const result = inferReleaseStatusFromAssets(assetStatus, true, true);
+		expect(result).toBe(DownloadedReleaseStatus.ENABLED);
+	});
+
+	it("returns ENABLED when no symlink integrity param provided (backward compat default true)", () => {
+		const assetStatus = [AssetStatus.COMPLETED, AssetStatus.COMPLETED];
+
+		const result = inferReleaseStatusFromAssets(assetStatus, true);
+		expect(result).toBe(DownloadedReleaseStatus.ENABLED);
+	});
 });

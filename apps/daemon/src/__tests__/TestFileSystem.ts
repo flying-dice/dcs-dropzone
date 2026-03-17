@@ -77,4 +77,8 @@ export class TestFileSystem implements FileSystem {
 	hasDir(dirPath: string): boolean {
 		return this.dirs.has(dirPath);
 	}
+
+	exists(path: string): boolean {
+		return this.dirs.has(path) || this.files.has(path) || this.symlinks.has(path);
+	}
 }

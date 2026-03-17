@@ -74,4 +74,9 @@ export class LocalFileSystem implements FileSystem {
 		const glob = new Bun.Glob(join(path, pattern));
 		return Array.from(glob.scanSync({ followSymlinks: true }));
 	}
+
+	@Log(logger)
+	exists(path: string): boolean {
+		return existsSync(path);
+	}
 }

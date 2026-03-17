@@ -62,6 +62,13 @@ export class ReleaseCatalog {
 			const symbolicLinks = this.deps.releaseRepository.getSymbolicLinksForRelease(release.releaseId);
 			const missionScripts = this.deps.releaseRepository.getMissionScriptsForRelease(release.releaseId);
 
+			let symlinkIntegrityValid = true;
+			if (release.enabled && symbolicLinks.length > 0) {
+				symlinkIntegrityValid = symbolicLinks.every(
+					(link) => link.installedPath !== null && this.deps.fileSystem.exists(link.installedPath),
+				);
+			}
+
 			releases.push({
 				...release,
 				assets,
@@ -70,6 +77,7 @@ export class ReleaseCatalog {
 				status: inferReleaseStatusFromAssets(
 					assets.map((it) => it.statusData?.status ?? AssetStatus.PENDING),
 					release.enabled,
+					symlinkIntegrityValid,
 				),
 				overallPercentProgress: totalPercentProgress(
 					assets.flatMap((it) => it.statusData?.overallPercentProgress ?? 0),
