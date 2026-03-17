@@ -1,4 +1,4 @@
-import { parseArgs } from "util";
+import { parseArgs } from "node:util";
 import type { ZodSchema } from "zod";
 
 declare global {
@@ -10,7 +10,9 @@ const buildSnapshot = typeof _BUILD_DZ_ENV !== "undefined" ? _BUILD_DZ_ENV : {};
 
 // Capture live environment variables starting with DZ_
 const liveBunEnv: Record<string, string> = Object.fromEntries(
-	Object.entries(Bun.env).filter((entry): entry is [string, string] => entry[0].startsWith("DZ_") && entry[1] !== undefined),
+	Object.entries(Bun.env).filter(
+		(entry): entry is [string, string] => entry[0].startsWith("DZ_") && entry[1] !== undefined,
+	),
 );
 
 // Capture CLI arguments starting with DZ_

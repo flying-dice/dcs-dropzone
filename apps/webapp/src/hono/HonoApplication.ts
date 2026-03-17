@@ -217,7 +217,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			async (c) => {
-				return c.json(UiAppConfig.parse(appConfig.config));
+				return c.json(UiAppConfig.parse(appConfig));
 			},
 		);
 	}

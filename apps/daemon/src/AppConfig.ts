@@ -18,9 +18,11 @@ export const AppConfig = z.object({
 	wgetPath: zen.path({ resolve: true, normalize: true, expandEnvVars: true }),
 	sevenzipPath: zen.path({ resolve: true, normalize: true, expandEnvVars: true }),
 
-	databasePath: zen.path({ resolve: true, normalize: true, expandEnvVars: true }).default(
-		join(process.cwd(), "data.sqlite"),
-	),
+	databasePath: zen
+		.path({ resolve: true, normalize: true, expandEnvVars: true })
+		.default(join(process.cwd(), "data.sqlite")),
+
+	webviewWorkerModulePath: z.string().default("./src/webview/worker.ts"),
 });
 
 export const UiAppConfig = AppConfig.pick({ webappUrl: true, daemonUrl: true });
@@ -41,4 +43,6 @@ export const appConfig = AppConfig.parse({
 	sevenzipPath: env.DZ_SEVENZIP_PATH ?? SEVEN_ZIP_BINARIES.map(which).find(Boolean),
 
 	databasePath: env.DZ_DATABASE_PATH,
+
+	webviewWorkerModulePath: env.DZ_WEBVIEW_WORKER_MODULE_PATH,
 });
