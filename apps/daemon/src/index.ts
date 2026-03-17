@@ -11,9 +11,9 @@ const logger = getLogger("bootstrap");
 
 logger.debug("Creating ProdApplication instance...");
 const app = new ProdApplication({
-	databaseUrl: appConfig.config.databasePath,
-	wgetExecutablePath: appConfig.config.wgetPath,
-	sevenZipExecutablePath: appConfig.config.sevenzipPath,
+	databaseUrl: appConfig.databasePath,
+	wgetExecutablePath: appConfig.wgetPath,
+	sevenZipExecutablePath: appConfig.sevenzipPath,
 });
 
 logger.debug("Creating Hono application wrapper...");
@@ -21,9 +21,9 @@ const honoApp = await HonoApplication.build(app);
 
 logger.debug("Starting Bun server...");
 const bunServer = serve({
-	hostname: appConfig.config.host,
-	port: appConfig.config.port,
-	development: appConfig.config.enableServeDevelopment,
+	hostname: appConfig.host,
+	port: appConfig.port,
+	development: appConfig.enableServeDevelopment,
 	routes: {
 		"/*": index,
 		"/api": honoApp.fetch,
@@ -35,7 +35,7 @@ const bunServer = serve({
 logger.info(`🚀 Server running at ${bunServer.url}`);
 
 const webviewWorker: WebviewWorker = new WebviewWorker({
-	debug: appConfig.config.enableWebviewWorkerDebug,
+	debug: appConfig.enableWebviewWorkerDebug,
 });
 
 webviewWorker.onMessage(async (message) => {

@@ -3,9 +3,9 @@ import { join, resolve } from "node:path";
 import { fetchManifest, type ManifestData, readManifest, writeManifest } from "@packages/manifest";
 import { appConfig } from "./AppConfig.ts";
 
-const stableAssetUrl = appConfig.config.dropzoneTarFile;
-const stableAssetManifestUrl = appConfig.config.dropzoneTarFileManifest;
-const manifestPath = appConfig.config.manifestPath;
+const stableAssetUrl = appConfig.dropzoneTarFile;
+const stableAssetManifestUrl = appConfig.dropzoneTarFileManifest;
+const manifestPath = appConfig.manifestPath;
 
 console.info(`Checking for updates from ${stableAssetUrl}...`);
 
@@ -62,7 +62,7 @@ const executablePath = resolve(`${folderName}/Dropzone.exe`);
 Bun.spawn({
 	cmd: [executablePath],
 	cwd: folderName,
-	env: { DropzoneDaemon_databasePath: join(process.cwd(), "data.sqlite"), ...process.env },
+	env: { DZ_DATABASE_PATH: join(process.cwd(), "data.sqlite"), ...process.env },
 	stdout: "inherit",
 	stdin: "inherit",
 	stderr: "inherit",

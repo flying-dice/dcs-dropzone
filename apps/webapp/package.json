@@ -9,8 +9,8 @@
 		"biome": "biome check --write",
 		"build": "bun build.ts",
 		"depcheck": "bunx depcheck",
-		"dev": "DropzoneWebapp_userCookieSecret=local-cookie-secret DropzoneWebapp_mongoUri=mongodb://localhost:27017/dcs-dropzone bun --hot src/index.ts",
-		"dev:docker": "docker compose up -d mongodb && DropzoneWebapp_userCookieSecret=local-cookie-secret DropzoneWebapp_mongoUri=mongodb://localhost:27017/dcs-dropzone bun --hot src/index.ts",
+		"dev": "DZ_USER_COOKIE_SECRET=local-cookie-secret DZ_MONGO_URI=mongodb://localhost:27017/dcs-dropzone bun --hot src/index.ts",
+		"dev:docker": "docker compose up -d mongodb && DZ_USER_COOKIE_SECRET=local-cookie-secret DZ_MONGO_URI=mongodb://localhost:27017/dcs-dropzone bun --hot src/index.ts",
 		"start": "docker compose up --build",
 		"tests": "bun test",
 		"tsc": "tsc --noEmit"

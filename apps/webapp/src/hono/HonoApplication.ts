@@ -68,7 +68,7 @@ const openapiSchema: BlankSchema = {
 				cookieAuth: {
 					type: "apiKey",
 					in: "cookie",
-					name: appConfig.config.userCookieName,
+					name: appConfig.userCookieName,
 					description: "Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
 				},
 			},
@@ -155,7 +155,7 @@ export class HonoApplication extends Hono<Env> {
 
 		self.onError(jsonErrorTransformer);
 
-		if (appConfig.config.enableGenerateSchema) {
+		if (appConfig.enableGenerateSchema) {
 			const spec = await generateSpecs(self, openapiSchema);
 			await Bun.write("openapi.schema.json", JSON.stringify(spec, undefined, 2));
 		}
@@ -246,11 +246,11 @@ export class HonoApplication extends Hono<Env> {
 				const userData = await c.var.app.users.saveUserDetails(authResult);
 
 				logger.debug("Setting signed cookie for user:", userData.id);
-				await setSignedCookie(c, appConfig.config.userCookieName, userData.id, appConfig.config.userCookieSecret, {
-					maxAge: appConfig.config.userCookieMaxAge,
+				await setSignedCookie(c, appConfig.userCookieName, userData.id, appConfig.userCookieSecret, {
+					maxAge: appConfig.userCookieMaxAge,
 				});
 
-				return c.redirect(appConfig.config.authRedirectUrl);
+				return c.redirect(appConfig.authRedirectUrl);
 			},
 		);
 	}
@@ -317,8 +317,8 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			(c) => {
-				deleteCookie(c, appConfig.config.userCookieName);
-				return c.redirect(appConfig.config.authRedirectUrl);
+				deleteCookie(c, appConfig.userCookieName);
+				return c.redirect(appConfig.authRedirectUrl);
 			},
 		);
 	}

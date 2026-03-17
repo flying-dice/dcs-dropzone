@@ -20,15 +20,16 @@ Without a consistent configuration strategy, teams risk:
 
 ## Decision
 
-Configuration flows through three ordered layers, each capable of overriding the previous:
+Configuration flows through two ordered layers:
 
 1. **Build-time snapshot** — a single `_BUILD_DZ_ENV` object baked into the compiled binary via `Bun.build({ define })`.
-2. **Hardcoded defaults** — Zod schema defaults in `AppConfig.ts`, used when a variable is absent from the snapshot and the live environment.
-3. **Runtime overrides** — `DZ_`-prefixed environment variables, CLI args, and `.rc` files resolved at startup.
+2. **Zod schema defaults** — per-app fallbacks applied when a variable is absent from both the snapshot and the live environment.
+
+Runtime overrides are achieved simply by setting `DZ_`-prefixed environment variables before starting the process; no separate file-based override mechanism is needed.
 
 ### Namespace Prefix: `DZ_`
 
-Only environment variables prefixed with `DZ_` are automatically processed by this system. Non-prefixed variables in the process environment are ignored, preventing accidental leakage and providing a clear convention for new configuration values.
+Only environment variables prefixed with `DZ_` are processed by this system. Non-prefixed variables are ignored, preventing accidental leakage and providing a clear convention for new configuration values.
 
 ### Single Global Snapshot: `_BUILD_DZ_ENV`
 
@@ -36,11 +37,10 @@ During the build step, `build.ts` calls `createBuildSnapshot()` from `@packages/
 
 ### `@packages/dz-config`
 
-The `@packages/dz-config` workspace package is the central home for both environment resolution and app configuration utilities. It exports:
+The `@packages/dz-config` workspace package is the central home for all environment resolution utilities. It exports:
 
-- **`env`** — the resolved `Record<string, string>` following the hierarchy CLI args > `Bun.env` > `_BUILD_DZ_ENV` snapshot. Imported by `AppConfig.ts` in each app.
+- **`env`** — the resolved `Record<string, string>` following the hierarchy CLI args > `Bun.env` > `_BUILD_DZ_ENV` snapshot. Imported directly by `AppConfig.ts` in each app.
 - **`createBuildSnapshot()`** — returns the `DZ_`-prefixed variables present at build time (with `SECRET` keys stripped). Imported by `build.ts` in each app.
-- **`RcConfig`** — thin wrapper around the `rc` module for runtime `.rc` file overrides, validated with Zod.
 
 ```ts
 // packages/dz-config/src/env.ts (simplified)
@@ -66,42 +66,63 @@ Variables are resolved in the following priority order (highest to lowest):
 1. **CLI arguments** — `--DZ_KEY=value` passed on the command line
 2. **Active `Bun.env`** — `DZ_`-prefixed variables present in the live process environment
 3. **`_BUILD_DZ_ENV` snapshot** — values baked into the compiled binary at build time
-4. **Zod schema defaults** — per-app fallbacks in `AppConfig.ts` (always localhost)
+4. **Zod schema defaults** — per-app fallbacks in `AppConfig.ts` (always localhost / safe values)
 
-### Layer 2 — Parsed Constants & RcConfig Defaults
+### `AppConfig.ts` Pattern
 
-Each app's `AppConfig.ts` imports `env` from `@packages/dz-config` and passes individual `DZ_` values through a Zod schema with sensible localhost defaults as a safety net. These parsed constants are then passed as defaults into `RcConfig`, which validates the merged result with Zod.
+Each app's `AppConfig.ts` imports `env` from `@packages/dz-config` and passes `DZ_` values directly into `AppConfig.parse()`. Zod schemas declare `.default()` values for all optional fields, so the parsed result is always fully typed with no nulls.
 
-### Layer 3 — Runtime Overrides
+```ts
+import { env } from "@packages/dz-config";
 
-Because `rc` is used under the hood, any `AppConfig` field can still be overridden at runtime without rebuilding via the standard `rc` lookup order:
+export const AppConfig = z.object({
+  port: z.coerce.number().int().default(56499),
+  webappUrl: z.url().default("http://localhost:3000/"),
+  // ...
+});
 
-1. **Command-line args** — `--webappUrl=https://...`
-2. **Environment variables** — `DropzoneDaemon_webappUrl=https://...`
-3. **RC files** — `.DropzoneDaemonrc`, `.DropzoneWebapprc`, `.DropzoneLauncherrc` (INI or JSON)
-
-| App          | RC file                | `appName`          |
-|--------------|------------------------|--------------------|
-| **Webapp**   | `.DropzoneWebapprc`    | `DropzoneWebapp`   |
-| **Daemon**   | `.DropzoneDaemonrc`    | `DropzoneDaemon`   |
-| **Launcher** | `.DropzoneLauncherrc`  | `DropzoneLauncher` |
+export const appConfig = AppConfig.parse({
+  port: env.DZ_PORT,
+  webappUrl: env.DZ_WEBAPP_URL,
+  // ...
+});
+```
 
 ### `DZ_` Variable Registry
 
-| App          | Variable                          | Zod Default                     |
-|--------------|-----------------------------------|---------------------------------|
-| **Daemon**   | `DZ_WEBAPP_URL`                   | `http://localhost:3000/`        |
-| **Daemon**   | `DZ_DAEMON_URL`                   | `http://localhost:56499/`       |
-| **Daemon**   | `DZ_WEBVIEW_WORKER_MODULE_PATH`   | `./src/webview/worker.ts`       |
-| **Daemon**   | `DZ_ENABLE_SERVE_DEVELOPMENT`     | `true`                          |
-| **Daemon**   | `DZ_ENABLE_WEBVIEW_WORKER_DEBUG`  | `true`                          |
-| **Daemon**   | `DZ_ENABLE_GENERATE_SCHEMA`       | `true`                          |
-| **Webapp**   | `DZ_WEBAPP_URL`                   | `http://localhost:3000/`        |
-| **Webapp**   | `DZ_DAEMON_URL`                   | `http://localhost:56499/`       |
-| **Webapp**   | `DZ_ENABLE_SERVE_DEVELOPMENT`     | `true`                          |
-| **Webapp**   | `DZ_ENABLE_UI_DEBUG`              | `true`                          |
-| **Webapp**   | `DZ_ENABLE_GENERATE_SCHEMA`       | `true`                          |
-| **Launcher** | `DZ_RELEASES_BASE_URL`            | `http://localhost:8081/`        |
+| App          | Variable                          | Zod Default                           |
+|--------------|-----------------------------------|---------------------------------------|
+| **Daemon**   | `DZ_HOST`                         | `127.0.0.1`                           |
+| **Daemon**   | `DZ_PORT`                         | `56499`                               |
+| **Daemon**   | `DZ_WEBAPP_URL`                   | `http://localhost:3000/`              |
+| **Daemon**   | `DZ_DAEMON_URL`                   | `http://localhost:56499/`             |
+| **Daemon**   | `DZ_WEBVIEW_WORKER_MODULE_PATH`   | `./src/webview/worker.ts`             |
+| **Daemon**   | `DZ_ENABLE_SERVE_DEVELOPMENT`     | `true`                                |
+| **Daemon**   | `DZ_ENABLE_WEBVIEW_WORKER_DEBUG`  | `true`                                |
+| **Daemon**   | `DZ_ENABLE_GENERATE_SCHEMA`       | `true`                                |
+| **Daemon**   | `DZ_WGET_PATH`                    | auto-detected from PATH               |
+| **Daemon**   | `DZ_SEVENZIP_PATH`                | auto-detected from PATH               |
+| **Daemon**   | `DZ_DATABASE_PATH`                | `<cwd>/data.sqlite`                   |
+| **Webapp**   | `DZ_PORT`                         | `3000`                                |
+| **Webapp**   | `DZ_MONGO_URI`                    | _(required)_                          |
+| **Webapp**   | `DZ_USER_COOKIE_SECRET`           | _(required, excluded from snapshot)_  |
+| **Webapp**   | `DZ_USER_COOKIE_NAME`             | `USERID`                              |
+| **Webapp**   | `DZ_USER_COOKIE_MAX_AGE`          | `86400`                               |
+| **Webapp**   | `DZ_AUTH_REDIRECT_URL`            | falls back to `DZ_WEBAPP_URL`         |
+| **Webapp**   | `DZ_AUTH_GH_CLIENT_ID`            | _(optional, activates GitHub OAuth)_  |
+| **Webapp**   | `DZ_AUTH_GH_CLIENT_SECRET`        | _(optional, excluded from snapshot)_  |
+| **Webapp**   | `DZ_AUTH_GH_REDIRECT_URL`         | _(optional)_                          |
+| **Webapp**   | `DZ_WEBAPP_URL`                   | `http://localhost:3000/`              |
+| **Webapp**   | `DZ_DAEMON_URL`                   | `http://localhost:56499/`             |
+| **Webapp**   | `DZ_ENABLE_SERVE_DEVELOPMENT`     | `true`                                |
+| **Webapp**   | `DZ_ENABLE_UI_DEBUG`              | `true`                                |
+| **Webapp**   | `DZ_ENABLE_GENERATE_SCHEMA`       | `true`                                |
+| **Launcher** | `DZ_RELEASES_BASE_URL`            | `http://localhost:8081/`              |
+| **Launcher** | `DZ_DROPZONE_TAR_FILE`            | derived from `DZ_RELEASES_BASE_URL`   |
+| **Launcher** | `DZ_DROPZONE_TAR_FILE_MANIFEST`   | derived from `DZ_RELEASES_BASE_URL`   |
+| **Launcher** | `DZ_MANIFEST_PATH`                | `.manifest`                           |
+
+> Variables marked _(excluded from snapshot)_ contain `SECRET` in their name and are filtered out by `createBuildSnapshot()`. They must be provided at runtime via `Bun.env`.
 
 ### CI / GitHub Actions
 
@@ -111,35 +132,33 @@ In CI workflows the `DZ_`-prefixed variables are set on the relevant build steps
 
 ### Do
 
-- **Do** prefix all new public configuration variables with `DZ_` — `createBuildSnapshot()` and `env` pick them up automatically with no build script changes required.
-- **Do** import `env` from `@packages/dz-config` in `AppConfig.ts` and pass `DZ_` values through a Zod schema to recover strict types and validate required fields.
+- **Do** prefix all new configuration variables with `DZ_` — `createBuildSnapshot()` and `env` pick them up automatically with no build script changes required.
+- **Do** import `env` from `@packages/dz-config` in `AppConfig.ts` and pass `DZ_` values directly into `AppConfig.parse()`.
 - **Do** import `createBuildSnapshot` from `@packages/dz-config` in `build.ts` and pass the result to `define: { _BUILD_DZ_ENV: JSON.stringify(snapshotToBake) }`.
-- **Do** pass `DZ_`-prefixed secrets via CI environment variables — they are stripped from the snapshot automatically (any key containing `SECRET` is excluded).
-- **Do** use the `rc` app name matching the pattern `Dropzone<AppName>` for runtime RC file overrides.
+- **Do** suffix secret variable names with `SECRET` (e.g. `DZ_USER_COOKIE_SECRET`, `DZ_AUTH_GH_CLIENT_SECRET`) so they are automatically excluded from the build snapshot.
+- **Do** declare Zod `.default()` values on all optional `AppConfig` fields so the schema is self-documenting and parse always succeeds for local dev.
 
 ### Don't
 
 - **Don't** use unprefixed environment variable names for values managed by this system — they will be ignored by `env`.
-- **Don't** add individual `declare const __CONSTANT` globals or reference them in `AppConfig.ts` — use `env.DZ_*` instead.
-- **Don't** invent custom configuration mechanisms — use `@packages/dz-config` with `RcConfig` and Zod.
-- **Don't** commit `.rc` files with production values into the repository — `.rc` files in the repo should contain local-development overrides only.
+- **Don't** use `AppName_fieldName=value` style env vars — there is no longer an RC module to interpret them.
+- **Don't** hardcode environment-specific values (URLs, ports, API keys) directly in source files; use `env.DZ_*` with a Zod default.
+- **Don't** commit `.env` files or RC files with production values into the repository.
 
 ## Consequences
 
 ### Positive
 
-- **Zero-maintenance scaling:** New public configuration variables simply need the `DZ_` prefix. No build scripts or interfaces need to be manually updated.
-- **Security by default:** The pattern inherently ignores non-prefixed variables and explicitly strips keys containing `SECRET` from the build artifact.
+- **Zero-maintenance scaling:** New configuration variables simply need the `DZ_` prefix. No build scripts or interfaces need to be manually updated.
+- **Security by default:** Non-prefixed variables are ignored; keys containing `SECRET` are stripped from the build artifact.
 - **Safe local development:** Running `bun run src/index.ts` directly never accidentally targets production services — all Zod defaults point at localhost.
-- **Consistent override mechanism:** All three apps follow the same layered pattern, reducing cognitive overhead for operators and developers.
+- **Simpler mental model:** Two layers (snapshot + Zod defaults) replace the previous three-layer (build constants → RC defaults → RC runtime) model.
 - **Clean compiled output:** A single `_BUILD_DZ_ENV` object avoids global namespace pollution and lets Bun's dead-code elimination remove unused branches.
-- **Runtime flexibility:** Operators can still change configuration at runtime without recompiling via `DZ_`-prefixed env vars, CLI args, or `.rc` files.
-- **Centralised utilities:** `@packages/dz-config` is the single source of truth for both environment resolution and runtime configuration, eliminating scattered `getenv` calls.
+- **Centralised utilities:** `@packages/dz-config` is the single source of truth for environment resolution.
 
 ### Negative
 
 - **Type erasure:** The `env` export is typed loosely as `Record<string, string>`. All callers must pass values through a Zod schema in `AppConfig.ts` to recover strict types.
-- **Three-layer mental model:** New contributors must understand the precedence order (CLI > Bun.env > snapshot > Zod defaults > rc overrides) to debug configuration issues.
 
 ### Risks
 
@@ -153,4 +172,3 @@ This ADR currently relies on manual enforcement during Pull Request reviews.
 
 - [Bun Build-Time Constants](https://bun.com/docs/guides/runtime/build-time-constants)
 - [Bun `define` option](https://bun.sh/docs/bundler/api#define)
-- [rc module](https://www.npmjs.com/package/rc)

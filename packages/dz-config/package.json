@@ -8,17 +8,9 @@
 	"scripts": {
 		"biome": "biome check --write",
 		"depcheck": "bunx depcheck",
-		"tests": "bun test",
 		"tsc": "tsc --noEmit"
 	},
-	"dependencies": {
-		"rc": "^1.2.8"
-	},
-	"peerDependencies": {
-		"zod": ">=4"
-	},
 	"devDependencies": {
-		"@types/bun": "1.3.6",
-		"@types/rc": "^1.2.4"
+		"@types/bun": "1.3.6"
 	}
 }
