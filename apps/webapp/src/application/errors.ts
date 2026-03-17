@@ -55,7 +55,7 @@ export class FailedToFindDaemonReleaseError extends Error {
 }
 
 export class ToggleReleaseError extends Error {
-	readonly _tag = "ToggleReleaseError" as const;
+	readonly _tag = "ToggleReleaseFailed" as const;
 	constructor(message: string) {
 		super(message);
 		this.name = "ToggleReleaseError";
