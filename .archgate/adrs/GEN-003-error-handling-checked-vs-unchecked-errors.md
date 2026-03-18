@@ -71,7 +71,6 @@ Every checked error type must extend `Error` so it is throwable at an integratio
 class ConfigNotFoundError extends Error {
   constructor(public readonly path: string) {
     super(`Config file not found: ${path}`);
-    this.name = "ConfigNotFoundError";
   }
 }
 
@@ -198,8 +197,7 @@ In prototype or spike code, `._unsafeUnwrap()` serves as a marker for "error han
 - Use `throw` for contract violations, programmer errors, and process-fatal conditions.
 - Use `Result` / `ResultAsync` for any failure a caller must handle.
 - Default to `Result` when unsure — it is always safe to give the caller the choice.
-- Extend `Error` for every custom error class — both checked and unchecked.
-- Set `this.name` on every error class to enable discrimination (e.g. `this.name = "ConfigNotFoundError"`).
+- Extend `Error` for every custom error class — both checked and unchecked. The class name serves as the discriminant via `constructor.name`.
 - Use `fromThrowable` / `fromPromise` when your function wants to **produce** a `Result` from third-party throwing code.
 - Use `try/catch` when **consuming** a throwing function that has not typed its errors — prefer clarity and familiarity over custom syntax.
 - Co-locate error classes with the function that produces them.
@@ -229,7 +227,7 @@ In prototype or spike code, `._unsafeUnwrap()` serves as a marker for "error han
 - The type signature of every function declares exactly which failures the caller must handle.
 - Unchecked errors still surface loudly with full stack traces.
 - Error classes that extend `Error` can always be thrown at an integration boundary (e.g. a framework error handler) without losing context.
-- The `name` property on error classes enables `switch` over union error types without casting.
+- The class name (via `constructor.name`) enables `switch` over union error types without casting.
 - Validated construction types eliminate entire classes of runtime checks from downstream code.
 - `.andThen()` chains keep business logic readable by separating the happy path from error plumbing.
 

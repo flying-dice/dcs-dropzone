@@ -14,7 +14,6 @@ export class DropzoneClientError extends Error {
 
 	constructor(props: DropzoneClientErrorProps) {
 		super(props.message);
-		this.name = "DropzoneClientError";
 		this.req = props.req;
 		this.res = props.res;
 		this.data = props.data;

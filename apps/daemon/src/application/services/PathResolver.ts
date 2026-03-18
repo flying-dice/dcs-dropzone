@@ -10,7 +10,6 @@ export class DropzoneModsDirNotConfigured extends Error {
 	readonly type = "DropzoneModsDirNotConfigured" as const;
 	constructor() {
 		super("Dropzone mods directory is not configured");
-		this.name = "DropzoneModsDirNotConfigured";
 	}
 }
 
@@ -18,7 +17,6 @@ export class DcsPathNotConfigured extends Error {
 	readonly type = "DcsPathNotConfigured" as const;
 	constructor() {
 		super("DCS path is not configured");
-		this.name = "DcsPathNotConfigured";
 	}
 }
 

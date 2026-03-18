@@ -22,7 +22,7 @@ export function AsyncStateWrapper<T>(props: AsyncStateWrapper<T>) {
 		}
 		return (
 			<ErrorState
-				title={props.asyncState.error.name}
+				title={props.asyncState.error.constructor.name}
 				description={props.asyncState.error.message}
 				icon={AppIcons.Error}
 				withoutBorder

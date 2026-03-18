@@ -3,7 +3,7 @@ import { showNotification } from "@mantine/notifications";
 export function showErrorNotification(error: Error | unknown) {
 	if (error instanceof Error) {
 		showNotification({
-			title: error.name,
+			title: error.constructor.name,
 			message: error.message,
 			color: "red",
 		});
