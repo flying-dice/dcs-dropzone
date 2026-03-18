@@ -5,6 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { appConfig } from "../../AppConfig.ts";
 import type { Application } from "../../application/Application.ts";
+import type { UserNotFoundError } from "../../application/errors.ts";
 import type { UserData } from "../../application/schemas/UserData.ts";
 
 const logger = getLogger("cookieAuth");
@@ -38,7 +39,7 @@ export const cookieAuth = () =>
 					logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
 					c.set("getUser", () => user);
 				},
-				(error: string) => {
+				(error: UserNotFoundError) => {
 					logger.warn({ requestId, error }, "User not found for token");
 					deleteCookie(c, appConfig.userCookieName);
 					throw new HTTPException(StatusCodes.UNAUTHORIZED);

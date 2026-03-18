@@ -74,7 +74,7 @@ export function useDaemon() {
 					else if (ok === "Disabled")
 						showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
 				},
-				(error) => showError(error),
+				(error) => showError(error.message),
 			);
 			await daemonReleases.refetch();
 		},

@@ -69,7 +69,6 @@ Every checked error type must extend `Error` so it is throwable at an integratio
 
 ```ts
 class ConfigNotFoundError extends Error {
-  readonly _tag = "ConfigNotFoundError";
   constructor(public readonly path: string) {
     super(`Config file not found: ${path}`);
   }
@@ -150,11 +149,40 @@ Key principles:
 
 ### Wrapping third-party code
 
-Third-party functions that `throw` must be wrapped at the boundary using `fromThrowable` or `fromPromise` before entering the codebase. Never let a raw `try/catch` propagate a generic `unknown` error up through application code.
+When a function **wants to produce a `Result`** for its callers, third-party throwing code at that boundary should be wrapped using `fromThrowable` or `fromPromise`:
 
 ```ts
 const safeParse = fromThrowable(JSON.parse, (e) => new JsonParseError(String(e)));
 ```
+
+### When `try/catch` is appropriate
+
+`Result` is a tool for the **producer** — a function that wants to type its error paths so callers can handle them. It is **not** a syntax replacement for `try/catch` at the call site.
+
+If you are **calling** a function that throws (and has not typed its errors with `Result`), a standard `try/catch` is preferred for clarity and familiarity:
+
+```ts
+// ✅ Good — the called function throws, caller handles it simply
+try {
+  const parsed = WorkerToMain.parse(message);
+  handler(parsed);
+} catch (error) {
+  logger.error("Failed to parse message from worker:", error);
+}
+
+// ❌ Bad — wrapping an untyped throwing call in Result adds complexity with no benefit
+Result.fromThrowable(
+  () => {
+    const parsed = WorkerToMain.parse(message);
+    handler(parsed);
+  },
+  (e) => (e instanceof Error ? e : new Error(String(e))),
+)().mapErr((error) => {
+  logger.error("Failed to parse message from worker:", error);
+});
+```
+
+The key distinction: **only use `Result.fromThrowable` / `ResultAsync.fromPromise` when the function you are writing wants to return a typed `Result` to its own callers.** If you are simply guarding against a throwing call and handling the error locally, `try/catch` is the right tool.
 
 ### Tests and prototype code
 
@@ -169,9 +197,9 @@ In prototype or spike code, `._unsafeUnwrap()` serves as a marker for "error han
 - Use `throw` for contract violations, programmer errors, and process-fatal conditions.
 - Use `Result` / `ResultAsync` for any failure a caller must handle.
 - Default to `Result` when unsure — it is always safe to give the caller the choice.
-- Extend `Error` for every custom error class — both checked and unchecked.
-- Add a `readonly _tag` discriminant on every error class to enable exhaustive narrowing.
-- Use `fromThrowable` / `fromPromise` to wrap all third-party throwing code at the call site.
+- Extend `Error` for every custom error class — both checked and unchecked. The class name serves as the discriminant via `constructor.name`.
+- Use `fromThrowable` / `fromPromise` when your function wants to **produce** a `Result` from third-party throwing code.
+- Use `try/catch` when **consuming** a throwing function that has not typed its errors — prefer clarity and familiarity over custom syntax.
 - Co-locate error classes with the function that produces them.
 - Use `result.match(ok, err)` to consume results at the orchestration layer — prefer it over `isOk()`/`isErr()` conditionals.
 - Use `.andThen()` chains to keep the happy path linear when sequencing fallible operations.
@@ -190,6 +218,7 @@ In prototype or spike code, `._unsafeUnwrap()` serves as a marker for "error han
 - Don't use bare `Promise<T>` for async operations that can fail — use `ResultAsync<T, E>`.
 - Don't use `isOk()`/`isErr()` conditionals to consume results — use `result.match()` instead.
 - Don't write deeply nested `match` blocks to sequence fallible operations — use `.andThen()` chains.
+- Don't replace a simple `try/catch` with `Result.fromThrowable()` when the called function has not typed its errors with `Result` — the `Result` type is for the **producer** to describe checked exceptions, not for the **caller** to add unnecessary syntax around untyped throwing code.
 
 ## Consequences
 
@@ -198,7 +227,7 @@ In prototype or spike code, `._unsafeUnwrap()` serves as a marker for "error han
 - The type signature of every function declares exactly which failures the caller must handle.
 - Unchecked errors still surface loudly with full stack traces.
 - Error classes that extend `Error` can always be thrown at an integration boundary (e.g. a framework error handler) without losing context.
-- The `_tag` discriminant enables exhaustive `switch` over union error types without casting.
+- The class name (via `constructor.name`) enables `switch` over union error types without casting.
 - Validated construction types eliminate entire classes of runtime checks from downstream code.
 - `.andThen()` chains keep business logic readable by separating the happy path from error plumbing.
 
@@ -215,9 +244,9 @@ In prototype or spike code, `._unsafeUnwrap()` serves as a marker for "error han
 ## Compliance and Enforcement
 
 - `neverthrow` must remain a direct dependency in `package.json`. Removal requires a superseding ADR.
-- `archgate check` enforces that no raw `try/catch` blocks appear outside of `fromThrowable` / `fromPromise` wrappers in `src/`.
-- All custom error classes must extend `Error` — enforced by lint rule.
-- `_unsafeUnwrap()` must not appear in `src/` outside of test files — enforced by lint rule.
+- All custom error classes must extend `Error` — enforced by `archgate check`.
+- `_unsafeUnwrap()` must not appear in `src/` outside of test files — enforced by `archgate check`.
+- `try/catch` is valid for calling functions that have not typed their errors with `Result`. Do not replace it with `Result.fromThrowable()` / `ResultAsync.fromPromise()` unless the function you are writing wants to return a typed `Result` to its callers.
 
 ## References
 

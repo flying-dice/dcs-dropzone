@@ -56,51 +56,49 @@ const SpawnSevenzipProps = z
 		};
 	})
 	.superRefine((it, ctx) => {
-		try {
-			if (!pathExistsSync(it.exePath)) {
+		if (!pathExistsSync(it.exePath)) {
+			ctx.addIssue({
+				code: "custom",
+				message: `Executable path does not exist: ${it.exePath}`,
+			});
+		} else {
+			const exeStat = statSync(it.exePath, { throwIfNoEntry: false });
+			if (!exeStat) {
 				ctx.addIssue({
 					code: "custom",
-					message: `Executable path does not exist: ${it.exePath}`,
+					message: `Failed to stat executable path: ${it.exePath}`,
 				});
-			}
-
-			if (statSync(it.exePath).isDirectory()) {
+			} else if (exeStat.isDirectory()) {
 				ctx.addIssue({
 					code: "custom",
 					message: `Executable path is a directory: ${it.exePath}`,
 				});
 			}
-		} catch (e) {
-			ctx.addIssue({
-				code: "custom",
-				message: `Failed to validate executable path: ${it.exePath} - ${e}`,
-			});
 		}
 
-		try {
-			if (!pathExistsSync(it.archivePath)) {
+		if (!pathExistsSync(it.archivePath)) {
+			ctx.addIssue({
+				code: "custom",
+				message: `Archive path does not exist: ${it.archivePath}`,
+			});
+		} else {
+			const archiveStat = statSync(it.archivePath, { throwIfNoEntry: false });
+			if (!archiveStat) {
+				const parentDir = dirname(it.archivePath);
+				if (existsSync(parentDir) && statSync(parentDir).isDirectory()) {
+					const children = readdirSync(dirname(it.archivePath));
+					logger.error(`Directory contents of ${dirname(it.archivePath)} [${children.join(", ")}]`);
+				}
 				ctx.addIssue({
 					code: "custom",
-					message: `Archive path does not exist: ${it.archivePath}`,
+					message: `Failed to stat archive path: ${it.archivePath}`,
 				});
-			}
-
-			if (statSync(it.archivePath).isDirectory()) {
+			} else if (archiveStat.isDirectory()) {
 				ctx.addIssue({
 					code: "custom",
 					message: `Archive path is a directory: ${it.archivePath}`,
 				});
 			}
-		} catch (e) {
-			const parentDir = dirname(it.archivePath);
-			if (existsSync(parentDir) && statSync(parentDir).isDirectory()) {
-				const children = readdirSync(dirname(it.archivePath));
-				logger.error(`Directory contents of ${dirname(it.archivePath)} [${children.join(", ")}]`);
-			}
-			ctx.addIssue({
-				code: "custom",
-				message: `Failed to validate archive path: ${it.archivePath} - ${e}`,
-			});
 		}
 	});
 
