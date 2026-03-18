@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import mongoose from "mongoose";
 import { MongoDownloadsRepository } from "./adapters/MongoDownloadsRepository.ts";
@@ -30,7 +29,6 @@ export class ProdApplication extends Application {
 		this.mongoUri = deps.mongoUri;
 	}
 
-	@Log(logger)
 	async init(): Promise<mongoose.Mongoose> {
 		logger.info("Connecting to MongoDB...");
 		const _mongoose = await mongoose.connect(this.mongoUri);

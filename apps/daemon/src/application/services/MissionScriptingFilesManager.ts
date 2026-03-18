@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
@@ -24,7 +23,6 @@ export class MissionScriptingFilesManager {
 		},
 	) {}
 
-	@Log(logger)
 	rebuild(): Result<void, DcsPathNotConfigured> {
 		logger.info("Regenerating Dropzone Mission Scripting Files");
 

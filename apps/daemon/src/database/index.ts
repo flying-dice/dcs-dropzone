@@ -20,7 +20,7 @@ export default (databaseUrl: string, abortSignal?: AbortSignal) => {
 			client: appDatabase.getDatabase(),
 			logger: {
 				logQuery: (query: string, params: unknown[]) => {
-					logger.debug({ query, params });
+					logger.trace({ query, params });
 				},
 			},
 		}),

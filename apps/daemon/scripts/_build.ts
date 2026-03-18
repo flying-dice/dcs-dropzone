@@ -1,7 +1,8 @@
 import { exists, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { BuildEnv } from "@packages/dz-config";
 import { writeManifest } from "@packages/manifest";
-import env from "./env.ts";
+import { BuildConfig } from "../src/config/schemas.ts";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone";
@@ -24,7 +25,6 @@ const ASSETS: [string, string][] = [
 
 const outfile = join(resolve(OUT_DIR), BUN_NAME);
 
-console.log("_BUILD_DZ_ENV", env);
 console.log("Building Project with Bun...");
 await Bun.build({
 	entrypoints: ["./src/index.ts", "./src/webview/worker.ts"],
@@ -43,7 +43,7 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		_BUILD_DZ_ENV: JSON.stringify(env),
+		...BuildEnv.dump(BuildConfig, process.env),
 	},
 });
 

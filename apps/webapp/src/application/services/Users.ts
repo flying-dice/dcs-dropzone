@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { UserNotFoundError } from "../errors.ts";
@@ -14,7 +13,6 @@ type Deps = {
 export class Users {
 	constructor(protected readonly deps: Deps) {}
 
-	@Log(logger)
 	async saveUserDetails(user: UserData): Promise<UserData> {
 		logger.info("Saving user details", { userId: user.id, username: user.username });
 		const saved = await this.deps.userRepository.saveUserDetails(UserData.parse(user));
@@ -22,7 +20,6 @@ export class Users {
 		return UserData.parse(saved);
 	}
 
-	@Log(logger)
 	async getUserById(userId: string): Promise<Result<UserData, UserNotFoundError>> {
 		logger.debug("Fetching user by ID", { userId });
 		const user = await this.deps.userRepository.findById(userId);

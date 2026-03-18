@@ -1069,8 +1069,8 @@
                     "error": {
                       "type": "string",
                       "enum": [
-                        "ModNotFound",
-                        "ReleaseNotFound"
+                        "ModNotFoundError",
+                        "ReleaseNotFoundError"
                       ]
                     }
                   },

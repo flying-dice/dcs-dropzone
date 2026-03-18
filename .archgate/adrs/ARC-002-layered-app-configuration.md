@@ -44,7 +44,7 @@ These files are loaded by Bun's `--env-file` flag in the app's `package.json` sc
 ```json
 {
   "dev": "bun --env-file=.env.local --watch src/index.ts",
-  "build": "bun --env-file=.env.prod build.ts",
+  "build": "bun --env-file=.env.prod _build.ts",
   "tests": "bun --env-file=.env.local test --coverage"
 }
 ```
@@ -61,7 +61,7 @@ The root `package.json` test script loads all app `.env.local` files at once:
 
 ### Single Global Snapshot: `_BUILD_DZ_ENV`
 
-During the build step each app's `build.ts` imports the validated env from its local `env.ts`, serialises it with `JSON.stringify(env)`, and injects it into the compiled binary as a single global JSON object named `_BUILD_DZ_ENV` via Bun's `define` feature. Variables that are absent (e.g. secrets marked `.optional()` in the Zod schema) are simply not included in the snapshot.
+During the build step each app's `_build.ts` imports the validated env from its local `env.ts`, serialises it with `JSON.stringify(env)`, and injects it into the compiled binary as a single global JSON object named `_BUILD_DZ_ENV` via Bun's `define` feature. Variables that are absent (e.g. secrets marked `.optional()` in the Zod schema) are simply not included in the snapshot.
 
 ### `@packages/dz-config`
 
@@ -132,12 +132,12 @@ export const appConfig = AppConfig.parse({
 });
 ```
 
-#### `build.ts` — Build-Time Snapshot
+#### `_build.ts` — Build-Time Snapshot
 
-Each app's `build.ts` imports the validated env from its local `env.ts` and bakes it into the compiled binary:
+Each app's `_build.ts` imports the validated env from its local `env.ts` and bakes it into the compiled binary:
 
 ```ts
-// apps/daemon/build.ts
+// apps/daemon/_build.ts
 import env from "./env.ts";
 
 await Bun.build({
@@ -187,7 +187,7 @@ In CI workflows the root test script loads all `.env.local` files via `--env-fil
 - **Do** add new variables to the app's `.env.local` (with development values) and `.env.prod` (with production values or placeholders).
 - **Do** add new variables to the app's `EnvConfig` Zod schema in `env.ts` with appropriate validation.
 - **Do** map validated env vars to domain-friendly names in `AppConfig.ts` via `AppConfig.parse()`.
-- **Do** import the validated env from the app's local `env.ts` in `build.ts` and pass it to `define: { _BUILD_DZ_ENV: JSON.stringify(env) }`.
+- **Do** import the validated env from the app's local `env.ts` in `_build.ts` and pass it to `define: { _BUILD_DZ_ENV: JSON.stringify(env) }`.
 - **Do** mark secrets as `.optional()` in the `EnvConfig` schema so builds succeed without them; provide them at runtime for production.
 
 ### Don't

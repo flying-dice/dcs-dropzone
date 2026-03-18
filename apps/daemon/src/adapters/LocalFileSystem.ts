@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
 import { mklink } from "../utils/mklink.ts";
@@ -8,7 +7,6 @@ import { mklink } from "../utils/mklink.ts";
 const logger = getLogger("LocalFileSystemService");
 
 export class LocalFileSystem implements FileSystem {
-	@Log(logger)
 	ensureDir(path: string): void {
 		logger.debug(`Ensuring directory exists at path: ${path}`);
 		if (!existsSync(path)) {
@@ -19,7 +17,6 @@ export class LocalFileSystem implements FileSystem {
 		}
 	}
 
-	@Log(logger)
 	async ensureSymlink(src: string, dest: string): Promise<void> {
 		logger.debug(`Ensuring symlink from ${dest} to ${src}`);
 		const parent = dirname(dest);
@@ -38,7 +35,6 @@ export class LocalFileSystem implements FileSystem {
 		}
 	}
 
-	@Log(logger)
 	removeDir(path: string): void {
 		logger.debug(`Removing directory at path: ${path}`);
 		if (existsSync(path)) {
@@ -49,7 +45,6 @@ export class LocalFileSystem implements FileSystem {
 		}
 	}
 
-	@Log(logger)
 	writeFile(filePath: string, content: string): void {
 		logger.debug(`Writing file at path: ${filePath}`);
 		const parent = dirname(filePath);
@@ -64,18 +59,15 @@ export class LocalFileSystem implements FileSystem {
 		writeFileSync(filePath, content);
 	}
 
-	@Log(logger)
 	resolve(...paths: string[]): string {
 		return resolve(...paths);
 	}
 
-	@Log(logger)
 	glob(path: string, pattern: string): string[] {
 		const glob = new Bun.Glob(join(path, pattern));
 		return Array.from(glob.scanSync({ followSymlinks: true }));
 	}
 
-	@Log(logger)
 	exists(path: string): boolean {
 		return existsSync(path);
 	}

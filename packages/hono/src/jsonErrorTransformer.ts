@@ -1,3 +1,4 @@
+import { zParse } from "@packages/zod/zParse";
 import type { ErrorHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
@@ -22,19 +23,25 @@ export const jsonErrorTransformer: ErrorHandler = (error, c) => {
 	logger.error(`Error occurred: ${error.message}`, { error, stack: error.stack });
 	if (error instanceof HTTPException) {
 		return c.json(
-			ErrorData.parse(<ErrorData>{
-				code: error.status,
-				error: error.message,
-			}),
+			zParse(
+				{
+					code: error.status,
+					error: error.message,
+				},
+				ErrorData,
+			),
 			error.status,
 		);
 	}
 
 	return c.json(
-		ErrorData.parse(<ErrorData>{
-			code: StatusCodes.INTERNAL_SERVER_ERROR,
-			error: error.message,
-		}),
+		zParse(
+			{
+				code: StatusCodes.INTERNAL_SERVER_ERROR,
+				error: error.message,
+			},
+			ErrorData,
+		),
 		StatusCodes.INTERNAL_SERVER_ERROR,
 	);
 };

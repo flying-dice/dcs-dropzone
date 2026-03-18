@@ -15,7 +15,7 @@
 		"depcheck": "bun run --workspaces depcheck",
 		"launcher:build": "bun run --filter launcher build",
 		"launcher:dev": "cd apps/launcher && bun run dev",
-		"test": "bun --env-file=apps/daemon/.env.local --env-file=apps/launcher/.env.local --env-file=apps/webapp/.env.local test",
+		"_test": "bun test --env-file=apps/daemon/.env.local --env-file=apps/launcher/.env.local --env-file=apps/webapp/.env.local",
 		"tests": "bun run --workspaces tests",
 		"tsc": "bun run --workspaces tsc",
 		"webapp:build": "bun run --filter webapp build",
@@ -76,5 +76,8 @@
 		"archgate": "^0.11.0",
 		"playwright": "^1.58.2",
 		"semantic-release": "^24.0.0"
+	},
+	"dependencies": {
+		"@inquirer/prompts": "^8.3.2"
 	}
 }

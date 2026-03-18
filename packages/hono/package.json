@@ -11,6 +11,9 @@
 		"tests": "bun test",
 		"tsc": "tsc --noEmit"
 	},
+	"dependencies": {
+		"@packages/zod": "workspace:*"
+	},
 	"peerDependencies": {
 		"hono": ">=4",
 		"hono-openapi": ">=1",

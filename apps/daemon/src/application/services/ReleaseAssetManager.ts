@@ -1,5 +1,4 @@
 import { basename, join } from "node:path";
-import { Log } from "@packages/decorators";
 import { type JobRecord, type JobRecordRepository, JobState, Queue, QueueEvents } from "@packages/queue";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
@@ -56,7 +55,6 @@ export class ReleaseAssetManager {
 		this.queue.stop();
 	}
 
-	@Log(logger)
 	getProgressReportForAssets(releaseId: string): Record<string, ModReleaseAssetStatusData> {
 		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(releaseId);
 		const assetStatusData: Record<string, ModReleaseAssetStatusData> = {};
@@ -80,7 +78,6 @@ export class ReleaseAssetManager {
 		return assetStatusData;
 	}
 
-	@Log(logger)
 	addRelease(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
 		const releaseFolderResult = this.deps.pathResolver.resolveReleasePath(releaseId);
 		if (releaseFolderResult.isErr()) return err(releaseFolderResult.error);
@@ -107,7 +104,6 @@ export class ReleaseAssetManager {
 		return ok(undefined);
 	}
 
-	@Log(logger)
 	removeRelease(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
 		for (const jobId of this.deps.releaseRepository.getJobIdsForRelease(releaseId)) {
 			const job = this.queue.getLatestByJobId(jobId);
@@ -125,7 +121,6 @@ export class ReleaseAssetManager {
 		return ok(undefined);
 	}
 
-	@Log(logger)
 	isReleaseReady(releaseId: string) {
 		const allJobs = this.deps.releaseRepository
 			.getJobIdsForRelease(releaseId)

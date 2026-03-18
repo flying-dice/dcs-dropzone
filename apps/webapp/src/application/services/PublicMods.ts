@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import type { ModCategory } from "../enums/ModCategory.ts";
@@ -24,7 +23,6 @@ type Deps = {
 export class PublicMods {
 	constructor(private readonly deps: Deps) {}
 
-	@Log(logger)
 	async getAllPublishedMods(query: {
 		page: number;
 		size: number;
@@ -66,7 +64,6 @@ export class PublicMods {
 		};
 	}
 
-	@Log(logger)
 	async getModById(modId: string): Promise<Result<{ mod: ModData; maintainers: UserData[] }, ModNotFoundError>> {
 		logger.debug("Fetching mod by ID", { modId });
 
@@ -86,7 +83,6 @@ export class PublicMods {
 		});
 	}
 
-	@Log(logger)
 	async getAllFeaturedMods(): Promise<ModSummaryData[]> {
 		logger.debug("Fetching featured mods");
 		const mods = await this.deps.modRepository.findAllFeaturedMods();
@@ -94,7 +90,6 @@ export class PublicMods {
 		return mods;
 	}
 
-	@Log(logger)
 	async getAllPopularMods(): Promise<ModSummaryData[]> {
 		logger.debug("Fetching popular mods");
 		const mods = await this.deps.modRepository.findAllPopularMods();
@@ -102,13 +97,11 @@ export class PublicMods {
 		return mods;
 	}
 
-	@Log(logger)
 	async getAllTags(): Promise<string[]> {
 		logger.debug("Fetching all tags");
 		return this.deps.modRepository.findAllTags();
 	}
 
-	@Log(logger)
 	async getCategoryCounts(): Promise<Record<ModCategory, number>> {
 		logger.debug("Fetching category counts");
 		const counts = await this.deps.modRepository.getCategoryCounts();
@@ -130,7 +123,6 @@ export class PublicMods {
 		return result;
 	}
 
-	@Log(logger)
 	async getServerMetrics(): Promise<{ totalMods: number; totalDownloads: number }> {
 		logger.debug("Fetching server metrics");
 		const metrics = await this.deps.modRepository.getServerMetrics();
@@ -138,7 +130,6 @@ export class PublicMods {
 		return ServerMetricsData.parse(metrics);
 	}
 
-	@Log(logger)
 	async findPublicModReleases(modId: string): Promise<Result<ModReleaseData[], NotFoundError>> {
 		logger.debug("Fetching mod releases", { modId });
 
@@ -153,7 +144,6 @@ export class PublicMods {
 		return ok(releases);
 	}
 
-	@Log(logger)
 	async findPublicModReleaseById(
 		modId: string,
 		releaseId: string,
@@ -171,7 +161,6 @@ export class PublicMods {
 		return ok(release);
 	}
 
-	@Log(logger)
 	async findLatestPublicModRelease(
 		modId: string,
 	): Promise<Result<ModReleaseData, ModNotFoundError | ReleaseNotFoundError>> {
@@ -188,7 +177,6 @@ export class PublicMods {
 		return ok(release);
 	}
 
-	@Log(logger)
 	async findUpdateInformationByIds(
 		modIds: string[],
 	): Promise<{ modId: string; id: string; version: string; createdAt: string }[]> {

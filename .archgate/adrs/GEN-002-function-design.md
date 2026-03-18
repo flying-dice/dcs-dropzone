@@ -2,7 +2,7 @@
 id: GEN-002
 title: Function Design Single Responsibility and Orchestration Layers
 domain: general
-rules: true
+rules: false
 ---
 
 ## Context

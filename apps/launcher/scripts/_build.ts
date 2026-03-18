@@ -1,19 +1,16 @@
 import { join, resolve } from "node:path";
-import env from "./env.ts";
+import { BuildEnv } from "@packages/dz-config";
+import { BuildConfig } from "../src/config/schemas.ts";
 
 const OUT_DIR = "./dist";
 const BUN_NAME = "Dropzone_Launcher";
 
 const outfile = join(resolve(OUT_DIR), BUN_NAME);
 
-console.log("_BUILD_DZ_ENV", env);
-
 await Bun.build({
 	entrypoints: ["./src/index.ts"],
 	minify: true,
 	sourcemap: "inline",
-	target: "bun",
-	format: "esm",
 	compile: {
 		outfile,
 		autoloadDotenv: false,
@@ -27,6 +24,6 @@ await Bun.build({
 	},
 	env: "BUN_PUBLIC_*",
 	define: {
-		_BUILD_DZ_ENV: JSON.stringify(env),
+		...BuildEnv.dump(BuildConfig, process.env),
 	},
 });

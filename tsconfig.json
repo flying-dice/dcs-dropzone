@@ -24,9 +24,7 @@
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false,
-		"useUnknownInCatchVariables": false,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true
+		"useUnknownInCatchVariables": false
 	},
 	"exclude": ["dist", "node_modules"]
 }

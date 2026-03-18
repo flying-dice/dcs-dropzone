@@ -41,7 +41,7 @@ Compile the Daemon into a standalone binary and release archive (`dcs-dropzone.t
 bun run daemon:build
 ```
 
-This runs `apps/daemon/build.ts` which:
+This runs `apps/daemon/_build.ts` which:
 - Compiles `apps/daemon/src/index.ts` into `apps/daemon/dist/Dropzone.exe`
 - Bundles helper binaries (wget, 7za) into `dist/`
 - Packages everything into `apps/daemon/dist/dcs-dropzone.tar` with a `.manifest` file
@@ -68,7 +68,7 @@ In a new terminal, compile the Launcher into a standalone executable:
 bun run launcher:build
 ```
 
-This runs `apps/launcher/build.ts` which compiles `apps/launcher/src/index.ts` into `apps/launcher/dist/Dropzone_Launcher.exe`. The build loads `apps/launcher/.env.prod` which points `DZ_LAUNCHER_RELEASE_TAR_PATH` at the GitHub releases URL. For local development, run `bun run launcher:build:local` instead to load `.env.local`, which points at the local `http-server` from step 2 (`http://localhost:8081/`).
+This runs `apps/launcher/_build.ts` which compiles `apps/launcher/src/index.ts` into `apps/launcher/dist/Dropzone_Launcher.exe`. The build loads `apps/launcher/.env.prod` which points `DZ_LAUNCHER_RELEASE_TAR_PATH` at the GitHub releases URL. For local development, run `bun run launcher:build:local` instead to load `.env.local`, which points at the local `http-server` from step 2 (`http://localhost:8081/`).
 
 ### 4. Build the Setup Installer
 

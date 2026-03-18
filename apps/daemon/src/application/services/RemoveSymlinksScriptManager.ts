@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { SymbolicLinkDestRoot } from "webapp";
@@ -20,7 +19,6 @@ export class RemoveSymlinksScriptManager {
 		},
 	) {}
 
-	@Log(logger)
 	rebuild(): Result<void, DcsPathNotConfigured> {
 		logger.info("Regenerating removeSymlinks.bat");
 

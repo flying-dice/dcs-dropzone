@@ -19,7 +19,7 @@
 │   │   ├── src/
 │   │   ├── bin/       # Third-party binaries (wget.exe, 7za.exe, etc.)
 │   │   ├── dzConfig.toml
-│   │   ├── build.ts
+│   │   ├── _build.ts
 │   │   ├── drizzle.ze.ts
 │   │   └── package.json
 │   └── webapp/        # Web UI for mod management
@@ -27,7 +27,6 @@
 │       ├── orval.dzConfig.cjs
 │       └── package.json
 ├── packages/
-│   ├── decorators/    # Shared decorators (e.g., @Log)
 │   ├── hono/          # Shared Hono utilities
 │   ├── queue/         # Job queue library (single-instance only)
 │   └── zod/           # Shared Zod schemas and validators
@@ -116,7 +115,7 @@ cd apps/webapp && bun run build
 cd apps/daemon && bun run build
 ```
 
-The daemon build script (`build.ts`) bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
+The daemon build script (`_build.ts`) bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
 
 ## CI/CD Pipeline
 

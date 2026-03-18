@@ -1,4 +1,4 @@
-import { defineRules } from "../../node_modules/archgate/src/formats/rules.ts";
+import { defineRules } from "archgate/rules";
 
 export default defineRules({
 	"neverthrow-dependency": {

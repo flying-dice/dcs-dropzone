@@ -162,7 +162,7 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 
 	// ── Step 10 — Save the Release ──────────────────────────────────────────────
 	await page.getByTestId("release-save-changes").click();
-	await expect(page.locator(".mantine-Notification-root")).toBeVisible({ timeout: 5_000 });
+	await expect(page.locator(".mantine-Notification-root").last()).toBeVisible({ timeout: 5_000 });
 
 	// ── Step 11 — Return to Mod Page and Save ───────────────────────────────────
 	await page.getByTestId("release-back-to-mod").click();
@@ -173,7 +173,7 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 	await expect(page.getByText("PUBLIC", { exact: true })).toBeVisible();
 
 	await page.getByTestId("mod-save-changes").click();
-	await expect(page.locator(".mantine-Notification-root")).toBeVisible({ timeout: 5_000 });
+	await expect(page.locator(".mantine-Notification-root").last()).toBeVisible({ timeout: 5_000 });
 
 	// ── Step 12 — Verify on My Mods Page ────────────────────────────────────────
 	await page.getByTestId("mod-back-to-mods").click();

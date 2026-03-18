@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import objectHash from "object-hash";
@@ -26,7 +25,6 @@ type Deps = {
 export class UserMods {
 	constructor(private readonly deps: Deps) {}
 
-	@Log(logger)
 	async createMod(user: UserData, createData: ModCreateData): Promise<ModData> {
 		logger.info("Creating mod", { userId: user.id, modName: createData.name, category: createData.category });
 		const id = this.deps.generateUuid();
@@ -52,7 +50,6 @@ export class UserMods {
 		return ModData.parse(result);
 	}
 
-	@Log(logger)
 	async updateMod(
 		user: UserData,
 		updateData: ModUpdateData,
@@ -73,7 +70,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async deleteMod(user: UserData, modId: string): Promise<Result<ModData, ModNotFoundError | NotMaintainerError>> {
 		logger.info("Deleting mod", { userId: user.id, modId });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, modId);
@@ -91,7 +87,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async findById(user: UserData, modId: string): Promise<Result<ModData, ModNotFoundError | NotMaintainerError>> {
 		logger.debug("Fetching user mod", { userId: user.id, modId });
 		const checkResult = await this.checkExistsAndUserAllowedToModify(user, modId);
@@ -111,7 +106,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async createRelease(
 		user: UserData,
 		createData: ModReleaseCreateData,
@@ -146,7 +140,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async updateRelease(
 		user: UserData,
 		updateData: ModReleaseUpdateData,
@@ -171,7 +164,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async deleteRelease(
 		user: UserData,
 		modId: string,
@@ -197,7 +189,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async findReleaseById(
 		user: UserData,
 		modId: string,
@@ -223,7 +214,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async findReleases(
 		user: UserData,
 		modId: string,
@@ -240,7 +230,6 @@ export class UserMods {
 		);
 	}
 
-	@Log(logger)
 	async findAllMods(user: UserData): Promise<{
 		data: ModSummaryData[];
 		meta: UserModsMetaData;

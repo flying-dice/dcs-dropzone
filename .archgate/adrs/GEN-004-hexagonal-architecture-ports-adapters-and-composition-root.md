@@ -2,7 +2,7 @@
 id: GEN-004
 title: Hexagonal Architecture Ports Adapters and Composition Root
 domain: general
-rules: true
+rules: false
 ---
 
 ## Context

@@ -1,5 +1,5 @@
 import { Webview } from "webview-bun";
-import { appConfig } from "../AppConfig.ts";
+import { appConfig } from "../config";
 import { WindowClosed } from "./messages/WindowClosed.ts";
 
 declare var self: Worker;
@@ -10,7 +10,6 @@ webview.title = appConfig.webviewWindowTitle;
 const url = new URL(appConfig.daemonUrl);
 url.searchParams.set("nocache", Date.now().toString());
 
-console.log(`Webview worker navigating to: ${url.toString()}`);
 webview.navigate(url.toString());
 
 try {

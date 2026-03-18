@@ -40,8 +40,4 @@ export class FailedToFindDaemonReleaseError extends Error {
 	}
 }
 
-export class ToggleReleaseError extends Error {
-	constructor(message: string) {
-		super(message);
-	}
-}
+export class ToggleReleaseError extends Error {}

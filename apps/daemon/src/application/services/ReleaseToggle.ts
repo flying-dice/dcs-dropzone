@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import type { FileSystem } from "../ports/FileSystem.ts";
@@ -22,7 +21,6 @@ type Deps = {
 export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
-	@Log(logger)
 	async enable(releaseId: string): Promise<Result<void, PathResolverError>> {
 		logger.info(`Enabling Release ${releaseId}`);
 		this.ensureReleaseIsReady(releaseId);
@@ -61,7 +59,6 @@ export class ReleaseToggle {
 		return ok(undefined);
 	}
 
-	@Log(logger)
 	disable(releaseId: string): Result<void, DcsPathNotConfigured> {
 		logger.info(`Disabling Release ${releaseId}`);
 

@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import { AssetStatus } from "../enums/AssetStatus.ts";
@@ -22,7 +21,6 @@ type Deps = {
 export class ReleaseCatalog {
 	constructor(protected deps: Deps) {}
 
-	@Log(logger)
 	add(data: ModAndReleaseData): Result<void, DropzoneModsDirNotConfigured> {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
@@ -34,7 +32,6 @@ export class ReleaseCatalog {
 		return ok(undefined);
 	}
 
-	@Log(logger)
 	remove(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
 		const removeResult = this.deps.releaseAssetManager.removeRelease(releaseId);
 		if (removeResult.isErr()) return err(removeResult.error);
@@ -43,7 +40,6 @@ export class ReleaseCatalog {
 		return ok(undefined);
 	}
 
-	@Log(logger)
 	getAllReleasesWithStatus(): ModAndReleaseData[] {
 		const releases: ModAndReleaseData[] = [];
 

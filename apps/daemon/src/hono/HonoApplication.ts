@@ -3,6 +3,7 @@ import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { ErrorData, OkData } from "@packages/hono/schemas";
+import { zParse } from "@packages/zod/zParse";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -12,9 +13,10 @@ import { describeRoute, generateSpecs, openAPIRouteHandler, resolver, validator 
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import { appConfig, UiAppConfig } from "../AppConfig.ts";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+import { appConfig } from "../config";
+import { UiAppConfig } from "../config/schemas.ts";
 
 const openapiSchema: BlankSchema = {
 	documentation: {
@@ -134,7 +136,17 @@ export class HonoApplication extends Hono<Env> {
 
 				const result = c.var.app.addRelease(modAndRelease);
 				if (result.isErr()) {
-					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+					return c.json(
+						zParse(
+							{
+								error: result.error.type,
+								code: StatusCodes.UNPROCESSABLE_ENTITY,
+								message: result.error.name,
+							},
+							ErrorData,
+						),
+						StatusCodes.UNPROCESSABLE_ENTITY,
+					);
 				}
 
 				return c.json(null, StatusCodes.OK);
@@ -182,7 +194,17 @@ export class HonoApplication extends Hono<Env> {
 
 				const result = c.var.app.removeRelease(releaseId);
 				if (result.isErr()) {
-					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+					return c.json(
+						zParse(
+							{
+								error: result.error.name,
+								message: result.error.message,
+								code: StatusCodes.UNPROCESSABLE_ENTITY,
+							},
+							ErrorData,
+						),
+						StatusCodes.UNPROCESSABLE_ENTITY,
+					);
 				}
 
 				return c.json(null, StatusCodes.OK);
@@ -342,7 +364,10 @@ export class HonoApplication extends Hono<Env> {
 				const { releaseId } = c.req.valid("param");
 				const result = await c.var.app.enableRelease(releaseId);
 				if (result.isErr()) {
-					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+					return c.json(
+						zParse({ error: result.error.type, code: StatusCodes.UNPROCESSABLE_ENTITY }, ErrorData),
+						StatusCodes.UNPROCESSABLE_ENTITY,
+					);
 				}
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
@@ -367,7 +392,10 @@ export class HonoApplication extends Hono<Env> {
 				const { releaseId } = c.req.valid("param");
 				const result = c.var.app.disableRelease(releaseId);
 				if (result.isErr()) {
-					return c.json(ErrorData.parse({ error: result.error.type }), StatusCodes.UNPROCESSABLE_ENTITY);
+					return c.json(
+						zParse({ error: result.error.type, code: StatusCodes.UNPROCESSABLE_ENTITY }, ErrorData),
+						StatusCodes.UNPROCESSABLE_ENTITY,
+					);
 				}
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},

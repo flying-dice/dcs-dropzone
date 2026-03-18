@@ -1,10 +1,9 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import type { SymbolicLinkDestRoot } from "webapp";
 import type { FileSystem } from "../ports/FileSystem.ts";
 
-const logger = getLogger("PathResolver");
+const _logger = getLogger("PathResolver");
 
 export class DropzoneModsDirNotConfigured extends Error {
 	readonly type = "DropzoneModsDirNotConfigured" as const;
@@ -31,7 +30,6 @@ type Deps = {
 export class PathResolver {
 	constructor(protected deps: Deps) {}
 
-	@Log(logger)
 	resolveReleasePath(releaseId: string, path?: string): Result<string, DropzoneModsDirNotConfigured> {
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 
@@ -46,7 +44,6 @@ export class PathResolver {
 		return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId));
 	}
 
-	@Log(logger)
 	resolveSymbolicLinkPath(root: SymbolicLinkDestRoot, path?: string): Result<string, DcsPathNotConfigured> {
 		const rootPath = this.deps.getDcsPathForSymbolicLinkDestRoot(root);
 

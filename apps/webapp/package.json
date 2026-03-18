@@ -32,7 +32,6 @@
 		"@mantine/notifications": "8.3.10",
 		"@monaco-editor/react": "^4.7.0",
 		"@packages/clients": "workspace:*",
-		"@packages/decorators": "workspace:*",
 		"@packages/dzui": "workspace:*",
 		"@packages/hono": "workspace:*",
 		"@packages/dz-config": "workspace:*",

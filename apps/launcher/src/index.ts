@@ -1,7 +1,7 @@
 import { existsSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fetchManifest, type ManifestData, readManifest, writeManifest } from "@packages/manifest";
-import { appConfig } from "./AppConfig.ts";
+import { appConfig } from "./config";
 
 const stableAssetUrl = appConfig.dropzoneTarFile;
 const stableAssetManifestUrl = appConfig.dropzoneTarFileManifest;

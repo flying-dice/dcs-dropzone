@@ -3,6 +3,7 @@ import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { ze } from "@packages/zod/ze";
+import { zParse } from "@packages/zod/zParse";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { deleteCookie, setSignedCookie } from "hono/cookie";
@@ -198,7 +199,10 @@ export class HonoApplication extends Hono<Env> {
 						StatusCodes.OK,
 					);
 				} catch (error) {
-					return c.json(ErrorData.parse({ error: String(error) }), StatusCodes.SERVICE_UNAVAILABLE);
+					return c.json(
+						zParse({ error: String(error), code: StatusCodes.SERVICE_UNAVAILABLE }, ErrorData),
+						StatusCodes.SERVICE_UNAVAILABLE,
+					);
 				}
 			},
 		);
@@ -509,7 +513,7 @@ export class HonoApplication extends Hono<Env> {
 					(mod) => c.json(mod, StatusCodes.OK),
 					(error) =>
 						c.json(
-							ErrorData.parse(<ErrorData>{ code: StatusCodes.NOT_FOUND, error: error.constructor.name }),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -546,10 +550,7 @@ export class HonoApplication extends Hono<Env> {
 					(data) => c.json({ data }, StatusCodes.OK),
 					(error) =>
 						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -591,10 +592,7 @@ export class HonoApplication extends Hono<Env> {
 					(data) => c.json(data, StatusCodes.OK),
 					(error) =>
 						c.json(
-							ErrorData.parse(<ErrorData>{
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -635,10 +633,7 @@ export class HonoApplication extends Hono<Env> {
 					(data) => c.json(data, StatusCodes.OK),
 					(error) =>
 						c.json(
-							ErrorData.parse(<ErrorData>{
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -683,12 +678,7 @@ export class HonoApplication extends Hono<Env> {
 						return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 					},
 					(error) => {
-						return c.json(
-							ErrorData.parse(<ErrorData>{
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
-						);
+						return c.json(zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData));
 					},
 				);
 			},
@@ -757,10 +747,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					(error) => {
 						return c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						);
 					},
@@ -830,10 +817,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					(error) => {
 						return c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						);
 					},
@@ -872,10 +856,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					(error) => {
 						return c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						);
 					},
@@ -917,10 +898,7 @@ export class HonoApplication extends Hono<Env> {
 					(data) => c.json({ data }, StatusCodes.OK),
 					(error) =>
 						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -965,10 +943,7 @@ export class HonoApplication extends Hono<Env> {
 					(body) => c.json(body, StatusCodes.OK),
 					(error) =>
 						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -1008,10 +983,7 @@ export class HonoApplication extends Hono<Env> {
 					(body) => c.json(body, StatusCodes.CREATED),
 					(error) =>
 						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -1068,10 +1040,7 @@ export class HonoApplication extends Hono<Env> {
 						),
 					(error) =>
 						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);
@@ -1122,10 +1091,7 @@ export class HonoApplication extends Hono<Env> {
 						),
 					(error) =>
 						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error: error.constructor.name,
-							}),
+							zParse({ code: StatusCodes.NOT_FOUND, error: error.constructor.name }, ErrorData),
 							StatusCodes.NOT_FOUND,
 						),
 				);

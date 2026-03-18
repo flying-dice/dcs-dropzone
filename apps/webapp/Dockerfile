@@ -7,16 +7,12 @@ COPY ./apps/webapp/src ./apps/webapp/src
 COPY ./apps/webapp/package.json ./apps/webapp/package.json
 COPY ./apps/webapp/tsconfig.json ./apps/webapp/tsconfig.json
 COPY ./apps/webapp/bun-env.d.ts ./apps/webapp/bun-env.d.ts
-COPY ./apps/webapp/build.ts ./apps/webapp/build.ts
+COPY ./apps/webapp/build.ts ./apps/webapp/_build.ts
 COPY ./apps/webapp/env.ts ./apps/webapp/env.ts
 
 COPY ./packages/clients/src ./packages/clients/src
 COPY ./packages/clients/package.json ./packages/clients/package.json
 COPY ./packages/clients/tsconfig.json ./packages/clients/tsconfig.json
-
-COPY ./packages/decorators/src ./packages/decorators/src
-COPY ./packages/decorators/package.json ./packages/decorators/package.json
-COPY ./packages/decorators/tsconfig.json ./packages/decorators/tsconfig.json
 
 COPY ./packages/dzui/src ./packages/dzui/src
 COPY ./packages/dzui/i18n ./packages/dzui/i18n
