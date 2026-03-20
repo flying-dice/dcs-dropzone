@@ -166,6 +166,7 @@ export function _MissionScripts(props: { form: UserModReleaseForm }) {
 				{props.form.values.missionScripts.length === 0 && <NoMissionScripts />}
 				{props.form.values.missionScripts.map((it, index) => (
 					<MissionScriptListItem
+						// biome-ignore lint/suspicious/noArrayIndexKey: TODO: Fix
 						key={`${it.path}-${it.root}-${it.runOn}-${index}`}
 						onClick={() => handleEditMissionScript(t, props.form, index)}
 						name={it.name}

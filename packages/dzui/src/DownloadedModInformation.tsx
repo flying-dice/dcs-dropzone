@@ -55,6 +55,7 @@ export function DownloadedModInformation(props: DownloadedModInformationProps) {
 					{props.mod.missionScripts.length === 0 && <NoMissionScripts />}
 					{props.mod.missionScripts.map((it, index) => (
 						<MissionScriptListItem
+							// biome-ignore lint/suspicious/noArrayIndexKey: TODO: Fix
 							key={`${it.path}-${it.root}-${it.runOn}-${index}`}
 							name={it.name}
 							root={it.root}
@@ -81,6 +82,7 @@ export function DownloadedModInformation(props: DownloadedModInformationProps) {
 					{props.mod.symbolicLinks.length === 0 && <NoSymbolicLinks />}
 					{props.mod.symbolicLinks.map((it, index) => (
 						<SymbolicLinkListItem
+							// biome-ignore lint/suspicious/noArrayIndexKey: TODO: Fix
 							key={`${it.src}-${it.dest}-${index}`}
 							data-testid={`symlink-item-${it.name}`}
 							name={it.name}

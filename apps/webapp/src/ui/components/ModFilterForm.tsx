@@ -9,13 +9,8 @@ import { useBreakpoint } from "../hooks/useBreakpoint.ts";
 import { ModCategorySelect } from "./ModCategorySelect.tsx";
 
 const categorySchema = z.codec(
-	z
-		.enum(ModDataCategory)
-		.nullable()
-		.optional(), // Input Schema: Nullable String
-	z
-		.enum(ModDataCategory)
-		.optional(), // Output Schema: Optional String
+	z.enum(ModDataCategory).nullable().optional(), // Input Schema: Nullable String
+	z.enum(ModDataCategory).optional(), // Output Schema: Optional String
 	{
 		decode: (i) => i ?? undefined, // Input → Optional String
 		encode: (i) => i, // Optional String → String

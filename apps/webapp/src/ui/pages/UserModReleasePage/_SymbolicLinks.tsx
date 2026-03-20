@@ -157,6 +157,7 @@ export function _SymbolicLinks(props: { form: UserModReleaseForm }) {
 				{props.form.values.symbolicLinks.length === 0 && <NoSymbolicLinks />}
 				{props.form.values.symbolicLinks.map((it, index) => (
 					<SymbolicLinkListItem
+						// biome-ignore lint/suspicious/noArrayIndexKey: TODO: Fix
 						key={`${it.src}-${it.dest}-${index}`}
 						data-testid={`symlink-item-${it.name}`}
 						onClick={() => handleEditSymbolicLink(t, props.form, index)}

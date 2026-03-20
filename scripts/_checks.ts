@@ -51,9 +51,7 @@ export async function _checks(env: typeof process.env) {
 	const debug = _debug(name);
 	debug(`Running common build: ${process.cwd()}`);
 
-	await Promise.all([
-		depcheck(debug.extend("depcheck"), env),
-		tsc(debug.extend("tsc"), env),
-		biome(debug.extend("biome"), env),
-	]);
+	await depcheck(debug.extend("depcheck"), env);
+	await tsc(debug.extend("tsc"), env);
+	await biome(debug.extend("biome"), env);
 }
