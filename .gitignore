@@ -57,3 +57,8 @@ apps/*/.manifest
 
 .test-results/
 .playwright-report/
+/apps/webapp/.data/
+**/*.log
+**/*.log.*
+
+apps/launcher/0.0.0/

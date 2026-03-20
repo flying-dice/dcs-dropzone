@@ -50,6 +50,3 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WEBAPP_URL: https://dcs-dropzone-container.flying-dice.workers.dev/
-          RELEASES_BASE_URL: https://github.com/flying-dice/dcs-dropzone/releases/latest/download/
-

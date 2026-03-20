@@ -1,38 +1,27 @@
 #!/usr/bin/env bun
 import { resolve } from "node:path";
-import { select } from "@inquirer/prompts";
 import { $ } from "bun";
 import { z } from "zod";
+import { _checks } from "../../../scripts/_checks.ts";
+import { getForCurrentTargetEnv, TargetEnvironment } from "../../../scripts/_target-env.ts";
 import type { BuildConfig } from "../src/config/schemas.ts";
 import { envLocalBuild, envProdBuild } from "./env.ts";
 
 process.chdir(resolve(import.meta.dirname, "../"));
-
-const IS_CI = process.env.CI;
-const IS_TTY = process.stdin.isTTY;
-
-enum TargetEnvironment {
-	Local = "local",
-	Prod = "prod",
-}
 
 const buildEnvs: Record<TargetEnvironment, BuildConfig> = {
 	[TargetEnvironment.Local]: envLocalBuild,
 	[TargetEnvironment.Prod]: envProdBuild,
 };
 
-const env = IS_CI
-	? TargetEnvironment.Prod
-	: !IS_TTY
-		? TargetEnvironment.Local
-		: await select({ message: "Select build target:", choices: Object.values(TargetEnvironment) });
-
-await $`bunx depcheck`;
 await $`bunx drizzle-kit generate --config drizzle.config.ts --name=init`;
 await $`bun scripts/_drizzle-migration.setup.ts`;
-await $`bunx tsc --noEmit`;
-await $`bunx biome check --write`;
-await $`bun scripts/_build.ts`.env({
-	...z.record(z.string(), z.coerce.string()).parse(buildEnvs[env]),
+
+const _env = {
+	...z.record(z.string(), z.coerce.string()).parse(getForCurrentTargetEnv(buildEnvs)),
 	...process.env,
-});
+};
+
+await _checks(_env);
+
+await $`bun scripts/_build.ts`.env(_env);

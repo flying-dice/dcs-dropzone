@@ -28,29 +28,11 @@ jobs:
       - name: Add daemon bins to PATH
         run: echo "${{ github.workspace }}\apps\daemon\bin" >> $env:GITHUB_PATH
 
-      - name: Run TypeScript Compiler
-        run: bun run tsc
+      - name: Build
+        run: bun run build
 
-      - name: Build Webapp
-        run: bun run webapp:build
-        env:
-          WEBAPP_URL: https://dcs-dropzone-container.flying-dice.workers.dev/
-
-      - name: Build Daemon
-        run: bun run daemon:build
-        env:
-          WEBAPP_URL: https://dcs-dropzone-container.flying-dice.workers.dev/
-
-      - name: Build Launcher
-        run: bun run launcher:build
-        env:
-          RELEASES_BASE_URL: https://github.com/flying-dice/dcs-dropzone/releases/latest/download/
-
-      - name: Build Setup Installer
-        run: iscc apps/launcher/installer.iss
-
-      - name: Run tests
-        run: bun --env-file=apps/daemon/.env.local --env-file=apps/launcher/.env.local --env-file=apps/webapp/.env.local test
+      - name: Tests
+        run: bun run tests
 
       - name: Upload log artifact
         if: always()

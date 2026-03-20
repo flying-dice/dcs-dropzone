@@ -80,7 +80,7 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 						(p) => p.latest!.version,
 					)
 					.when(
-						(p) => p.latestError && p.latestError === GetLatestModReleaseById404Error.ModNotFound,
+						(p) => p.latestError && p.latestError === GetLatestModReleaseById404Error.ModNotFoundError,
 						() => (
 							<Text size={"sm"} c={"red"}>
 								{t("MOD_NOT_FOUND_ERROR")}
@@ -88,7 +88,7 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 						),
 					)
 					.when(
-						(p) => p.latestError && p.latestError === GetLatestModReleaseById404Error.ReleaseNotFound,
+						(p) => p.latestError && p.latestError === GetLatestModReleaseById404Error.ReleaseNotFoundError,
 						() => (
 							<Text size={"sm"} c={"red"}>
 								{t("LATEST_RELEASE_NOT_FOUND_ERROR")}

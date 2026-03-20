@@ -3,10 +3,10 @@ import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
-import { appConfig } from "../../AppConfig.ts";
 import type { Application } from "../../application/Application.ts";
 import type { UserNotFoundError } from "../../application/errors.ts";
 import type { UserData } from "../../application/schemas/UserData.ts";
+import { appConfig } from "../../config/index.ts";
 
 const logger = getLogger("cookieAuth");
 

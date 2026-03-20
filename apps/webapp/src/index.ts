@@ -1,10 +1,10 @@
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import { appConfig } from "./AppConfig.ts";
 import type { AuthenticationProvider } from "./authentication/AuthenticationProvider.ts";
 import { GithubAuthenticationProvider } from "./authentication/GithubAuthenticationProvider.ts";
 import { MockAuthService } from "./authentication/MockAuthService.ts";
+import { appConfig } from "./config";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
 import index from "./ui/index.html";

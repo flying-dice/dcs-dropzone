@@ -14,7 +14,6 @@ import { describeRoute, generateSpecs, openAPIRouteHandler, validator } from "ho
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import { appConfig, UiAppConfig } from "../AppConfig.ts";
 import type { Application } from "../application/Application.ts";
 import { ErrorData } from "../application/schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../application/schemas/ModAvailableFilterData.ts";
@@ -32,6 +31,7 @@ import { TypedErrorData } from "../application/schemas/TypedErrorData.ts";
 import { UserData } from "../application/schemas/UserData.ts";
 import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
 import type { AuthenticationProvider } from "../authentication/AuthenticationProvider.ts";
+import { appConfig, UiAppConfig } from "../config/index.ts";
 import { default as Database, default as database } from "../database";
 import { cookieAuth } from "./middleware/cookieAuth.ts";
 

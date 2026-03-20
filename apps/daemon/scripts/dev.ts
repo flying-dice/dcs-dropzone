@@ -6,7 +6,6 @@ import { envLocalDev } from "./env.ts";
 
 process.chdir(resolve(import.meta.dirname, "../"));
 
-await $`bunx biome check --write`;
 await $`bun --watch src/index.ts`.env({
 	...z.record(z.string(), z.coerce.string()).parse(envLocalDev),
 	...process.env,

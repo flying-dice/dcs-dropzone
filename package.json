@@ -6,23 +6,17 @@
 		"packages/*"
 	],
 	"scripts": {
-		"check": "bun run checks.ts",
-		"check:adrs": "archgate check",
-		"biome:fix": "biome check --write",
-		"biome": "biome ci",
-		"daemon:build": "bun run --filter daemon build",
+		"archgate": "archgate check",
+
 		"daemon:dev": "cd apps/daemon && bun run dev",
-		"depcheck": "bun run --workspaces depcheck",
-		"launcher:build": "bun run --filter launcher build",
 		"launcher:dev": "cd apps/launcher && bun run dev",
-		"_test": "bun test --env-file=apps/daemon/.env.local --env-file=apps/launcher/.env.local --env-file=apps/webapp/.env.local",
-		"tests": "bun run --workspaces tests",
-		"tsc": "bun run --workspaces tsc",
-		"webapp:build": "bun run --filter webapp build",
-		"webapp:deploy": "bun run --filter cloudflare deploy",
 		"webapp:dev": "cd apps/webapp && bun run dev",
-		"installer:build": "bun run --filter launcher build:installer",
-		"build": "bun run webapp:build && bun run daemon:build && bun run launcher:build && bun run installer:build",
+
+		"webapp:deploy": "bun run --filter cloudflare deploy",
+
+		"build": "bun run --filter '*' --filter '-cloudflare' build",
+		"tests": "bun run --filter '*' --filter '-cloudflare' tests",
+
 		"test:playwright": "bunx playwright test"
 	},
 	"release": {
@@ -73,11 +67,12 @@
 		"@semantic-release/git": "^10.0.1",
 		"@semantic-release/github": "^10.1.3",
 		"@semantic-release/release-notes-generator": "^14.0.1",
+		"@types/chalk": "^2.2.4",
+		"@types/debug": "^4.1.13",
 		"archgate": "^0.11.0",
+		"debug": "^4.4.3",
 		"playwright": "^1.58.2",
-		"semantic-release": "^24.0.0"
-	},
-	"dependencies": {
-		"@inquirer/prompts": "^8.3.2"
+		"semantic-release": "^24.0.0",
+		"chalk": "^5.6.2"
 	}
 }

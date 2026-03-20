@@ -1,8 +1,6 @@
 appenders:
   console:
     type: stdout
-    layout:
-      type: json
 
 categories:
   default:

@@ -6,10 +6,8 @@
 		"./*": "./src/*.ts"
 	},
 	"scripts": {
-		"biome": "biome check --write",
-		"depcheck": "bunx depcheck",
-		"tests": "bun test",
-		"tsc": "tsc --noEmit"
+		"tests": "bun scripts/test.ts",
+		"build": "bun scripts/build.ts"
 	},
 	"peerDependencies": {
 		"neverthrow": "^8.2.0",

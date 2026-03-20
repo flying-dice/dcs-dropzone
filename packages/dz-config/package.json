@@ -6,16 +6,14 @@
 		".": "./src/index.ts"
 	},
 	"scripts": {
-		"biome": "biome check --write",
-		"depcheck": "bunx depcheck",
-		"tests": "bun test",
-		"tsc": "tsc --noEmit"
+		"tests": "bun scripts/test.ts",
+		"build": "bun scripts/build.ts"
 	},
 	"peerDependencies": {
 		"zod": ">=4"
 	},
 	"devDependencies": {
-		"@types/bun": "1.3.6",
+		"@types/bun": "1.3.11",
 		"zod": "^4.2.1"
 	}
 }
