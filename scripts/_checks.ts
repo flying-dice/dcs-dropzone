@@ -3,6 +3,7 @@ import { $ } from "bun";
 import _debug, { type Debugger } from "debug";
 
 async function depcheck(debug: Debugger, env: typeof process.env) {
+	if (process.env.CI) return;
 	debug("Running depcheck...");
 	const res = await $`bunx depcheck 2>&1`.env(env).nothrow().quiet();
 
