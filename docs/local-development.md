@@ -38,10 +38,10 @@ The **Launcher** downloads the **Daemon** archive from a release server (locally
 Compile the Daemon into a standalone binary and release archive (`dcs-dropzone.tar`):
 
 ```sh
-bun run daemon:build
+cd apps/daemon && bun run build
 ```
 
-This runs `apps/daemon/_build.ts` which:
+This runs `apps/daemon/scripts/build.ts` which:
 - Compiles `apps/daemon/src/index.ts` into `apps/daemon/dist/Dropzone.exe`
 - Bundles helper binaries (wget, 7za) into `dist/`
 - Packages everything into `apps/daemon/dist/dcs-dropzone.tar` with a `.manifest` file
@@ -51,7 +51,7 @@ This runs `apps/daemon/_build.ts` which:
 The Launcher expects to download the Daemon archive from a URL. Locally, this is served with `http-server` on port 8081:
 
 ```sh
-bun run daemon:build:serve
+cd apps/daemon && bun run build:serve
 ```
 
 This runs `npx http-server ./dist -p 8081` inside `apps/daemon/`, making the archive available at:
@@ -65,20 +65,20 @@ This runs `npx http-server ./dist -p 8081` inside `apps/daemon/`, making the arc
 In a new terminal, compile the Launcher into a standalone executable:
 
 ```sh
-bun run launcher:build
+cd apps/launcher && bun run build
 ```
 
-This runs `apps/launcher/_build.ts` which compiles `apps/launcher/src/index.ts` into `apps/launcher/dist/Dropzone_Launcher.exe`. The build loads `apps/launcher/.env.prod` which points `DZ_LAUNCHER_RELEASE_TAR_PATH` at the GitHub releases URL. For local development, run `bun run launcher:build:local` instead to load `.env.local`, which points at the local `http-server` from step 2 (`http://localhost:8081/`).
+This compiles `apps/launcher/src/index.ts` into `apps/launcher/dist/Dropzone_Launcher.exe`. The build loads `apps/launcher/.env.prod` which points `DZ_LAUNCHER_RELEASE_TAR_PATH` at the GitHub releases URL. For local development, run `cd apps/launcher && bun run build:local` instead to load `.env.local`, which points at the local `http-server` from step 2 (`http://localhost:8081/`).
 
 ### 4. Build the Setup Installer
 
 Package the Launcher into a Windows installer using Inno Setup:
 
 ```sh
-bun run installer:build
+iscc apps/launcher/installer.iss
 ```
 
-This runs `iscc apps/launcher/installer.iss` and outputs `apps/launcher/dist/Dropzone_Setup.exe`.
+This outputs `apps/launcher/dist/Dropzone_Setup.exe`.
 
 ### 5. Run the Setup
 
@@ -143,22 +143,21 @@ Scripts in each app's `package.json` select the appropriate env file:
 - `bun run dev` loads `.env.local` for development.
 - `bun run build` loads `.env.prod` for production builds.
 - `bun run build:local` loads `.env.local` for local builds.
-- `bun test` (at root) loads all `.env.local` files at once.
-
-See the [ARC-002 ADR](../.archgate/adrs/ARC-002-layered-app-configuration.md) for full details on how configuration layering works.
+- `bun run tests` (at root) loads all `.env.local` files at once.
 
 ## Quick reference
 
-| Command                    | What it does                                              |
-|----------------------------|-----------------------------------------------------------|
-| `bun run daemon:build`     | Build the Daemon binary + release archive                 |
-| `bun run daemon:build:serve` | Serve the Daemon archive on `http://localhost:8081`     |
-| `bun run daemon:dev`       | Run the Daemon in watch mode (no compile, direct from source) |
-| `bun run launcher:build`   | Build the Launcher executable                             |
-| `bun run installer:build`  | Build the Windows installer with Inno Setup               |
-| `bun run launcher:dev`     | Run the Launcher in watch mode                            |
-| `bun run webapp:build`     | Build the Webapp binary                                   |
-| `bun run webapp:dev`       | Run the Webapp with hot-reload (needs Docker for MongoDB) |
-| `bun run --filter webapp start` | Run the Webapp + MongoDB in Docker Compose           |
-| `bun run build`            | Build everything (webapp, daemon, launcher, installer)    |
-| `bun test`                 | Run all tests                                             |
+| Command                                   | What it does                                              |
+|-------------------------------------------|-----------------------------------------------------------|
+| `cd apps/daemon && bun run build`         | Build the Daemon binary + release archive                 |
+| `cd apps/daemon && bun run build:serve`   | Serve the Daemon archive on `http://localhost:8081`       |
+| `bun run daemon:dev`                      | Run the Daemon in watch mode (no compile, direct from source) |
+| `cd apps/launcher && bun run build`       | Build the Launcher executable (production)                |
+| `cd apps/launcher && bun run build:local` | Build the Launcher executable (local, points to localhost)|
+| `iscc apps/launcher/installer.iss`        | Build the Windows installer with Inno Setup               |
+| `bun run launcher:dev`                    | Run the Launcher in watch mode                            |
+| `cd apps/webapp && bun run build`         | Build the Webapp binary                                   |
+| `bun run webapp:dev`                      | Run the Webapp with hot-reload (needs Docker for MongoDB) |
+| `bun run --filter webapp start`           | Run the Webapp + MongoDB in Docker Compose                |
+| `bun run build`                           | Build everything (webapp, daemon, launcher)               |
+| `bun run tests`                           | Run all tests                                             |

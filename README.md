@@ -22,8 +22,9 @@ It also supports mission scripting hooks that run on mission start, both before 
 ```text
 dcs-dropzone/
 ├─ apps/
-│  ├─ webapp/   # Server-side Web Application: publish, browse, download, enable/disable mods
-│  └─ daemon/   # Client-side Daemon with TUI + API: installs releases, creates/removes symlinks
+│  ├─ webapp/    # Server-side Web Application: publish, browse, download, enable/disable mods
+│  ├─ daemon/    # Client-side Daemon with TUI + API: installs releases, creates/removes symlinks
+│  └─ launcher/  # Updater that downloads and runs the correct version of the Daemon
 └─ ...
 ```
 
