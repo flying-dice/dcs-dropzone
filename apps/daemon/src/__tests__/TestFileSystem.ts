@@ -7,11 +7,16 @@ export class TestFileSystem implements FileSystem {
 	private readonly dirs = new Set<string>();
 	private readonly symlinks = new Map<string, string>();
 
+	symlinkError: Error | null = null;
+
 	ensureDir(path: string): void {
 		this.dirs.add(path);
 	}
 
 	async ensureSymlink(src: string, dest: string): Promise<void> {
+		if (this.symlinkError) {
+			throw this.symlinkError;
+		}
 		this.symlinks.set(dest, src);
 	}
 
