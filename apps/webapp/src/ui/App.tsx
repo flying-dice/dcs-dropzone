@@ -7,6 +7,7 @@ import { AppNavbar } from "./AppNavbar.tsx";
 import { AssetActivity } from "./components/AssetActivity.tsx";
 import { ProfileMenu } from "./components/ProfileMenu.tsx";
 import { useUserContext } from "./context/UserContext.ts";
+import { useDaemon } from "./hooks/useDaemon.ts";
 import { DownloadedPage } from "./pages/DownloadedPage";
 import { Homepage } from "./pages/HomePage";
 import { ModPage } from "./pages/ModPage";
@@ -43,10 +44,12 @@ export function App() {
 	const navbarDisclosure = useDisclosure();
 	const { t } = useAppTranslation();
 	const config = useGetConfig();
+	const daemon = useDaemon();
 
 	return (
 		<HashRouter>
 			<DzAppShell
+				isDaemonSuccess={daemon.isSuccess}
 				webappUrl={config.data?.data.webappUrl ?? ""}
 				daemonUrl={config.data?.data.daemonUrl ?? ""}
 				variant={"webapp"}

@@ -59,6 +59,7 @@ export type DzAppShellProps = Omit<AppShellProps, "header" | "footer"> & {
 	navbarDisclosure?: UseDisclosureReturnValue;
 	daemonUrl: string;
 	webappUrl: string;
+	isDaemonSuccess?: boolean;
 };
 export function DzAppShell(props: DzAppShellProps) {
 	const { isSm, isXs } = useBreakpoint();
@@ -115,7 +116,7 @@ export function DzAppShell(props: DzAppShellProps) {
 			icon: AppIcons.Library,
 			onClick: openDaemon,
 			loading: daemonOpening.loading,
-			disabled: !!daemonOpening.error,
+			disabled: props.isDaemonSuccess === false || !!daemonOpening.error,
 		},
 		{
 			id: "settings",
@@ -124,7 +125,7 @@ export function DzAppShell(props: DzAppShellProps) {
 			icon: AppIcons.Settings,
 			onClick: openSettings,
 			loading: settingsOpening.loading,
-			disabled: !!settingsOpening.error,
+			disabled: props.isDaemonSuccess === false || !!settingsOpening.error,
 		},
 	];
 
