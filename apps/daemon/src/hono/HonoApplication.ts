@@ -105,6 +105,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			async (c) => {
+				logger.info("Retrieving application config");
 				return c.json(UiAppConfig.parse(appConfig));
 			},
 		);
@@ -133,9 +134,11 @@ export class HonoApplication extends Hono<Env> {
 
 			(c) => {
 				const modAndRelease = c.req.valid("json");
+				logger.info("Adding release to daemon: %s", modAndRelease.releaseId ?? "unknown");
 
 				const result = c.var.app.addRelease(modAndRelease);
 				if (result.isErr()) {
+					logger.error("Failed to add release: %s - %s", result.error.type, result.error.name);
 					return c.json(
 						zParse(
 							{
@@ -149,6 +152,7 @@ export class HonoApplication extends Hono<Env> {
 					);
 				}
 
+				logger.info("Release added successfully");
 				return c.json(null, StatusCodes.OK);
 			},
 		);
@@ -165,7 +169,9 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			(c) => {
+				logger.info("Retrieving all daemon releases");
 				const subscriptions = c.var.app.getAllReleasesWithStatus();
+				logger.info("Retrieved %d releases", subscriptions.length);
 				return c.json(subscriptions, StatusCodes.OK);
 			},
 		);
@@ -191,9 +197,11 @@ export class HonoApplication extends Hono<Env> {
 			),
 			(c) => {
 				const { releaseId } = c.req.valid("param");
+				logger.info("Removing release %s from daemon", releaseId);
 
 				const result = c.var.app.removeRelease(releaseId);
 				if (result.isErr()) {
+					logger.error("Failed to remove release %s: %s - %s", releaseId, result.error.name, result.error.message);
 					return c.json(
 						zParse(
 							{
@@ -207,6 +215,7 @@ export class HonoApplication extends Hono<Env> {
 					);
 				}
 
+				logger.info("Release %s removed successfully", releaseId);
 				return c.json(null, StatusCodes.OK);
 			},
 		);
@@ -251,9 +260,12 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			async (c) => {
+				logger.info("Performing health check");
 				try {
+					logger.info("Health check passed - status UP");
 					return c.json({ status: "UP", daemonInstanceId: c.var.app.getDaemonInstanceId() }, StatusCodes.OK);
 				} catch (error) {
+					logger.error("Health check failed:", error);
 					return c.json(
 						{ status: "DOWN", daemonInstanceId: c.var.app.getDaemonInstanceId(), error: String(error) },
 						StatusCodes.SERVICE_UNAVAILABLE,
@@ -282,6 +294,7 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			(c) => {
+				logger.info("Retrieving daemon settings");
 				return c.json(
 					{
 						dcsWorkingDir: c.var.app.settings.getDcsWorkingDir(),
@@ -321,6 +334,7 @@ export class HonoApplication extends Hono<Env> {
 			validator("json", SettingsBody, loggingHook),
 			(c) => {
 				const body = c.req.valid("json");
+				logger.info("Updating daemon settings");
 
 				if (body.dcsWorkingDir !== undefined) {
 					c.var.app.settings.setDcsWorkingDir(body.dcsWorkingDir);
@@ -334,6 +348,7 @@ export class HonoApplication extends Hono<Env> {
 					c.var.app.settings.setDropzoneModsDir(body.dropzoneModsDir);
 				}
 
+				logger.info("Settings updated successfully");
 				return c.json(
 					{
 						dcsWorkingDir: c.var.app.settings.getDcsWorkingDir(),
@@ -362,13 +377,16 @@ export class HonoApplication extends Hono<Env> {
 			validator("param", z.object({ releaseId: z.string() }), loggingHook),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
+				logger.info("Enabling release %s", releaseId);
 				const result = await c.var.app.enableRelease(releaseId);
 				if (result.isErr()) {
+					logger.error("Failed to enable release %s: %s", releaseId, result.error.type);
 					return c.json(
 						zParse({ error: result.error.type, code: StatusCodes.UNPROCESSABLE_ENTITY }, ErrorData),
 						StatusCodes.UNPROCESSABLE_ENTITY,
 					);
 				}
+				logger.info("Release %s enabled successfully", releaseId);
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
@@ -390,13 +408,16 @@ export class HonoApplication extends Hono<Env> {
 			validator("param", z.object({ releaseId: z.string() }), loggingHook),
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
+				logger.info("Disabling release %s", releaseId);
 				const result = c.var.app.disableRelease(releaseId);
 				if (result.isErr()) {
+					logger.error("Failed to disable release %s: %s", releaseId, result.error.type);
 					return c.json(
 						zParse({ error: result.error.type, code: StatusCodes.UNPROCESSABLE_ENTITY }, ErrorData),
 						StatusCodes.UNPROCESSABLE_ENTITY,
 					);
 				}
+				logger.info("Release %s disabled successfully", releaseId);
 				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
