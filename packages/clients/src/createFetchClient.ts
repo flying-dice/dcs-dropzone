@@ -57,13 +57,15 @@ async function autoParseByContentType(res: Response): Promise<any> {
 	}
 }
 
-export function createFetchClient(config: ClientConfig = {}) {
+export type Fetch = typeof fetch;
+
+export function createFetchClient(config: ClientConfig = {}, __fetch: Fetch = fetch) {
 	const _config = ClientConfig.parse(config);
 
 	const _fetch = async <T>(url: string, options: RequestInit): Promise<T> => {
 		const _url = _config.baseUrl ? new URL(url, _config.baseUrl) : url;
 		const request = new Request(_url, options);
-		const response = await fetch(request);
+		const response = await __fetch(request);
 
 		if (!response.ok) {
 			throw new DropzoneClientError({
