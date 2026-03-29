@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import { ok } from "neverthrow";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
 
 export class TestFileSystem implements FileSystem {
@@ -78,7 +79,7 @@ export class TestFileSystem implements FileSystem {
 		return this.dirs.has(dirPath);
 	}
 
-	exists(path: string): boolean {
-		return this.dirs.has(path) || this.files.has(path) || this.symlinks.has(path);
+	exists(path: string) {
+		return ok(this.dirs.has(path) || this.files.has(path) || this.symlinks.has(path));
 	}
 }

@@ -1,3 +1,5 @@
+import type { Result } from "neverthrow";
+
 export interface FileSystem {
 	ensureDir(path: string): void;
 	ensureSymlink(src: string, dest: string): Promise<void>;
@@ -5,5 +7,5 @@ export interface FileSystem {
 	writeFile(filePath: string, content: string): void;
 	resolve(...paths: string[]): string;
 	glob(path: string, pattern: string): string[];
-	exists(path: string): boolean;
+	exists(path: string): Result<boolean, Error>;
 }

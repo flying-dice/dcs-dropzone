@@ -159,6 +159,90 @@
         }
       }
     },
+    "/api/settings/validate": {
+      "get": {
+        "operationId": "getSettingsValidation",
+        "summary": "Validate Settings",
+        "description": "Validates the current daemon path settings by checking if all directories are configured and exist on disk.",
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "dcsWorkingDir": {
+                      "type": "object",
+                      "properties": {
+                        "exists": {
+                          "type": "boolean"
+                        },
+                        "resolvedPath": {
+                          "type": "string"
+                        },
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "exists"
+                      ]
+                    },
+                    "dcsInstallDir": {
+                      "type": "object",
+                      "properties": {
+                        "exists": {
+                          "type": "boolean"
+                        },
+                        "resolvedPath": {
+                          "type": "string"
+                        },
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "exists"
+                      ]
+                    },
+                    "dropzoneModsDir": {
+                      "type": "object",
+                      "properties": {
+                        "exists": {
+                          "type": "boolean"
+                        },
+                        "resolvedPath": {
+                          "type": "string"
+                        },
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "exists"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "valid",
+                    "dcsWorkingDir",
+                    "dcsInstallDir",
+                    "dropzoneModsDir"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/downloads": {
       "post": {
         "operationId": "addReleaseToDaemon",

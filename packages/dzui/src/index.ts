@@ -22,6 +22,7 @@ export * from "./NoMissionScripts.tsx";
 export * from "./NoSymbolicLinks.tsx";
 export * from "./orDefaultValue.ts";
 export * from "./PathWithRoot.tsx";
+export * from "./SettingsRequiredDialog.tsx";
 export * from "./StatCard.tsx";
 export * from "./SymbolicLinkListItem.tsx";
 export * from "./showDetailedErrorModal.tsx";

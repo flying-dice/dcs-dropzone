@@ -11,4 +11,8 @@ export class TestKeyValueRepository implements KeyValueRepository {
 		this.store.set(key, value);
 		return value;
 	}
+
+	delete(key: string): void {
+		this.store.delete(key);
+	}
 }

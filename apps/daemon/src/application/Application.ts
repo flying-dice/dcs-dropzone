@@ -50,7 +50,10 @@ export abstract class Application {
 			this.deps.keyValueRepository.get(Application.DAEMON_INSTANCE_ID_KEY) ??
 			this.deps.keyValueRepository.save(Application.DAEMON_INSTANCE_ID_KEY, this.deps.generateUuid());
 
-		this.settings = new Settings({ keyValueRepository: this.deps.keyValueRepository });
+		this.settings = new Settings({
+			keyValueRepository: this.deps.keyValueRepository,
+			fileSystem: this.deps.fileSystem,
+		});
 
 		const pathResolver = new PathResolver({
 			...deps,

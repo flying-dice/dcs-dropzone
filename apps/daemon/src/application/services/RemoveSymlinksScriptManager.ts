@@ -5,7 +5,7 @@ import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../
 import { generateRemoveSymlinksScript } from "../functions/generateRemoveSymlinksScript.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
-import type { DcsPathNotConfigured, PathResolver } from "./PathResolver.ts";
+import { DcsPathNotConfigured, type PathResolver } from "./PathResolver.ts";
 
 const logger = getLogger("RemoveSymlinksScriptManager");
 
@@ -18,6 +18,16 @@ export class RemoveSymlinksScriptManager {
 			getDropzoneModsFolder: () => string | undefined;
 		},
 	) {}
+
+	filePath(): Result<string, DcsPathNotConfigured> {
+		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
+
+		if (!dropzoneModsFolder) {
+			return err(new DcsPathNotConfigured());
+		}
+
+		return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, "removeSymlinks.bat"));
+	}
 
 	rebuild(): Result<void, DcsPathNotConfigured> {
 		logger.info("Regenerating removeSymlinks.bat");
@@ -43,16 +53,12 @@ export class RemoveSymlinksScriptManager {
 
 		const content = generateRemoveSymlinksScript(installedPaths, missionScriptPaths);
 
-		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
-		const outputDir = dropzoneModsFolder
-			? this.deps.fileSystem.resolve(dropzoneModsFolder, "..")
-			: this.deps.fileSystem.resolve(".");
+		return this.filePath().andThen((_path) => {
+			logger.debug(`Writing removeSymlinks.bat to ${_path}`);
+			this.deps.fileSystem.writeFile(_path, content);
 
-		const outputPath = this.deps.fileSystem.resolve(outputDir, "removeSymlinks.bat");
-		logger.debug(`Writing removeSymlinks.bat to ${outputPath}`);
-		this.deps.fileSystem.writeFile(outputPath, content);
-
-		logger.info("Regenerated removeSymlinks.bat");
-		return ok(undefined);
+			logger.info("Regenerated removeSymlinks.bat");
+			return ok(undefined);
+		});
 	}
 }

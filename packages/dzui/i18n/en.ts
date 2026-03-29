@@ -306,6 +306,15 @@ export default {
 		SETTINGS_SAVED_SUCCESS_TITLE: "Settings Saved",
 		SETTINGS_SAVED_SUCCESS_DESC: "Your settings have been updated successfully.",
 		SETTINGS_SAVED_ERROR_TITLE: "Error Saving Settings",
+		SETTINGS_REQUIRED_TITLE: "Configuration Required",
+		SETTINGS_REQUIRED_DESC:
+			"Your directory settings are missing or invalid. Please configure your settings before continuing.",
+		SETTINGS_ERROR_NOT_RESOLVED:
+			"This directory could not be resolved. Please ensure environment variables are correct: {{dir}}",
+		SETTINGS_ERROR_NOT_FOUND: "This directory does not exist on disk: {{dir}}",
+		SETTINGS_ERROR_FAILED: "This directory failed validation due to {{err}} {{dir}}",
+		SETTINGS_ERROR_UNEXPECTED: "An unexpected error occurred during validation",
+		OPEN_SETTINGS: "Open Settings",
 
 		DropzoneModsDirNotConfigured:
 			"Dropzone mods directory is not configured. Please set it in Settings before managing releases.",

@@ -37,6 +37,15 @@ export class PathResolver {
 			return err(new DropzoneModsDirNotConfigured());
 		}
 
+		const existsResult = this.deps.fileSystem.exists(dropzoneModsFolder);
+		const exists = existsResult.match(
+			(v) => v,
+			() => false,
+		);
+		if (!exists) {
+			return err(new DropzoneModsDirNotConfigured());
+		}
+
 		if (path) {
 			return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId, path));
 		}

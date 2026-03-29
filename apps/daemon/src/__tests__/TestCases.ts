@@ -1,3 +1,4 @@
+import { mkdirSync } from "node:fs";
 import { getLogger } from "log4js";
 import type { Application } from "../application/Application.ts";
 import { ProdApplication } from "../ProdApplication.ts";
@@ -23,15 +24,25 @@ export const TestCases: TestCase[] = [
 			const tempDir = new TestTempDir();
 			logger.info("Creating ProdApplication test case with temporary directory:", tempDir.path);
 
+			const modsDir = tempDir.join("dcs-dropzone", "mods");
+			const dcsWorkingDir = tempDir.join("dcs-dropzone", "dcs", "working");
+			const dcsInstallDir = tempDir.join("dcs-dropzone", "dcs", "install");
+
+			mkdirSync(modsDir, { recursive: true });
+			mkdirSync(dcsWorkingDir, { recursive: true });
+			mkdirSync(dcsInstallDir, { recursive: true });
+
 			const app = new ProdApplication({
 				databaseUrl: ":memory:",
 				wgetExecutablePath: SYSTEM_WGET_PATH,
 				sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
 			});
 
-			app.settings.setDropzoneModsDir(tempDir.join("dcs-dropzone", "mods"));
-			app.settings.setDcsWorkingDir(tempDir.join("dcs-dropzone", "dcs", "working"));
-			app.settings.setDcsInstallDir(tempDir.join("dcs-dropzone", "dcs", "install"));
+			app.settings.setAll({
+				dropzoneModsDir: modsDir,
+				dcsWorkingDir,
+				dcsInstallDir,
+			});
 
 			return { app, tempDir };
 		},

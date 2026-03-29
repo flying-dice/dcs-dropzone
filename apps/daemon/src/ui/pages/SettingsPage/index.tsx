@@ -1,13 +1,14 @@
 import "@packages/dzui/i18n";
 import { Container, Stack } from "@mantine/core";
-import { useGetSettings, useGetSettingsSuggestions } from "@packages/clients/daemon";
+import { useGetSettings, useGetSettingsSuggestions, useGetSettingsValidation } from "@packages/clients/daemon";
 import { DzMain } from "@packages/dzui";
-import type { SettingsFormValues } from "./form";
 import { _SettingsForm } from "./_SettingsForm";
+import type { SettingsFormValues } from "./form";
 
 export function SettingsPage() {
 	const settings = useGetSettings();
 	const suggestions = useGetSettingsSuggestions();
+	const validation = useGetSettingsValidation();
 
 	const initialValues: SettingsFormValues | undefined = settings.data?.data
 		? {
@@ -23,8 +24,10 @@ export function SettingsPage() {
 				<Stack py="md" gap="xl">
 					{initialValues && (
 						<_SettingsForm
+							key={JSON.stringify(initialValues)}
 							initialValues={initialValues}
 							placeholders={suggestions.data?.data}
+							validation={validation.data?.data}
 						/>
 					)}
 				</Stack>

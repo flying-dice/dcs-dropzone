@@ -1,8 +1,18 @@
 import { Anchor, Container, Group, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useGetSettingsValidation } from "@packages/clients/daemon";
 import { useGetConfig } from "@packages/clients/webapp";
-import { AppIcons, ColorSchemeControls, DzAppShell, DzMain, ErrorState, useAppTranslation } from "@packages/dzui";
+import {
+	AppIcons,
+	ColorSchemeControls,
+	DzAppShell,
+	DzMain,
+	ErrorState,
+	SettingsRequiredDialog,
+	useAppTranslation,
+} from "@packages/dzui";
 import { HashRouter, Route, Routes, useNavigate } from "react-router-dom";
+import { useAsyncFn } from "react-use";
 import { AppNavbar } from "./AppNavbar.tsx";
 import { AssetActivity } from "./components/AssetActivity.tsx";
 import { ProfileMenu } from "./components/ProfileMenu.tsx";
@@ -45,13 +55,25 @@ export function App() {
 	const { t } = useAppTranslation();
 	const config = useGetConfig();
 	const daemon = useDaemon();
+	const settingsValidation = useGetSettingsValidation();
+
+	const settingsInvalid = settingsValidation.data?.data.valid === false;
+	const daemonUrl = config.data?.data.daemonUrl ?? "";
+
+	const [settingsOpening, openSettings] = useAsyncFn(async () => {
+		await fetch(new URL("/api/health", daemonUrl));
+		const settingsUrl = new URL(daemonUrl);
+		settingsUrl.searchParams.set("nocache", Date.now().toString());
+		settingsUrl.hash = "#/settings";
+		window.open(settingsUrl.toString(), "_self");
+	}, [daemonUrl]);
 
 	return (
 		<HashRouter>
 			<DzAppShell
 				isDaemonSuccess={daemon.isSuccess}
 				webappUrl={config.data?.data.webappUrl ?? ""}
-				daemonUrl={config.data?.data.daemonUrl ?? ""}
+				daemonUrl={daemonUrl}
 				variant={"webapp"}
 				navbar={{
 					breakpoint: "xs",
@@ -67,6 +89,11 @@ export function App() {
 				}
 				navbarDisclosure={navbarDisclosure}
 			>
+				<SettingsRequiredDialog
+					opened={settingsInvalid}
+					onOpenSettings={openSettings}
+					settingsLoading={settingsOpening.loading}
+				/>
 				<AppNavbar withMyMods={user !== null} />
 				<Routes>
 					<Route path="/" element={<Homepage />} />

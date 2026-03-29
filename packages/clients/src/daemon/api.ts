@@ -185,6 +185,31 @@ export type GetSettingsSuggestions200 = {
 	dropzoneModsDir?: string;
 };
 
+export type GetSettingsValidation200DcsWorkingDir = {
+	exists: boolean;
+	resolvedPath?: string;
+	error?: string;
+};
+
+export type GetSettingsValidation200DcsInstallDir = {
+	exists: boolean;
+	resolvedPath?: string;
+	error?: string;
+};
+
+export type GetSettingsValidation200DropzoneModsDir = {
+	exists: boolean;
+	resolvedPath?: string;
+	error?: string;
+};
+
+export type GetSettingsValidation200 = {
+	valid: boolean;
+	dcsWorkingDir: GetSettingsValidation200DcsWorkingDir;
+	dcsInstallDir: GetSettingsValidation200DcsInstallDir;
+	dropzoneModsDir: GetSettingsValidation200DropzoneModsDir;
+};
+
 export type AddReleaseToDaemon422Code = (typeof AddReleaseToDaemon422Code)[keyof typeof AddReleaseToDaemon422Code];
 
 export const AddReleaseToDaemon422Code = {
@@ -605,6 +630,117 @@ export function useGetSettingsSuggestions<TData = Awaited<ReturnType<typeof getS
 	queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getGetSettingsSuggestionsQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Validates the current daemon path settings by checking if all directories are configured and exist on disk.
+ * @summary Validate Settings
+ */
+export type getSettingsValidationResponse200 = {
+	data: GetSettingsValidation200;
+	status: 200;
+};
+
+export type getSettingsValidationResponseSuccess = getSettingsValidationResponse200 & {
+	headers: Headers;
+};
+
+export type getSettingsValidationResponse = getSettingsValidationResponseSuccess;
+
+export const getGetSettingsValidationUrl = () => {
+	return `/api/settings/validate`;
+};
+
+export const getSettingsValidation = async (options?: RequestInit): Promise<getSettingsValidationResponse> => {
+	return fetch<getSettingsValidationResponse>(getGetSettingsValidationUrl(), {
+		...options,
+		method: "GET",
+	});
+};
+
+export const getGetSettingsValidationQueryKey = () => {
+	return [`/api/settings/validate`] as const;
+};
+
+export const getGetSettingsValidationQueryOptions = <
+	TData = Awaited<ReturnType<typeof getSettingsValidation>>,
+	TError = unknown,
+>(options?: {
+	query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsValidation>>, TError, TData>>;
+	request?: SecondParameter<typeof fetch>;
+}) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetSettingsValidationQueryKey();
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getSettingsValidation>>> = ({ signal }) =>
+		getSettingsValidation({ signal, ...requestOptions });
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof getSettingsValidation>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetSettingsValidationQueryResult = NonNullable<Awaited<ReturnType<typeof getSettingsValidation>>>;
+export type GetSettingsValidationQueryError = unknown;
+
+export function useGetSettingsValidation<TData = Awaited<ReturnType<typeof getSettingsValidation>>, TError = unknown>(
+	options: {
+		query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsValidation>>, TError, TData>> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getSettingsValidation>>,
+					TError,
+					Awaited<ReturnType<typeof getSettingsValidation>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetSettingsValidation<TData = Awaited<ReturnType<typeof getSettingsValidation>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsValidation>>, TError, TData>> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof getSettingsValidation>>,
+					TError,
+					Awaited<ReturnType<typeof getSettingsValidation>>
+				>,
+				"initialData"
+			>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetSettingsValidation<TData = Awaited<ReturnType<typeof getSettingsValidation>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsValidation>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Validate Settings
+ */
+
+export function useGetSettingsValidation<TData = Awaited<ReturnType<typeof getSettingsValidation>>, TError = unknown>(
+	options?: {
+		query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsValidation>>, TError, TData>>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getGetSettingsValidationQueryOptions(options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
 		queryKey: DataTag<QueryKey, TData, TError>;

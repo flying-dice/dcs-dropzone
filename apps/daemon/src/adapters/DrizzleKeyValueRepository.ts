@@ -39,4 +39,8 @@ export class DrizzleKeyValueRepository implements KeyValueRepository {
 
 		return res.value as string;
 	}
+
+	delete(key: string): void {
+		this.db.delete(T_KEY_VALUE).where(eq(T_KEY_VALUE.key, key)).run();
+	}
 }

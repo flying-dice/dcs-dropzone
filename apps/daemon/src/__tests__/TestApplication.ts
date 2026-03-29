@@ -27,6 +27,10 @@ export class TestApplication extends Application {
 		keyValueRepository.save("dcs_working_dir", tempFile.join("Saved Games", "DCS"));
 		keyValueRepository.save("dcs_install_dir", tempFile.join("Program Files", "Eagle Dynamics", "DCS World"));
 
+		fileSystem.ensureDir(tempFile.join("mods"));
+		fileSystem.ensureDir(tempFile.join("Saved Games", "DCS"));
+		fileSystem.ensureDir(tempFile.join("Program Files", "Eagle Dynamics", "DCS World"));
+
 		super({
 			jobRecordRepository,
 			downloadProcessor,

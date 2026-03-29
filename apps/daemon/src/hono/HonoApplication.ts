@@ -72,6 +72,7 @@ export class HonoApplication extends Hono<Env> {
 
 		self.getSettings();
 		self.getSettingsSuggestions();
+		self.getSettingsValidation();
 		self.putSettings();
 
 		self.addReleaseToDaemon();
@@ -285,14 +286,7 @@ export class HonoApplication extends Hono<Env> {
 			}),
 			(c) => {
 				logger.info("Retrieving daemon settings");
-				return c.json(
-					{
-						dcsWorkingDir: c.var.app.settings.getDcsWorkingDir(),
-						dcsInstallDir: c.var.app.settings.getDcsInstallDir(),
-						dropzoneModsDir: c.var.app.settings.getDropzoneModsDir(),
-					},
-					StatusCodes.OK,
-				);
+				return c.json(c.var.app.settings.getAll(), StatusCodes.OK);
 			},
 		);
 	}
@@ -317,18 +311,50 @@ export class HonoApplication extends Hono<Env> {
 			}),
 			(c) => {
 				logger.info("Retrieving settings suggestions");
-				const userProfile = process.env.USERPROFILE;
-				const programFiles = process.env.ProgramFiles;
-				const localAppData = process.env.LOCALAPPDATA;
 
 				return c.json(
 					{
-						dcsWorkingDir: userProfile ? `${userProfile}\\Saved Games\\DCS` : undefined,
-						dcsInstallDir: programFiles ? `${programFiles}\\Eagle Dynamics\\DCS World` : undefined,
-						dropzoneModsDir: localAppData ? `${localAppData}\\DCS Dropzone\\Mods` : undefined,
+						dcsWorkingDir: "%USERPROFILE%\\Saved Games\\DCS",
+						dcsInstallDir: "%PROGRAMFILES%\\Eagle Dynamics\\DCS World",
+						dropzoneModsDir: "%LOCALAPPDATA%\\DCS Dropzone\\Mods",
 					},
 					StatusCodes.OK,
 				);
+			},
+		);
+	}
+
+	private getSettingsValidation() {
+		const SettingsValidationEntry = z.object({
+			exists: z.boolean(),
+			resolvedPath: z.string().optional(),
+			error: z.string().optional(),
+		});
+
+		const SettingsValidationResponse = z.object({
+			valid: z.boolean(),
+			dcsWorkingDir: SettingsValidationEntry,
+			dcsInstallDir: SettingsValidationEntry,
+			dropzoneModsDir: SettingsValidationEntry,
+		});
+
+		this.get(
+			"/api/settings/validate",
+			describeJsonRoute({
+				operationId: "getSettingsValidation",
+				summary: "Validate Settings",
+				description:
+					"Validates the current daemon path settings by checking if all directories are configured and exist on disk.",
+				tags: ["Settings"],
+				responses: {
+					[StatusCodes.OK]: SettingsValidationResponse,
+				},
+			}),
+			(c) => {
+				logger.info("Validating daemon settings");
+				const result = c.var.app.settings.validate();
+				logger.info("Settings validation result: valid=%s", result.valid);
+				return c.json(result, StatusCodes.OK);
 			},
 		);
 	}
@@ -361,28 +387,9 @@ export class HonoApplication extends Hono<Env> {
 			(c) => {
 				const body = c.req.valid("json");
 				logger.info("Updating daemon settings");
-
-				if (body.dcsWorkingDir !== undefined) {
-					c.var.app.settings.setDcsWorkingDir(body.dcsWorkingDir);
-				}
-
-				if (body.dcsInstallDir !== undefined) {
-					c.var.app.settings.setDcsInstallDir(body.dcsInstallDir);
-				}
-
-				if (body.dropzoneModsDir !== undefined) {
-					c.var.app.settings.setDropzoneModsDir(body.dropzoneModsDir);
-				}
-
+				const updated = c.var.app.settings.setAll(body);
 				logger.info("Settings updated successfully");
-				return c.json(
-					{
-						dcsWorkingDir: c.var.app.settings.getDcsWorkingDir(),
-						dcsInstallDir: c.var.app.settings.getDcsInstallDir(),
-						dropzoneModsDir: c.var.app.settings.getDropzoneModsDir(),
-					},
-					StatusCodes.OK,
-				);
+				return c.json(updated, StatusCodes.OK);
 			},
 		);
 	}

@@ -3,9 +3,9 @@ import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
 
 export const settingsFormSchema = z.object({
-	dcsWorkingDir: z.string().min(1, { message: "DCS Working Directory is required" }),
-	dcsInstallDir: z.string().min(1, { message: "DCS Install Directory is required" }),
-	dropzoneModsDir: z.string().min(1, { message: "Dropzone Mods Directory is required" }),
+	dcsWorkingDir: z.string(),
+	dcsInstallDir: z.string(),
+	dropzoneModsDir: z.string(),
 });
 
 export type SettingsFormValues = z.infer<typeof settingsFormSchema>;

@@ -28,7 +28,8 @@
       "Bash(npx tsc:*)",
       "Bash(ls \"C:\\\\Users\\\\jonat\\\\Projects\\\\dcs-dropzone\\\\apps\\\\webapp\"\" | grep -E \"bun-env)",
       "Bash(.env \")",
-      "Bash(bun test:*)"
+      "Bash(bun test:*)",
+      "Bash(bunx orval:*)"
     ]
   },
   "agent": "archgate:developer"

@@ -62,7 +62,12 @@ export class ReleaseCatalog {
 			let symlinkIntegrityValid = true;
 			if (release.enabled && symbolicLinks.length > 0) {
 				symlinkIntegrityValid = symbolicLinks.every(
-					(link) => link.installedPath !== null && this.deps.fileSystem.exists(link.installedPath),
+					(link) =>
+						link.installedPath !== null &&
+						this.deps.fileSystem.exists(link.installedPath).match(
+							(exists) => exists,
+							() => false,
+						),
 				);
 			}
 
