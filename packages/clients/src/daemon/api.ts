@@ -25,16 +25,6 @@ import type {
 } from '@tanstack/react-query';
 
 import { fetch } from './client';
-export interface ErrorData {
-  /**
-   * @minimum 100
-   * @maximum 599
-   */
-  code: number;
-  message?: string;
-  error: string;
-}
-
 export type ModReleaseAssetStatusDataStatus = typeof ModReleaseAssetStatusDataStatus[keyof typeof ModReleaseAssetStatusDataStatus];
 
 
@@ -159,6 +149,16 @@ export interface OkData {
   ok?: boolean;
 }
 
+export interface ErrorData {
+  /**
+   * @minimum 100
+   * @maximum 599
+   */
+  code: number;
+  message?: string;
+  error: string;
+}
+
 export type GetConfig200 = {
   webappUrl: string;
   daemonUrl: string;
@@ -180,6 +180,30 @@ export type PutSettings200 = {
   dcsWorkingDir?: string;
   dcsInstallDir?: string;
   dropzoneModsDir?: string;
+};
+
+export type GetSettingsSuggestions200 = {
+  dcsWorkingDir?: string;
+  dcsInstallDir?: string;
+  dropzoneModsDir?: string;
+};
+
+export type AddReleaseToDaemon422Code = typeof AddReleaseToDaemon422Code[keyof typeof AddReleaseToDaemon422Code];
+
+
+export const AddReleaseToDaemon422Code = {
+  DropzoneModsDirNotConfigured: 'DropzoneModsDirNotConfigured',
+} as const;
+
+export type AddReleaseToDaemon422 = {
+  /**
+   * @minimum 100
+   * @maximum 599
+   */
+  status: number;
+  code: AddReleaseToDaemon422Code;
+  message: string;
+  data: unknown;
 };
 
 export type GetDaemonHealth200 = {
@@ -510,13 +534,125 @@ export const usePutSettings = <TError = unknown,
       return useMutation(getPutSettingsMutationOptions(options), queryClient);
     }
     
+/**
+ * Returns suggested default paths for settings based on the current system environment.
+ * @summary Get Settings Suggestions
+ */
+export type getSettingsSuggestionsResponse200 = {
+  data: GetSettingsSuggestions200
+  status: 200
+}
+    
+export type getSettingsSuggestionsResponseSuccess = (getSettingsSuggestionsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getSettingsSuggestionsResponse = (getSettingsSuggestionsResponseSuccess)
+
+export const getGetSettingsSuggestionsUrl = () => {
+
+
+  
+
+  return `/api/settings/suggestions`
+}
+
+export const getSettingsSuggestions = async ( options?: RequestInit): Promise<getSettingsSuggestionsResponse> => {
+  
+  return fetch<getSettingsSuggestionsResponse>(getGetSettingsSuggestionsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetSettingsSuggestionsQueryKey = () => {
+    return [
+    `/api/settings/suggestions`
+    ] as const;
+    }
+
+    
+export const getGetSettingsSuggestionsQueryOptions = <TData = Awaited<ReturnType<typeof getSettingsSuggestions>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsSuggestions>>, TError, TData>>, request?: SecondParameter<typeof fetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSettingsSuggestionsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSettingsSuggestions>>> = ({ signal }) => getSettingsSuggestions({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSettingsSuggestions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSettingsSuggestionsQueryResult = NonNullable<Awaited<ReturnType<typeof getSettingsSuggestions>>>
+export type GetSettingsSuggestionsQueryError = unknown
+
+
+export function useGetSettingsSuggestions<TData = Awaited<ReturnType<typeof getSettingsSuggestions>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsSuggestions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSettingsSuggestions>>,
+          TError,
+          Awaited<ReturnType<typeof getSettingsSuggestions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof fetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSettingsSuggestions<TData = Awaited<ReturnType<typeof getSettingsSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsSuggestions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSettingsSuggestions>>,
+          TError,
+          Awaited<ReturnType<typeof getSettingsSuggestions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof fetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSettingsSuggestions<TData = Awaited<ReturnType<typeof getSettingsSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsSuggestions>>, TError, TData>>, request?: SecondParameter<typeof fetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Settings Suggestions
+ */
+
+export function useGetSettingsSuggestions<TData = Awaited<ReturnType<typeof getSettingsSuggestions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSettingsSuggestions>>, TError, TData>>, request?: SecondParameter<typeof fetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSettingsSuggestionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 export type addReleaseToDaemonResponse200 = {
   data: void
   status: 200
 }
 
 export type addReleaseToDaemonResponse422 = {
-  data: ErrorData
+  data: AddReleaseToDaemon422
   status: 422
 }
     
@@ -552,7 +688,7 @@ export const addReleaseToDaemon = async (modAndReleaseData: ModAndReleaseData, o
 
 
 
-export const getAddReleaseToDaemonMutationOptions = <TError = ErrorData,
+export const getAddReleaseToDaemonMutationOptions = <TError = AddReleaseToDaemon422,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReleaseToDaemon>>, TError,{data: ModAndReleaseData}, TContext>, request?: SecondParameter<typeof fetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof addReleaseToDaemon>>, TError,{data: ModAndReleaseData}, TContext> => {
 
@@ -581,9 +717,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type AddReleaseToDaemonMutationResult = NonNullable<Awaited<ReturnType<typeof addReleaseToDaemon>>>
     export type AddReleaseToDaemonMutationBody = ModAndReleaseData
-    export type AddReleaseToDaemonMutationError = ErrorData
+    export type AddReleaseToDaemonMutationError = AddReleaseToDaemon422
 
-    export const useAddReleaseToDaemon = <TError = ErrorData,
+    export const useAddReleaseToDaemon = <TError = AddReleaseToDaemon422,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReleaseToDaemon>>, TError,{data: ModAndReleaseData}, TContext>, request?: SecondParameter<typeof fetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof addReleaseToDaemon>>,
@@ -703,20 +839,13 @@ export type removeReleaseFromDaemonResponse200 = {
   data: void
   status: 200
 }
-
-export type removeReleaseFromDaemonResponse422 = {
-  data: ErrorData
-  status: 422
-}
     
 export type removeReleaseFromDaemonResponseSuccess = (removeReleaseFromDaemonResponse200) & {
   headers: Headers;
 };
-export type removeReleaseFromDaemonResponseError = (removeReleaseFromDaemonResponse422) & {
-  headers: Headers;
-};
+;
 
-export type removeReleaseFromDaemonResponse = (removeReleaseFromDaemonResponseSuccess | removeReleaseFromDaemonResponseError)
+export type removeReleaseFromDaemonResponse = (removeReleaseFromDaemonResponseSuccess)
 
 export const getRemoveReleaseFromDaemonUrl = (releaseId: string,) => {
 
@@ -740,7 +869,7 @@ export const removeReleaseFromDaemon = async (releaseId: string, options?: Reque
 
 
 
-export const getRemoveReleaseFromDaemonMutationOptions = <TError = ErrorData,
+export const getRemoveReleaseFromDaemonMutationOptions = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReleaseFromDaemon>>, TError,{releaseId: string}, TContext>, request?: SecondParameter<typeof fetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeReleaseFromDaemon>>, TError,{releaseId: string}, TContext> => {
 
@@ -769,9 +898,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type RemoveReleaseFromDaemonMutationResult = NonNullable<Awaited<ReturnType<typeof removeReleaseFromDaemon>>>
     
-    export type RemoveReleaseFromDaemonMutationError = ErrorData
+    export type RemoveReleaseFromDaemonMutationError = unknown
 
-    export const useRemoveReleaseFromDaemon = <TError = ErrorData,
+    export const useRemoveReleaseFromDaemon = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReleaseFromDaemon>>, TError,{releaseId: string}, TContext>, request?: SecondParameter<typeof fetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof removeReleaseFromDaemon>>,

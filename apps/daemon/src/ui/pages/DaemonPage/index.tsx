@@ -15,7 +15,7 @@ export function DownloadedPage() {
 
 	return (
 		<DzMain>
-			<Container>
+			<Container size={"md"}>
 				<Stack py={"md"} gap={"xl"}>
 					<DownloadedStatsCards enabled={enabled} downloaded={downloaded} withoutUpdates />
 					{match(allDaemonReleases)

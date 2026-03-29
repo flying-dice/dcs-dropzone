@@ -24,6 +24,10 @@ export class ReleaseCatalog {
 	add(data: ModAndReleaseData): Result<void, DropzoneModsDirNotConfigured> {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
+		// Verify dropzone mods directory is configured before persisting to prevent orphaned records
+		const pathCheck = this.deps.pathResolver.resolveReleasePath(data.releaseId);
+		if (pathCheck.isErr()) return err(pathCheck.error);
+
 		this.deps.releaseRepository.saveRelease(data);
 		const addResult = this.deps.releaseAssetManager.addRelease(data.releaseId);
 		if (addResult.isErr()) return err(addResult.error);
@@ -32,12 +36,9 @@ export class ReleaseCatalog {
 		return ok(undefined);
 	}
 
-	remove(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
-		const removeResult = this.deps.releaseAssetManager.removeRelease(releaseId);
-		if (removeResult.isErr()) return err(removeResult.error);
-
+	remove(releaseId: string): void {
+		this.deps.releaseAssetManager.removeRelease(releaseId);
 		this.deps.releaseRepository.deleteRelease(releaseId);
-		return ok(undefined);
 	}
 
 	getAllReleasesWithStatus(): ModAndReleaseData[] {

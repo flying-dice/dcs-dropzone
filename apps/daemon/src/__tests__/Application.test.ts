@@ -2,14 +2,22 @@ import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { ok } from "node:assert";
 import { join } from "node:path";
-import { JobState } from "@packages/queue";
+import { InMemoryJobRecordRepository, JobState } from "@packages/queue";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import type { Application } from "../application/Application.ts";
+import { Application } from "../application/Application.ts";
 import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
+import type { DownloadJobData, DownloadJobResult } from "../application/ports/DownloadProcessor.ts";
+import type { ExtractJobData, ExtractJobResult } from "../application/ports/ExtractProcessor.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+import { DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
 import { TestCases } from "./TestCases.ts";
+import { TestDelayProcessor } from "./TestDelayProcessor.ts";
+import { TestFileSystem } from "./TestFileSystem.ts";
+import { TestKeyValueRepository } from "./TestKeyValueRepository.ts";
+import { TestReleaseRepository } from "./TestReleaseRepository.ts";
 import type { TestTempDir } from "./TestTempDir.ts";
+import { TestUUIDGenerator } from "./TestUUIDGenerator.ts";
 import { waitForJobsForRelease } from "./utils.ts";
 
 describe.each(TestCases)("$label", ({ build }) => {
@@ -159,7 +167,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 	describe("RemoveRelease", () => {
 		it("should remove the release and all associated data from the repository", () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
-			app.removeRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
+			app.removeRelease(modAndReleaseData.releaseId);
 
 			const allReleases = app.deps.releaseRepository.getAllReleases();
 			const assetsForRelease = app.deps.releaseRepository.getReleaseAssetsForRelease(modAndReleaseData.releaseId);
@@ -272,6 +280,92 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const removeSymlinksBatFiles = app.deps.fileSystem.glob(join(dropzoneModsDir, ".."), "**/removeSymlinks.bat");
 
 			expect(removeSymlinksBatFiles.length).toBeGreaterThanOrEqual(1);
+		});
+	});
+});
+
+class UnconfiguredTestApplication extends Application {
+	constructor() {
+		super({
+			jobRecordRepository: new InMemoryJobRecordRepository(),
+			downloadProcessor: new TestDelayProcessor<"download", DownloadJobData, DownloadJobResult>("download"),
+			extractProcessor: new TestDelayProcessor<"extract", ExtractJobData, ExtractJobResult>("extract"),
+			keyValueRepository: new TestKeyValueRepository(),
+			releaseRepository: new TestReleaseRepository(),
+			fileSystem: new TestFileSystem(),
+			generateUuid: TestUUIDGenerator(),
+		});
+	}
+}
+
+describe("Unconfigured paths", () => {
+	let app: UnconfiguredTestApplication;
+	let modAndReleaseData: ModAndReleaseData;
+
+	beforeEach(() => {
+		app = new UnconfiguredTestApplication();
+		modAndReleaseData = {
+			releaseId: "test-release-id",
+			modId: "test-mod-id",
+			modName: "Test Mod",
+			dependencies: [],
+			version: "1.0.0",
+			versionHash: Date.now().toString(),
+			assets: [
+				{
+					id: "test-release-id__asset-1",
+					name: "Test Asset",
+					urls: [
+						{
+							id: "test-release-id__asset-1__url-1",
+							url: "https://example.com/sample.zip",
+						},
+					],
+					isArchive: true,
+				},
+			],
+			symbolicLinks: [
+				{
+					id: "symbolic-link-1",
+					name: "Test Script",
+					src: "sample/test.lua",
+					dest: "Scripts/test.lua",
+					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+				},
+			],
+			missionScripts: [],
+		};
+	});
+
+	describe("addRelease without dropzone mods dir configured", () => {
+		it("should return a DropzoneModsDirNotConfigured error", () => {
+			const result = app.addRelease(modAndReleaseData);
+
+			expect(result.isErr()).toBe(true);
+			expect(result._unsafeUnwrapErr()).toBeInstanceOf(DropzoneModsDirNotConfigured);
+		});
+
+		it("should not persist an orphaned release record", () => {
+			app.addRelease(modAndReleaseData);
+
+			const allReleases = app.deps.releaseRepository.getAllReleases();
+			expect(allReleases.length).toEqual(0);
+		});
+	});
+
+	describe("removeRelease without directories configured", () => {
+		it("should succeed even when no directories are configured", () => {
+			// Force a release into the repository to simulate an orphaned state
+			app.deps.releaseRepository.saveRelease(modAndReleaseData);
+
+			const allReleasesBefore = app.deps.releaseRepository.getAllReleases();
+			expect(allReleasesBefore.length).toEqual(1);
+
+			// removeRelease should not throw even though paths aren't configured
+			expect(() => app.removeRelease(modAndReleaseData.releaseId)).not.toThrow();
+
+			const allReleasesAfter = app.deps.releaseRepository.getAllReleases();
+			expect(allReleasesAfter.length).toEqual(0);
 		});
 	});
 });

@@ -1,3 +1,4 @@
+import * as assert from "node:assert";
 import { addReleaseToDaemonById, calculateDashboardMetrics } from "@packages/clients";
 import {
 	getGetAllDaemonReleasesUrl,
@@ -5,7 +6,13 @@ import {
 	removeReleaseFromDaemon,
 	useGetAllDaemonReleases,
 } from "@packages/clients/daemon";
-import { showErrorNotification, showSuccessNotification, useAppTranslation } from "@packages/dzui";
+import {
+	showDetailedErrorModal,
+	showErrorNotification,
+	showSuccessNotification,
+	useAppTranslation,
+} from "@packages/dzui";
+import { StatusCodes } from "http-status-codes";
 import { useAsync, useAsyncFn } from "react-use";
 import toggleReleaseById from "../commands/ToggleReleaseById.ts";
 import type { UserModReleaseForm } from "../pages/UserModReleasePage/form.ts";
@@ -41,11 +48,12 @@ export function useDaemon() {
 		async (isUserMod: boolean, modId: string, releaseId: string, form?: UserModReleaseForm) => {
 			const result = await addReleaseToDaemonById(isUserMod, { releaseId, modId, data: form?.values });
 
-			if (result) {
-				showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error: result })));
-			} else {
-				showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
-			}
+			result.match(
+				() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
+				(error) => {
+					showDetailedErrorModal(t("ERROR"), error.message, JSON.stringify(error.data, null, 2));
+				},
+			);
 
 			await daemonReleases.refetch();
 		},
@@ -84,14 +92,14 @@ export function useDaemon() {
 	const [updating, update] = useAsyncFn(
 		async (isUserMod: boolean, modId: string, currentReleaseId: string, latestReleaseId: string) => {
 			try {
-				await removeReleaseFromDaemon(currentReleaseId);
+				const removeRes = await removeReleaseFromDaemon(currentReleaseId);
+				assert.ok(removeRes.status === StatusCodes.OK, "Failed to remove current release from daemon");
 
 				const result = await addReleaseToDaemonById(isUserMod, { releaseId: latestReleaseId, modId });
-				if (result) {
-					showErrorNotification(new Error(t("ERROR_TAKING_ACTION", { error: result })));
-				} else {
-					showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
-				}
+				result.match(
+					() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
+					(error) => showDetailedErrorModal(t("ERROR"), error.message, JSON.stringify(error.data, null, 2)),
+				);
 
 				await daemonReleases.refetch();
 			} catch (e) {

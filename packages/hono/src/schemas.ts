@@ -1,5 +1,5 @@
 import { getReasonPhrase } from "http-status-codes";
-import { z } from "zod";
+import { type ZodAny, z } from "zod";
 
 export const ErrorData = z
 	.object({
@@ -26,3 +26,11 @@ export const OkData = z
 	});
 
 export type OkData = z.infer<typeof OkData>;
+
+export const ErrorResult = (codes: string[], data: ZodAny = z.any()) =>
+	z.object({
+		status: z.number().int().min(100).max(599),
+		code: z.enum(codes),
+		message: z.string(),
+		data,
+	});

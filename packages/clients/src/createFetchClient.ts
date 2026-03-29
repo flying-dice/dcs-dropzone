@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { DropzoneClientError } from "./DropzoneClientError.ts";
 
 export const ClientConfig = z.object({
 	baseUrl: z.url().optional(),
@@ -66,15 +65,6 @@ export function createFetchClient(config: ClientConfig = {}, __fetch: Fetch = fe
 		const _url = _config.baseUrl ? new URL(url, _config.baseUrl) : url;
 		const request = new Request(_url, options);
 		const response = await __fetch(request);
-
-		if (!response.ok) {
-			throw new DropzoneClientError({
-				message: `Request failed with status ${response.status}`,
-				req: request,
-				res: response,
-				status: response.status,
-			});
-		}
 
 		const data = await autoParseByContentType(response);
 

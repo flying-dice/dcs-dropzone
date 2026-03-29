@@ -24,6 +24,7 @@ export * from "./orDefaultValue.ts";
 export * from "./PathWithRoot.tsx";
 export * from "./StatCard.tsx";
 export * from "./SymbolicLinkListItem.tsx";
+export * from "./showDetailedErrorModal.tsx";
 export * from "./showErrorNotification.tsx";
 export * from "./showSuccessNotification.tsx";
 export * from "./theme.ts";

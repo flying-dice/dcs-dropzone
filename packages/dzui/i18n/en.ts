@@ -129,6 +129,7 @@ export default {
 		EMPTY_RELEASES_TITLE: "No Releases Added",
 		ERROR_LOADING_MOD: "Error loading mod.",
 		ERROR_LOADING_RELEASE: "Error loading release.",
+		ERROR_ADDING_TO_DAEMON: "Error adding release to daemon.",
 		ERROR_STATUS: "Error: {{status}}",
 		FEATURED_MODS: "Featured Mods",
 		LIGHT: "Light",
@@ -292,6 +293,19 @@ export default {
 		COUNT_DOWNLOADS: "{{count}} Downloads",
 		DISCOVER: "Discover",
 		LIBRARY: "Library",
+		SETTINGS: "Settings",
+		SETTINGS_PAGE_TITLE: "Settings",
+		SETTINGS_DCS_WORKING_DIR_LABEL: "DCS Working Directory",
+		SETTINGS_DCS_WORKING_DIR_DESCRIPTION:
+			"Path to your DCS Saved Games folder (e.g., C:\\Users\\You\\Saved Games\\DCS)",
+		SETTINGS_DCS_INSTALL_DIR_LABEL: "DCS Install Directory",
+		SETTINGS_DCS_INSTALL_DIR_DESCRIPTION:
+			"Path to your DCS World installation folder (e.g., C:\\Program Files\\Eagle Dynamics\\DCS World)",
+		SETTINGS_DROPZONE_MODS_DIR_LABEL: "Dropzone Mods Directory",
+		SETTINGS_DROPZONE_MODS_DIR_DESCRIPTION: "Path where Dropzone stores downloaded mods",
+		SETTINGS_SAVED_SUCCESS_TITLE: "Settings Saved",
+		SETTINGS_SAVED_SUCCESS_DESC: "Your settings have been updated successfully.",
+		SETTINGS_SAVED_ERROR_TITLE: "Error Saving Settings",
 
 		DropzoneModsDirNotConfigured:
 			"Dropzone mods directory is not configured. Please set it in Settings before managing releases.",

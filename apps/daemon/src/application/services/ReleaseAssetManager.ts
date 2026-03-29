@@ -104,7 +104,7 @@ export class ReleaseAssetManager {
 		return ok(undefined);
 	}
 
-	removeRelease(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
+	removeRelease(releaseId: string): void {
 		for (const jobId of this.deps.releaseRepository.getJobIdsForRelease(releaseId)) {
 			const job = this.queue.getLatestByJobId(jobId);
 			if (job && [JobState.Pending, JobState.Waiting, JobState.Running].includes(job.state)) {
@@ -113,12 +113,15 @@ export class ReleaseAssetManager {
 		}
 
 		const releaseFolderResult = this.deps.pathResolver.resolveReleasePath(releaseId);
-		if (releaseFolderResult.isErr()) return err(releaseFolderResult.error);
+		if (releaseFolderResult.isOk()) {
+			this.deps.fileSystem.removeDir(releaseFolderResult.value);
+		} else {
+			logger.warn(
+				`Could not resolve release path for ${releaseId} during removal, skipping folder cleanup: ${releaseFolderResult.error.type}`,
+			);
+		}
 
-		this.deps.fileSystem.removeDir(releaseFolderResult.value);
 		this.deps.releaseRepository.clearJobsForRelease(releaseId);
-
-		return ok(undefined);
 	}
 
 	isReleaseReady(releaseId: string) {

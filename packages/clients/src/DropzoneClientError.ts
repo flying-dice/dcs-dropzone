@@ -1,14 +1,14 @@
 export type DropzoneClientErrorProps = {
 	message?: string;
-	req: Request;
-	res: Response;
+	req?: Request;
+	res?: Response;
 	data?: any;
 	status: number;
 };
 
 export class DropzoneClientError extends Error {
-	public readonly req: Request;
-	public readonly res: Response;
+	public readonly req?: Request;
+	public readonly res?: Response;
 	public readonly data?: any;
 	public readonly status: number;
 

@@ -54,7 +54,7 @@ function ActionMenuFooterItem(props: ActionMenuItemProps) {
 }
 
 export type DzAppShellProps = Omit<AppShellProps, "header" | "footer"> & {
-	variant: "webapp" | "daemon";
+	variant: "webapp" | "daemon" | "settings";
 	headerSection?: ReactNode;
 	navbarDisclosure?: UseDisclosureReturnValue;
 	daemonUrl: string;
@@ -79,7 +79,20 @@ export function DzAppShell(props: DzAppShellProps) {
 			await fetch(new URL("/api/health", props.daemonUrl));
 			const daemonUrl = new URL(props.daemonUrl);
 			daemonUrl.searchParams.set("nocache", Date.now().toString());
+			daemonUrl.hash = "#/";
 			window.open(daemonUrl.toString(), "_self");
+		} catch (e) {
+			showErrorNotification(e);
+		}
+	}, [props.daemonUrl]);
+
+	const [settingsOpening, openSettings] = useAsyncFn(async () => {
+		try {
+			await fetch(new URL("/api/health", props.daemonUrl));
+			const settingsUrl = new URL(props.daemonUrl);
+			settingsUrl.searchParams.set("nocache", Date.now().toString());
+			settingsUrl.hash = "#/settings";
+			window.open(settingsUrl.toString(), "_self");
 		} catch (e) {
 			showErrorNotification(e);
 		}
@@ -103,6 +116,15 @@ export function DzAppShell(props: DzAppShellProps) {
 			onClick: openDaemon,
 			loading: daemonOpening.loading,
 			disabled: !!daemonOpening.error,
+		},
+		{
+			id: "settings",
+			label: t("SETTINGS"),
+			active: props.variant === "settings",
+			icon: AppIcons.Settings,
+			onClick: openSettings,
+			loading: settingsOpening.loading,
+			disabled: !!settingsOpening.error,
 		},
 	];
 

@@ -126,6 +126,39 @@
         }
       }
     },
+    "/api/settings/suggestions": {
+      "get": {
+        "operationId": "getSettingsSuggestions",
+        "summary": "Get Settings Suggestions",
+        "description": "Returns suggested default paths for settings based on the current system environment.",
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dcsWorkingDir": {
+                      "type": "string"
+                    },
+                    "dcsInstallDir": {
+                      "type": "string"
+                    },
+                    "dropzoneModsDir": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/downloads": {
       "post": {
         "operationId": "addReleaseToDaemon",
@@ -141,7 +174,30 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorData"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "DropzoneModsDirNotConfigured"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {}
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "message",
+                    "data"
+                  ]
                 }
               }
             }
@@ -188,16 +244,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorData"
-                }
-              }
-            }
           }
         },
         "parameters": [
@@ -379,26 +425,6 @@
   },
   "components": {
     "schemas": {
-      "ErrorData": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "minimum": 100,
-            "maximum": 599
-          },
-          "message": {
-            "type": "string"
-          },
-          "error": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "error"
-        ]
-      },
       "ModReleaseAssetStatusData": {
         "title": "Mod Release Asset Status Data",
         "description": "Status data representation of a mod release asset, including download and extraction progress.",
@@ -641,6 +667,26 @@
             "type": "boolean"
           }
         }
+      },
+      "ErrorData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "error"
+        ]
       }
     }
   }

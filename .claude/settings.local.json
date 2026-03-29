@@ -27,7 +27,8 @@
       "Bash(npx --yes typescript-language-server --version)",
       "Bash(npx tsc:*)",
       "Bash(ls \"C:\\\\Users\\\\jonat\\\\Projects\\\\dcs-dropzone\\\\apps\\\\webapp\"\" | grep -E \"bun-env)",
-      "Bash(.env \")"
+      "Bash(.env \")",
+      "Bash(bun test:*)"
     ]
   },
   "agent": "archgate:developer"

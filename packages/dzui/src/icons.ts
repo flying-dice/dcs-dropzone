@@ -6,6 +6,7 @@ import {
 	FaDownload,
 	FaEye,
 	FaEyeSlash,
+	FaGear,
 	FaListCheck,
 	FaStore,
 	FaTag,
@@ -32,6 +33,7 @@ export const AppIcons = {
 	Error: FaTriangleExclamation,
 	Store: FaStore,
 	Library: FaListCheck,
+	Settings: FaGear,
 };
 
 export const VisibilityIcons: Record<ModDataVisibility, IconType> = {

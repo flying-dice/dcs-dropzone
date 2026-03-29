@@ -1,4 +1,5 @@
 import type { JobRecordRepository } from "@packages/queue";
+import { getLogger } from "log4js";
 import type { Result } from "neverthrow";
 import type { DownloadProcessor } from "./ports/DownloadProcessor.ts";
 import type { ExtractProcessor } from "./ports/ExtractProcessor.ts";
@@ -19,6 +20,8 @@ import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
 import { ReleaseToggle } from "./services/ReleaseToggle.ts";
 import { RemoveSymlinksScriptManager } from "./services/RemoveSymlinksScriptManager.ts";
 import { Settings } from "./services/Settings.ts";
+
+const logger = getLogger("Application");
 
 type Deps = {
 	downloadProcessor: DownloadProcessor;
@@ -106,10 +109,17 @@ export abstract class Application {
 		return this.releaseCatalog.add(data);
 	}
 
-	public removeRelease(releaseId: string): Result<void, PathResolverError> {
+	public removeRelease(releaseId: string): void {
+		// Try to disable the release first (removes symlinks, rebuilds scripts).
+		// Path configuration errors are non-fatal during removal since there are no
+		// symlinks or generated files to clean up if paths were never configured.
 		const disableResult = this.releaseToggleService.disable(releaseId);
-		if (disableResult.isErr()) return disableResult;
-		return this.releaseCatalog.remove(releaseId);
+		if (disableResult.isErr()) {
+			logger.warn(
+				`Could not fully disable release ${releaseId} during removal (${disableResult.error.type}), proceeding with cleanup`,
+			);
+		}
+		this.releaseCatalog.remove(releaseId);
 	}
 
 	public getAllReleasesWithStatus() {

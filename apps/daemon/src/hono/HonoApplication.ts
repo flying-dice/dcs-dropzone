@@ -2,7 +2,7 @@ import { describeJsonRoute } from "@packages/hono/describeJsonRoute";
 import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
-import { ErrorData, OkData } from "@packages/hono/schemas";
+import { ErrorData, ErrorResult, OkData } from "@packages/hono/schemas";
 import { zParse } from "@packages/zod/zParse";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
@@ -15,6 +15,7 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
+import { DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
 import { appConfig } from "../config";
 import { UiAppConfig } from "../config/schemas.ts";
 
@@ -70,6 +71,7 @@ export class HonoApplication extends Hono<Env> {
 		self.config();
 
 		self.getSettings();
+		self.getSettingsSuggestions();
 		self.putSettings();
 
 		self.addReleaseToDaemon();
@@ -120,6 +122,8 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private addReleaseToDaemon() {
+		const UnprocessableEntityResult = ErrorResult([DropzoneModsDirNotConfigured.name]);
+
 		this.post(
 			"/api/downloads",
 			describeJsonRoute({
@@ -127,7 +131,7 @@ export class HonoApplication extends Hono<Env> {
 				tags: ["Downloads"],
 				responses: {
 					[StatusCodes.OK]: null,
-					[StatusCodes.UNPROCESSABLE_ENTITY]: ErrorData,
+					[StatusCodes.UNPROCESSABLE_ENTITY]: UnprocessableEntityResult,
 				},
 			}),
 			validator("json", ModAndReleaseData, loggingHook),
@@ -142,11 +146,12 @@ export class HonoApplication extends Hono<Env> {
 					return c.json(
 						zParse(
 							{
-								error: result.error.type,
-								code: StatusCodes.UNPROCESSABLE_ENTITY,
-								message: result.error.name,
+								status: StatusCodes.UNPROCESSABLE_ENTITY,
+								code: result.error.type,
+								message: result.error.message,
+								data: result.error,
 							},
-							ErrorData,
+							UnprocessableEntityResult,
 						),
 						StatusCodes.UNPROCESSABLE_ENTITY,
 					);
@@ -185,7 +190,6 @@ export class HonoApplication extends Hono<Env> {
 				tags: ["Downloads"],
 				responses: {
 					[StatusCodes.OK]: null,
-					[StatusCodes.UNPROCESSABLE_ENTITY]: ErrorData,
 				},
 			}),
 			validator(
@@ -199,21 +203,7 @@ export class HonoApplication extends Hono<Env> {
 				const { releaseId } = c.req.valid("param");
 				logger.info("Removing release %s from daemon", releaseId);
 
-				const result = c.var.app.removeRelease(releaseId);
-				if (result.isErr()) {
-					logger.error("Failed to remove release %s: %s - %s", releaseId, result.error.name, result.error.message);
-					return c.json(
-						zParse(
-							{
-								error: result.error.name,
-								message: result.error.message,
-								code: StatusCodes.UNPROCESSABLE_ENTITY,
-							},
-							ErrorData,
-						),
-						StatusCodes.UNPROCESSABLE_ENTITY,
-					);
-				}
+				c.var.app.removeRelease(releaseId);
 
 				logger.info("Release %s removed successfully", releaseId);
 				return c.json(null, StatusCodes.OK);
@@ -300,6 +290,42 @@ export class HonoApplication extends Hono<Env> {
 						dcsWorkingDir: c.var.app.settings.getDcsWorkingDir(),
 						dcsInstallDir: c.var.app.settings.getDcsInstallDir(),
 						dropzoneModsDir: c.var.app.settings.getDropzoneModsDir(),
+					},
+					StatusCodes.OK,
+				);
+			},
+		);
+	}
+
+	private getSettingsSuggestions() {
+		const SettingsSuggestionsResponse = z.object({
+			dcsWorkingDir: z.string().optional(),
+			dcsInstallDir: z.string().optional(),
+			dropzoneModsDir: z.string().optional(),
+		});
+
+		this.get(
+			"/api/settings/suggestions",
+			describeJsonRoute({
+				operationId: "getSettingsSuggestions",
+				summary: "Get Settings Suggestions",
+				description: "Returns suggested default paths for settings based on the current system environment.",
+				tags: ["Settings"],
+				responses: {
+					[StatusCodes.OK]: SettingsSuggestionsResponse,
+				},
+			}),
+			(c) => {
+				logger.info("Retrieving settings suggestions");
+				const userProfile = process.env.USERPROFILE;
+				const programFiles = process.env.ProgramFiles;
+				const localAppData = process.env.LOCALAPPDATA;
+
+				return c.json(
+					{
+						dcsWorkingDir: userProfile ? `${userProfile}\\Saved Games\\DCS` : undefined,
+						dcsInstallDir: programFiles ? `${programFiles}\\Eagle Dynamics\\DCS World` : undefined,
+						dropzoneModsDir: localAppData ? `${localAppData}\\DCS Dropzone\\Mods` : undefined,
 					},
 					StatusCodes.OK,
 				);

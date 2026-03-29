@@ -5,6 +5,6 @@ import { _checks } from "../../../scripts/_checks.ts";
 
 process.chdir(resolve(import.meta.dirname, "../"));
 
-await _checks(process.env);
-
 await $`bunx orval --config orval.config.cjs`;
+
+await _checks(process.env);
