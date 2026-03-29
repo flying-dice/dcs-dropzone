@@ -34,14 +34,16 @@ export default async function (command: ToggleReleaseByIdCommand): Promise<Toggl
 	if (subscription.status === ModAndReleaseDataStatus.ENABLED) {
 		const disableResponse = await disableRelease(releaseId);
 		if (disableResponse.status !== StatusCodes.OK) {
-			return err(new ToggleReleaseError("Failed to disable release"));
+			const data = disableResponse.data as { error?: string };
+			return err(new ToggleReleaseError(data?.error ?? "Failed to disable release"));
 		}
 		return ok("Disabled");
 	}
 
 	const enableResponse = await enableRelease(releaseId);
 	if (enableResponse.status !== StatusCodes.OK) {
-		return err(new ToggleReleaseError("Failed to enable release"));
+		const data = enableResponse.data as { error?: string };
+		return err(new ToggleReleaseError(data?.error ?? "Failed to enable release"));
 	}
 	return ok("Enabled");
 }
