@@ -7,6 +7,12 @@ import type { DcsPathNotConfigured, PathResolver, PathResolverError } from "./Pa
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
+export class SymlinkCreationFailed extends Error {
+	readonly type = "SymlinkCreationFailed" as const;
+}
+
+export type ReleaseToggleError = PathResolverError | SymlinkCreationFailed;
+
 const logger = getLogger("ReleaseToggle");
 
 type Deps = {
@@ -21,7 +27,7 @@ type Deps = {
 export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
-	async enable(releaseId: string): Promise<Result<void, PathResolverError>> {
+	async enable(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
 		logger.info(`Enabling Release ${releaseId}`);
 		this.ensureReleaseIsReady(releaseId);
 
@@ -39,7 +45,12 @@ export class ReleaseToggle {
 			const destAbs = destAbsResult.value;
 
 			logger.debug(`Creating symlink (release=${releaseId}, linkId=${link.id}, src=${srcAbs}, dest=${destAbs})`);
-			await this.deps.fileSystem.ensureSymlink(srcAbs, destAbs);
+			try {
+				await this.deps.fileSystem.ensureSymlink(srcAbs, destAbs);
+			} catch (e) {
+				logger.error(`Failed to create symlink for linkId ${link.id}: ${e}`);
+				return err(new SymlinkCreationFailed(`Failed to create symlink for ${link.id}: ${e}`));
+			}
 
 			this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, destAbs);
 			logger.debug(`Stored installed symlink path for linkId ${link.id}: ${destAbs}`);
