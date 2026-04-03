@@ -251,7 +251,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
+                }
+              }
+            }
           },
           "422": {
             "description": "Unprocessable Entity",
@@ -260,27 +267,24 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "type": "integer",
-                      "minimum": 100,
-                      "maximum": 599
-                    },
                     "code": {
+                      "default": 422,
+                      "type": "number",
+                      "const": 422
+                    },
+                    "message": {
+                      "default": "Unprocessable Entity",
+                      "type": "string"
+                    },
+                    "reason": {
                       "type": "string",
                       "enum": [
                         "DropzoneModsDirNotConfigured"
                       ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {}
+                    }
                   },
                   "required": [
-                    "status",
-                    "code",
-                    "message",
-                    "data"
+                    "reason"
                   ]
                 }
               }
@@ -327,7 +331,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -404,16 +415,17 @@
         }
       }
     },
-    "/api/toggle/{releaseId}/enable": {
+    "/api/toggle/{releaseId}": {
       "post": {
-        "operationId": "enableRelease",
+        "operationId": "toggleRelease",
         "tags": [
           "Toggle"
         ],
-        "summary": "Enable a release by creating its symbolic links",
+        "summary": "Toggle a release enabled state",
+        "description": "Enables the release if currently disabled, or disables it if currently enabled.",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Release toggled successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -423,7 +435,41 @@
             }
           },
           "422": {
-            "description": "Unprocessable Entity",
+            "description": "Failed to toggle release due to unprocessable entity error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "default": 422,
+                      "type": "number",
+                      "const": 422
+                    },
+                    "message": {
+                      "default": "Unprocessable Entity",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "DropzoneModsDirNotConfigured",
+                        "DcsPathNotConfigured",
+                        "ReleaseNotFound",
+                        "ReleaseNotReady",
+                        "SymlinkCreationFailed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "reason"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to toggle release due to internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -431,9 +477,74 @@
                 }
               }
             }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "releaseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/toggle/{releaseId}/enable": {
+      "post": {
+        "operationId": "enableRelease",
+        "tags": [
+          "Toggle"
+        ],
+        "summary": "Enable a release by creating its symbolic links",
+        "responses": {
+          "200": {
+            "description": "Release enabled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkData"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Failed to enable release due to unprocessable entity error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "default": 422,
+                      "type": "number",
+                      "const": 422
+                    },
+                    "message": {
+                      "default": "Unprocessable Entity",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "DropzoneModsDirNotConfigured",
+                        "DcsPathNotConfigured",
+                        "ReleaseNotFound",
+                        "ReleaseNotReady",
+                        "SymlinkCreationFailed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "reason"
+                  ]
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error",
+            "description": "Failed to enable release due to internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -464,7 +575,7 @@
         "summary": "Disable a release by removing its symbolic links",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Release disabled successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -474,17 +585,37 @@
             }
           },
           "422": {
-            "description": "Unprocessable Entity",
+            "description": "Failed to disable release due to unprocessable entity error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorData"
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "default": 422,
+                      "type": "number",
+                      "const": 422
+                    },
+                    "message": {
+                      "default": "Unprocessable Entity",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "DcsPathNotConfigured"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "reason"
+                  ]
                 }
               }
             }
           },
           "500": {
-            "description": "Internal Server Error",
+            "description": "Failed to disable release due to internal server error",
             "content": {
               "application/json": {
                 "schema": {

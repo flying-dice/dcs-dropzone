@@ -1,5 +1,5 @@
-import { getReasonPhrase } from "http-status-codes";
-import { type ZodAny, z } from "zod";
+import { getReasonPhrase, StatusCodes } from "http-status-codes";
+import { type ZodAny, type ZodEnum, z } from "zod";
 
 export const ErrorData = z
 	.object({
@@ -16,6 +16,15 @@ export const ErrorData = z
 	});
 
 export type ErrorData = z.infer<typeof ErrorData>;
+
+export const UnprocessableEntityData = <T extends string[]>(reasons: T) =>
+	z.object({
+		code: z.literal(StatusCodes.UNPROCESSABLE_ENTITY).default(StatusCodes.UNPROCESSABLE_ENTITY),
+		message: z.string().default(getReasonPhrase(StatusCodes.UNPROCESSABLE_ENTITY)),
+		reason: z.enum(reasons),
+	});
+
+export type UnprocessableEntityData = z.infer<typeof UnprocessableEntityData>;
 
 export const OkData = z
 	.object({

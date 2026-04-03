@@ -42,6 +42,10 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 		return this.db.select().from(T_MOD_RELEASES).all();
 	}
 
+	getById(releaseId: string) {
+		return this.db.select().from(T_MOD_RELEASES).where(eq(T_MOD_RELEASES.releaseId, releaseId)).get();
+	}
+
 	getMissionScriptsByRunOn(runOn: MissionScriptRunOn) {
 		return this.db
 			.select({

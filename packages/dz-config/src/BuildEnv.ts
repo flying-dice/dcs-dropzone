@@ -25,6 +25,32 @@ function load<T>(schema: ZodType<T>): T | undefined {
 }
 
 /**
+ * Merges build-time environment variables (embedded via {@link dump}) with the current
+ * `process.env` and validates the combined result against a schema.
+ *
+ * Build-time variables are loaded first via {@link load}. They are then shallow-merged with
+ * `process.env`, with runtime values taking precedence. The merged object is validated against
+ * `currentEnvSchema` and returned.
+ *
+ * This is the primary entry point for applications that need both baked-in build defaults and
+ * runtime overrides from the process environment.
+ *
+ * @param currentEnvSchema - Zod schema for the final merged environment. This is what callers
+ *   receive and what must satisfy all required fields after the merge.
+ * @param buildEnvSchema - Zod schema used to validate and extract the build-time payload embedded
+ *   in `_BUILD_DZ_BUILD_ENV`. Passed directly to {@link load}.
+ * @returns The validated merged environment.
+ * @throws If the merged object does not satisfy `currentEnvSchema`.
+ */
+function loadWithCurrentEnv<CURRENT_ENV, BUILD_ENV>(
+	currentEnvSchema: ZodType<CURRENT_ENV>,
+	buildEnvSchema: ZodType<BUILD_ENV>,
+): CURRENT_ENV {
+	const buildEnv = load(buildEnvSchema);
+	return currentEnvSchema.parse({ ...buildEnv, ...process.env });
+}
+
+/**
  * Reads environment variables from `process.env` (or a provided substitute), validates them
  * against the provided Zod schema, and serialises the result into an object that can be passed
  * directly to Bun's `define` build option.
@@ -54,4 +80,5 @@ function dump<T>(schema: ZodType<T>, env = process.env): { _BUILD_DZ_BUILD_ENV: 
 export const BuildEnv = {
 	load,
 	dump,
+	loadWithCurrentEnv,
 };

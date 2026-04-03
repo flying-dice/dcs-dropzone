@@ -14,6 +14,8 @@ export interface ReleaseRepository {
 
 	getAllReleases(): ReleaseInfo[];
 
+	getById(releaseId: string): ReleaseInfo | undefined;
+
 	getMissionScriptsByRunOn(runOn: MissionScriptRunOn): MissionScriptByRunOn[];
 
 	getReleaseAssetsForRelease(releaseId: string): ReleaseAsset[];

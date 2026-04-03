@@ -10,7 +10,7 @@ import type { DownloadJobData, DownloadJobResult } from "../application/ports/Do
 import type { ExtractJobData, ExtractJobResult } from "../application/ports/ExtractProcessor.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
-import { SymlinkCreationFailed } from "../application/services/ReleaseToggle.ts";
+import { ReleaseNotFound, ReleaseNotReady, SymlinkCreationFailed } from "../application/services/ReleaseToggle.ts";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
 import { TestApplication } from "./TestApplication.ts";
 import { TestCases } from "./TestCases.ts";
@@ -439,5 +439,105 @@ describe("Symlink creation failure", () => {
 		const releases = app.getAllReleasesWithStatus();
 		expect(releases.length).toEqual(1);
 		expect(releases[0]?.status).not.toBe(DownloadedReleaseStatus.ENABLED);
+	});
+});
+
+describe("ReleaseNotFound", () => {
+	let app: TestApplication;
+
+	beforeEach(() => {
+		app = new TestApplication();
+	});
+
+	it("should return ReleaseNotFound when enabling a release that does not exist", async () => {
+		const result = await app.enableRelease("non-existent-release-id");
+
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
+		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotFound");
+	});
+});
+
+describe("ReleaseNotReady", () => {
+	let app: TestApplication;
+	let modAndReleaseData: ModAndReleaseData;
+
+	beforeEach(() => {
+		app = new TestApplication();
+		modAndReleaseData = {
+			releaseId: "test-release-id",
+			modId: "test-mod-id",
+			modName: "Test Mod",
+			dependencies: [],
+			version: "1.0.0",
+			versionHash: Date.now().toString(),
+			assets: [
+				{
+					id: "test-release-id__asset-1",
+					name: "Test Asset",
+					urls: [{ id: "test-release-id__asset-1__url-1", url: "https://example.com/sample.zip" }],
+					isArchive: true,
+				},
+			],
+			symbolicLinks: [],
+			missionScripts: [],
+		};
+	});
+
+	it("should return ReleaseNotReady when enabling a release with incomplete jobs", async () => {
+		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+
+		// Do not wait for jobs — attempt to enable immediately
+		const result = await app.enableRelease(modAndReleaseData.releaseId);
+
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotReady);
+		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotReady");
+	});
+});
+
+describe("toggleRelease", () => {
+	let app: TestApplication;
+	let modAndReleaseData: ModAndReleaseData;
+
+	beforeEach(() => {
+		app = new TestApplication();
+		modAndReleaseData = {
+			releaseId: "test-release-id",
+			modId: "test-mod-id",
+			modName: "Test Mod",
+			dependencies: [],
+			version: "1.0.0",
+			versionHash: Date.now().toString(),
+			assets: [],
+			symbolicLinks: [],
+			missionScripts: [],
+		};
+	});
+
+	it("should return ReleaseNotFound when toggling a release that does not exist", async () => {
+		const result = await app.toggleRelease("non-existent-release-id");
+
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
+	});
+
+	it("should enable a disabled release", async () => {
+		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+
+		(await app.toggleRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+
+		const release = app.deps.releaseRepository.getById(modAndReleaseData.releaseId);
+		expect(release?.enabled).toBe(true);
+	});
+
+	it("should disable an enabled release", async () => {
+		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+
+		(await app.toggleRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+
+		const release = app.deps.releaseRepository.getById(modAndReleaseData.releaseId);
+		expect(release?.enabled).toBe(false);
 	});
 });

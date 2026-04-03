@@ -103,6 +103,14 @@ export abstract class Application {
 		return this.releaseToggleService.disable(releaseId);
 	}
 
+	public async toggleRelease(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
+		const release = this.deps.releaseRepository.getById(releaseId);
+		if (release?.enabled) {
+			return this.releaseToggleService.disable(releaseId);
+		}
+		return this.releaseToggleService.enable(releaseId);
+	}
+
 	public addRelease(data: ModAndReleaseData): Result<void, DropzoneModsDirNotConfigured> {
 		return this.releaseCatalog.add(data);
 	}

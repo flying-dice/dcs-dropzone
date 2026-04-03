@@ -7,11 +7,25 @@ import type { DcsPathNotConfigured, PathResolver, PathResolverError } from "./Pa
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
+export class ReleaseNotFound extends Error {
+	readonly type = "ReleaseNotFound" as const;
+	constructor(releaseId: string) {
+		super(`Release ${releaseId} not found`);
+	}
+}
+
+export class ReleaseNotReady extends Error {
+	readonly type = "ReleaseNotReady" as const;
+	constructor(releaseId: string) {
+		super(`Cannot enable release ${releaseId} because not all jobs are completed`);
+	}
+}
+
 export class SymlinkCreationFailed extends Error {
 	readonly type = "SymlinkCreationFailed" as const;
 }
 
-export type ReleaseToggleError = PathResolverError | SymlinkCreationFailed;
+export type ReleaseToggleError = PathResolverError | ReleaseNotFound | ReleaseNotReady | SymlinkCreationFailed;
 
 const logger = getLogger("ReleaseToggle");
 
@@ -29,7 +43,8 @@ export class ReleaseToggle {
 
 	async enable(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
 		logger.info(`Enabling Release ${releaseId}`);
-		this.ensureReleaseIsReady(releaseId);
+		const readyResult = this.checkReleaseIsReady(releaseId);
+		if (readyResult.isErr()) return err(readyResult.error);
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
@@ -105,14 +120,21 @@ export class ReleaseToggle {
 		return ok(undefined);
 	}
 
-	private ensureReleaseIsReady(releaseId: string): void {
+	private checkReleaseIsReady(releaseId: string): Result<void, ReleaseNotFound | ReleaseNotReady> {
 		logger.debug(`Checking if release ${releaseId} is ready`);
+
+		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
+		if (!exists) {
+			logger.warn(`Release ${releaseId} not found`);
+			return err(new ReleaseNotFound(releaseId));
+		}
 
 		if (!this.deps.releaseAssetManager.isReleaseReady(releaseId)) {
 			logger.warn(`Release ${releaseId} is not ready: some jobs are incomplete`);
-			throw new Error(`Cannot enable release ${releaseId} because not all jobs are completed.`);
+			return err(new ReleaseNotReady(releaseId));
 		}
 
 		logger.debug(`Release ${releaseId} is ready for activation`);
+		return ok(undefined);
 	}
 }

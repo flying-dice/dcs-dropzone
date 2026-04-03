@@ -36,6 +36,21 @@ export class TestReleaseRepository implements ReleaseRepository {
 		return releaseInfos;
 	}
 
+	getById(releaseId: string): ReleaseInfo | undefined {
+		const releaseData = this.releases.get(releaseId);
+		if (!releaseData) return undefined;
+
+		return {
+			releaseId: releaseData.releaseId,
+			modId: releaseData.modId,
+			modName: releaseData.modName,
+			version: releaseData.version,
+			versionHash: releaseData.versionHash,
+			dependencies: releaseData.dependencies,
+			enabled: this.enabledReleases.get(releaseData.releaseId) ?? false,
+		};
+	}
+
 	getReleaseAssetsForRelease(releaseId: string): ReleaseAsset[] {
 		const releaseAssets: ReleaseAsset[] = [];
 

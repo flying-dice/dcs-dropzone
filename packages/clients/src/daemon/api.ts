@@ -238,6 +238,18 @@ export type GetDaemonHealth503 = {
 	error: string;
 };
 
+export type DisableRelease422Reason = (typeof DisableRelease422Reason)[keyof typeof DisableRelease422Reason];
+
+export const DisableRelease422Reason = {
+	DcsPathNotConfigured: "DcsPathNotConfigured",
+} as const;
+
+export type DisableRelease422 = {
+	code?: 422;
+	message?: string;
+	reason: DisableRelease422Reason;
+};
+
 type AwaitedInput<T> = PromiseLike<T> | T;
 
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
@@ -1218,7 +1230,7 @@ export type disableReleaseResponse200 = {
 };
 
 export type disableReleaseResponse422 = {
-	data: ErrorData;
+	data: DisableRelease422;
 	status: 422;
 };
 
@@ -1247,7 +1259,7 @@ export const disableRelease = async (releaseId: string, options?: RequestInit): 
 	});
 };
 
-export const getDisableReleaseMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
+export const getDisableReleaseMutationOptions = <TError = DisableRelease422 | ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
 	request?: SecondParameter<typeof fetch>;
 }): UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext> => {
@@ -1269,12 +1281,12 @@ export const getDisableReleaseMutationOptions = <TError = ErrorData, TContext = 
 
 export type DisableReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof disableRelease>>>;
 
-export type DisableReleaseMutationError = ErrorData;
+export type DisableReleaseMutationError = DisableRelease422 | ErrorData;
 
 /**
  * @summary Disable a release by removing its symbolic links
  */
-export const useDisableRelease = <TError = ErrorData, TContext = unknown>(
+export const useDisableRelease = <TError = DisableRelease422 | ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
 		request?: SecondParameter<typeof fetch>;
