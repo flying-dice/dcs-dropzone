@@ -10,7 +10,9 @@ import type { DownloadJobData, DownloadJobResult } from "../application/ports/Do
 import type { ExtractJobData, ExtractJobResult } from "../application/ports/ExtractProcessor.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
+import { SymlinkCreationFailed } from "../application/services/ReleaseToggle.ts";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
+import { TestApplication } from "./TestApplication.ts";
 import { TestCases } from "./TestCases.ts";
 import { TestDelayProcessor } from "./TestDelayProcessor.ts";
 import { TestFileSystem } from "./TestFileSystem.ts";
@@ -367,5 +369,75 @@ describe("Unconfigured paths", () => {
 			const allReleasesAfter = app.deps.releaseRepository.getAllReleases();
 			expect(allReleasesAfter.length).toEqual(0);
 		});
+	});
+});
+
+describe("Symlink creation failure", () => {
+	let app: TestApplication;
+	let modAndReleaseData: ModAndReleaseData;
+
+	beforeEach(() => {
+		app = new TestApplication();
+		modAndReleaseData = {
+			releaseId: "test-release-id",
+			modId: "test-mod-id",
+			modName: "Test Mod",
+			dependencies: [],
+			version: "1.0.0",
+			versionHash: Date.now().toString(),
+			assets: [
+				{
+					id: "test-release-id__asset-1",
+					name: "Test Asset",
+					urls: [
+						{
+							id: "test-release-id__asset-1__url-1",
+							url: "https://example.com/sample.zip",
+						},
+					],
+					isArchive: true,
+				},
+			],
+			symbolicLinks: [
+				{
+					id: "symbolic-link-1",
+					name: "Test Script",
+					src: "sample/test.lua",
+					dest: "Scripts/test.lua",
+					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+				},
+			],
+			missionScripts: [],
+		};
+	});
+
+	it("should return SymlinkCreationFailed error when symlink creation fails (e.g. UAC denied)", async () => {
+		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+
+		// Simulate symlink creation failure (e.g. UAC elevation denied)
+		const fileSystem = app.deps.fileSystem as TestFileSystem;
+		fileSystem.symlinkError = new Error("UAC elevation denied");
+
+		const result = await app.enableRelease(modAndReleaseData.releaseId);
+
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(SymlinkCreationFailed);
+		expect(result._unsafeUnwrapErr().type).toBe("SymlinkCreationFailed");
+	});
+
+	it("should not mark release as enabled when symlink creation fails", async () => {
+		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+
+		// Simulate symlink creation failure
+		const fileSystem = app.deps.fileSystem as TestFileSystem;
+		fileSystem.symlinkError = new Error("UAC elevation denied");
+
+		await app.enableRelease(modAndReleaseData.releaseId);
+
+		const releases = app.getAllReleasesWithStatus();
+		expect(releases.length).toEqual(1);
+		expect(releases[0]?.status).not.toBe(DownloadedReleaseStatus.ENABLED);
 	});
 });

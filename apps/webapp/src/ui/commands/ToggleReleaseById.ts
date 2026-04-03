@@ -1,6 +1,6 @@
 import { disableRelease, enableRelease, getAllDaemonReleases, ModAndReleaseDataStatus } from "@packages/clients/daemon";
 import { StatusCodes } from "http-status-codes";
-import { type Err, err, type Ok, ok, type Result } from "neverthrow";
+import { err, ok, type Result } from "neverthrow";
 import {
 	FailedToFindDaemonReleaseError,
 	FailedToGetDaemonReleasesError,
@@ -32,12 +32,18 @@ export default async function (command: ToggleReleaseByIdCommand): Promise<Toggl
 	}
 
 	if (subscription.status === ModAndReleaseDataStatus.ENABLED) {
-		return await disableRelease(releaseId)
-			.then((): Ok<"Disabled", never> => ok("Disabled"))
-			.catch((e): Err<never, ToggleReleaseError> => err(new ToggleReleaseError(String(e.message))));
+		const disableResponse = await disableRelease(releaseId);
+		if (disableResponse.status !== StatusCodes.OK) {
+			const data = disableResponse.data as { error?: string };
+			return err(new ToggleReleaseError(data?.error ?? "Failed to disable release"));
+		}
+		return ok("Disabled");
 	}
 
-	return await enableRelease(releaseId)
-		.then((): Ok<"Enabled", never> => ok("Enabled"))
-		.catch((e): Err<never, ToggleReleaseError> => err(new ToggleReleaseError(String(e.message))));
+	const enableResponse = await enableRelease(releaseId);
+	if (enableResponse.status !== StatusCodes.OK) {
+		const data = enableResponse.data as { error?: string };
+		return err(new ToggleReleaseError(data?.error ?? "Failed to enable release"));
+	}
+	return ok("Enabled");
 }
