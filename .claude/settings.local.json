@@ -29,7 +29,9 @@
       "Bash(ls \"C:\\\\Users\\\\jonat\\\\Projects\\\\dcs-dropzone\\\\apps\\\\webapp\"\" | grep -E \"bun-env)",
       "Bash(.env \")",
       "Bash(bun test:*)",
-      "Bash(bunx orval:*)"
+      "Bash(bunx orval:*)",
+      "WebFetch(domain:www.digitalcombatsimulator.com)",
+      "Read(//c/Users/jonat/.claude/**)"
     ]
   },
   "agent": "archgate:developer"
