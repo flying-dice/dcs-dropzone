@@ -20,7 +20,7 @@ Additionally, the webapp consumer at `apps/webapp/src/ui/commands/ToggleReleaseB
 ### 1. Define per-error Zod schemas in `application/schemas/`
 **File:** `apps/daemon/src/application/schemas/ToggleErrors.ts` (new)
 
-Each error type gets its own Zod object schema with `reason` as the discriminant. The error side of the Go-style tuple returns the matching zod-inferred type.
+Each error type gets its own Zod object schema with `reason` as the discriminant. The error side of the Go-style tuple is the Zod-inferred type — plain data, not an Error class.
 
 ```typescript
 import { z } from "zod";
@@ -84,60 +84,51 @@ export const ToggleReleaseError = z.discriminatedUnion("reason", [
 
 Each endpoint gets its own discriminated union containing only the errors it can produce. The client receives a response body whose shape varies by `reason`, allowing type-safe narrowing and localisation mapping.
 
-### 2. Replace `UnprocessableEntityData` usage in Hono handlers
+### 2. Refactor application layer to return structured error data
+**Files:** `apps/daemon/src/application/services/ReleaseToggle.ts`, `apps/daemon/src/application/services/PathResolver.ts`
+
+The error side of the Go-style tuple changes from Error class instances to plain data objects matching the Zod schema types (i.e. `z.infer<typeof EnableReleaseError>` etc.).
+
+For example, where `PathResolver` currently returns:
+```typescript
+return [undefined, new DropzoneModsDirNotConfigured()];
+```
+It becomes:
+```typescript
+return [undefined, { reason: "DropzoneModsDirNotConfigured" as const }];
+```
+
+And where `ReleaseToggle.enable()` encounters a `SymlinkCreationFailed` from the linker, it logs the raw error details (file paths, link IDs) server-side, then returns:
+```typescript
+return [undefined, { reason: "SymlinkCreationFailed" as const, errorCode: linkerErr.code }];
+```
+
+For partial disable failures:
+```typescript
+return [undefined, { reason: "PartialDisableFailure" as const, removedCount: removedIds.length, failedCount: linkerErr.failed.length }];
+```
+
+The `ReleaseToggleError` type becomes `z.infer<typeof ToggleReleaseError>` (or the specific endpoint union type). The internal Error classes (`ReleaseNotFound`, `ReleaseNotReady`, etc.) can be removed or kept only for logging purposes — they no longer cross the API boundary.
+
+### 3. Simplify Hono route handlers — just pass through
 **File:** `apps/daemon/src/hono/HonoApplication.ts`
 
-Replace the current pattern:
-```typescript
-const _UnprocessableEntityData = UnprocessableEntityData([...]);
-// ...
-return c.json(zParse({ reason: enableErr.type }, _UnprocessableEntityData), 422);
-```
+The handler becomes trivially simple — no mapping, no helper function. The application already returns the exact data shape the API needs:
 
-With:
 ```typescript
-import { EnableReleaseError, DisableReleaseError, ToggleReleaseError } from "../application/schemas/ToggleErrors.ts";
-// ...
-return c.json(zParse(toErrorPayload(enableErr), EnableReleaseError), 422);
-```
-
-Add a helper that maps the internal error class to the structured payload:
-```typescript
-function toErrorPayload(err: ReleaseToggleError) {
-  switch (err.type) {
-    case "SymlinkCreationFailed":
-      return { reason: err.type, errorCode: err.code };
-    case "PartialDisableFailure":
-      return { reason: err.type, removedCount: err.removedCount, failedCount: err.failedCount };
-    default:
-      return { reason: err.type };
-  }
+const [, enableErr] = await c.var.app.enableRelease(releaseId);
+if (enableErr) {
+  logger.error("Failed to enable release %s: %s", releaseId, enableErr.reason);
+  return c.json(enableErr, StatusCodes.UNPROCESSABLE_ENTITY);
 }
 ```
 
-Update the `describeRoute` OpenAPI response schemas to reference the new discriminated union schemas instead of `UnprocessableEntityData`.
-
-### 3. Add `PartialDisableFailure` error class
-**File:** `apps/daemon/src/application/services/ReleaseToggle.ts`
-
-```typescript
-export class PartialDisableFailure extends Error {
-  readonly type = "PartialDisableFailure" as const;
-  constructor(
-    readonly removedCount: number,
-    readonly failedCount: number,
-  ) {
-    super(`${failedCount} symlink(s) could not be removed, ${removedCount} removed successfully`);
-  }
-}
-```
-
-Update `disable()` to return `PartialDisableFailure` when `linkerErr` exists (the mod is still marked disabled — current behaviour preserved). Update `ReleaseToggleError` union to include `PartialDisableFailure`.
+Update `describeRoute` OpenAPI response schemas to reference the discriminated union schemas.
 
 ### 4. Update `Application.ts` return types
 **File:** `apps/daemon/src/application/Application.ts`
 
-Update `disableRelease()` return type to include `PartialDisableFailure`.
+Update `enableRelease()`, `disableRelease()`, and `toggleRelease()` return types to use the Zod-inferred error types from the schemas.
 
 ### 5. Fix webapp consumer
 **File:** `apps/webapp/src/ui/commands/ToggleReleaseById.ts`
