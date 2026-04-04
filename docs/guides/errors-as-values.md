@@ -1,6 +1,6 @@
 # Errors as Values
 
-This guide explains how to handle known, expected errors in this codebase using the "Errors as Values" pattern with Go-style tuples, as defined in [GEN-005](/archgate/adrs/GEN-005-errors-as-values-go-style-tuples).
+This guide explains how to handle known, expected errors in this codebase using the "Errors as Values" pattern with Go-style tuples, as defined in [GEN-005](https://github.com/flying-dice/dcs-dropzone/blob/main/.archgate/adrs/GEN-005-errors-as-values-go-style-tuples.md).
 
 ## The Pattern
 

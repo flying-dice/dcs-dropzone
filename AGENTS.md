@@ -227,6 +227,7 @@ Before committing changes, ALWAYS:
 4. Run `bun run tsc` in affected workspaces to check types
 5. Verify no unintended files are staged (check `.gitignore`)
 6. Ensure changes work on Windows (CI target platform)
+7. **If you modified any files under `docs/`**, run `bun x vitepress build docs` to verify there are no dead links or build errors before committing
 
 ## Additional Notes
 
