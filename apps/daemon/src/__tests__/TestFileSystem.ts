@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { err, ok } from "neverthrow";
+import { ok } from "neverthrow";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
 
 export class TestFileSystem implements FileSystem {
@@ -7,18 +7,8 @@ export class TestFileSystem implements FileSystem {
 	private readonly dirs = new Set<string>();
 	private readonly symlinks = new Map<string, string>();
 
-	symlinkError: Error | null = null;
-
 	ensureDir(path: string): void {
 		this.dirs.add(path);
-	}
-
-	async ensureSymlink(src: string, dest: string) {
-		if (this.symlinkError) {
-			return err(this.symlinkError);
-		}
-		this.symlinks.set(dest, src);
-		return ok(undefined);
 	}
 
 	removeDir(path: string): void {

@@ -222,6 +222,17 @@
         "zod": ">=4",
       },
     },
+    "packages/linker": {
+      "name": "@packages/linker",
+      "dependencies": {
+        "@packages/zod": "workspace:*",
+      },
+      "peerDependencies": {
+        "log4js": ">=6",
+        "neverthrow": ">=8",
+        "zod": ">=4",
+      },
+    },
     "packages/manifest": {
       "name": "@packages/manifest",
       "peerDependencies": {
@@ -571,6 +582,8 @@
     "@packages/dzui": ["@packages/dzui@workspace:packages/dzui"],
 
     "@packages/hono": ["@packages/hono@workspace:packages/hono"],
+
+    "@packages/linker": ["@packages/linker@workspace:packages/linker"],
 
     "@packages/manifest": ["@packages/manifest@workspace:packages/manifest"],
 
