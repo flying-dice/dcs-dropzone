@@ -140,9 +140,11 @@ export async function mklink(options: Options): Promise<[ExitCodes, null] | [und
 	try {
 		symlinkSync(target, link, "file");
 		return [ExitCodes.LinkCreated, null];
-	} catch (e: any) {
-		console.error(e.message);
-		if (e?.code === "EPERM") {
+	} catch (e: unknown) {
+		const message = e instanceof Error ? e.message : String(e);
+		const code = e instanceof Error && "code" in e ? (e as { code: string }).code : undefined;
+		console.error(message);
+		if (code === "EPERM") {
 			console.info("Creating symbolic link with elevated permissions");
 			const [, elevatedErr] = await createSymlinkElevated(link, target);
 			if (elevatedErr) {

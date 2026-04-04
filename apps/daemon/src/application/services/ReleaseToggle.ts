@@ -98,7 +98,7 @@ export class ReleaseToggle {
 			.map((link) => ({ id: link.id, installedPath: link.installedPath! }));
 
 		const [removedOk, linkerErr] = this.deps.linker.disable(installedLinks);
-		const removedIds = removedOk ?? linkerErr!.removed;
+		const removedIds = removedOk ?? linkerErr?.removed ?? [];
 
 		if (linkerErr) {
 			for (const failure of linkerErr.failed) {
