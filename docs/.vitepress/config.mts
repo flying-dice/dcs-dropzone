@@ -60,7 +60,7 @@ export default defineConfig({
       {
         text: 'Launcher Spec',
         items: [
-          { text: 'Check for updates', link: '/launcher/spec/check-for-updates' },
+          { text: 'Check for Updates', link: '/launcher/spec/check-for-updates' },
         ]
       },
       {
