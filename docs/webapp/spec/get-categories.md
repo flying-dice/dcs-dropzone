@@ -1,4 +1,4 @@
-# Get categories
+# Get Categories
 
 **Stable**
 

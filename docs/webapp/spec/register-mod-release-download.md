@@ -1,4 +1,4 @@
-# Register mod release download
+# Register Mod Release Download
 
 **Stable**
 

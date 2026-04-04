@@ -1,4 +1,4 @@
-# Get update information
+# Get Update Information
 
 **Experimental**
 

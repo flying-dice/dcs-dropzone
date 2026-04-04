@@ -1,4 +1,4 @@
-# Get all releases
+# Get All Releases
 
 **Stable**
 

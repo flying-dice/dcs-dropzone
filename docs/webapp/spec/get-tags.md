@@ -1,4 +1,4 @@
-# Get tags
+# Get Tags
 
 **Stable**
 

@@ -1,4 +1,4 @@
-# Update mod
+# Update Mod
 
 **Stable**
 

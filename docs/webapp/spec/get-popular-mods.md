@@ -1,4 +1,4 @@
-# Get popular mods
+# Get Popular Mods
 
 **Stable**
 

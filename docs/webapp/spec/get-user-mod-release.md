@@ -1,4 +1,4 @@
-# Get user mod release
+# Get User Mod Release
 
 **Stable**
 

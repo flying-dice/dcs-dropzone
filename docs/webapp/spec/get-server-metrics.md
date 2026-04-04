@@ -1,4 +1,4 @@
-# Get server metrics
+# Get Server Metrics
 
 **Stable**
 

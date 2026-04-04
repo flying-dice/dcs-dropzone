@@ -1,4 +1,4 @@
-# Validate settings
+# Validate Settings
 
 **Stable**
 

@@ -1,4 +1,4 @@
-# Get featured mods
+# Get Featured Mods
 
 **Stable**
 

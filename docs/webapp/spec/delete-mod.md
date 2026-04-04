@@ -1,4 +1,4 @@
-# Delete mod
+# Delete Mod
 
 **Stable**
 

@@ -1,4 +1,4 @@
-# Get config
+# Get Config
 
 **Stable**
 

@@ -76,13 +76,12 @@ The effects depend on the direction of the toggle.
 
 ```mermaid
 flowchart TD
-    Start([toggleRelease releaseId]) --> Exists{Release exists?}
+    Start([toggleRelease releaseId]) --> Lookup[Look up release by ID]
 
-    Exists -- No --> ErrNotFound([Reject: ReleaseNotFound])
-    Exists -- Yes --> State{Release currently<br/>enabled?}
+    Lookup --> State{release.enabled<br/>is true?}
 
-    State -- Yes --> Disable[Delegate to disable]
-    State -- No --> Enable[Delegate to enable]
+    State -- Yes --> Disable[Delegate to disable releaseId]
+    State -- "No (disabled or not found)" --> Enable[Delegate to enable releaseId]
 
     Disable --> DisableOk{Disable succeeded?}
     DisableOk -- Yes --> Done([Release reaches DISABLED state])
@@ -92,12 +91,13 @@ flowchart TD
     EnableOk -- Yes --> Done2([Release reaches ENABLED state])
     EnableOk -- No --> EnableErr([Reject: ReleaseToggleError])
 
-    style ErrNotFound fill:#f87171,color:#fff
     style DisableErr fill:#f87171,color:#fff
     style EnableErr fill:#f87171,color:#fff
     style Done fill:#4ade80,color:#000
     style Done2 fill:#4ade80,color:#000
 ```
+
+> **Note:** The toggle operation does not perform its own existence check. If the release does not exist, `enabled` is falsy, so the enable path is taken. The enable delegate then returns `ReleaseNotFound`.
 
 ## See Also
 

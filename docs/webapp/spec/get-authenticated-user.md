@@ -1,4 +1,4 @@
-# Get authenticated user
+# Get Authenticated User
 
 **Stable**
 

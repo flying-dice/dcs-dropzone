@@ -1,4 +1,4 @@
-# Browse mods
+# Browse Mods
 
 **Stable**
 

@@ -1,4 +1,4 @@
-# Delete release
+# Delete Release
 
 **Stable**
 

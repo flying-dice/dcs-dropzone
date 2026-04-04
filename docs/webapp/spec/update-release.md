@@ -1,4 +1,4 @@
-# Update release
+# Update Release
 
 **Stable**
 

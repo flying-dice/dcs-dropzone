@@ -1,4 +1,4 @@
-# Get settings suggestions
+# Get Settings Suggestions
 
 **Stable**
 

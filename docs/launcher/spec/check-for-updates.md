@@ -1,4 +1,4 @@
-# Check for updates
+# Check for Updates
 
 **Stable**
 

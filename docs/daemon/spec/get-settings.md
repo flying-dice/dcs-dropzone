@@ -1,4 +1,4 @@
-# Get settings
+# Get Settings
 
 **Stable**
 

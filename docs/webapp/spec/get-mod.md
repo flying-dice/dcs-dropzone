@@ -1,4 +1,4 @@
-# Get mod
+# Get Mod
 
 **Stable**
 

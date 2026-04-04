@@ -1,4 +1,4 @@
-# Update settings
+# Update Settings
 
 **Stable**
 

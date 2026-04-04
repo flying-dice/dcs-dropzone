@@ -1,4 +1,4 @@
-# Get user mods
+# Get User Mods
 
 **Stable**
 

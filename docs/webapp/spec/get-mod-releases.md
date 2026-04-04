@@ -1,4 +1,4 @@
-# Get mod releases
+# Get Mod Releases
 
 **Stable**
 

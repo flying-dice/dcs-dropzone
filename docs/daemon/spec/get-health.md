@@ -1,4 +1,4 @@
-# Get health
+# Get Health
 
 **Stable**
 
