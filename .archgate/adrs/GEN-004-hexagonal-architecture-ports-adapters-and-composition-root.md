@@ -11,7 +11,7 @@ As applications grow, domain logic becomes entangled with infrastructure — dat
 
 This ADR establishes hexagonal architecture (ports and adapters) as the structural pattern for this codebase. It defines where domain logic lives, how it interacts with the outside world, and how the system is wired together.
 
-This ADR complements GEN-002 (function design) and GEN-003 (error handling). GEN-002 governs function-level design — scope, purity, direction. This ADR governs module-level structure — what depends on what and where wiring happens.
+This ADR complements GEN-002 (function design) and GEN-005 (error handling). GEN-002 governs function-level design — scope, purity, direction. This ADR governs module-level structure — what depends on what and where wiring happens.
 
 ![example.svg](https://www.plantuml.com/plantuml/svg/hLJ1Rjmw3BpxAtXCy11_W14i4hmMw2L0KRIdeWT6udg5ofGgqSakslnx9Ije5Sif5aLzY2DoE4Dnbhw9Wa7coNPYn1AyeoEEZj72RL078wHa3WHlZpXvIrtdKNt5aU3MU_ZUGNgKnHZpsHg5OXp_xrZeA4kwFF_172by8E-Y4HTE0tnwSLw0JzqsNSLp1TZ831lIA-5Oz68ZKy9mVPrU3uOKxNQrsZbT5nNKEkSkBci9mq9XZufMTKdFko2rLgA8-40NMR38N9RNTikvOmcpMdCOFK1A61wh8ED4TJZHFVtsyGuDlp3opl7ecePHenSAg_de-pHm9fL7Fy2RwlGN5tiVd6viFzk8SYjsGc1fB-3shn3UCX1BE7bdMC2mfcCl4Lo02GtdVnVOtbY2HpTR3VVEIPI07kH0zIzm0TwVG0LAPnvpVciH7eqS2kipGN0-61I2vx56GDRWCSRCOWJ45VoAiA-T-qXHQkUMm7d6rLln-SkvNgsa_ebNmOo7nQoMiJLB4gOs9aFAyEcFeq-vWcqdz6lmPUePMeIhLlOkBDBP6p-7L4fnSQ86NLtjjlG72FHjDe5YWoxVdW5KWgBXs9L0Jgrw742J9zOH77ThXt_q_TQz1Z3vWpqHIzoiQVUyBQhQIRa96KUAWA2SjMNFatLTj_QkxtUljCHHaCMWKEpMwvcgsgQQiaQjtAOE34178TP5uapeJVexJ_Od)
 
@@ -134,7 +134,7 @@ Adapters must:
 
 - Implement exactly one port.
 - Contain no business logic or policy decisions — only translation and delegation to the underlying technology.
-- Translate infrastructure errors into domain errors (see GEN-003).
+- Translate infrastructure errors into domain errors (see GEN-005).
 - Be replaceable — swapping an adapter must not require changes to any domain code.
 
 ```ts
@@ -292,5 +292,5 @@ const testApp = createApplicationContext({
 - Alistair Cockburn, [Hexagonal Architecture (Ports and Adapters)](https://alistair.cockburn.us/hexagonal-architecture/)
 - Gary Bernhardt, ["Boundaries" (SCNA 2012)](https://www.destroyallsoftware.com/talks/boundaries) — Functional Core, Imperative Shell
 - GEN-002 — Function Design: Single Responsibility and Orchestration Layers
-- GEN-003 — Error Handling: Checked vs Unchecked Errors
+- GEN-005 — Errors as Values Using Go-Style Tuples
 - [Archgate CLI](https://github.com/archgate/cli)

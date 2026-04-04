@@ -29,6 +29,7 @@ export default defineConfig({
           { text: 'How the Daemon works', link: '/guides/how-the-daemon-works' },
           { text: 'How the Webapp works', link: '/guides/how-the-webapp-works' },
           { text: 'How the Launcher works', link: '/guides/how-the-launcher-works' },
+          { text: 'Errors as Values', link: '/guides/errors-as-values' },
           { text: 'Local development', link: '/local-development' },
         ]
       },
