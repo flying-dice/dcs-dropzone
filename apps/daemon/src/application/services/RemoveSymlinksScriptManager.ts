@@ -4,7 +4,7 @@ import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../
 import { generateRemoveSymlinksScript } from "../functions/generateRemoveSymlinksScript.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
-import { DcsPathNotConfigured, type PathResolver } from "./PathResolver.ts";
+import type { DcsPathError, PathResolver } from "./PathResolver.ts";
 
 const logger = getLogger("RemoveSymlinksScriptManager");
 
@@ -18,22 +18,22 @@ export class RemoveSymlinksScriptManager {
 		},
 	) {}
 
-	filePath(): [string, null] | [undefined, DcsPathNotConfigured] {
+	filePath(): [string, null] | [undefined, DcsPathError] {
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 
 		if (!dropzoneModsFolder) {
-			return [undefined, new DcsPathNotConfigured()];
+			return [undefined, { reason: "DcsPathNotConfigured" as const }];
 		}
 
 		return [this.deps.fileSystem.resolve(dropzoneModsFolder, "removeSymlinks.bat"), null];
 	}
 
-	rebuild(): [void, null] | [undefined, DcsPathNotConfigured] {
+	rebuild(): [void, null] | [undefined, DcsPathError] {
 		logger.info("Regenerating removeSymlinks.bat");
 
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 		if (!dropzoneModsFolder) {
-			return [undefined, new DcsPathNotConfigured()];
+			return [undefined, { reason: "DcsPathNotConfigured" as const }];
 		}
 
 		const folderExists = this.deps.fileSystem.exists(dropzoneModsFolder);

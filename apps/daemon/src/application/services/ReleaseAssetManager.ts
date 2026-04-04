@@ -9,7 +9,7 @@ import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import { ModReleaseAssetStatusData } from "../schemas/ModAndReleaseData.ts";
 import type { ReleaseAsset } from "../schemas/ReleaseAsset.ts";
-import type { DropzoneModsDirNotConfigured, PathResolver } from "./PathResolver.ts";
+import type { DropzoneModsDirError, PathResolver } from "./PathResolver.ts";
 
 const logger = getLogger("ReleaseAssetCoordinator");
 
@@ -77,7 +77,7 @@ export class ReleaseAssetManager {
 		return assetStatusData;
 	}
 
-	addRelease(releaseId: string): [void, null] | [undefined, DropzoneModsDirNotConfigured] {
+	addRelease(releaseId: string): [void, null] | [undefined, DropzoneModsDirError] {
 		const [releaseFolder, releaseFolderErr] = this.deps.pathResolver.resolveReleasePath(releaseId);
 		if (releaseFolderErr) return [undefined, releaseFolderErr] as const;
 
@@ -115,7 +115,7 @@ export class ReleaseAssetManager {
 			this.deps.fileSystem.removeDir(releaseFolder);
 		} else {
 			logger.warn(
-				`Could not resolve release path for ${releaseId} during removal, skipping folder cleanup: ${releaseFolderErr!.type}`,
+				`Could not resolve release path for ${releaseId} during removal, skipping folder cleanup: ${releaseFolderErr!.reason}`,
 			);
 		}
 
@@ -128,6 +128,22 @@ export class ReleaseAssetManager {
 			.flatMap((it) => this.queue.getAllByJobId(it));
 
 		return !allJobs.some((it) => [JobState.Pending, JobState.Running].includes(it.state));
+	}
+
+	getReleaseReadiness(releaseId: string): { ready: true } | { ready: false; pendingCount: number; failedCount: number } {
+		const allJobs = this.deps.releaseRepository
+			.getJobIdsForRelease(releaseId)
+			.flatMap((it) => this.queue.getAllByJobId(it));
+
+		const pendingCount = allJobs.filter((it) =>
+			[JobState.Pending, JobState.Waiting, JobState.Running].includes(it.state),
+		).length;
+		const failedCount = allJobs.filter((it) => it.state === JobState.Failed).length;
+
+		if (pendingCount > 0 || failedCount > 0) {
+			return { ready: false, pendingCount, failedCount };
+		}
+		return { ready: true };
 	}
 
 	private getAllJobsForReleaseId(

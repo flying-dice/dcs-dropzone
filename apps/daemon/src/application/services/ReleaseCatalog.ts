@@ -5,7 +5,7 @@ import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import type { DropzoneModsDirNotConfigured, PathResolver } from "./PathResolver.ts";
+import type { DropzoneModsDirError, PathResolver } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 
 const logger = getLogger("ReleaseCatalog");
@@ -20,7 +20,7 @@ type Deps = {
 export class ReleaseCatalog {
 	constructor(protected deps: Deps) {}
 
-	add(data: ModAndReleaseData): [void, null] | [undefined, DropzoneModsDirNotConfigured] {
+	add(data: ModAndReleaseData): [void, null] | [undefined, DropzoneModsDirError] {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
 		// Verify dropzone mods directory is configured before persisting to prevent orphaned records

@@ -4,7 +4,7 @@ import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../
 import { generateDropzoneMissionScriptingScript } from "../functions/generateDropzoneMissionScriptingScript.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
-import type { DcsPathNotConfigured, PathResolver } from "./PathResolver.ts";
+import type { DcsPathError, PathResolver } from "./PathResolver.ts";
 
 const logger = getLogger("MissionScriptingFilesManager");
 
@@ -22,7 +22,7 @@ export class MissionScriptingFilesManager {
 		},
 	) {}
 
-	rebuild(): [void, null] | [undefined, DcsPathNotConfigured] {
+	rebuild(): [void, null] | [undefined, DcsPathError] {
 		logger.info("Regenerating Dropzone Mission Scripting Files");
 
 		const [beforeAbsPath, beforeAbsPathErr] = this.deps.pathResolver.resolveSymbolicLinkPath(
@@ -100,7 +100,7 @@ export class MissionScriptingFilesManager {
 			path: string;
 			pathRoot: SymbolicLinkDestRoot;
 		}[],
-	): [{ id: string; path: string }[], null] | [undefined, DcsPathNotConfigured] {
+	): [{ id: string; path: string }[], null] | [undefined, DcsPathError] {
 		const results: { id: string; path: string }[] = [];
 		for (const it of scripts) {
 			const [resolvedPath, pathErr] = this.deps.pathResolver.resolveSymbolicLinkPath(it.pathRoot, it.path);

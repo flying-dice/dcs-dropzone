@@ -8,8 +8,6 @@ import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import type { Application } from "../application/Application.ts";
 import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
-import { DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
-import { ReleaseNotFound, ReleaseNotReady, SymlinkCreationFailed } from "../application/services/ReleaseToggle.ts";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
 import { ProdApplication } from "../ProdApplication.ts";
 import { TestCases } from "./TestCases.ts";
@@ -387,10 +385,12 @@ describe("Unconfigured paths", () => {
 	});
 
 	describe("addRelease without dropzone mods dir configured", () => {
-		it("should return a DropzoneModsDirNotConfigured error", () => {
+		it("should return a DropzoneModsDirInvalid error when default path does not exist", () => {
 			const [, err] = app.addRelease(modAndReleaseData);
 
-			expect(err).toBeInstanceOf(DropzoneModsDirNotConfigured);
+			expect(err).toEqual(
+				expect.objectContaining({ reason: "DropzoneModsDirInvalid", errorCode: "PATH_NOT_FOUND" }),
+			);
 		});
 
 		it("should not persist an orphaned release record", () => {
@@ -460,8 +460,10 @@ describe("Symlink creation failure", () => {
 		// No assets → immediately ready. The Linker fails because the source path does not exist on disk.
 		const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
 
-		expect(enableErr).toBeInstanceOf(SymlinkCreationFailed);
-		expect(enableErr!.type).toBe("SymlinkCreationFailed");
+		expect(enableErr).toEqual(expect.objectContaining({ reason: "SymlinkCreationFailed" }));
+		expect(enableErr!.reason).toBe("SymlinkCreationFailed");
+		expect(enableErr!).toHaveProperty("errorCode");
+		expect(enableErr!).toHaveProperty("systemError");
 	});
 
 	it("should not mark release as enabled when symlink creation fails", async () => {
@@ -505,15 +507,13 @@ describe("ReleaseNotFound", () => {
 	it("should return ReleaseNotFound when enabling a release that does not exist", async () => {
 		const [, enableErr] = await app.enableRelease("non-existent-release-id");
 
-		expect(enableErr).toBeInstanceOf(ReleaseNotFound);
-		expect(enableErr!.type).toBe("ReleaseNotFound");
+		expect(enableErr).toEqual({ reason: "ReleaseNotFound" });
 	});
 
 	it("should return ReleaseNotFound when disabling a release that does not exist", () => {
 		const [, disableErr] = app.disableRelease("non-existent-release-id");
 
-		expect(disableErr).toBeInstanceOf(ReleaseNotFound);
-		expect(disableErr!.type).toBe("ReleaseNotFound");
+		expect(disableErr).toEqual({ reason: "ReleaseNotFound" });
 	});
 });
 
@@ -557,8 +557,9 @@ describe("ReleaseNotReady", () => {
 		// Do not wait for jobs — attempt to enable immediately
 		const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
 
-		expect(enableErr).toBeInstanceOf(ReleaseNotReady);
-		expect(enableErr!.type).toBe("ReleaseNotReady");
+		expect(enableErr).toEqual(
+			expect.objectContaining({ reason: "ReleaseNotReady", pendingCount: expect.any(Number), failedCount: expect.any(Number) }),
+		);
 	});
 });
 
@@ -591,7 +592,7 @@ describe("toggleRelease", () => {
 	it("should return ReleaseNotFound when toggling a release that does not exist", async () => {
 		const [, toggleErr] = await app.toggleRelease("non-existent-release-id");
 
-		expect(toggleErr).toBeInstanceOf(ReleaseNotFound);
+		expect(toggleErr).toEqual({ reason: "ReleaseNotFound" });
 	});
 
 	it("should enable a disabled release", async () => {
