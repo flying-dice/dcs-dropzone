@@ -156,7 +156,7 @@ The goal is **not** to avoid all `try/catch` — it is to codify known errors. I
 
 ### Risks
 
-- **Migration Period:** Existing code using `neverthrow` will coexist with the new tuple pattern during the transition. Both patterns are valid during migration, but all new code must use tuples.
+- **Migration Complete:** All `neverthrow` usage has been removed from the codebase. The `neverthrow` dependency is no longer present.
 
 ## Supersedes
 
@@ -165,7 +165,7 @@ This ADR supersedes:
 - **BE-001** — Standardized Error Handling with Neverthrow
 - **GEN-003** — Error Handling: Checked vs Unchecked Errors
 
-The `neverthrow` library is no longer required for new code. Existing `neverthrow` usage may remain during the migration period but should be converted to the tuple pattern when files are modified.
+The `neverthrow` library has been fully removed from the codebase. All error handling now uses the tuple pattern described above.
 
 ## Compliance and Enforcement
 

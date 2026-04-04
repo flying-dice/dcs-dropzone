@@ -127,5 +127,5 @@ try {
 
 ### Fix 3 (Optional) — `FileSystem` port — Return Result instead of throwing
 
-Change the `ensureSymlink` port signature to return `Promise<Result<void, Error>>` instead of `Promise<void>`, aligning with the project's neverthrow conventions and making error handling explicit at the type level.
+Change the `ensureSymlink` port signature to return `Promise<[void, null] | [undefined, Error]>` instead of `Promise<void>`, aligning with the project's Go-style tuple error handling conventions (GEN-005) and making error handling explicit at the type level.
 

@@ -10,7 +10,6 @@
 		"build": "bun scripts/build.ts"
 	},
 	"peerDependencies": {
-		"neverthrow": "^8.2.0",
 		"zod": ">=4"
 	}
 }

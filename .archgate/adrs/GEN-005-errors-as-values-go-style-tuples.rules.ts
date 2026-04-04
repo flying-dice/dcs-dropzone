@@ -1,6 +1,27 @@
 import { defineRules } from "archgate/rules";
 
 export default defineRules({
+	"no-neverthrow-imports": {
+		description: "neverthrow must not be imported — use Go-style tuples instead (GEN-005).",
+		severity: "error",
+		async check(ctx) {
+			const matches = await ctx.grepFiles(/from\s+["']neverthrow["']/, "{apps,packages}/*/src/**/*.ts");
+			const filtered = matches.filter((m) => {
+				if (m.file.includes(".test.") || m.file.includes("__tests__")) return false;
+				return true;
+			});
+
+			for (const match of filtered) {
+				ctx.report.violation({
+					message: `neverthrow import found. Use Go-style tuples [T, null] | [undefined, E] instead.`,
+					file: match.file,
+					line: match.line,
+					fix: "Replace neverthrow Result with Go-style tuples as described in GEN-005.",
+				});
+			}
+		},
+	},
+
 	"error-classes-extend-error": {
 		description: "All custom error classes must extend Error.",
 		severity: "error",
