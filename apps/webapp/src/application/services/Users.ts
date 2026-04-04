@@ -1,5 +1,4 @@
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import { UserNotFoundError } from "../errors.ts";
 import type { UserRepository } from "../ports/UserRepository.ts";
 import { UserData } from "../schemas/UserData.ts";
@@ -20,16 +19,16 @@ export class Users {
 		return UserData.parse(saved);
 	}
 
-	async getUserById(userId: string): Promise<Result<UserData, UserNotFoundError>> {
+	async getUserById(userId: string): Promise<[UserData, null] | [undefined, UserNotFoundError]> {
 		logger.debug("Fetching user by ID", { userId });
 		const user = await this.deps.userRepository.findById(userId);
 
 		if (!user) {
 			logger.info("User not found", { userId });
-			return err(new UserNotFoundError());
+			return [undefined, new UserNotFoundError()];
 		}
 
 		logger.debug("User fetched", { userId, username: user.username });
-		return ok(UserData.parse(user));
+		return [UserData.parse(user), null];
 	}
 }

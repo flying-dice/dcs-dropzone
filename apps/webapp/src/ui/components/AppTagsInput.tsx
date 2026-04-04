@@ -1,7 +1,6 @@
 import { Badge, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useAppTranslation } from "@packages/dzui";
 import { ze } from "@packages/zod/ze";
-import { err, ok, type Result } from "neverthrow";
 import type * as React from "react";
 import { useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
@@ -15,31 +14,31 @@ export function AppTagsInput(props: AppTagsInputProps) {
 	const { t } = useAppTranslation();
 	const [values, setValues] = useState<Set<string>>(new Set(props.value));
 
-	const validateInput = (value: string): Result<string, string> => {
+	const validateInput = (value: string): [string, null] | [undefined, string] => {
 		const parseRes = ze.tag().safeParse(value);
 		if (!parseRes.success) {
-			return err(
+			return [undefined,
 				z
 					.treeifyError(parseRes.error)
 					.errors.map((error) => t(error as any))
 					.join(", "),
-			);
+			];
 		}
 
 		if (values.has(value)) {
-			return err(t("DUPLICATE_TAG_ERROR"));
+			return [undefined, t("DUPLICATE_TAG_ERROR")];
 		}
 
-		return ok(value);
+		return [value, null];
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
-			const result = validateInput(e.currentTarget.value);
-			if (result.isOk()) {
+			const [value] = validateInput(e.currentTarget.value);
+			if (value !== undefined) {
 				const newValues = new Set(values);
-				newValues.add(result.value);
+				newValues.add(value);
 				setValues(newValues);
 				props.onChange(Array.from(newValues));
 				e.currentTarget.value = "";
@@ -69,9 +68,9 @@ export function AppTagsInput(props: AppTagsInputProps) {
 						return;
 					}
 
-					const result = validateInput(e.currentTarget.value);
-					if (result.isErr()) {
-						setError(result.error);
+					const [, validationError] = validateInput(e.currentTarget.value);
+					if (validationError !== undefined) {
+						setError(validationError);
 					} else {
 						setError(null);
 					}

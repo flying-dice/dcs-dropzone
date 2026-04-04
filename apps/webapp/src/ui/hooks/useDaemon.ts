@@ -74,15 +74,14 @@ export function useDaemon() {
 
 	const [toggling, toggle] = useAsyncFn(
 		async (releaseId: string) => {
-			const result = await toggleReleaseById({ releaseId });
-			result.match(
-				(ok) => {
-					if (ok === "Enabled") showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
-					else if (ok === "Disabled")
-						showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
-				},
-				(error) => showError(error.message),
-			);
+			const [status, error] = await toggleReleaseById({ releaseId });
+			if (error) {
+				showError(error.message);
+			} else {
+				if (status === "Enabled") showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
+				else if (status === "Disabled")
+					showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
+			}
 			await daemonReleases.refetch();
 		},
 		[t, daemonReleases],
