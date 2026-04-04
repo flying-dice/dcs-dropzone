@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { ok } from "node:assert";
 import { join } from "node:path";
 import { InMemoryJobRecordRepository, JobState } from "@packages/queue";
+import { err } from "neverthrow";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import { Application } from "../application/Application.ts";
 import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
@@ -478,7 +479,7 @@ describe("Symlink creation failure", () => {
 		fileSystem.ensureSymlink = async (src: string, dest: string) => {
 			callCount++;
 			if (callCount === 2) {
-				fileSystem.symlinkError = new Error("UAC elevation denied");
+				return err(new Error("UAC elevation denied"));
 			}
 			return originalEnsureSymlink(src, dest);
 		};

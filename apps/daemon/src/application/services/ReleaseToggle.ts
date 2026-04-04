@@ -25,13 +25,6 @@ export class SymlinkCreationFailed extends Error {
 	readonly type = "SymlinkCreationFailed" as const;
 }
 
-export class SymlinkRemovalFailed extends Error {
-	readonly type = "SymlinkRemovalFailed" as const;
-	constructor(linkId: string, cause: unknown) {
-		super(`Failed to remove symlink for linkId ${linkId}: ${cause}`);
-	}
-}
-
 export type ReleaseToggleError = PathResolverError | ReleaseNotFound | ReleaseNotReady | SymlinkCreationFailed;
 
 export type ResolvedSymbolicLink = {

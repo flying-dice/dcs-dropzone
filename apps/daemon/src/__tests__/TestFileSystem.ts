@@ -18,7 +18,7 @@ export class TestFileSystem implements FileSystem {
 			return err(this.symlinkError);
 		}
 		this.symlinks.set(dest, src);
-		return ok(undefined as void);
+		return ok(undefined);
 	}
 
 	removeDir(path: string): void {
