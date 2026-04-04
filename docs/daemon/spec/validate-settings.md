@@ -29,7 +29,7 @@ There are no inputs. The operation reads from the Daemon's stored settings.
 :   `true` only when all three paths resolve successfully and exist on disk. `false` otherwise.
 
 `SettingsValidationEntry` (per field)
-:   One of three forms:
+:   One of four forms:
 
     - `{ exists: true, resolvedPath: string }` — path resolved and confirmed present on disk.
     - `{ exists: false, resolvedPath: string }` — path resolved but not found on disk.

@@ -13,7 +13,7 @@ Browsing mods returns a paginated list of publicly visible [mods](#) from the [r
 ## Inputs
 
 `page`
-:   **Number, required.** The page number to return, zero-indexed.
+:   **Number, required.** The page number to return, 1-indexed (the first page is `1`).
 
 `size`
 :   **Number, required.** The number of results per page.

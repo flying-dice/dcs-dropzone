@@ -35,6 +35,8 @@ Registering a mod release download records that a [Daemon](#) instance has insta
 `{ code: 404, error: "ReleaseNotFoundError" }`
 :   Returned when the release does not exist or is not public. No download is recorded.
 
+> **Note:** The current implementation returns HTTP 200 for this error case due to a missing status code argument in the handler. The spec documents the intended behavior; see the implementation for the actual response code.
+
 ### Effects
 
 | Effect | Status |
@@ -49,7 +51,7 @@ flowchart TD
 
     FindRelease --> Found{Release found<br/>and public?}
 
-    Found -- No --> NotFound(["404 { code: 404, error: 'ReleaseNotFoundError' }"])
+    Found -- No --> NotFound(["{ code: 404, error: 'ReleaseNotFoundError' }<br/>⚠️ currently returns HTTP 200"])
     Found -- Yes --> Register[registerModReleaseDownload modId releaseId daemonInstanceId]
 
     Register --> Done(["200 { ok: true }"])

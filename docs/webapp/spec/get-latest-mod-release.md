@@ -12,7 +12,7 @@ Getting the latest mod release returns the most recently created public [release
 
 ## Inputs
 
-`modId`
+`id`
 :   **String, required (path parameter).** The identifier of the mod.
 
 ### Assertions
@@ -37,7 +37,7 @@ None. This is a read-only operation.
 
 ```mermaid
 flowchart TD
-    Start([findLatestPublicModRelease modId]) --> Query[modRepository.findLatestPublicModRelease modId]
+    Start([findLatestPublicModRelease id]) --> Query[modRepository.findLatestPublicModRelease id]
 
     Query --> Found{Release found?}
 

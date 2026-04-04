@@ -29,7 +29,7 @@ Getting a user mod returns the full details of a single [mod](#) owned by the au
 :   Returned with `200 OK` when the mod is found and the user is a maintainer.
 
 `{ code: 404, error: "ModNotFoundError" | "NotMaintainerError" }`
-:   Returned when the mod does not exist or the user is not a maintainer. Both cases return `404` — the distinction between "not found" and "not authorised" is not exposed to the caller.
+:   Returned when the mod does not exist or the user is not a maintainer. Both cases return HTTP `404`, but the `error` field in the response body distinguishes `"ModNotFoundError"` from `"NotMaintainerError"`.
 
 `401 Unauthorized`
 :   Returned when the session cookie is absent or invalid.
