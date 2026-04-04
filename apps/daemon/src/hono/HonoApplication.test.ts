@@ -1,5 +1,5 @@
 import "../__tests__/log4js.ts";
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdirSync } from "node:fs";
 import { TestTempDir } from "../__tests__/TestTempDir.ts";
 import { SYSTEM_7ZIP_PATH, SYSTEM_WGET_PATH } from "../__tests__/utils.ts";
@@ -27,8 +27,20 @@ function buildConfiguredApp() {
 
 describe("HonoApplication", () => {
 	describe("Private Network Access CORS", () => {
+		let app: ProdApplication;
+		let tempDir: TestTempDir;
+
+		beforeEach(() => {
+			const configured = buildConfiguredApp();
+			app = configured.app;
+			tempDir = configured.tempDir;
+		});
+
+		afterEach(() => {
+			tempDir.cleanup();
+		});
+
 		it("should add Access-Control-Allow-Private-Network header when request includes Access-Control-Request-Private-Network", async () => {
-			const { app } = buildConfiguredApp();
 			const honoApp = await HonoApplication.build(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
@@ -47,7 +59,6 @@ describe("HonoApplication", () => {
 		});
 
 		it("should not add Access-Control-Allow-Private-Network header when request does not include Access-Control-Request-Private-Network", async () => {
-			const { app } = buildConfiguredApp();
 			const honoApp = await HonoApplication.build(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
@@ -65,7 +76,6 @@ describe("HonoApplication", () => {
 		});
 
 		it("should add Access-Control-Allow-Private-Network header for POST preflight requests with PNA header", async () => {
-			const { app } = buildConfiguredApp();
 			const honoApp = await HonoApplication.build(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
@@ -88,6 +98,7 @@ describe("HonoApplication", () => {
 	describe("Toggle routes", () => {
 		let app: ProdApplication;
 		let honoApp: HonoApplication;
+		let tempDir: TestTempDir;
 
 		// A release with no assets is immediately "ready" — no jobs to wait for
 		const readyRelease: ModAndReleaseData = {
@@ -118,10 +129,15 @@ describe("HonoApplication", () => {
 		beforeEach(async () => {
 			const configured = buildConfiguredApp();
 			app = configured.app;
+			tempDir = configured.tempDir;
 			honoApp = await HonoApplication.build(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
 			});
+		});
+
+		afterEach(() => {
+			tempDir.cleanup();
 		});
 
 		describe("POST /api/toggle/:releaseId/enable", () => {

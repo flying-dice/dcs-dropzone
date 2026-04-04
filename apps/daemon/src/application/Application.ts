@@ -17,7 +17,6 @@ import {
 	type ReleaseNotFound,
 	ReleaseToggle,
 	type ReleaseToggleError,
-	type ResolvedSymbolicLink,
 } from "./services/ReleaseToggle.ts";
 import { RemoveSymlinksScriptManager } from "./services/RemoveSymlinksScriptManager.ts";
 import { Settings } from "./services/Settings.ts";
@@ -102,7 +101,7 @@ export abstract class Application {
 		return this.daemonInstanceId;
 	}
 
-	public async enableRelease(releaseId: string): Promise<Result<ResolvedSymbolicLink[], ReleaseToggleError>> {
+	public async enableRelease(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
 		return this.releaseToggleService.enable(releaseId);
 	}
 
@@ -110,7 +109,7 @@ export abstract class Application {
 		return this.releaseToggleService.disable(releaseId);
 	}
 
-	public async toggleRelease(releaseId: string): Promise<Result<ResolvedSymbolicLink[] | void, ReleaseToggleError>> {
+	public async toggleRelease(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
 		const release = this.deps.releaseRepository.getById(releaseId);
 		if (release?.enabled) {
 			return this.releaseToggleService.disable(releaseId);

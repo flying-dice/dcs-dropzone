@@ -218,18 +218,16 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(downloadJobs[0]?.state).toEqual(JobState.Success);
 			expect(extractJobs[0]?.state).toEqual(JobState.Success);
 
-			const resolvedLinks = (await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
 			const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
 			ok(symlinkInstalledPath);
 			expect(symlinkInstalledPath).toEndWith("test.lua");
 
-			expect(resolvedLinks.length).toEqual(symbolicLinks.length);
-			for (const resolved of resolvedLinks) {
-				expect(resolved.id).toBeDefined();
-				expect(resolved.src).toBeDefined();
-				expect(resolved.dest).toEndWith("test.lua");
+			for (const link of symbolicLinks) {
+				expect(link.installedPath).toBeDefined();
+				expect(link.installedPath).toEndWith("test.lua");
 			}
 		});
 
@@ -436,6 +434,10 @@ describe("Symlink creation failure", () => {
 		};
 	});
 
+	afterEach(() => {
+		tempDir.cleanup();
+	});
+
 	it("should return SymlinkCreationFailed error when source files do not exist on disk", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
 
@@ -471,9 +473,16 @@ describe("Symlink creation failure", () => {
 
 describe("ReleaseNotFound", () => {
 	let app: Application;
+	let tempDir: TestTempDir;
 
 	beforeEach(() => {
-		app = buildConfiguredApp().app;
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
+	});
+
+	afterEach(() => {
+		tempDir.cleanup();
 	});
 
 	it("should return ReleaseNotFound when enabling a release that does not exist", async () => {
@@ -495,10 +504,13 @@ describe("ReleaseNotFound", () => {
 
 describe("ReleaseNotReady", () => {
 	let app: Application;
+	let tempDir: TestTempDir;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = buildConfiguredApp().app;
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -519,6 +531,10 @@ describe("ReleaseNotReady", () => {
 		};
 	});
 
+	afterEach(() => {
+		tempDir.cleanup();
+	});
+
 	it("should return ReleaseNotReady when enabling a release with incomplete jobs", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
 
@@ -533,10 +549,13 @@ describe("ReleaseNotReady", () => {
 
 describe("toggleRelease", () => {
 	let app: Application;
+	let tempDir: TestTempDir;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = buildConfiguredApp().app;
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -548,6 +567,10 @@ describe("toggleRelease", () => {
 			symbolicLinks: [],
 			missionScripts: [],
 		};
+	});
+
+	afterEach(() => {
+		tempDir.cleanup();
 	});
 
 	it("should return ReleaseNotFound when toggling a release that does not exist", async () => {

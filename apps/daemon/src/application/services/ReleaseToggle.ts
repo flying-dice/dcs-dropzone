@@ -1,4 +1,4 @@
-import { type Linker, type LinkerError, type ResolvedLink, SymlinkCreationFailed } from "@packages/linker";
+import { type LinkDefinition, type Linker, type LinkerError, SymlinkCreationFailed } from "@packages/linker";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
@@ -21,7 +21,7 @@ export class ReleaseNotReady extends Error {
 	}
 }
 
-export { type ResolvedLink as ResolvedSymbolicLink, SymlinkCreationFailed };
+export { SymlinkCreationFailed };
 
 export type ReleaseToggleError = PathResolverError | LinkerError | ReleaseNotFound | ReleaseNotReady;
 
@@ -39,7 +39,7 @@ type Deps = {
 export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
-	async enable(releaseId: string): Promise<Result<ResolvedLink[], ReleaseToggleError>> {
+	async enable(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
 		logger.info(`Enabling Release ${releaseId}`);
 		const readyResult = this.checkReleaseIsReady(releaseId);
 		if (readyResult.isErr()) return err(readyResult.error);
@@ -47,7 +47,7 @@ export class ReleaseToggle {
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
 
-		const linkDefinitions: { id: string; src: string; dest: string }[] = [];
+		const linkDefinitions: LinkDefinition[] = [];
 
 		for (const link of links) {
 			const srcAbsResult = this.deps.pathResolver.resolveReleasePath(releaseId, link.src);
@@ -62,9 +62,7 @@ export class ReleaseToggle {
 		const linkerResult = await this.deps.linker.enable(linkDefinitions);
 		if (linkerResult.isErr()) return err(linkerResult.error);
 
-		const created = linkerResult.value;
-
-		for (const resolved of created) {
+		for (const resolved of linkerResult.value) {
 			this.deps.releaseRepository.setInstalledPathForSymbolicLink(resolved.id, resolved.dest);
 			logger.debug(`Stored installed symlink path for linkId ${resolved.id}: ${resolved.dest}`);
 		}
@@ -80,7 +78,7 @@ export class ReleaseToggle {
 		if (removeSymlinksRebuildResult.isErr()) return err(removeSymlinksRebuildResult.error);
 
 		logger.info(`Finished enabling Release ${releaseId}`);
-		return ok(created);
+		return ok(undefined);
 	}
 
 	disable(releaseId: string): Result<void, ReleaseNotFound | DcsPathNotConfigured> {

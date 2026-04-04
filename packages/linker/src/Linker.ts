@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { lstatSync, mkdirSync, rmSync } from "node:fs";
 import { dirname } from "node:path";
 import { getLogger } from "log4js";
 import { err, fromThrowable, ok, type Result } from "neverthrow";
@@ -65,7 +65,7 @@ export class Linker {
 		for (const link of links) {
 			logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
 
-			if (!existsSync(link.installedPath)) {
+			if (!lstatSync(link.installedPath, { throwIfNoEntry: false })) {
 				removed.push(link.id);
 				logger.debug(`Symlink already absent for linkId ${link.id}, treating as removed`);
 				continue;
@@ -90,7 +90,7 @@ export class Linker {
 	private async createLink(link: LinkDefinition): Promise<Result<ResolvedLink, SymlinkCreationFailed>> {
 		logger.debug(`Creating symlink (linkId=${link.id}, src=${link.src}, dest=${link.dest})`);
 
-		if (!existsSync(link.src)) {
+		if (!lstatSync(link.src, { throwIfNoEntry: false })) {
 			return err(
 				new SymlinkCreationFailed(link.id, LinkerErrorCode.SourceNotFound, `Source path does not exist: ${link.src}`),
 			);
@@ -98,7 +98,7 @@ export class Linker {
 
 		try {
 			const parent = dirname(link.dest);
-			if (!existsSync(parent)) {
+			if (!lstatSync(parent, { throwIfNoEntry: false })) {
 				mkdirSync(parent, { recursive: true });
 			}
 		} catch (e) {
@@ -111,7 +111,7 @@ export class Linker {
 			);
 		}
 
-		if (existsSync(link.dest)) {
+		if (lstatSync(link.dest, { throwIfNoEntry: false })) {
 			return err(
 				new SymlinkCreationFailed(
 					link.id,
@@ -141,7 +141,7 @@ export class Linker {
 		logger.warn(`Rolling back ${created.length} created symlinks`);
 		for (const link of created) {
 			try {
-				if (existsSync(link.dest)) {
+				if (lstatSync(link.dest, { throwIfNoEntry: false })) {
 					rmSync(link.dest, { force: true, recursive: true });
 				}
 				logger.debug(`Rolled back symlink for linkId ${link.id} at ${link.dest}`);
