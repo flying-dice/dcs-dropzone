@@ -34,14 +34,13 @@ describe("Linker", () => {
 				{ id: "link-1", src: join(srcDir, "test.lua"), dest: join(destDir, "test.lua") },
 			];
 
-			const result = await linker.enable(links);
+			const [resolved, err] = await linker.enable(links);
 
-			expect(result.isOk()).toBe(true);
-			const resolved = result._unsafeUnwrap();
-			expect(resolved.length).toEqual(1);
-			expect(resolved[0]?.id).toBe("link-1");
-			expect(resolved[0]?.src).toBe(join(srcDir, "test.lua"));
-			expect(resolved[0]?.dest).toBe(join(destDir, "test.lua"));
+			expect(err).toBeNull();
+			expect(resolved!.length).toEqual(1);
+			expect(resolved![0]?.id).toBe("link-1");
+			expect(resolved![0]?.src).toBe(join(srcDir, "test.lua"));
+			expect(resolved![0]?.dest).toBe(join(destDir, "test.lua"));
 
 			expect(existsSync(join(destDir, "test.lua"))).toBe(true);
 		});
@@ -55,11 +54,10 @@ describe("Linker", () => {
 				{ id: "link-2", src: join(srcDir, "second.lua"), dest: join(destDir, "second.lua") },
 			];
 
-			const result = await linker.enable(links);
+			const [resolved, err] = await linker.enable(links);
 
-			expect(result.isOk()).toBe(true);
-			const resolved = result._unsafeUnwrap();
-			expect(resolved.length).toEqual(2);
+			expect(err).toBeNull();
+			expect(resolved!.length).toEqual(2);
 			expect(existsSync(join(destDir, "first.lua"))).toBe(true);
 			expect(existsSync(join(destDir, "second.lua"))).toBe(true);
 		});
@@ -71,9 +69,9 @@ describe("Linker", () => {
 
 			const links: LinkDefinition[] = [{ id: "link-1", src: subDir, dest: join(destDir, "mymod") }];
 
-			const result = await linker.enable(links);
+			const [, err] = await linker.enable(links);
 
-			expect(result.isOk()).toBe(true);
+			expect(err).toBeNull();
 			expect(existsSync(join(destDir, "mymod", "init.lua"))).toBe(true);
 		});
 
@@ -83,17 +81,17 @@ describe("Linker", () => {
 
 			const links: LinkDefinition[] = [{ id: "link-1", src: join(srcDir, "test.lua"), dest: nestedDest }];
 
-			const result = await linker.enable(links);
+			const [, err] = await linker.enable(links);
 
-			expect(result.isOk()).toBe(true);
+			expect(err).toBeNull();
 			expect(existsSync(nestedDest)).toBe(true);
 		});
 
 		it("should return an empty array when no links are provided", async () => {
-			const result = await linker.enable([]);
+			const [resolved, err] = await linker.enable([]);
 
-			expect(result.isOk()).toBe(true);
-			expect(result._unsafeUnwrap()).toEqual([]);
+			expect(err).toBeNull();
+			expect(resolved).toEqual([]);
 		});
 
 		it("should return SourceNotFound error when source does not exist", async () => {
@@ -101,14 +99,12 @@ describe("Linker", () => {
 				{ id: "link-1", src: join(srcDir, "nonexistent.lua"), dest: join(destDir, "test.lua") },
 			];
 
-			const result = await linker.enable(links);
+			const [, error] = await linker.enable(links);
 
-			expect(result.isErr()).toBe(true);
-			const error = result._unsafeUnwrapErr();
 			expect(error).toBeInstanceOf(SymlinkCreationFailed);
-			expect(error.type).toBe("SymlinkCreationFailed");
-			expect(error.linkId).toBe("link-1");
-			expect(error.code).toBe(LinkerErrorCode.SourceNotFound);
+			expect(error!.type).toBe("SymlinkCreationFailed");
+			expect(error!.linkId).toBe("link-1");
+			expect(error!.code).toBe(LinkerErrorCode.SourceNotFound);
 		});
 
 		it("should return LinkAlreadyExists error when dest already exists", async () => {
@@ -119,13 +115,11 @@ describe("Linker", () => {
 				{ id: "link-1", src: join(srcDir, "test.lua"), dest: join(destDir, "test.lua") },
 			];
 
-			const result = await linker.enable(links);
+			const [, error] = await linker.enable(links);
 
-			expect(result.isErr()).toBe(true);
-			const error = result._unsafeUnwrapErr();
 			expect(error).toBeInstanceOf(SymlinkCreationFailed);
-			expect(error.code).toBe(LinkerErrorCode.LinkAlreadyExists);
-			expect(error.linkId).toBe("link-1");
+			expect(error!.code).toBe(LinkerErrorCode.LinkAlreadyExists);
+			expect(error!.linkId).toBe("link-1");
 		});
 
 		it("should rollback previously created symlinks when a subsequent link fails", async () => {
@@ -137,12 +131,11 @@ describe("Linker", () => {
 				{ id: "link-2", src: join(srcDir, "nonexistent.lua"), dest: join(destDir, "second.lua") },
 			];
 
-			const result = await linker.enable(links);
+			const [, error] = await linker.enable(links);
 
-			expect(result.isErr()).toBe(true);
-			const error = result._unsafeUnwrapErr();
-			expect(error.linkId).toBe("link-2");
-			expect(error.code).toBe(LinkerErrorCode.SourceNotFound);
+			expect(error).toBeDefined();
+			expect(error!.linkId).toBe("link-2");
+			expect(error!.code).toBe(LinkerErrorCode.SourceNotFound);
 
 			// First symlink should have been rolled back
 			expect(existsSync(join(destDir, "first.lua"))).toBe(false);
@@ -164,13 +157,11 @@ describe("Linker", () => {
 			];
 
 			try {
-				const result = await linker.enable(links);
+				const [, error] = await linker.enable(links);
 
-				expect(result.isErr()).toBe(true);
-				const error = result._unsafeUnwrapErr();
 				expect(error).toBeInstanceOf(SymlinkCreationFailed);
-				expect(error.linkId).toBe("link-1");
-				expect(error.code).toBe(LinkerErrorCode.PermissionDenied);
+				expect(error!.linkId).toBe("link-1");
+				expect(error!.code).toBe(LinkerErrorCode.PermissionDenied);
 			} finally {
 				// Restore permissions so afterEach cleanup can delete the directory
 				chmodSync(readonlyDir, 0o755);
@@ -182,11 +173,11 @@ describe("Linker", () => {
 				{ id: "my-special-link", src: join(srcDir, "nope.lua"), dest: join(destDir, "test.lua") },
 			];
 
-			const result = await linker.enable(links);
+			const [, error] = await linker.enable(links);
 
-			expect(result.isErr()).toBe(true);
-			expect(result._unsafeUnwrapErr().linkId).toBe("my-special-link");
-			expect(result._unsafeUnwrapErr().message).toContain("my-special-link");
+			expect(error).toBeDefined();
+			expect(error!.linkId).toBe("my-special-link");
+			expect(error!.message).toContain("my-special-link");
 		});
 	});
 
@@ -197,10 +188,10 @@ describe("Linker", () => {
 
 			expect(existsSync(join(destDir, "file.lua"))).toBe(true);
 
-			const result = linker.disable([{ id: "link-1", installedPath: join(destDir, "file.lua") }]);
+			const [removed, err] = linker.disable([{ id: "link-1", installedPath: join(destDir, "file.lua") }]);
 
-			expect(result.isOk()).toBe(true);
-			expect(result._unsafeUnwrap()).toEqual(["link-1"]);
+			expect(err).toBeNull();
+			expect(removed).toEqual(["link-1"]);
 			expect(existsSync(join(destDir, "file.lua"))).toBe(false);
 		});
 
@@ -212,28 +203,28 @@ describe("Linker", () => {
 				{ id: "link-b", src: join(srcDir, "b.lua"), dest: join(destDir, "b.lua") },
 			]);
 
-			const result = linker.disable([
+			const [removed, err] = linker.disable([
 				{ id: "link-a", installedPath: join(destDir, "a.lua") },
 				{ id: "link-b", installedPath: join(destDir, "b.lua") },
 			]);
 
-			expect(result.isOk()).toBe(true);
-			expect(result._unsafeUnwrap()).toEqual(["link-a", "link-b"]);
+			expect(err).toBeNull();
+			expect(removed).toEqual(["link-a", "link-b"]);
 			expect(existsSync(join(destDir, "a.lua"))).toBe(false);
 			expect(existsSync(join(destDir, "b.lua"))).toBe(false);
 		});
 
 		it("should treat absent installed path as already removed", () => {
-			const result = linker.disable([{ id: "link-1", installedPath: join(destDir, "nonexistent") }]);
+			const [removed, err] = linker.disable([{ id: "link-1", installedPath: join(destDir, "nonexistent") }]);
 
-			expect(result.isOk()).toBe(true);
-			expect(result._unsafeUnwrap()).toEqual(["link-1"]);
+			expect(err).toBeNull();
+			expect(removed).toEqual(["link-1"]);
 		});
 
 		it("should handle empty link list without error", () => {
-			const result = linker.disable([]);
-			expect(result.isOk()).toBe(true);
-			expect(result._unsafeUnwrap()).toEqual([]);
+			const [removed, err] = linker.disable([]);
+			expect(err).toBeNull();
+			expect(removed).toEqual([]);
 		});
 
 		it("should return err with removed and failed lists when a removal fails", () => {
@@ -250,17 +241,16 @@ describe("Linker", () => {
 			chmodSync(readonlyDir, 0o000);
 
 			try {
-				const result = linker.disable([
+				const [, outcome] = linker.disable([
 					{ id: "link-keep", installedPath: join(destDir, "keep.lua") },
 					{ id: "link-locked", installedPath: join(readonlyDir, "locked.lua") },
 				]);
 
-				expect(result.isErr()).toBe(true);
-				const outcome = result._unsafeUnwrapErr();
-				expect(outcome.removed).toEqual(["link-keep"]);
-				expect(outcome.failed).toHaveLength(1);
-				expect(outcome.failed[0]).toBeInstanceOf(RemovalFailed);
-				expect(outcome.failed[0]?.linkId).toBe("link-locked");
+				expect(outcome).toBeDefined();
+				expect(outcome!.removed).toEqual(["link-keep"]);
+				expect(outcome!.failed).toHaveLength(1);
+				expect(outcome!.failed[0]).toBeInstanceOf(RemovalFailed);
+				expect(outcome!.failed[0]?.linkId).toBe("link-locked");
 			} finally {
 				chmodSync(readonlyDir, 0o755);
 			}
