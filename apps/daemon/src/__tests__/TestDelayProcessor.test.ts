@@ -13,23 +13,16 @@ describe("TestDownloadProcessor", () => {
 			updateProgress: progressHandler,
 		};
 
-		const result = await processor.process({}, mockContext);
+		const [result, resultErr] = await processor.process({}, mockContext);
 
-		expect(result.isOk()).toBe(true);
+		expect(resultErr).toBeNull();
 		expect(mockContext.updateProgress).toHaveBeenCalledTimes(4);
 		expect(mockContext.updateProgress).toHaveBeenCalledWith(25);
 		expect(mockContext.updateProgress).toHaveBeenCalledWith(50);
 		expect(mockContext.updateProgress).toHaveBeenCalledWith(75);
 		expect(mockContext.updateProgress).toHaveBeenCalledWith(100);
 
-		result.match(
-			(res) => {
-				expect(res).toEqual({});
-			},
-			(err) => {
-				throw new Error(`Expected success but got error: ${err}`);
-			},
-		);
+		expect(result).toEqual({});
 	});
 
 	it("handles abort signal during processing", async () => {

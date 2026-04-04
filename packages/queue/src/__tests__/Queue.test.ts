@@ -1,7 +1,7 @@
 import "./log4js.ts";
 import { describe, expect, it } from "bun:test";
 import * as assert from "node:assert";
-import { err, ok, type Result } from "neverthrow";
+
 import type { DelayCalculator } from "../DelayCalculator.ts";
 import { JobErrorCode, JobState } from "../JobRecordRepository.ts";
 import type { Processor } from "../Processor.ts";
@@ -46,7 +46,7 @@ describe("Queue", () => {
 				name: "test",
 				process: async (data) => {
 					processedData = data;
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -94,12 +94,12 @@ describe("Queue", () => {
 					switch (_action) {
 						case Action.ReturnString:
 							_action = Action.ReturnUndefined;
-							return "done" as unknown as Result<string, string>;
+							return "done" as unknown as [string, null] | [undefined, string];
 						case Action.ReturnUndefined:
 							_action = Action.ReturnOk;
-							return undefined as unknown as Result<string, string>;
+							return undefined as unknown as [string, null] | [undefined, string];
 						case Action.ReturnOk:
-							return ok("done");
+							return ["done", null];
 					}
 				},
 			};
@@ -122,13 +122,13 @@ describe("Queue", () => {
 				state: JobState.Failed,
 				errorCode: JobErrorCode.ProcessorException,
 				errorMessage:
-					"AssertionError [ERR_ASSERTION]: Processor returned an invalid value, expected type 'Result' but received type 'string'",
+					"AssertionError [ERR_ASSERTION]: Processor returned an invalid value, expected a [result, null] | [undefined, error] tuple but received type 'string'",
 			});
 			expect(runs[1]).toMatchObject({
 				state: JobState.Failed,
 				errorCode: JobErrorCode.ProcessorException,
 				errorMessage:
-					"AssertionError [ERR_ASSERTION]: Processor returned an invalid value, expected type 'Result' but received type 'undefined'",
+					"AssertionError [ERR_ASSERTION]: Processor returned an invalid value, expected a [result, null] | [undefined, error] tuple but received type 'undefined'",
 			});
 			expect(runs[2]).toMatchObject({
 				state: JobState.Success,
@@ -147,9 +147,9 @@ describe("Queue", () => {
 				process: async () => {
 					attempts++;
 					if (attempts <= failCount) {
-						return err(`Simulated failure (attempt ${attempts})`);
+						return [undefined, `Simulated failure (attempt ${attempts})`];
 					}
-					return ok("success");
+					return ["success", null];
 				},
 			};
 
@@ -193,7 +193,7 @@ describe("Queue", () => {
 			const processor: Processor = {
 				name: "test",
 				process: async () => {
-					return err("Something went wrong");
+					return [undefined, "Something went wrong"];
 				},
 			};
 
@@ -226,7 +226,7 @@ describe("Queue", () => {
 						_throw = false;
 						throw new Error("Unexpected error");
 					}
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -261,7 +261,7 @@ describe("Queue", () => {
 						progressUpdates.push(step);
 						ctx.updateProgress(step);
 					}
-					return ok("done");
+					return ["done", null];
 				},
 			};
 			const c = createTestContext({ processors: [processor] });
@@ -308,7 +308,7 @@ describe("Queue", () => {
 				name: "test",
 				process: async () => {
 					processCount++;
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -336,7 +336,7 @@ describe("Queue", () => {
 				name: "queueA",
 				process: async () => {
 					results.push("A");
-					return ok("A");
+					return ["A", null];
 				},
 			};
 
@@ -344,7 +344,7 @@ describe("Queue", () => {
 				name: "queueB",
 				process: async () => {
 					results.push("B");
-					return ok("B");
+					return ["B", null];
 				},
 			};
 
@@ -365,7 +365,7 @@ describe("Queue", () => {
 			const processor: Processor = {
 				name: "test",
 				process: async () => {
-					return ok("done");
+					return ["done", null];
 				},
 			};
 			const c = createTestContext({ processors: [processor] });
@@ -395,7 +395,7 @@ describe("Queue", () => {
 			const processor: Processor = {
 				name: "test",
 				process: async () => {
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -438,7 +438,7 @@ describe("Queue", () => {
 				name: "test",
 				process: async ({ id }) => {
 					processed.push(id);
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -470,7 +470,7 @@ describe("Queue", () => {
 					started = true;
 					await delay(30_000, ctx.abortSignal);
 					finished = true;
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -504,7 +504,7 @@ describe("Queue", () => {
 				name: "test",
 				process: async () => {
 					attempts++;
-					return err("fail");
+					return [undefined, "fail"];
 				},
 			};
 
@@ -537,9 +537,9 @@ describe("Queue", () => {
 				process: async () => {
 					attempts++;
 					if (attempts < 3) {
-						return err(`fail-${attempts}`);
+						return [undefined, `fail-${attempts}`];
 					}
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -579,9 +579,9 @@ describe("Queue", () => {
 				process: async () => {
 					calls++;
 					if (calls <= 2) {
-						return err("fail");
+						return [undefined, "fail"];
 					}
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -613,9 +613,9 @@ describe("Queue", () => {
 				process: async ({ id }) => {
 					processed.push(id);
 					if (id === "failing") {
-						return err("fail");
+						return [undefined, "fail"];
 					}
-					return ok("done");
+					return ["done", null];
 				},
 			};
 
@@ -654,7 +654,7 @@ describe("Queue", () => {
 				name: "test",
 				process: async () => {
 					attempts++;
-					return err(`fail-${attempts}`);
+					return [undefined, `fail-${attempts}`];
 				},
 			};
 
@@ -695,9 +695,9 @@ describe("Queue", () => {
 				process: async () => {
 					attempts++;
 					if (attempts === 1) {
-						return err("transient failure");
+						return [undefined, "transient failure"];
 					}
-					return ok("recovered");
+					return ["recovered", null];
 				},
 			};
 

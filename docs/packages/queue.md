@@ -297,10 +297,10 @@ type Processor<TData = any, TResult = any> = {
 
   /**
    * Executes the job.
-   * - Return Ok(result) on success.
-   * - Return Err(reason) on a known failure — the queue will retry.
+   * - Return [result, null] on success.
+   * - Return [undefined, reason] on a known failure — the queue will retry.
    */
-  process: (job: TData, ctx: ProcessorContext) => Promise<Result<TResult, string>>;
+  process: (job: TData, ctx: ProcessorContext) => Promise<[TResult, null] | [undefined, string]>;
 };
 ```
 
@@ -310,7 +310,6 @@ Each processor handles **one job at a time**. The queue skips a processor's next
 
 ```ts
 import type { Processor, ProcessorContext } from "@packages/queue";
-import { ok, err } from "neverthrow";
 
 const downloadProcessor: Processor<{ url: string }, { filePath: string }> = {
   name: "download",
@@ -320,9 +319,9 @@ const downloadProcessor: Processor<{ url: string }, { filePath: string }> = {
         onProgress: (pct) => ctx.updateProgress(pct),
         signal: ctx.abortSignal,
       });
-      return ok({ filePath });
+      return [{ filePath }, null];
     } catch (e) {
-      return err(String(e));
+      return [undefined, String(e)];
     }
   },
 };
@@ -453,7 +452,7 @@ Machine-readable failure codes set on a `JobRecord` when a run fails.
 
 | Value | String | Description |
 |---|---|---|
-| `JobErrorCode.ProcessorError` | `"PROCESSOR_ERROR"` | The processor returned `Err(reason)`. |
+| `JobErrorCode.ProcessorError` | `"PROCESSOR_ERROR"` | The processor returned `[undefined, reason]`. |
 | `JobErrorCode.ProcessorException` | `"PROCESSOR_EXCEPTION"` | The processor's `process()` threw an unhandled exception. |
 | `JobErrorCode.JobRunNotFound` | `"JOB_RUN_NOT_FOUND"` | A running record existed in the repository with no matching active `JobRun` — typically caused by an unexpected restart. |
 
@@ -486,4 +485,4 @@ After 3 failed attempts the `Failed` event is emitted with no rescheduled run. R
 ## See Also
 
 - [How the Daemon works](/guides/how-the-daemon-works) — The daemon uses the queue to coordinate mod download and extraction jobs.
-- [`neverthrow` documentation](https://github.com/supermacro/neverthrow) — The `Result` type used by `Processor.process()`.
+- [Errors as Values](/guides/errors-as-values) — The Go-style tuple pattern used by `Processor.process()`.

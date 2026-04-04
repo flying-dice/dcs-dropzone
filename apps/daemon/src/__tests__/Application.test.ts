@@ -88,7 +88,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 	describe("addRelease", () => {
 		it("should add the release, assets, symlinks, mission scripts to the repository and create jobs", () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 
 			const allReleases = app.deps.releaseRepository.getAllReleases();
 			const assetsForRelease = app.deps.releaseRepository.getReleaseAssetsForRelease(modAndReleaseData.releaseId);
@@ -177,7 +178,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 	describe("RemoveRelease", () => {
 		it("should remove the release and all associated data from the repository", () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 			app.removeRelease(modAndReleaseData.releaseId);
 
 			const allReleases = app.deps.releaseRepository.getAllReleases();
@@ -204,7 +206,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 	describe("EnableRelease", () => {
 		it("should enable the release successfully when all jobs are completed", async () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 			createSourceFilesOnDisk(app, modAndReleaseData);
@@ -218,7 +221,8 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(downloadJobs[0]?.state).toEqual(JobState.Success);
 			expect(extractJobs[0]?.state).toEqual(JobState.Success);
 
-			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+			expect(enableErr).toBeNull();
 
 			const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
@@ -232,11 +236,13 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should write Mission Scripting Files", async () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
-			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+			expect(enableErr).toBeNull();
 
 			const dcsWorkingDir = app.settings.getDcsWorkingDir();
 			ok(dcsWorkingDir);
@@ -251,11 +257,13 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should reflect ENABLED status in getAllReleasesWithStatus after enabling", async () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
-			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+			expect(enableErr).toBeNull();
 
 			const releases = app.getAllReleasesWithStatus();
 			expect(releases.length).toEqual(1);
@@ -263,12 +271,15 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should reflect DISABLED status in getAllReleasesWithStatus after disabling", async () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
-			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
-			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
+			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+			expect(enableErr).toBeNull();
+			const [, disableErr] = app.disableRelease(modAndReleaseData.releaseId);
+			expect(disableErr).toBeNull();
 
 			const releases = app.getAllReleasesWithStatus();
 			expect(releases.length).toEqual(1);
@@ -276,11 +287,13 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should generate removeSymlinks.bat after enabling a release", async () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
-			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+			expect(enableErr).toBeNull();
 
 			const dropzoneModsDir = app.settings.getDropzoneModsDir();
 			ok(dropzoneModsDir);
@@ -290,12 +303,15 @@ describe.each(TestCases)("$label", ({ build }) => {
 		});
 
 		it("should regenerate removeSymlinks.bat after disabling a release", async () => {
-			app.addRelease(modAndReleaseData)._unsafeUnwrap();
+			const [, addErr] = app.addRelease(modAndReleaseData);
+			expect(addErr).toBeNull();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
-			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
-			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
+			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+			expect(enableErr).toBeNull();
+			const [, disableErr] = app.disableRelease(modAndReleaseData.releaseId);
+			expect(disableErr).toBeNull();
 
 			const dropzoneModsDir = app.settings.getDropzoneModsDir();
 			ok(dropzoneModsDir);
@@ -372,10 +388,9 @@ describe("Unconfigured paths", () => {
 
 	describe("addRelease without dropzone mods dir configured", () => {
 		it("should return a DropzoneModsDirNotConfigured error", () => {
-			const result = app.addRelease(modAndReleaseData);
+			const [, err] = app.addRelease(modAndReleaseData);
 
-			expect(result.isErr()).toBe(true);
-			expect(result._unsafeUnwrapErr()).toBeInstanceOf(DropzoneModsDirNotConfigured);
+			expect(err).toBeInstanceOf(DropzoneModsDirNotConfigured);
 		});
 
 		it("should not persist an orphaned release record", () => {
@@ -439,18 +454,19 @@ describe("Symlink creation failure", () => {
 	});
 
 	it("should return SymlinkCreationFailed error when source files do not exist on disk", async () => {
-		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		const [, addErr] = app.addRelease(modAndReleaseData);
+		expect(addErr).toBeNull();
 
 		// No assets → immediately ready. The Linker fails because the source path does not exist on disk.
-		const result = await app.enableRelease(modAndReleaseData.releaseId);
+		const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBeInstanceOf(SymlinkCreationFailed);
-		expect(result._unsafeUnwrapErr().type).toBe("SymlinkCreationFailed");
+		expect(enableErr).toBeInstanceOf(SymlinkCreationFailed);
+		expect(enableErr!.type).toBe("SymlinkCreationFailed");
 	});
 
 	it("should not mark release as enabled when symlink creation fails", async () => {
-		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		const [, addErr] = app.addRelease(modAndReleaseData);
+		expect(addErr).toBeNull();
 
 		await app.enableRelease(modAndReleaseData.releaseId);
 
@@ -460,7 +476,8 @@ describe("Symlink creation failure", () => {
 	});
 
 	it("should not store installed paths when symlink creation fails", async () => {
-		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		const [, addErr] = app.addRelease(modAndReleaseData);
+		expect(addErr).toBeNull();
 
 		await app.enableRelease(modAndReleaseData.releaseId);
 
@@ -486,19 +503,17 @@ describe("ReleaseNotFound", () => {
 	});
 
 	it("should return ReleaseNotFound when enabling a release that does not exist", async () => {
-		const result = await app.enableRelease("non-existent-release-id");
+		const [, enableErr] = await app.enableRelease("non-existent-release-id");
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
-		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotFound");
+		expect(enableErr).toBeInstanceOf(ReleaseNotFound);
+		expect(enableErr!.type).toBe("ReleaseNotFound");
 	});
 
 	it("should return ReleaseNotFound when disabling a release that does not exist", () => {
-		const result = app.disableRelease("non-existent-release-id");
+		const [, disableErr] = app.disableRelease("non-existent-release-id");
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
-		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotFound");
+		expect(disableErr).toBeInstanceOf(ReleaseNotFound);
+		expect(disableErr!.type).toBe("ReleaseNotFound");
 	});
 });
 
@@ -536,14 +551,14 @@ describe("ReleaseNotReady", () => {
 	});
 
 	it("should return ReleaseNotReady when enabling a release with incomplete jobs", async () => {
-		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		const [, addErr] = app.addRelease(modAndReleaseData);
+		expect(addErr).toBeNull();
 
 		// Do not wait for jobs — attempt to enable immediately
-		const result = await app.enableRelease(modAndReleaseData.releaseId);
+		const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotReady);
-		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotReady");
+		expect(enableErr).toBeInstanceOf(ReleaseNotReady);
+		expect(enableErr!.type).toBe("ReleaseNotReady");
 	});
 });
 
@@ -574,26 +589,30 @@ describe("toggleRelease", () => {
 	});
 
 	it("should return ReleaseNotFound when toggling a release that does not exist", async () => {
-		const result = await app.toggleRelease("non-existent-release-id");
+		const [, toggleErr] = await app.toggleRelease("non-existent-release-id");
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
+		expect(toggleErr).toBeInstanceOf(ReleaseNotFound);
 	});
 
 	it("should enable a disabled release", async () => {
-		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		const [, addErr] = app.addRelease(modAndReleaseData);
+		expect(addErr).toBeNull();
 
-		(await app.toggleRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+		const [, toggleErr] = await app.toggleRelease(modAndReleaseData.releaseId);
+		expect(toggleErr).toBeNull();
 
 		const release = app.deps.releaseRepository.getById(modAndReleaseData.releaseId);
 		expect(release?.enabled).toBe(true);
 	});
 
 	it("should disable an enabled release", async () => {
-		app.addRelease(modAndReleaseData)._unsafeUnwrap();
-		(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+		const [, addErr] = app.addRelease(modAndReleaseData);
+		expect(addErr).toBeNull();
+		const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+		expect(enableErr).toBeNull();
 
-		(await app.toggleRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+		const [, toggleErr] = await app.toggleRelease(modAndReleaseData.releaseId);
+		expect(toggleErr).toBeNull();
 
 		const release = app.deps.releaseRepository.getById(modAndReleaseData.releaseId);
 		expect(release?.enabled).toBe(false);

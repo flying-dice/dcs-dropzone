@@ -251,12 +251,12 @@ If a well-written caller could do something meaningful with the error, return it
 
 ## Migration from neverthrow
 
-This pattern supersedes the previous `neverthrow` `Result` pattern. When modifying existing files that use `neverthrow`:
+The `neverthrow` library has been fully removed from this codebase. All error handling now uses Go-style tuples as described above.
+
+If you encounter any legacy code that still uses `neverthrow` patterns, convert it following these steps:
 
 1. Convert `Result<T, E>` return types to `[T, null] | [undefined, E]`
 2. Replace `ok(value)` with `[value, null]`
 3. Replace `err(error)` with `[undefined, error]`
 4. Replace `.andThen()` chains with sequential destructuring and early returns
 5. Replace `.match()` calls with `if (err)` checks
-
-**Existing `neverthrow` code does not need to be converted immediately** — convert when you are already modifying the file.

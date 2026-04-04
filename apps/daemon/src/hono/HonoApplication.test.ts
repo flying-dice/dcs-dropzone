@@ -142,7 +142,8 @@ describe("HonoApplication", () => {
 
 		describe("POST /api/toggle/:releaseId/enable", () => {
 			it("should return 200 and ok:true when release is successfully enabled", async () => {
-				app.addRelease(readyRelease)._unsafeUnwrap();
+				const [, addErr] = app.addRelease(readyRelease);
+				expect(addErr).toBeNull();
 
 				const response = await honoApp.request(`/api/toggle/${readyRelease.releaseId}/enable`, { method: "POST" });
 
@@ -158,7 +159,8 @@ describe("HonoApplication", () => {
 			});
 
 			it("should return 422 with ReleaseNotReady when release has incomplete jobs", async () => {
-				app.addRelease(notReadyRelease)._unsafeUnwrap();
+				const [, addErr] = app.addRelease(notReadyRelease);
+				expect(addErr).toBeNull();
 
 				const response = await honoApp.request(`/api/toggle/${notReadyRelease.releaseId}/enable`, { method: "POST" });
 
@@ -169,8 +171,10 @@ describe("HonoApplication", () => {
 
 		describe("POST /api/toggle/:releaseId/disable", () => {
 			it("should return 200 and ok:true when release is successfully disabled", async () => {
-				app.addRelease(readyRelease)._unsafeUnwrap();
-				(await app.enableRelease(readyRelease.releaseId))._unsafeUnwrap();
+				const [, addErr] = app.addRelease(readyRelease);
+				expect(addErr).toBeNull();
+				const [, enableErr] = await app.enableRelease(readyRelease.releaseId);
+				expect(enableErr).toBeNull();
 
 				const response = await honoApp.request(`/api/toggle/${readyRelease.releaseId}/disable`, { method: "POST" });
 
@@ -188,7 +192,8 @@ describe("HonoApplication", () => {
 
 		describe("POST /api/toggle/:releaseId", () => {
 			it("should return 200 and enable a disabled release", async () => {
-				app.addRelease(readyRelease)._unsafeUnwrap();
+				const [, addErr] = app.addRelease(readyRelease);
+				expect(addErr).toBeNull();
 
 				const response = await honoApp.request(`/api/toggle/${readyRelease.releaseId}`, { method: "POST" });
 
@@ -198,8 +203,10 @@ describe("HonoApplication", () => {
 			});
 
 			it("should return 200 and disable an enabled release", async () => {
-				app.addRelease(readyRelease)._unsafeUnwrap();
-				(await app.enableRelease(readyRelease.releaseId))._unsafeUnwrap();
+				const [, addErr] = app.addRelease(readyRelease);
+				expect(addErr).toBeNull();
+				const [, enableErr] = await app.enableRelease(readyRelease.releaseId);
+				expect(enableErr).toBeNull();
 
 				const response = await honoApp.request(`/api/toggle/${readyRelease.releaseId}`, { method: "POST" });
 

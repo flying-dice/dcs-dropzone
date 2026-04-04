@@ -1,7 +1,6 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
 
 const logger = getLogger("LocalFileSystemService");
@@ -50,12 +49,7 @@ export class LocalFileSystem implements FileSystem {
 		return Array.from(glob.scanSync({ followSymlinks: true }));
 	}
 
-	exists(path: string): Result<boolean, Error> {
-		try {
-			return ok(existsSync(path));
-		} catch (e) {
-			if (e instanceof Error) return err(e);
-			return err(new Error(e.toString()));
-		}
+	exists(path: string): boolean {
+		return existsSync(path);
 	}
 }

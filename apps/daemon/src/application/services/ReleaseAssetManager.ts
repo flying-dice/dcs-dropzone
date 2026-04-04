@@ -1,7 +1,6 @@
 import { basename, join } from "node:path";
 import { type JobRecord, type JobRecordRepository, JobState, Queue, QueueEvents } from "@packages/queue";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import { inferAssetStatusFromJobs } from "../functions/inferAssetStatusFromJobs.ts";
 import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import type { DownloadJobData, DownloadJobResult, DownloadProcessor } from "../ports/DownloadProcessor.ts";
@@ -78,11 +77,10 @@ export class ReleaseAssetManager {
 		return assetStatusData;
 	}
 
-	addRelease(releaseId: string): Result<void, DropzoneModsDirNotConfigured> {
-		const releaseFolderResult = this.deps.pathResolver.resolveReleasePath(releaseId);
-		if (releaseFolderResult.isErr()) return err(releaseFolderResult.error);
+	addRelease(releaseId: string): [void, null] | [undefined, DropzoneModsDirNotConfigured] {
+		const [releaseFolder, releaseFolderErr] = this.deps.pathResolver.resolveReleasePath(releaseId);
+		if (releaseFolderErr) return [undefined, releaseFolderErr] as const;
 
-		const releaseFolder = releaseFolderResult.value;
 		this.deps.fileSystem.ensureDir(releaseFolder);
 
 		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(releaseId);
@@ -101,7 +99,7 @@ export class ReleaseAssetManager {
 			}
 		}
 
-		return ok(undefined);
+		return [undefined, null];
 	}
 
 	removeRelease(releaseId: string): void {
@@ -112,12 +110,12 @@ export class ReleaseAssetManager {
 			}
 		}
 
-		const releaseFolderResult = this.deps.pathResolver.resolveReleasePath(releaseId);
-		if (releaseFolderResult.isOk()) {
-			this.deps.fileSystem.removeDir(releaseFolderResult.value);
+		const [releaseFolder, releaseFolderErr] = this.deps.pathResolver.resolveReleasePath(releaseId);
+		if (releaseFolder) {
+			this.deps.fileSystem.removeDir(releaseFolder);
 		} else {
 			logger.warn(
-				`Could not resolve release path for ${releaseId} during removal, skipping folder cleanup: ${releaseFolderResult.error.type}`,
+				`Could not resolve release path for ${releaseId} during removal, skipping folder cleanup: ${releaseFolderErr!.type}`,
 			);
 		}
 

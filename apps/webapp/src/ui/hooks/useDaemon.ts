@@ -46,14 +46,13 @@ export function useDaemon() {
 
 	const [adding, add] = useAsyncFn(
 		async (isUserMod: boolean, modId: string, releaseId: string, form?: UserModReleaseForm) => {
-			const result = await addReleaseToDaemonById(isUserMod, { releaseId, modId, data: form?.values });
+			const [, error] = await addReleaseToDaemonById(isUserMod, { releaseId, modId, data: form?.values });
 
-			result.match(
-				() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
-				(error) => {
-					showDetailedErrorModal(t("ERROR"), error.message, JSON.stringify(error.data, null, 2));
-				},
-			);
+			if (error) {
+				showDetailedErrorModal(t("ERROR"), error.message, JSON.stringify(error.data, null, 2));
+			} else {
+				showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
+			}
 
 			await daemonReleases.refetch();
 		},
@@ -75,15 +74,14 @@ export function useDaemon() {
 
 	const [toggling, toggle] = useAsyncFn(
 		async (releaseId: string) => {
-			const result = await toggleReleaseById({ releaseId });
-			result.match(
-				(ok) => {
-					if (ok === "Enabled") showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
-					else if (ok === "Disabled")
-						showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
-				},
-				(error) => showError(error.message),
-			);
+			const [status, error] = await toggleReleaseById({ releaseId });
+			if (error) {
+				showError(error.message);
+			} else {
+				if (status === "Enabled") showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
+				else if (status === "Disabled")
+					showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
+			}
 			await daemonReleases.refetch();
 		},
 		[t, daemonReleases],
@@ -95,11 +93,12 @@ export function useDaemon() {
 				const removeRes = await removeReleaseFromDaemon(currentReleaseId);
 				assert.ok(removeRes.status === StatusCodes.OK, "Failed to remove current release from daemon");
 
-				const result = await addReleaseToDaemonById(isUserMod, { releaseId: latestReleaseId, modId });
-				result.match(
-					() => showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC")),
-					(error) => showDetailedErrorModal(t("ERROR"), error.message, JSON.stringify(error.data, null, 2)),
-				);
+				const [, error] = await addReleaseToDaemonById(isUserMod, { releaseId: latestReleaseId, modId });
+				if (error) {
+					showDetailedErrorModal(t("ERROR"), error.message, JSON.stringify(error.data, null, 2));
+				} else {
+					showSuccessNotification(t("ADDED_SUCCESS_TITLE"), t("ADDED_SUCCESS_DESC"));
+				}
 
 				await daemonReleases.refetch();
 			} catch (e) {

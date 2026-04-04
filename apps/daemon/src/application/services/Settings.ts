@@ -121,12 +121,8 @@ export class Settings {
 				return { exists: false, resolvedPath };
 			}
 
-			const existsResult = this.deps.fileSystem.exists(resolvedPath);
-
-			return existsResult.match(
-				(exists) => ({ exists, resolvedPath }),
-				(error) => ({ exists: false, resolvedPath, error: error.message }),
-			);
+			const exists = this.deps.fileSystem.exists(resolvedPath);
+			return { exists, resolvedPath };
 		};
 
 		const dcsWorkingDir = validateEntry(this.getDcsWorkingDir());

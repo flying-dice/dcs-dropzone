@@ -4,7 +4,6 @@ import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import type { Application } from "../../application/Application.ts";
-import type { UserNotFoundError } from "../../application/errors.ts";
 import type { UserData } from "../../application/schemas/UserData.ts";
 import { appConfig } from "../../config/index.ts";
 
@@ -32,19 +31,16 @@ export const cookieAuth = () =>
 
 		try {
 			logger.debug({ requestId, userId }, "Loading authenticated user");
-			const result = await c.var.app.users.getUserById(userId);
+			const [user, userError] = await c.var.app.users.getUserById(userId);
 
-			result.match(
-				(user: UserData) => {
-					logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
-					c.set("getUser", () => user);
-				},
-				(error: UserNotFoundError) => {
-					logger.warn({ requestId, error }, "User not found for token");
-					deleteCookie(c, appConfig.userCookieName);
-					throw new HTTPException(StatusCodes.UNAUTHORIZED);
-				},
-			);
+			if (userError) {
+				logger.warn({ requestId, error: userError }, "User not found for token");
+				deleteCookie(c, appConfig.userCookieName);
+				throw new HTTPException(StatusCodes.UNAUTHORIZED);
+			}
+
+			logger.debug({ requestId, userId: user.id }, "Authenticated user loaded");
+			c.set("getUser", () => user);
 		} catch (error) {
 			if (error instanceof HTTPException) {
 				throw error;

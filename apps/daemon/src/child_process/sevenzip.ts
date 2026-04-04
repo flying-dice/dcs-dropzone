@@ -4,7 +4,6 @@ import { mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathExistsSync } from "fs-extra";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import { z } from "zod";
 import { extractPercentage } from "../application/functions/extract-percentage.ts";
 
@@ -106,10 +105,10 @@ export type SpawnSevenzipProps = z.infer<typeof SpawnSevenzipProps>;
 
 /**
  * Result of the sevenzip spawn process
- * - Ok: string - Path to the extracted directory
- * - Err: SevenzipErrors - Error type
+ * - Ok: [string, null] - Path to the extracted directory
+ * - Err: [undefined, SevenzipErrors] - Error type
  */
-export type SevenzipResult = Result<string, SevenzipErrors>;
+export type SevenzipResult = [string, null] | [undefined, SevenzipErrors];
 
 /**
  * Enum representing possible errors that can occur during the sevenzip process.
@@ -136,7 +135,7 @@ export async function spawnSevenzip(props: SpawnSevenzipProps, abortSignal?: Abo
 
 	if (!parsedProps.success) {
 		logger.error(`Invalid sevenzip props`, parsedProps.error.issues);
-		return err(SevenzipErrors.PropsError);
+		return [undefined, SevenzipErrors.PropsError];
 	}
 
 	const { exePath, archivePath, targetDir, onProgress } = parsedProps.data;
@@ -196,11 +195,11 @@ export async function spawnSevenzip(props: SpawnSevenzipProps, abortSignal?: Abo
 	}).then(
 		() => {
 			logger.info(`Sevenzip process completed successfully for archive: ${archivePath}`);
-			return ok(targetDir);
+			return [targetDir, null] as SevenzipResult;
 		},
 		(error) => {
 			logger.error("Sevenzip process error", { error, archivePath });
-			return err(SevenzipErrors.ProcessError);
+			return [undefined, SevenzipErrors.ProcessError] as SevenzipResult;
 		},
 	);
 }
