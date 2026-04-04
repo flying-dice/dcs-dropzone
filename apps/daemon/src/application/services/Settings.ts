@@ -53,8 +53,9 @@ export class Settings {
 	private static resolvePath(raw: string | undefined): string | undefined {
 		if (raw === undefined || raw.length === 0) return undefined;
 		const expanded = expandEnvVars(raw);
-		// If any %VAR% or $VAR placeholders remain, the env var wasn't defined — path is unusable
-		if (/%[A-Za-z0-9_()]+%/.test(expanded) || /\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/.test(expanded)) return undefined;
+		// If any %VAR% or $VAR / ${VAR} placeholders remain, the env var wasn't defined — path is unusable
+		if (/%[A-Za-z0-9_()]+%/.test(expanded) || /\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})/.test(expanded))
+			return undefined;
 		return normalize(expanded);
 	}
 

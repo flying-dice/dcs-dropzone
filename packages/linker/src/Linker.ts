@@ -111,7 +111,7 @@ export class Linker {
 		try {
 			const parent = dirname(link.dest);
 			const parentStat = safeLstat(parent);
-			if (parentStat.isOk() && !parentStat.value) {
+			if (parentStat.isErr() || !parentStat.value) {
 				mkdirSync(parent, { recursive: true });
 			}
 		} catch (e) {
