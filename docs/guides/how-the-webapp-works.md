@@ -89,7 +89,6 @@ The Daemon also calls the Webapp periodically to check whether any installed mod
 
 ## See Also
 
-- [Mod lifecycle overview](/guides/mod-lifecycle) — End-to-end flow from discovery to active mod in DCS World.
-- [Daemon documentation](/daemon/) — How the Daemon downloads, unpacks, and activates releases.
-- [Install Release](/daemon/spec/install-release) — Spec page for the Daemon behavior triggered when a user installs a mod.
-- [Enable Mod](/daemon/spec/enable-mod) — Spec page for the Daemon behavior that activates a mod using symlink definitions.
+- [How the Daemon works](/guides/how-the-daemon-works) — How the Daemon downloads, unpacks, and activates releases.
+- [Add Release](/daemon/spec/add-release) — Spec page for the Daemon behavior triggered when a user installs a mod.
+- [Enable Release](/daemon/spec/enable-release) — Spec page for the Daemon behavior that activates a mod using symlink definitions.
