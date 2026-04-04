@@ -132,7 +132,11 @@ async function processOrder(orderId: string) {
 - **Don't** return raw strings or plain objects as errors — always use `Error` subclasses.
 - **Don't** throw known domain errors — return them in the tuple.
 - **Don't** create global utility types or functions for the tuple pattern — the power is in the inline, zero-dependency signatures.
-- **Don't** use `try/catch` for handling known domain errors — the tuple pattern replaces this.
+- **Don't** artificially wrap single operations in `try/catch` just to return a tuple (e.g., wrapping `lstatSync` in a `safeLstat` helper). If the API has a non-throwing option, use it directly.
+
+### try/catch in Orchestrators
+
+The goal is **not** to avoid all `try/catch` — it is to codify known errors. In an orchestrator with 4 or 5 operations that might each throw, `try/catch` is the right tool to categorise raw errors into known, typed failure patterns while keeping the underlying stack trace. See the [Errors as Values guide](../../docs/guides/errors-as-values.md#try-catch-in-orchestrators) for full examples.
 
 ## Consequences
 

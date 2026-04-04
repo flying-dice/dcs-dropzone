@@ -143,6 +143,96 @@ if (err) {
 }
 ```
 
+## try/catch in Orchestrators
+
+The goal of the tuple pattern is **not** to eliminate all `try/catch` — it is to codify known errors at meaningful boundaries. Wrapping a single standard library call in `try/catch` just to return a tuple adds noise with no benefit. Use `try/catch` naturally when it is the clearest way to handle an operation, and return typed tuples from orchestrators that categorise multiple failure points into known error patterns.
+
+### ❌ Don't: Artificially wrap single operations
+
+Creating a helper that wraps one call in `try/catch` just to return a tuple is pointless — it wraps errors with errors for the sake of it:
+
+```ts
+// ❌ Bad — artificial wrapper around a single call
+function safeLstat(path: string): [Stats | undefined, null] | [undefined, Error] {
+  try {
+    return [lstatSync(path, { throwIfNoEntry: false }), null];
+  } catch (e) {
+    return [undefined, e instanceof Error ? e : new Error(String(e))];
+  }
+}
+```
+
+Instead, call the function directly. Many Node.js APIs already have non-throwing options:
+
+```ts
+// ✅ Good — use the API's own non-throwing option
+const stat = lstatSync(path, { throwIfNoEntry: false });
+if (!stat) {
+  // handle missing file
+}
+```
+
+### ✅ Do: Use try/catch in orchestrators to categorise failures
+
+Orchestrators coordinate 4–5 operations that might each fail. Here, `try/catch` is valuable because you **categorise** the raw error into a known, typed failure while preserving the original stack trace:
+
+```ts
+class SymlinkCreationFailed extends Error {
+  constructor(
+    readonly linkId: string,
+    readonly code: LinkerErrorCode,
+    message: string,
+  ) {
+    super(`Failed to create symlink for ${linkId}: ${message}`);
+  }
+}
+
+async function createLink(
+  link: LinkDefinition,
+): Promise<[ResolvedLink, null] | [undefined, SymlinkCreationFailed]> {
+  // 1. Source must exist — no try/catch needed, API has non-throwing option
+  const srcStat = lstatSync(link.src, { throwIfNoEntry: false });
+  if (!srcStat) {
+    return [undefined, new SymlinkCreationFailed(link.id, "SOURCE_NOT_FOUND", `Source does not exist: ${link.src}`)];
+  }
+
+  // 2. Ensure parent directory — try/catch categorises the failure
+  try {
+    const parent = dirname(link.dest);
+    if (!lstatSync(parent, { throwIfNoEntry: false })) {
+      mkdirSync(parent, { recursive: true });
+    }
+  } catch (e) {
+    return [undefined, new SymlinkCreationFailed(link.id, "LINK_CREATION_FAILED", `Failed to create parent dir: ${e}`)];
+  }
+
+  // 3. Dest must not exist — try/catch catches permission errors
+  try {
+    if (lstatSync(link.dest, { throwIfNoEntry: false })) {
+      return [undefined, new SymlinkCreationFailed(link.id, "ALREADY_EXISTS", `Dest already exists: ${link.dest}`)];
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return [undefined, new SymlinkCreationFailed(link.id, "PERMISSION_DENIED", `Cannot access dest: ${msg}`)];
+  }
+
+  // 4. Create the link
+  const [, mklinkErr] = await mklink({ link: link.dest, target: link.src });
+  if (mklinkErr) {
+    return [undefined, new SymlinkCreationFailed(link.id, "LINK_CREATION_FAILED", mklinkErr[1])];
+  }
+
+  return [{ id: link.id, src: link.src, dest: link.dest }, null];
+}
+```
+
+The key difference: the orchestrator **adds value** by mapping raw errors from different operations (stat, mkdir, mklink) into a single typed error (`SymlinkCreationFailed`) with a meaningful error code. The caller gets a known failure pattern they can act on.
+
+### The rule of thumb
+
+- **Single operation?** Call it directly. Use the API's non-throwing option if available, or let it throw naturally.
+- **Orchestrator with multiple failure points?** Use `try/catch` to categorise raw errors into known typed errors. Return those as tuples so the caller gets a clean, actionable API.
+
 ## When to Throw
 
 `throw` is reserved for **unexpected, fatal errors** — contract violations, programming bugs, and unrecoverable system failures. These are not errors the caller is expected to handle:
