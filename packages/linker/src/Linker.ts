@@ -77,7 +77,9 @@ export class Linker {
 				logger.debug(`Removed symlink for linkId ${link.id}`);
 			} else {
 				failed.push(new RemovalFailed(link.id, result.error.message));
-				logger.error(`Failed to remove symlink for linkId ${link.id} at ${link.installedPath}: ${result.error.message}`);
+				logger.error(
+					`Failed to remove symlink for linkId ${link.id} at ${link.installedPath}: ${result.error.message}`,
+				);
 			}
 		}
 

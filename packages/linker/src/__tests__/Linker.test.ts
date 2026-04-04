@@ -1,8 +1,7 @@
 import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { platform } from "node:os";
-import { tmpdir } from "node:os";
+import { platform, tmpdir } from "node:os";
 import { join } from "node:path";
 import { LinkerErrorCode, RemovalFailed, SymlinkCreationFailed } from "../errors.ts";
 import { Linker } from "../Linker.ts";

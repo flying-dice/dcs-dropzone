@@ -523,10 +523,7 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private disableRelease() {
-		const _UnprocessableEntityData = UnprocessableEntityData([
-			DcsPathNotConfigured.name,
-			ReleaseNotFound.name,
-		]);
+		const _UnprocessableEntityData = UnprocessableEntityData([DcsPathNotConfigured.name, ReleaseNotFound.name]);
 
 		this.post(
 			"/api/toggle/:releaseId/disable",
