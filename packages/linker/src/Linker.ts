@@ -1,18 +1,12 @@
 import { lstatSync, mkdirSync, rmSync } from "node:fs";
 import { dirname } from "node:path";
 import { getLogger } from "log4js";
-import { err, fromThrowable, ok, type Result } from "neverthrow";
 import type { LinkerError } from "./errors.ts";
 import { LinkerErrorCode, RemovalFailed, SymlinkCreationFailed } from "./errors.ts";
 import { mklink } from "./mklink.ts";
 import type { LinkDefinition, ResolvedLink } from "./types.ts";
 
 const logger = getLogger("Linker");
-
-const safeLstat = fromThrowable(
-	(path: string) => lstatSync(path, { throwIfNoEntry: false }),
-	(e) => (e instanceof Error ? e : new Error(String(e))),
-);
 
 /**
  * The Linker is responsible for creating and removing symbolic links on disk.
@@ -30,24 +24,24 @@ export class Linker {
 	 * If any link fails, all previously created links are rolled back.
 	 *
 	 * @param links - Link definitions with absolute src and dest paths.
-	 * @returns On success, the resolved links. On failure, all links are rolled back and
-	 *          a {@link SymlinkCreationFailed} error with a {@link LinkerErrorCode} is returned.
+	 * @returns On success, `[ResolvedLink[], null]`. On failure, all links are rolled back and
+	 *          `[undefined, SymlinkCreationFailed]` is returned.
 	 */
-	async enable(links: LinkDefinition[]): Promise<Result<ResolvedLink[], LinkerError>> {
+	async enable(links: LinkDefinition[]): Promise<[ResolvedLink[], null] | [undefined, LinkerError]> {
 		logger.info(`Creating ${links.length} symbolic links`);
 		const created: ResolvedLink[] = [];
 
 		for (const link of links) {
-			const result = await this.createLink(link);
-			if (result.isErr()) {
+			const [resolved, createErr] = await this.createLink(link);
+			if (createErr) {
 				this.rollback(created);
-				return err(result.error);
+				return [undefined, createErr];
 			}
-			created.push(result.value);
+			created.push(resolved);
 		}
 
 		logger.info(`Successfully created ${created.length} symbolic links`);
-		return ok(created);
+		return [created, null];
 	}
 
 	/**
@@ -55,117 +49,123 @@ export class Linker {
 	 * All links are attempted regardless of individual failures.
 	 *
 	 * @param links - Array of objects with link id and installed path to remove.
-	 * @returns On full success, the IDs of all removed links. On partial/total failure,
-	 *          an object with the successfully removed IDs and the structured failures.
+	 * @returns On full success, `[string[], null]` with the IDs of all removed links.
+	 *          On partial/total failure, `[undefined, { removed, failed }]`.
 	 */
 	disable(
 		links: { id: string; installedPath: string }[],
-	): Result<string[], { removed: string[]; failed: RemovalFailed[] }> {
+	): [string[], null] | [undefined, { removed: string[]; failed: RemovalFailed[] }] {
 		logger.info(`Removing ${links.length} symbolic links`);
 		const removed: string[] = [];
 		const failed: RemovalFailed[] = [];
 
-		const _rmSync = fromThrowable(rmSync, (e) => (e instanceof Error ? e : new Error(String(e))));
-
 		for (const link of links) {
 			logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
 
-			const statResult = safeLstat(link.installedPath);
-			if (statResult.isErr()) {
-				failed.push(new RemovalFailed(link.id, `Cannot stat path: ${statResult.error.message}`));
-				logger.error(`Failed to stat path for linkId ${link.id}: ${statResult.error.message}`);
-				continue;
-			}
-			if (!statResult.value) {
-				removed.push(link.id);
-				logger.debug(`Symlink already absent for linkId ${link.id}, treating as removed`);
-				continue;
-			}
+			try {
+				const stat = lstatSync(link.installedPath, { throwIfNoEntry: false });
+				if (!stat) {
+					removed.push(link.id);
+					logger.debug(`Symlink already absent for linkId ${link.id}, treating as removed`);
+					continue;
+				}
 
-			const result = _rmSync(link.installedPath, { force: true, recursive: true });
-			if (result.isOk()) {
+				rmSync(link.installedPath, { force: true, recursive: true });
 				removed.push(link.id);
 				logger.debug(`Removed symlink for linkId ${link.id}`);
-			} else {
-				failed.push(new RemovalFailed(link.id, result.error.message));
-				logger.error(
-					`Failed to remove symlink for linkId ${link.id} at ${link.installedPath}: ${result.error.message}`,
-				);
+			} catch (e) {
+				const message = e instanceof Error ? e.message : String(e);
+				failed.push(new RemovalFailed(link.id, message));
+				logger.error(`Failed to remove symlink for linkId ${link.id} at ${link.installedPath}: ${message}`);
 			}
 		}
 
 		logger.info(`Finished removing symbolic links (${removed.length}/${links.length} succeeded)`);
-		return failed.length > 0 ? err({ removed, failed }) : ok(removed);
+		return failed.length > 0 ? [undefined, { removed, failed }] : [removed, null];
 	}
 
-	private async createLink(link: LinkDefinition): Promise<Result<ResolvedLink, SymlinkCreationFailed>> {
+	/**
+	 * Orchestrates creating a single symlink — checks source exists, ensures parent dirs,
+	 * checks dest is free, then delegates to mklink. Categorises any failure into a
+	 * {@link SymlinkCreationFailed} with a specific {@link LinkerErrorCode}.
+	 */
+	private async createLink(link: LinkDefinition): Promise<[ResolvedLink, null] | [undefined, SymlinkCreationFailed]> {
 		logger.debug(`Creating symlink (linkId=${link.id}, src=${link.src}, dest=${link.dest})`);
 
-		const srcStat = safeLstat(link.src);
-		if (srcStat.isErr() || !srcStat.value) {
-			return err(
+		// --- source must exist ---
+		const srcStat = lstatSync(link.src, { throwIfNoEntry: false });
+		if (!srcStat) {
+			return [
+				undefined,
 				new SymlinkCreationFailed(link.id, LinkerErrorCode.SourceNotFound, `Source path does not exist: ${link.src}`),
-			);
+			];
 		}
 
+		// --- ensure parent directory for dest ---
 		try {
 			const parent = dirname(link.dest);
-			const parentStat = safeLstat(parent);
-			if (parentStat.isErr() || !parentStat.value) {
+			if (!lstatSync(parent, { throwIfNoEntry: false })) {
 				mkdirSync(parent, { recursive: true });
 			}
 		} catch (e) {
-			return err(
+			return [
+				undefined,
 				new SymlinkCreationFailed(
 					link.id,
 					LinkerErrorCode.LinkCreationFailed,
 					`Failed to create parent directory for dest: ${e}`,
 				),
-			);
+			];
 		}
 
-		const destStat = safeLstat(link.dest);
-		if (destStat.isErr()) {
-			return err(
+		// --- dest must not already exist ---
+		try {
+			const destStat = lstatSync(link.dest, { throwIfNoEntry: false });
+			if (destStat) {
+				return [
+					undefined,
+					new SymlinkCreationFailed(
+						link.id,
+						LinkerErrorCode.LinkAlreadyExists,
+						`Destination path already exists: ${link.dest}`,
+					),
+				];
+			}
+		} catch (e) {
+			const message = e instanceof Error ? e.message : String(e);
+			return [
+				undefined,
 				new SymlinkCreationFailed(
 					link.id,
 					LinkerErrorCode.PermissionDenied,
-					`Cannot access destination path: ${destStat.error.message}`,
+					`Cannot access destination path: ${message}`,
 				),
-			);
-		}
-		if (destStat.value) {
-			return err(
-				new SymlinkCreationFailed(
-					link.id,
-					LinkerErrorCode.LinkAlreadyExists,
-					`Destination path already exists: ${link.dest}`,
-				),
-			);
+			];
 		}
 
-		const result = await mklink({ link: link.dest, target: link.src });
-		if (result.isErr()) {
-			const [, message] = result.error;
+		// --- create the link ---
+		const [, mklinkErr] = await mklink({ link: link.dest, target: link.src });
+		if (mklinkErr) {
+			const [, message] = mklinkErr;
 
 			const code =
 				message.toLowerCase().includes("eperm") || message.toLowerCase().includes("permission")
 					? LinkerErrorCode.PermissionDenied
 					: LinkerErrorCode.LinkCreationFailed;
 
-			return err(new SymlinkCreationFailed(link.id, code, message));
+			return [undefined, new SymlinkCreationFailed(link.id, code, message)];
 		}
 
 		logger.debug(`Created symlink for linkId ${link.id}`);
-		return ok({ id: link.id, src: link.src, dest: link.dest });
+		return [{ id: link.id, src: link.src, dest: link.dest }, null];
 	}
 
 	private rollback(created: ResolvedLink[]): void {
 		logger.warn(`Rolling back ${created.length} created symlinks`);
 		for (const link of created) {
 			try {
-				const stat = safeLstat(link.dest);
-				if (stat.isOk() && stat.value) {
+				const stat = lstatSync(link.dest, { throwIfNoEntry: false });
+				if (stat) {
 					rmSync(link.dest, { force: true, recursive: true });
 				}
 				logger.debug(`Rolled back symlink for linkId ${link.id} at ${link.dest}`);

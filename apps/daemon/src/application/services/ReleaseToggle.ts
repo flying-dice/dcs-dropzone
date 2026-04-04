@@ -59,10 +59,10 @@ export class ReleaseToggle {
 			linkDefinitions.push({ id: link.id, src: srcAbsResult.value, dest: destAbsResult.value });
 		}
 
-		const linkerResult = await this.deps.linker.enable(linkDefinitions);
-		if (linkerResult.isErr()) return err(linkerResult.error);
+		const [resolvedLinks, linkerErr] = await this.deps.linker.enable(linkDefinitions);
+		if (linkerErr) return err(linkerErr);
 
-		for (const resolved of linkerResult.value) {
+		for (const resolved of resolvedLinks) {
 			this.deps.releaseRepository.setInstalledPathForSymbolicLink(resolved.id, resolved.dest);
 			logger.debug(`Stored installed symlink path for linkId ${resolved.id}: ${resolved.dest}`);
 		}
@@ -97,11 +97,11 @@ export class ReleaseToggle {
 			.filter((link) => link.installedPath !== null)
 			.map((link) => ({ id: link.id, installedPath: link.installedPath! }));
 
-		const linkerResult = this.deps.linker.disable(installedLinks);
-		const removedIds = linkerResult.isOk() ? linkerResult.value : linkerResult.error.removed;
+		const [removedOk, linkerErr] = this.deps.linker.disable(installedLinks);
+		const removedIds = removedOk ?? linkerErr?.removed ?? [];
 
-		if (linkerResult.isErr()) {
-			for (const failure of linkerResult.error.failed) {
+		if (linkerErr) {
+			for (const failure of linkerErr.failed) {
 				logger.warn(`Could not remove symlink (linkId=${failure.linkId}): ${failure.message}`);
 			}
 		}

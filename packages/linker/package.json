@@ -15,7 +15,6 @@
 	},
 	"peerDependencies": {
 		"log4js": ">=6",
-		"neverthrow": ">=8",
 		"zod": ">=4"
 	}
 }

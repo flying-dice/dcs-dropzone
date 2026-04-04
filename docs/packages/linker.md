@@ -2,7 +2,7 @@
 
 **Stable**
 
-The **Linker API** provides an interface for creating and removing symbolic links on disk. It handles platform-specific symlink strategies (junctions, hard links, symbolic links, and UAC elevation on Windows) and returns structured, actionable errors using [`neverthrow`](https://github.com/supermacro/neverthrow) `Result` types.
+The **Linker API** provides an interface for creating and removing symbolic links on disk. It handles platform-specific symlink strategies (junctions, hard links, symbolic links, and UAC elevation on Windows) and returns structured, actionable errors using Go-style error tuples (`[T, null] | [undefined, E]`).
 
 The package lives at `packages/linker` and is published internally as `@packages/linker`.
 
@@ -25,7 +25,7 @@ Creates symbolic links for all provided [`LinkDefinition`](#linkdefinition) obje
 ##### Syntax
 
 ```ts
-linker.enable(links: LinkDefinition[]): Promise<Result<ResolvedLink[], SymlinkCreationFailed>>
+linker.enable(links: LinkDefinition[]): Promise<[ResolvedLink[], null] | [undefined, SymlinkCreationFailed]>
 ```
 
 ##### Parameters
@@ -35,14 +35,14 @@ linker.enable(links: LinkDefinition[]): Promise<Result<ResolvedLink[], SymlinkCr
 
 ##### Return value
 
-A `Promise` that resolves to a `Result`:
+A `Promise` that resolves to a Go-style error tuple:
 
-- **`ok(ResolvedLink[])`** — All symlinks were created. The resolved array contains one [`ResolvedLink`](#resolvedlink) per input entry with the `id`, `src`, and `dest` that were used.
-- **`err(SymlinkCreationFailed)`** — One link failed. Previously created links are rolled back. The error identifies the failing link via `linkId` and includes a machine-readable [`LinkerErrorCode`](#linkererrorcode).
+- **`[ResolvedLink[], null]`** — All symlinks were created. The array contains one [`ResolvedLink`](#resolvedlink) per input entry with the `id`, `src`, and `dest` that were used.
+- **`[undefined, SymlinkCreationFailed]`** — One link failed. Previously created links are rolled back. The error identifies the failing link via `linkId` and includes a machine-readable [`LinkerErrorCode`](#linkererrorcode).
 
 ##### Exceptions
 
-No exceptions are thrown. All errors are returned as `Result` values.
+No exceptions are thrown. All known errors are returned as values in the tuple.
 
 ##### Description
 
@@ -72,7 +72,7 @@ import { LinkerErrorCode } from "@packages/linker";
 
 const linker = new Linker();
 
-const result = await linker.enable([
+const [resolved, err] = await linker.enable([
   {
     id: "my-mod-script",
     src: "/path/to/mod/release/Scripts/myMod.lua",
@@ -80,23 +80,20 @@ const result = await linker.enable([
   },
 ]);
 
-result.match(
-  (resolved) => {
-    console.log(`Created ${resolved.length} symlink(s)`);
-  },
-  (error) => {
-    switch (error.code) {
-      case LinkerErrorCode.SourceNotFound:
-        console.error(`Source file missing for link '${error.linkId}'`);
-        break;
-      case LinkerErrorCode.PermissionDenied:
-        console.error(`Permission denied — try running as administrator`);
-        break;
-      default:
-        console.error(`Symlink creation failed: ${error.message}`);
-    }
-  },
-);
+if (err) {
+  switch (err.code) {
+    case LinkerErrorCode.SourceNotFound:
+      console.error(`Source file missing for link '${err.linkId}'`);
+      break;
+    case LinkerErrorCode.PermissionDenied:
+      console.error(`Permission denied — try running as administrator`);
+      break;
+    default:
+      console.error(`Symlink creation failed: ${err.message}`);
+  }
+} else {
+  console.log(`Created ${resolved.length} symlink(s)`);
+}
 ```
 
 ---
@@ -110,7 +107,7 @@ Removes symlinks from disk. All links are attempted regardless of individual fai
 ```ts
 linker.disable(
   links: { id: string; installedPath: string }[]
-): Result<string[], { removed: string[]; failed: RemovalFailed[] }>
+): [string[], null] | [undefined, { removed: string[]; failed: RemovalFailed[] }]
 ```
 
 ##### Parameters
@@ -122,10 +119,10 @@ linker.disable(
 
 ##### Return value
 
-A `Result` (synchronous — no `Promise`):
+A synchronous Go-style error tuple:
 
-- **`ok(string[])`** — All links were removed. The array contains the `id` of every successfully removed link.
-- **`err({ removed, failed })`** — At least one removal failed.
+- **`[string[], null]`** — All links were removed. The array contains the `id` of every successfully removed link.
+- **`[undefined, { removed, failed }]`** — At least one removal failed.
   - `removed: string[]` — IDs of links that were successfully removed.
   - `failed: RemovalFailed[]` — Structured errors for links that could not be removed. Each entry exposes the `linkId` and a `message`.
 
@@ -133,23 +130,23 @@ Links whose `installedPath` does not exist on disk are treated as already remove
 
 ##### Exceptions
 
-No exceptions are thrown. All errors are returned as `Result` values.
+No exceptions are thrown. All known errors are returned as values in the tuple.
 
 ##### Examples
 
 ```ts
-const result = linker.disable([
+const [removed, err] = linker.disable([
   { id: "my-mod-script", installedPath: "/path/to/dcs/Saved Games/Scripts/myMod.lua" },
 ]);
 
-if (result.isOk()) {
-  console.log(`Removed ${result.value.length} symlink(s)`);
-} else {
-  const { removed, failed } = result.error;
+if (err) {
+  const { removed, failed } = err;
   console.log(`Removed ${removed.length}, failed ${failed.length}`);
   for (const f of failed) {
     console.warn(`Could not remove '${f.linkId}': ${f.message}`);
   }
+} else {
+  console.log(`Removed ${removed.length} symlink(s)`);
 }
 ```
 
@@ -162,7 +159,7 @@ Low-level function used internally by `Linker.enable()`. Creates a single symbol
 ##### Syntax
 
 ```ts
-mklink(options: { link: string; target: string }): Promise<Result<ExitCodes, [ExitCodes, string]>>
+mklink(options: { link: string; target: string }): Promise<[ExitCodes, null] | [undefined, [ExitCodes, string]]>
 ```
 
 ---
@@ -278,4 +275,4 @@ enum LinkerErrorCode {
 
 - [Enable Release](/daemon/spec/enable-release) — How the Daemon uses `Linker.enable()` during mod activation.
 - [Disable Release](/daemon/spec/disable-release) — How the Daemon uses `Linker.disable()` during mod deactivation.
-- [`neverthrow` documentation](https://github.com/supermacro/neverthrow) — The `Result` type used throughout this API.
+- [GEN-005 ADR](https://github.com/flying-dice/dcs-dropzone/blob/main/.archgate/adrs/GEN-005-errors-as-values-go-style-tuples.md) — The error handling pattern used throughout this API.
