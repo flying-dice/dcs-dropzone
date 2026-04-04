@@ -71,7 +71,7 @@ The test: can you name the function with a single verb phrase that fully describ
 
 ### Error handling
 
-See GEN-003 for the complete error handling decision. In summary: leaf functions that can fail return `Result` or `ResultAsync` (checked errors). Contract violations and impossible states use `throw` (unchecked errors). Orchestrators compose results using `.andThen()` chains.
+See GEN-005 for the complete error handling decision. In summary: leaf functions that can fail return a Go-style tuple `[T, null] | [undefined, E]` (checked errors). Contract violations and impossible states use `throw` (unchecked errors). Orchestrators compose results using early returns.
 
 ## Do's and Don'ts
 
@@ -120,5 +120,5 @@ See GEN-003 for the complete error handling decision. In summary: leaf functions
 - Gary Bernhardt, ["Boundaries" (SCNA 2012)](https://www.destroyallsoftware.com/talks/boundaries) — Functional Core, Imperative Shell pattern
 - Bertrand Meyer, *Object-Oriented Software Construction* (1988) — Command-Query Separation
 - Robert C. Martin, *Clean Code* (2008) — Single Responsibility Principle
-- GEN-003 — Error Handling: Checked vs Unchecked Errors
+- GEN-005 — Errors as Values Using Go-Style Tuples
 - [Archgate CLI](https://github.com/archgate/cli)

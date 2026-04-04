@@ -175,7 +175,7 @@ All formatting is enforced by [Biome](https://biomejs.dev/). The key rules are:
 
 - Strict type checking is enabled in every workspace.
 - `any` and non-null assertions (`!`) are allowed where genuinely appropriate — do not abuse them.
-- Prefer `neverthrow` `Result`/`ResultAsync` over exceptions for recoverable failures (see [Error Handling](#error-handling)).
+- Prefer Go-style error tuples (`[T, null] | [undefined, E]`) over exceptions for recoverable failures (see [Error Handling](#error-handling)).
 - Prefer `ts-pattern` for exhaustive pattern matching over long `if/else` or `switch` chains.
 
 ---
@@ -254,38 +254,38 @@ bun test --watch      # Re-run on file change
 
 ## Error Handling
 
-This project uses `neverthrow` for all recoverable errors. **Do not throw exceptions for expected business logic failures.**
+This project uses Go-style error tuples for all recoverable errors (see [GEN-005](.archgate/adrs/GEN-005-errors-as-values-go-style-tuples.md)). **Do not throw exceptions for expected business logic failures.**
 
-### The rule (BE-001 + GEN-003)
+### The rule (GEN-005)
 
 | Situation | Tool |
 |-----------|------|
-| Expected, recoverable failure (file not found, validation, network timeout) | `Result<T, E>` / `ResultAsync<T, E>` from `neverthrow` |
+| Expected, recoverable failure (file not found, validation, network timeout) | Return `[T, null] \| [undefined, CustomError]` tuple |
 | Contract violation / programming bug / unreachable state | `throw` |
 
 ### Error type requirements
 
-Every error returned in an `err()` must be a **class extending `Error`** with a `readonly type` literal string property:
+Every error returned in a tuple must be a **class extending `Error`**:
 
 ```ts
 // ✅ Correct
 class ConfigNotFoundError extends Error {
-  readonly type = "ConfigNotFoundError" as const;
   constructor(public readonly path: string) {
     super(`Config file not found: ${path}`);
+    this.name = "ConfigNotFoundError";
   }
 }
 
-function readConfig(path: string): ResultAsync<Config, ConfigNotFoundError> { ... }
+function readConfig(path: string): [Config, null] | [undefined, ConfigNotFoundError] { ... }
 
-// ❌ Incorrect — plain string errors are banned
-return err("config not found");
+// ❌ Incorrect — plain string errors
+return [undefined, "config not found"];
 
-// ❌ Incorrect — generic Error without a type discriminant
-return err(new Error("config not found"));
+// ❌ Incorrect — generic Error without a custom class
+return [undefined, new Error("config not found")];
 ```
 
-Use `switch (error.type)` in callers to exhaustively handle every failure mode. TypeScript will catch unhandled cases.
+Callers destructure the tuple and use `if (err)` with early returns. Use `instanceof` to narrow specific error types.
 
 ---
 

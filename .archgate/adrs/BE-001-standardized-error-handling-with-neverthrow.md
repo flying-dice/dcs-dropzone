@@ -3,7 +3,11 @@ id: BE-001
 title: Standardized Error Handling with Neverthrow
 domain: backend
 rules: false
+status: deprecated
+superseded_by: GEN-005
 ---
+
+> **⚠️ DEPRECATED:** This ADR has been superseded by [GEN-005 — Errors as Values Using Go-Style Tuples](./GEN-005-errors-as-values-go-style-tuples.md). New code must use the Go-style tuple pattern instead of `neverthrow`. Existing `neverthrow` usage may remain during the migration period.
 
 # Standardized Error Handling with Neverthrow
 

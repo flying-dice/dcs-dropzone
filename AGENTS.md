@@ -153,7 +153,7 @@ The daemon build script (`_build.ts`) bundles the app with third-party binaries 
 - Strict type checking enabled
 - `noExplicitAny`: off (explicit any allowed)
 - `noNonNullAssertion`: off (! operator allowed)
-- Use `neverthrow` Result types for error handling (ok/err pattern)
+- Use Go-style error tuples for error handling (`[T, null] | [undefined, E]` pattern)
 - Prefer functional patterns with ts-pattern for control flow
 
 ### Testing Conventions
@@ -174,7 +174,7 @@ The daemon build script (`_build.ts`) bundles the app with third-party binaries 
 - **Ports & Adapters**: Separate interfaces (ports) from implementations (adapters)
 - **Repository Pattern**: Used for data access (e.g., `JobRepo`, `ModRepository`)
 - **Service Layer**: Business logic in service classes (e.g., `UserMods`, `PublicMods`)
-- **Result Pattern**: Use `neverthrow` for error handling instead of exceptions
+- **Result Pattern**: Use Go-style error tuples (`[T, null] | [undefined, E]`) for error handling instead of exceptions
 
 ## Common Pitfalls & Workarounds
 
@@ -227,6 +227,7 @@ Before committing changes, ALWAYS:
 4. Run `bun run tsc` in affected workspaces to check types
 5. Verify no unintended files are staged (check `.gitignore`)
 6. Ensure changes work on Windows (CI target platform)
+7. **If you modified any files under `docs/`**, run `bun run docs:build` to verify there are no dead links or build errors before committing
 
 ## Additional Notes
 

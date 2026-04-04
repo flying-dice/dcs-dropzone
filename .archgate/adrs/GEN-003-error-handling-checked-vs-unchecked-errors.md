@@ -3,7 +3,11 @@ id: GEN-003
 title: Error Handling Checked vs Unchecked Errors
 domain: general
 rules: true
+status: deprecated
+superseded_by: GEN-005
 ---
+
+> **⚠️ DEPRECATED:** This ADR has been superseded by [GEN-005 — Errors as Values Using Go-Style Tuples](./GEN-005-errors-as-values-go-style-tuples.md). New code must use the Go-style tuple pattern instead of `neverthrow` `Result` types. Existing code may remain during the migration period. The `throw` guidance for unchecked/contract errors in this ADR remains valid.
 
 ## Context
 

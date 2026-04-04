@@ -27,6 +27,9 @@ The Launcher is a desktop process that runs on startup. It checks for available 
 [Getting started with local development](/local-development)
 :   How to run all three applications locally for development and testing.
 
+[Errors as Values](/guides/errors-as-values)
+:   How to handle known errors using Go-style tuples instead of throwing exceptions.
+
 ## Spec
 
 Spec pages define system behaviors using Spec Driven Development. Each spec describes one behavior in terms of inputs and observable system actions, with no implementation detail.
