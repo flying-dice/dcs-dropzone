@@ -211,6 +211,71 @@ Run schema generation — the discriminated union will produce a `oneOf` with di
 | `SymlinkCreationFailed` | `errorCode: SOURCE_NOT_FOUND \| LINK_ALREADY_EXISTS \| PERMISSION_DENIED \| LINK_CREATION_FAILED`, `systemError?: string` | Symlink creation failed — `errorCode` tells the client the specific cause, `systemError` carries the OS-level error (e.g. `EPERM: operation not permitted`) |
 | `PartialDisableFailure` | `removedCount: number`, `failedCount: number`, `systemError?: string` | Some mod files could not be removed during disable |
 
+## Suggested Improvements
+
+### A. `SymlinkCreationFailed` — include `src` and `dest` paths
+
+The linker already has both paths when it fails. For `LINK_ALREADY_EXISTS` the user needs to know *which* destination path is conflicting (maybe another mod put a file there). For `SOURCE_NOT_FOUND` the user needs to see which source file is missing to decide whether to re-download. These are mod-related paths, not internal implementation details.
+
+```typescript
+export const SymlinkCreationFailedError = z.object({
+  reason: z.literal("SymlinkCreationFailed"),
+  errorCode: z.enum([...]),
+  src: z.string(),                  // source path that was being linked
+  dest: z.string(),                 // destination path where the link was going
+  systemError: z.string().optional(),
+});
+```
+
+This means for `LINK_ALREADY_EXISTS` the client can say _"Cannot enable — a file already exists at `C:\Users\...\DCS\Mods\aircraft\F-14`. Another mod or manual install may be using this path."_ That's actionable.
+
+### B. `PartialDisableFailure` — include per-failure detail
+
+Currently `systemError` joins all failure messages into one string. For multiple failures, structured per-failure data is more useful:
+
+```typescript
+export const PartialDisableFailureError = z.object({
+  reason: z.literal("PartialDisableFailure"),
+  removedCount: z.number().int(),
+  failures: z.array(z.object({
+    path: z.string(),                // installed path that couldn't be removed
+    systemError: z.string(),         // OS error for this specific removal
+  })),
+});
+```
+
+The client can then list each failed path individually with its error, rather than showing one concatenated blob.
+
+### C. Webapp error modal should be reason-aware
+
+Currently `useErrorModal` dumps a raw string into a `<Code>` block. With structured errors, the modal (or a new component) should switch on `reason` and render contextual UI:
+
+- **Config errors** (`DropzoneModsDirNotConfigured`, `DcsPathNotConfigured`) — show a "Go to Settings" button/link
+- **Invalid path errors** (`DropzoneModsDirInvalid`, `DcsPathInvalid`) — show the bad path + "Go to Settings" button
+- **Permission errors** (`SymlinkCreationFailed` + `PERMISSION_DENIED`) — show guidance about running as administrator
+- **Conflict errors** (`SymlinkCreationFailed` + `LINK_ALREADY_EXISTS`) — show the conflicting path, suggest checking for other mods or manual installs
+- **Not ready** (`ReleaseNotReady`) — if `pendingCount > 0` show "Download still in progress, please wait"; if `failedCount > 0` show "Download failed" with a retry option
+
+This replaces the generic "Action Failed" modal with error-specific guidance. The i18n keys would follow a pattern like `TOGGLE_ERROR_{reason}` or `TOGGLE_ERROR_{reason}_{errorCode}` for easy localisation.
+
+### D. Add `releaseId` to `ReleaseNotFound` and `ReleaseNotReady`
+
+The client already knows which release it tried to toggle, but including the `releaseId` in the error response makes the API self-contained and helps with logging/debugging on the client side without extra correlation work.
+
+```typescript
+export const ReleaseNotFoundError = z.object({
+  reason: z.literal("ReleaseNotFound"),
+  releaseId: z.string(),
+});
+
+export const ReleaseNotReadyError = z.object({
+  reason: z.literal("ReleaseNotReady"),
+  releaseId: z.string(),
+  pendingCount: z.number().int(),
+  failedCount: z.number().int(),
+});
+```
+
 ## Verification
 
 1. Run existing tests: `bun test` in `apps/daemon` and `packages/linker`
