@@ -56,4 +56,3 @@ On uninstall, the installer runs a cleanup script that removes all files managed
 
 - [How the Daemon works](/guides/how-the-daemon-works) — What the Daemon does after the Launcher starts it.
 - [How the Webapp works](/guides/how-the-webapp-works) — The hosted application where users discover mods.
-- [Mod lifecycle overview](/guides/mod-lifecycle) — End-to-end flow from discovery to active mod in DCS World.

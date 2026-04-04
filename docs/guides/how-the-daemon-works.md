@@ -94,6 +94,5 @@ The saved games directory path is derived from the DCS installation path. If eit
 ## See Also
 
 - [How the Webapp works](/guides/how-the-webapp-works) — How release metadata, assets, and symlink definitions are published to the registry.
-- [Mod lifecycle overview](/guides/mod-lifecycle) — End-to-end flow from discovery to active mod.
-- [Enable Mod](/daemon/spec/enable-mod) — Spec page for the enable behavior.
-- [Install Release](/daemon/spec/install-release) — Spec page for the download and extract behavior.
+- [Enable Release](/daemon/spec/enable-release) — Spec page for the enable behavior.
+- [Add Release](/daemon/spec/add-release) — Spec page for the download and extract behavior.

@@ -8,35 +8,33 @@ DCS Dropzone is a mod manager for DCS World that handles discovering, installing
 
 The Daemon is a local background process that manages the full mod lifecycle on the user's machine. It downloads [releases](#), unpacks them into a local mod store, and enables or disables [mods](#) by managing [symlinks](#) in the DCS World [saved games directory](#).
 
-- [Daemon documentation](/daemon/)
+- [Daemon documentation](/guides/how-the-daemon-works)
 
 ### Webapp
 
 The Webapp is a hosted web application where users browse and discover mods from the [registry](#). It provides search, filtering, and mod detail pages, and communicates installation requests to the local Daemon.
 
-- [Webapp documentation](/webapp/)
+- [Webapp documentation](/guides/how-the-webapp-works)
 
 ### Launcher
 
 The Launcher is a desktop process that runs on startup. It checks for available application updates, downloads and applies them, then starts the Daemon. Users interact with the Launcher to keep DCS Dropzone itself up to date.
 
-- [Launcher documentation](/launcher/)
+- [Launcher documentation](/guides/how-the-launcher-works)
 
 ## Guides
-
-[Mod lifecycle overview](/guides/mod-lifecycle)
-:   End-to-end walkthrough of the journey from discovering a mod in the Webapp to having it active in DCS World, covering each application's role in the process.
 
 [Getting started with local development](/local-development)
 :   How to run all three applications locally for development and testing.
 
 ## Spec
 
-Spec pages define system behaviors for [Spec Driven Development](/guides/spec-driven-development). Each spec describes one behavior in terms of inputs and observable system actions, with no implementation detail.
+Spec pages define system behaviors using Spec Driven Development. Each spec describes one behavior in terms of inputs and observable system actions, with no implementation detail.
 
-- [Daemon specs](/daemon/spec/)
-- [Webapp specs](/webapp/spec/)
-- [Launcher specs](/launcher/spec/)
+- [Add Release](/daemon/spec/add-release)
+- [Enable Release](/daemon/spec/enable-release)
+- [Disable Release](/daemon/spec/disable-release)
+- [Remove Release](/daemon/spec/remove-release)
 
 ## See Also
 
