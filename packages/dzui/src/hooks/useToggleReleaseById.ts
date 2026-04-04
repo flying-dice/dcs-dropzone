@@ -11,21 +11,18 @@ export function useToggleReleaseById() {
 
 	return useAsyncFn(
 		async (releaseId: string) => {
-			const result = await toggleReleaseById({ releaseId });
-			result.match(
-				(ok) => {
-					if (ok === "Enabled") showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
-					else if (ok === "Disabled")
-						showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
-				},
-				(error) => {
-					if (error.message) {
-						showErrorModal(error.message);
-					} else {
-						showErrorNotification(new Error(error.type));
-					}
-				},
-			);
+			const [value, error] = await toggleReleaseById({ releaseId });
+			if (error) {
+				if (error.message) {
+					showErrorModal(error.message);
+				} else {
+					showErrorNotification(new Error(error.type));
+				}
+			} else {
+				if (value === "Enabled") showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
+				else if (value === "Disabled")
+					showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
+			}
 		},
 		[t],
 	);

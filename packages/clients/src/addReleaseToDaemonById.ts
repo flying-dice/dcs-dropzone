@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-import { err, ok, type Result } from "neverthrow";
 import { DropzoneClientError } from "./DropzoneClientError.ts";
 import { addReleaseToDaemon, getDaemonHealth, type ModAndReleaseData } from "./daemon";
 import {
@@ -38,7 +37,7 @@ export type AddReleaseToDaemonByIdProps = {
 export async function addReleaseToDaemonById(
 	isUserMod = false,
 	props: AddReleaseToDaemonByIdProps,
-): Promise<Result<void, AddReleaseToDaemonError>> {
+): Promise<[void, null] | [undefined, AddReleaseToDaemonError]> {
 	const { modId, releaseId, data } = props;
 
 	const health = await getDaemonHealth();
@@ -46,61 +45,66 @@ export async function addReleaseToDaemonById(
 	let releaseData: ModReleaseData;
 
 	if (health.status !== StatusCodes.OK || !health.data) {
-		return err(
+		return [
+			undefined,
 			new FailedToGetHealthError({
 				message: "Failed to get daemon health",
 				data: health.data,
 				status: health.status,
 			}),
-		);
+		];
 	}
 
 	if (isUserMod) {
 		const userMod = await getUserModById(modId);
 		if (userMod.status !== StatusCodes.OK || !userMod.data) {
-			return err(
+			return [
+				undefined,
 				new FailedToGetModError({
 					message: "Failed to get user mod",
 					data: userMod.data,
 					status: userMod.status,
 				}),
-			);
+			];
 		}
 		modData = userMod.data;
 
 		const userRelease = await getUserModReleaseById(modId, releaseId);
 		if (userRelease.status !== StatusCodes.OK || !userRelease.data) {
-			return err(
+			return [
+				undefined,
 				new FailedToGetReleaseError({
 					message: "Failed to get user mod release",
 					data: userRelease.data,
 					status: userRelease.status,
 				}),
-			);
+			];
 		}
 		releaseData = userRelease.data;
 	} else {
 		const mod = await getModById(modId);
 		if (mod.status !== StatusCodes.OK || !mod.data) {
-			return err(
+			return [
+				undefined,
 				new FailedToGetModError({
 					message: "Failed to get mod",
 					data: mod.data,
 					status: mod.status,
 				}),
-			);
+			];
 		}
 		modData = mod.data.mod;
 
 		const release = await getModReleaseById(modId, releaseId);
 		if (release.status !== StatusCodes.OK || !release.data) {
-			return err(
+			return [
+				undefined,
 				new FailedToGetReleaseError({
 					message: "Failed to get mod release",
 					data: release.data,
 					status: release.status,
 				}),
-			);
+			];
 		}
 		releaseData = release.data;
 	}
@@ -118,7 +122,8 @@ export async function addReleaseToDaemonById(
 	});
 
 	if (result.status !== StatusCodes.OK) {
-		return err(
+		return [
+			undefined,
 			result.data.reason === "DropzoneModsDirNotConfigured"
 				? new DropzoneModsDirNotConfiguredError({
 						message: "Failed to add release to daemon because mods directory is not configured",
@@ -130,7 +135,7 @@ export async function addReleaseToDaemonById(
 						data: result.data,
 						status: result.status,
 					}),
-		);
+		];
 	}
 
 	if (!data) {
@@ -139,5 +144,5 @@ export async function addReleaseToDaemonById(
 		});
 	}
 
-	return ok();
+	return [undefined, null];
 }
