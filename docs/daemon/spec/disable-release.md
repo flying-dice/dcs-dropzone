@@ -23,7 +23,7 @@ Disabling a [release](#) deactivates the [mod](#) in DCS World by removing the [
 
 ### Outputs
 
-`Result<void, ReleaseToggleError>`
+`Result<void, ReleaseNotFound | DcsPathNotConfigured>`
 :   On success, returns `void`. On failure, returns one of the following error types:
 
 `ReleaseNotFound`
@@ -32,16 +32,13 @@ Disabling a [release](#) deactivates the [mod](#) in DCS World by removing the [
 `DcsPathNotConfigured`
 :   The DCS path required to rebuild the mission scripting files and remove-symlinks script has not been configured.
 
-`DropzoneModsDirNotConfigured`
-:   The mods directory has not been configured or does not exist on disk.
-
 ### Effects
 
 | Effect | Status |
 |--------|--------|
 | Symlinks are removed from disk using the installed paths stored in the Daemon's local store | <Badge type="tip" text="Implemented" /> |
-| The installed path of each removed symlink is cleared from the Daemon's local store | <Badge type="tip" text="Implemented" /> |
-| If a symlink cannot be removed, the error is logged and the remaining symlinks are still processed | <Badge type="tip" text="Implemented" /> |
+| The installed path of each successfully removed symlink is cleared from the Daemon's local store | <Badge type="tip" text="Implemented" /> |
+| If a symlink cannot be removed, a warning is logged and the installed path is left in place | <Badge type="tip" text="Implemented" /> |
 | The release is marked as disabled in the Daemon's local store | <Badge type="tip" text="Implemented" /> |
 | `Scripts/DropzoneMissionScriptsBeforeSanitize.lua` is rebuilt to exclude before-sanitize mission scripts from this release | <Badge type="tip" text="Implemented" /> |
 | `Scripts/DropzoneMissionScriptsAfterSanitize.lua` is rebuilt to exclude after-sanitize mission scripts from this release | <Badge type="tip" text="Implemented" /> |
@@ -56,18 +53,14 @@ flowchart TD
     Exists -- No --> ErrNotFound([Reject: ReleaseNotFound])
     Exists -- Yes --> GetLinks[Get symlinks for release<br/>from local store]
 
-    GetLinks --> Loop{More symlinks?}
+    GetLinks --> DisableLinks[Linker.disable all installed links]
 
-    Loop -- No --> MarkDisabled[Mark release as disabled]
-    Loop -- Yes --> HasPath{Symlink has<br/>installed path?}
+    DisableLinks --> RemoveOk{All removed?}
+    RemoveOk -- "Yes (ok)" --> ClearAll[Clear installed paths<br/>in local store]
+    RemoveOk -- "Partial failure (err)" --> ClearSucceeded[Clear installed paths<br/>for successfully removed links.<br/>Log warning for failures.]
 
-    HasPath -- No --> SkipLink[Skip symlink] --> Loop
-    HasPath -- Yes --> RemoveLink[Remove symlink from disk]
-
-    RemoveLink --> RemoveOk{Removal succeeded?}
-
-    RemoveOk -- Yes --> ClearPath[Clear installed path<br/>in local store] --> Loop
-    RemoveOk -- No --> LogError[Log error,<br/>continue] --> Loop
+    ClearAll --> MarkDisabled[Mark release as disabled]
+    ClearSucceeded --> MarkDisabled
 
     MarkDisabled --> RebuildBefore[Rebuild<br/>DropzoneMissionScriptsBeforeSanitize.lua]
     RebuildBefore --> RebuildAfter[Rebuild<br/>DropzoneMissionScriptsAfterSanitize.lua]
@@ -81,7 +74,7 @@ flowchart TD
 
     style ErrNotFound fill:#f87171,color:#fff
     style ErrDcsPath fill:#f87171,color:#fff
-    style LogError fill:#fb923c,color:#fff
+    style ClearSucceeded fill:#fb923c,color:#fff
     style Done fill:#4ade80,color:#000
 ```
 
@@ -91,3 +84,4 @@ flowchart TD
 - [Remove Release](/daemon/spec/remove-release) — Spec page for fully removing a release from the Daemon.
 - [Add Release](/daemon/spec/add-release) — Spec page for downloading a release before it can be enabled.
 - [How the Daemon works](/guides/how-the-daemon-works) — Guide covering the symlink mechanism and mission scripting files.
+- [Linker](/packages/linker) — Reference for the `@packages/linker` package that handles symlink creation and removal.
