@@ -60,19 +60,19 @@ function trySymlink(
 	target: string,
 	link: string,
 	type: "dir" | "file" | "junction",
-): [void, null] | [undefined, Error] {
+): [undefined, null] | [undefined, Error] {
 	try {
 		symlinkSync(target, link, type);
-		return [undefined as void, null];
+		return [undefined, null];
 	} catch (e) {
 		return [undefined, e instanceof Error ? e : new Error(String(e))];
 	}
 }
 
-function tryHardlink(target: string, link: string): [void, null] | [undefined, Error] {
+function tryHardlink(target: string, link: string): [undefined, null] | [undefined, Error] {
 	try {
 		linkSync(target, link);
-		return [undefined as void, null];
+		return [undefined, null];
 	} catch (e) {
 		return [undefined, e instanceof Error ? e : new Error(String(e))];
 	}
