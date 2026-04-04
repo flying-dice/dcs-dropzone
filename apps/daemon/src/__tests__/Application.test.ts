@@ -1,27 +1,20 @@
 import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { mkdirSync, writeFileSync } from "node:fs";
 import { ok } from "node:assert";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { InMemoryJobRecordRepository, JobState } from "@packages/queue";
+import { JobState } from "@packages/queue";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import { Application } from "../application/Application.ts";
+import type { Application } from "../application/Application.ts";
 import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
-import type { DownloadJobData, DownloadJobResult } from "../application/ports/DownloadProcessor.ts";
-import type { ExtractJobData, ExtractJobResult } from "../application/ports/ExtractProcessor.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
 import { ReleaseNotFound, ReleaseNotReady, SymlinkCreationFailed } from "../application/services/ReleaseToggle.ts";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
-import { TestApplication } from "./TestApplication.ts";
+import { ProdApplication } from "../ProdApplication.ts";
 import { TestCases } from "./TestCases.ts";
-import { TestDelayProcessor } from "./TestDelayProcessor.ts";
-import { TestFileSystem } from "./TestFileSystem.ts";
-import { TestKeyValueRepository } from "./TestKeyValueRepository.ts";
-import { TestReleaseRepository } from "./TestReleaseRepository.ts";
-import type { TestTempDir } from "./TestTempDir.ts";
-import { TestUUIDGenerator } from "./TestUUIDGenerator.ts";
-import { waitForJobsForRelease } from "./utils.ts";
+import { TestTempDir } from "./TestTempDir.ts";
+import { SYSTEM_7ZIP_PATH, SYSTEM_WGET_PATH, waitForJobsForRelease } from "./utils.ts";
 
 /**
  * Creates real source files on disk that the Linker expects to exist.
@@ -315,26 +308,37 @@ describe.each(TestCases)("$label", ({ build }) => {
 	});
 });
 
-class UnconfiguredTestApplication extends Application {
-	constructor() {
-		super({
-			jobRecordRepository: new InMemoryJobRecordRepository(),
-			downloadProcessor: new TestDelayProcessor<"download", DownloadJobData, DownloadJobResult>("download"),
-			extractProcessor: new TestDelayProcessor<"extract", ExtractJobData, ExtractJobResult>("extract"),
-			keyValueRepository: new TestKeyValueRepository(),
-			releaseRepository: new TestReleaseRepository(),
-			fileSystem: new TestFileSystem(),
-			generateUuid: TestUUIDGenerator(),
-		});
-	}
+function buildUnconfiguredApp() {
+	return new ProdApplication({
+		databaseUrl: ":memory:",
+		wgetExecutablePath: SYSTEM_WGET_PATH,
+		sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
+	});
+}
+
+function buildConfiguredApp() {
+	const tempDir = new TestTempDir();
+	const modsDir = tempDir.join("dcs-dropzone", "mods");
+	const dcsWorkingDir = tempDir.join("dcs-dropzone", "dcs", "working");
+	const dcsInstallDir = tempDir.join("dcs-dropzone", "dcs", "install");
+	mkdirSync(modsDir, { recursive: true });
+	mkdirSync(dcsWorkingDir, { recursive: true });
+	mkdirSync(dcsInstallDir, { recursive: true });
+	const app = new ProdApplication({
+		databaseUrl: ":memory:",
+		wgetExecutablePath: SYSTEM_WGET_PATH,
+		sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
+	});
+	app.settings.setAll({ dropzoneModsDir: modsDir, dcsWorkingDir, dcsInstallDir });
+	return { app, tempDir };
 }
 
 describe("Unconfigured paths", () => {
-	let app: UnconfiguredTestApplication;
+	let app: Application;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new UnconfiguredTestApplication();
+		app = buildUnconfiguredApp();
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -402,11 +406,14 @@ describe("Unconfigured paths", () => {
 });
 
 describe("Symlink creation failure", () => {
-	let app: TestApplication;
+	let app: Application;
+	let tempDir: TestTempDir;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -445,7 +452,7 @@ describe("Symlink creation failure", () => {
 		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
 		// The Linker will fail because the source files don't exist on disk
-		// (TestApplication uses in-memory processors that don't create real files)
+		// (test processors don't create real files on disk)
 		const result = await app.enableRelease(modAndReleaseData.releaseId);
 
 		expect(result.isErr()).toBe(true);
@@ -478,10 +485,10 @@ describe("Symlink creation failure", () => {
 });
 
 describe("ReleaseNotFound", () => {
-	let app: TestApplication;
+	let app: Application;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		app = buildConfiguredApp().app;
 	});
 
 	it("should return ReleaseNotFound when enabling a release that does not exist", async () => {
@@ -502,11 +509,11 @@ describe("ReleaseNotFound", () => {
 });
 
 describe("ReleaseNotReady", () => {
-	let app: TestApplication;
+	let app: Application;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		app = buildConfiguredApp().app;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -540,11 +547,11 @@ describe("ReleaseNotReady", () => {
 });
 
 describe("toggleRelease", () => {
-	let app: TestApplication;
+	let app: Application;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		app = buildConfiguredApp().app;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
