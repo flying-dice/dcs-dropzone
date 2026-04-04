@@ -4,14 +4,14 @@
 
 The Daemon API's 422 error responses currently return only a class name as `reason` with no structured detail. Users can't tell *why* enabling/disabling failed. The error classes internally carry rich info (`SymlinkCreationFailed` has a `LinkerErrorCode` enum, release IDs, file paths) but none of it reaches the API consumer.
 
-**Key constraint:** Error responses must be structured with machine-readable codes so the client (webapp) can map them to localised user-facing strings. Raw error messages, file paths, and TypeScript-specific details must stay server-side in logs only.
+**Key constraint:** Error responses must be structured with machine-readable codes so the client (webapp) can map them to localised user-facing strings. System-level errors (e.g. `EPERM` from `mklink`) should be surfaced as they help users diagnose issues. Avoid leaking TypeScript-specific details (stack traces, class names) but OS/filesystem errors are fair game.
 
 Additionally, the webapp consumer at `apps/webapp/src/ui/commands/ToggleReleaseById.ts:35-44` reads `data.error` which doesn't exist in the response. The disable endpoint silently swallows partial symlink removal failures.
 
 ## Design Principles
 
 1. **Structured codes, not messages** — Return machine-readable codes that clients map to localised UI strings
-2. **No leaking internals** — File paths, link IDs, and raw error messages stay in server logs only
+2. **Surface system-level errors** — OS/filesystem errors (e.g. `EPERM`, `EEXIST`) are useful diagnostic info for the user and should be included in the response. Avoid leaking TypeScript internals (stack traces, class names) but system errors are fair game.
 3. **Discriminated unions** — Each error `reason` has its own Zod schema shape, composed via `z.discriminatedUnion("reason", [...])`
 4. **Client-actionable** — Error shapes carry enough structured context for the client to tell the user what to do
 
@@ -31,6 +31,8 @@ export const ReleaseNotFoundError = z.object({
 
 export const ReleaseNotReadyError = z.object({
   reason: z.literal("ReleaseNotReady"),
+  pendingCount: z.number().int(),  // jobs still pending/running
+  failedCount: z.number().int(),   // jobs that failed
 });
 
 export const DropzoneModsDirNotConfiguredError = z.object({
@@ -49,12 +51,14 @@ export const SymlinkCreationFailedError = z.object({
     "PERMISSION_DENIED",
     "LINK_CREATION_FAILED",
   ]),
+  systemError: z.string().optional(), // e.g. "EPERM: operation not permitted, symlink '...' -> '...'"
 });
 
 export const PartialDisableFailureError = z.object({
   reason: z.literal("PartialDisableFailure"),
   removedCount: z.number().int(),
   failedCount: z.number().int(),
+  systemError: z.string().optional(), // OS-level error from failed removals
 });
 
 // Composed unions for each endpoint
@@ -89,6 +93,8 @@ Each endpoint gets its own discriminated union containing only the errors it can
 
 The error side of the Go-style tuple changes from Error class instances to plain data objects matching the Zod schema types (i.e. `z.infer<typeof EnableReleaseError>` etc.).
 
+The `checkReleaseIsReady` method currently returns a boolean. It needs to be expanded to query the job states and return counts so the error data includes `pendingCount` and `failedCount`. This lets the client distinguish between "still downloading" (pending > 0) and "download failed" (failed > 0) and show appropriate messaging.
+
 For example, where `PathResolver` currently returns:
 ```typescript
 return [undefined, new DropzoneModsDirNotConfigured()];
@@ -98,14 +104,19 @@ It becomes:
 return [undefined, { reason: "DropzoneModsDirNotConfigured" as const }];
 ```
 
-And where `ReleaseToggle.enable()` encounters a `SymlinkCreationFailed` from the linker, it logs the raw error details (file paths, link IDs) server-side, then returns:
+And where `ReleaseToggle.enable()` encounters a `SymlinkCreationFailed` from the linker, it passes through the system-level error message:
 ```typescript
-return [undefined, { reason: "SymlinkCreationFailed" as const, errorCode: linkerErr.code }];
+return [undefined, { reason: "SymlinkCreationFailed" as const, errorCode: linkerErr.code, systemError: linkerErr.message }];
 ```
 
 For partial disable failures:
 ```typescript
-return [undefined, { reason: "PartialDisableFailure" as const, removedCount: removedIds.length, failedCount: linkerErr.failed.length }];
+return [undefined, {
+  reason: "PartialDisableFailure" as const,
+  removedCount: removedIds.length,
+  failedCount: linkerErr.failed.length,
+  systemError: linkerErr.failed.map(f => f.message).join("; "),
+}];
 ```
 
 The `ReleaseToggleError` type becomes `z.infer<typeof ToggleReleaseError>` (or the specific endpoint union type). The internal Error classes (`ReleaseNotFound`, `ReleaseNotReady`, etc.) can be removed or kept only for logging purposes — they no longer cross the API boundary.
@@ -153,16 +164,16 @@ Run schema generation — the discriminated union will produce a `oneOf` with di
 | `reason` | Additional fields | User-actionable meaning |
 |---|---|---|
 | `ReleaseNotFound` | — | The mod/release no longer exists |
-| `ReleaseNotReady` | — | Download/extraction is still in progress |
+| `ReleaseNotReady` | `pendingCount: number`, `failedCount: number` | Jobs not yet complete — client can distinguish "still downloading" (pending > 0) from "download failed" (failed > 0) |
 | `DropzoneModsDirNotConfigured` | — | Dropzone mods directory needs to be configured in settings |
 | `DcsPathNotConfigured` | — | DCS installation path needs to be configured in settings |
-| `SymlinkCreationFailed` | `errorCode: SOURCE_NOT_FOUND \| LINK_ALREADY_EXISTS \| PERMISSION_DENIED \| LINK_CREATION_FAILED` | Symlink creation failed — `errorCode` tells the client the specific cause |
-| `PartialDisableFailure` | `removedCount: number`, `failedCount: number` | Some mod files could not be removed during disable |
+| `SymlinkCreationFailed` | `errorCode: SOURCE_NOT_FOUND \| LINK_ALREADY_EXISTS \| PERMISSION_DENIED \| LINK_CREATION_FAILED`, `systemError?: string` | Symlink creation failed — `errorCode` tells the client the specific cause, `systemError` carries the OS-level error (e.g. `EPERM: operation not permitted`) |
+| `PartialDisableFailure` | `removedCount: number`, `failedCount: number`, `systemError?: string` | Some mod files could not be removed during disable |
 
 ## Verification
 
 1. Run existing tests: `bun test` in `apps/daemon` and `packages/linker`
 2. Verify new tests pass for discriminated union response shapes
-3. Verify no response body contains raw file paths or error messages (only structured codes)
+3. Verify `systemError` surfaces OS-level errors (e.g. `EPERM`) where applicable
 4. Regenerate OpenAPI schema and verify `oneOf` discriminated union appears for 422 responses
 5. Check webapp reads structured error bodies correctly
