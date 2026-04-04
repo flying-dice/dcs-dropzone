@@ -33,10 +33,15 @@ export class JobRun<TData = any, TResult = any> {
 			);
 
 			const [result, error] = res;
-			if (error !== null && error !== undefined) {
+			if (typeof error === "string") {
 				props.onFailed(JobErrorCode.ProcessorError, error);
-			} else {
+			} else if (error === null || error === undefined) {
 				props.onSuccess(result as TResult);
+			} else {
+				props.onFailed(
+					JobErrorCode.ProcessorException,
+					`Processor returned an invalid error value, expected a string but received type '${typeof error}'`,
+				);
 			}
 		} catch (error) {
 			props.onFailed(JobErrorCode.ProcessorException, String(error));
