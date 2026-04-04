@@ -3,7 +3,7 @@ import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import type { PathResolver, PathResolverError } from "./PathResolver.ts";
+import type { DcsPathNotConfigured, PathResolver, PathResolverError } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
@@ -83,7 +83,7 @@ export class ReleaseToggle {
 		return ok(created);
 	}
 
-	disable(releaseId: string): Result<void, ReleaseToggleError> {
+	disable(releaseId: string): Result<void, ReleaseNotFound | DcsPathNotConfigured> {
 		logger.info(`Disabling Release ${releaseId}`);
 
 		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
@@ -99,7 +99,14 @@ export class ReleaseToggle {
 			.filter((link) => link.installedPath !== null)
 			.map((link) => ({ id: link.id, installedPath: link.installedPath! }));
 
-		const removedIds = this.deps.linker.disable(installedLinks);
+		const linkerResult = this.deps.linker.disable(installedLinks);
+		const removedIds = linkerResult.isOk() ? linkerResult.value : linkerResult.error.removed;
+
+		if (linkerResult.isErr()) {
+			for (const failure of linkerResult.error.failed) {
+				logger.warn(`Could not remove symlink (linkId=${failure.linkId}): ${failure.message}`);
+			}
+		}
 
 		for (const id of removedIds) {
 			this.deps.releaseRepository.setInstalledPathForSymbolicLink(id, null);

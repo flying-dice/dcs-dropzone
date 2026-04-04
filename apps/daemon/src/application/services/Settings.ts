@@ -44,7 +44,10 @@ export class Settings {
 	 */
 	private static resolvePath(raw: string | undefined): string | undefined {
 		if (raw === undefined || raw.length === 0) return undefined;
-		return normalize(expandEnvVars(raw));
+		const expanded = expandEnvVars(raw);
+		// If any %VAR% placeholders remain, the env var wasn't defined — path is unusable
+		if (/%[A-Za-z0-9_()]+%/.test(expanded)) return undefined;
+		return normalize(expanded);
 	}
 
 	private get(key: string): string | undefined {

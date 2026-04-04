@@ -421,19 +421,8 @@ describe("Symlink creation failure", () => {
 			dependencies: [],
 			version: "1.0.0",
 			versionHash: Date.now().toString(),
-			assets: [
-				{
-					id: "test-release-id__asset-1",
-					name: "Test Asset",
-					urls: [
-						{
-							id: "test-release-id__asset-1__url-1",
-							url: "https://example.com/sample.zip",
-						},
-					],
-					isArchive: true,
-				},
-			],
+			// No assets → release is immediately "ready" without waiting for downloads
+			assets: [],
 			symbolicLinks: [
 				{
 					id: "symbolic-link-1",
@@ -449,10 +438,8 @@ describe("Symlink creation failure", () => {
 
 	it("should return SymlinkCreationFailed error when source files do not exist on disk", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
-		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-		// The Linker will fail because the source files don't exist on disk
-		// (test processors don't create real files on disk)
+		// No assets → immediately ready. The Linker fails because the source path does not exist on disk.
 		const result = await app.enableRelease(modAndReleaseData.releaseId);
 
 		expect(result.isErr()).toBe(true);
@@ -462,7 +449,6 @@ describe("Symlink creation failure", () => {
 
 	it("should not mark release as enabled when symlink creation fails", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
-		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
 		await app.enableRelease(modAndReleaseData.releaseId);
 
@@ -473,7 +459,6 @@ describe("Symlink creation failure", () => {
 
 	it("should not store installed paths when symlink creation fails", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
-		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
 		await app.enableRelease(modAndReleaseData.releaseId);
 

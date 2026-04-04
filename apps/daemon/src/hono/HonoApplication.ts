@@ -525,7 +525,6 @@ export class HonoApplication extends Hono<Env> {
 	private disableRelease() {
 		const _UnprocessableEntityData = UnprocessableEntityData([
 			DcsPathNotConfigured.name,
-			DropzoneModsDirNotConfigured.name,
 			ReleaseNotFound.name,
 		]);
 

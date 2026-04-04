@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { dirname } from "node:path";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
+import { err, fromThrowable, ok, type Result } from "neverthrow";
 import type { LinkerError } from "./errors.ts";
-import { LinkerErrorCode, SymlinkCreationFailed } from "./errors.ts";
+import { LinkerErrorCode, RemovalFailed, SymlinkCreationFailed } from "./errors.ts";
 import { mklink } from "./mklink.ts";
 import type { LinkDefinition, ResolvedLink } from "./types.ts";
 
@@ -47,30 +47,42 @@ export class Linker {
 
 	/**
 	 * Removes symlinks at the provided installed paths.
-	 * Individual removal failures are logged but do not prevent other removals.
+	 * All links are attempted regardless of individual failures.
 	 *
 	 * @param links - Array of objects with link id and installed path to remove.
-	 * @returns Array of link IDs that were successfully removed.
+	 * @returns On full success, the IDs of all removed links. On partial/total failure,
+	 *          an object with the successfully removed IDs and the structured failures.
 	 */
-	disable(links: { id: string; installedPath: string }[]): string[] {
+	disable(
+		links: { id: string; installedPath: string }[],
+	): Result<string[], { removed: string[]; failed: RemovalFailed[] }> {
 		logger.info(`Removing ${links.length} symbolic links`);
 		const removed: string[] = [];
+		const failed: RemovalFailed[] = [];
+
+		const _rmSync = fromThrowable(rmSync, (e) => (e instanceof Error ? e : new Error(String(e))));
 
 		for (const link of links) {
 			logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
-			try {
-				if (existsSync(link.installedPath)) {
-					rmSync(link.installedPath, { force: true, recursive: true });
-				}
+
+			if (!existsSync(link.installedPath)) {
+				removed.push(link.id);
+				logger.debug(`Symlink already absent for linkId ${link.id}, treating as removed`);
+				continue;
+			}
+
+			const result = _rmSync(link.installedPath, { force: true, recursive: true });
+			if (result.isOk()) {
 				removed.push(link.id);
 				logger.debug(`Removed symlink for linkId ${link.id}`);
-			} catch (e) {
-				logger.error(`Failed to remove symlink for linkId ${link.id} at ${link.installedPath}: ${e}`);
+			} else {
+				failed.push(new RemovalFailed(link.id, result.error.message));
+				logger.error(`Failed to remove symlink for linkId ${link.id} at ${link.installedPath}: ${result.error.message}`);
 			}
 		}
 
 		logger.info(`Finished removing symbolic links (${removed.length}/${links.length} succeeded)`);
-		return removed;
+		return failed.length > 0 ? err({ removed, failed }) : ok(removed);
 	}
 
 	private async createLink(link: LinkDefinition): Promise<Result<ResolvedLink, SymlinkCreationFailed>> {

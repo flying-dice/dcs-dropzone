@@ -1,9 +1,10 @@
 import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { platform } from "node:os";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { LinkerErrorCode, SymlinkCreationFailed } from "../errors.ts";
+import { LinkerErrorCode, RemovalFailed, SymlinkCreationFailed } from "../errors.ts";
 import { Linker } from "../Linker.ts";
 import type { LinkDefinition } from "../types.ts";
 
@@ -140,12 +141,41 @@ describe("Linker", () => {
 			const result = await linker.enable(links);
 
 			expect(result.isErr()).toBe(true);
-			expect(result._unsafeUnwrapErr().linkId).toBe("link-2");
+			const error = result._unsafeUnwrapErr();
+			expect(error.linkId).toBe("link-2");
+			expect(error.code).toBe(LinkerErrorCode.SourceNotFound);
 
 			// First symlink should have been rolled back
 			expect(existsSync(join(destDir, "first.lua"))).toBe(false);
 			// Second symlink was never created
 			expect(existsSync(join(destDir, "second.lua"))).toBe(false);
+		});
+
+		it("should return PermissionDenied error when dest directory is not writable", async () => {
+			// chmod 000 is not applicable on Windows; root bypasses permission bits
+			if (platform() === "win32" || process.getuid?.() === 0) return;
+
+			writeFileSync(join(srcDir, "test.lua"), "content");
+			const readonlyDir = join(tempDir, "readonly");
+			mkdirSync(readonlyDir);
+			chmodSync(readonlyDir, 0o000);
+
+			const links: LinkDefinition[] = [
+				{ id: "link-1", src: join(srcDir, "test.lua"), dest: join(readonlyDir, "test.lua") },
+			];
+
+			try {
+				const result = await linker.enable(links);
+
+				expect(result.isErr()).toBe(true);
+				const error = result._unsafeUnwrapErr();
+				expect(error).toBeInstanceOf(SymlinkCreationFailed);
+				expect(error.linkId).toBe("link-1");
+				expect(error.code).toBe(LinkerErrorCode.PermissionDenied);
+			} finally {
+				// Restore permissions so afterEach cleanup can delete the directory
+				chmodSync(readonlyDir, 0o755);
+			}
 		});
 
 		it("should include the failing link id in the error", async () => {
@@ -162,15 +192,16 @@ describe("Linker", () => {
 	});
 
 	describe("disable", () => {
-		it("should remove symlinks at installed paths and return removed IDs", async () => {
+		it("should remove symlinks at installed paths and return ok with removed IDs", async () => {
 			writeFileSync(join(srcDir, "file.lua"), "content");
 			await linker.enable([{ id: "link-1", src: join(srcDir, "file.lua"), dest: join(destDir, "file.lua") }]);
 
 			expect(existsSync(join(destDir, "file.lua"))).toBe(true);
 
-			const removed = linker.disable([{ id: "link-1", installedPath: join(destDir, "file.lua") }]);
+			const result = linker.disable([{ id: "link-1", installedPath: join(destDir, "file.lua") }]);
 
-			expect(removed).toEqual(["link-1"]);
+			expect(result.isOk()).toBe(true);
+			expect(result._unsafeUnwrap()).toEqual(["link-1"]);
 			expect(existsSync(join(destDir, "file.lua"))).toBe(false);
 		});
 
@@ -182,25 +213,58 @@ describe("Linker", () => {
 				{ id: "link-b", src: join(srcDir, "b.lua"), dest: join(destDir, "b.lua") },
 			]);
 
-			const removed = linker.disable([
+			const result = linker.disable([
 				{ id: "link-a", installedPath: join(destDir, "a.lua") },
 				{ id: "link-b", installedPath: join(destDir, "b.lua") },
 			]);
 
-			expect(removed).toEqual(["link-a", "link-b"]);
+			expect(result.isOk()).toBe(true);
+			expect(result._unsafeUnwrap()).toEqual(["link-a", "link-b"]);
 			expect(existsSync(join(destDir, "a.lua"))).toBe(false);
 			expect(existsSync(join(destDir, "b.lua"))).toBe(false);
 		});
 
-		it("should succeed when installed path does not exist", () => {
-			const removed = linker.disable([{ id: "link-1", installedPath: join(destDir, "nonexistent") }]);
+		it("should treat absent installed path as already removed", () => {
+			const result = linker.disable([{ id: "link-1", installedPath: join(destDir, "nonexistent") }]);
 
-			expect(removed).toEqual(["link-1"]);
+			expect(result.isOk()).toBe(true);
+			expect(result._unsafeUnwrap()).toEqual(["link-1"]);
 		});
 
 		it("should handle empty link list without error", () => {
-			const removed = linker.disable([]);
-			expect(removed).toEqual([]);
+			const result = linker.disable([]);
+			expect(result.isOk()).toBe(true);
+			expect(result._unsafeUnwrap()).toEqual([]);
+		});
+
+		it("should return err with removed and failed lists when a removal fails", () => {
+			// chmod 000 is not applicable on Windows; root bypasses permission bits
+			if (platform() === "win32" || process.getuid?.() === 0) return;
+
+			writeFileSync(join(srcDir, "keep.lua"), "content");
+			writeFileSync(join(destDir, "keep.lua"), "file to remove");
+
+			const readonlyDir = join(tempDir, "readonly-dest");
+			mkdirSync(readonlyDir);
+			writeFileSync(join(readonlyDir, "locked.lua"), "locked");
+			// Make the parent readonly so rmSync cannot remove the file inside
+			chmodSync(readonlyDir, 0o000);
+
+			try {
+				const result = linker.disable([
+					{ id: "link-keep", installedPath: join(destDir, "keep.lua") },
+					{ id: "link-locked", installedPath: join(readonlyDir, "locked.lua") },
+				]);
+
+				expect(result.isErr()).toBe(true);
+				const outcome = result._unsafeUnwrapErr();
+				expect(outcome.removed).toEqual(["link-keep"]);
+				expect(outcome.failed).toHaveLength(1);
+				expect(outcome.failed[0]).toBeInstanceOf(RemovalFailed);
+				expect(outcome.failed[0]?.linkId).toBe("link-locked");
+			} finally {
+				chmodSync(readonlyDir, 0o755);
+			}
 		});
 	});
 });

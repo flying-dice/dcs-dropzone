@@ -26,4 +26,16 @@ export class SymlinkCreationFailed extends Error {
 	}
 }
 
+export class RemovalFailed extends Error {
+	readonly type = "RemovalFailed" as const;
+
+	constructor(
+		/** The ID of the link that could not be removed */
+		readonly linkId: string,
+		message: string,
+	) {
+		super(`Failed to remove symlink for ${linkId}: ${message}`);
+	}
+}
+
 export type LinkerError = SymlinkCreationFailed;
