@@ -33,7 +33,11 @@ Functions will return a strongly typed, discriminated tuple in the format `[Resu
 ### Rules of Implementation
 
 1. **No Wrapper Types:** The tuple union must be written directly inline in the function's return signature. We will not use global wrapper types or utility functions, ensuring zero coupling for consumers.
-2. **Custom Error Classes:** We will return instantiated custom `Error` classes (e.g., `FooError`) rather than strings. This preserves standard `Error` behavior, including stack traces and custom properties (like `.code`).
+2. **Typed Error Values:** The error side of the tuple must be a well-typed value. This can be either:
+   - A custom `Error` class (e.g., `FooError extends Error`) — preserves stack traces and enables `instanceof` checks. Best for errors that benefit from stack traces or are used internally for logging/debugging.
+   - A plain data object conforming to a Zod schema (e.g., `z.infer<typeof FooError>`) — best for structured error data that crosses API boundaries, where the shape is the contract and stack traces are irrelevant.
+   
+   In both cases, avoid returning raw strings or untyped objects.
 3. **Return, Don't Throw:** Known exceptions are instantiated and returned on the right side of the tuple. The `throw` keyword is strictly reserved for unexpected, fatal developer or system errors (e.g., database connection drops, out-of-memory).
 
 ### Code Example
@@ -66,6 +70,50 @@ function bar() {
   }
 
   // TypeScript guarantees 'result' is a string.
+  console.log(result);
+}
+```
+
+### Structured Error Data (Zod Schema)
+
+When errors cross API boundaries, plain data objects conforming to Zod schemas are preferred over Error classes. The schema is the contract — both producer and consumer share it.
+
+```ts
+// 1. Define error schemas with a discriminant
+const InvalidInputError = z.object({
+  reason: z.literal("InvalidInput"),
+  field: z.string(),
+});
+
+const NotFoundError = z.object({
+  reason: z.literal("NotFound"),
+});
+
+const FooError = z.discriminatedUnion("reason", [InvalidInputError, NotFoundError]);
+type FooError = z.infer<typeof FooError>;
+
+// 2. Return structured data on the error side (Producer)
+function foo(value: string): [string, null] | [undefined, FooError] {
+  if (!value) {
+    return [undefined, { reason: "InvalidInput", field: "value" }];
+  }
+  return [`Processed ${value}`, null];
+}
+
+// 3. Consumer narrows on the discriminant
+function bar() {
+  const [result, err] = foo("");
+  if (err) {
+    switch (err.reason) {
+      case "InvalidInput":
+        console.error(`Field ${err.field} is invalid`); // type-narrowed
+        break;
+      case "NotFound":
+        console.error("Not found");
+        break;
+    }
+    return;
+  }
   console.log(result);
 }
 ```
@@ -121,7 +169,8 @@ async function processOrder(orderId: string) {
 
 - **Do** return known errors as values using the `[T, null] | [undefined, E]` tuple pattern.
 - **Do** write the tuple union inline in the function's return type — no global wrapper types.
-- **Do** use custom classes extending `Error` for all error types, preserving stack traces and enabling `instanceof` checks.
+- **Do** use custom classes extending `Error` when stack traces or `instanceof` checks are valuable (e.g., internal service errors, logging).
+- **Do** use plain data objects conforming to Zod schemas when the error crosses an API boundary and the shape is the contract (e.g., structured 422 response bodies).
 - **Do** use early `if (err) return` to keep the happy path linear.
 - **Do** reserve `throw` for contract violations, programming bugs, and unrecoverable system failures.
 - **Do** use `as const` when re-returning error tuples from composed calls to preserve type narrowing.
@@ -129,7 +178,7 @@ async function processOrder(orderId: string) {
 ### Don't
 
 - **Don't** use wrapper library `Result` types for new code — use native tuples instead.
-- **Don't** return raw strings or plain objects as errors — always use `Error` subclasses.
+- **Don't** return raw strings or untyped plain objects as errors — use either `Error` subclasses or Zod-validated data objects.
 - **Don't** throw known domain errors — return them in the tuple.
 - **Don't** create global utility types or functions for the tuple pattern — the power is in the inline, zero-dependency signatures.
 - **Don't** artificially wrap single operations in `try/catch` just to return a tuple (e.g., wrapping `lstatSync` in a `safeLstat` helper). If the API has a non-throwing option, use it directly.
@@ -146,7 +195,7 @@ The goal is **not** to avoid all `try/catch` — it is to codify known errors. I
 - **Self-Documenting APIs:** A developer using our functions immediately sees exactly which custom errors they are expected to handle just by hovering over the function signature.
 - **Zero Dependencies:** Because the types are inline standard tuples, consumers of our code do not need to import any specialized types from our library.
 - **Better DX:** Callers can handle errors cleanly with early returns, avoiding nested `try/catch` blocks and variable scope issues.
-- **Preserved Stack Traces:** By returning `new CustomError()`, we retain the V8 stack trace at the exact point of failure.
+- **Preserved Stack Traces:** When using `Error` subclasses, we retain the V8 stack trace at the exact point of failure. When using Zod schema data objects, stack traces are intentionally omitted as the error crosses an API boundary where the structured shape is the contract.
 
 ### Negative
 
@@ -167,7 +216,7 @@ This ADR supersedes:
 
 ## Compliance and Enforcement
 
-- All custom error classes must extend `Error` — enforced by `archgate check`.
+- All custom error classes (when using the class-based approach) must extend `Error` — enforced by `archgate check`.
 - New code must use the tuple return pattern for known errors — enforced during code review.
 - `throw` is reserved for contract violations and unrecoverable errors — enforced during code review.
 

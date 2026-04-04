@@ -198,7 +198,12 @@ The webapp's `useDaemon` hook (`apps/webapp/src/ui/hooks/useDaemon.ts:77`) calls
 - **Update** `useDaemon` in the webapp to use the shared `toggleReleaseById` from `packages/clients` (or the dzui `useToggleReleaseById` hook) instead of the local command
 - **Update** `useToggleReleaseById` in dzui to handle the structured error data and render reason-aware feedback
 
-### 6. Update tests
+### 6. Update ADR GEN-005
+**File:** `.archgate/adrs/GEN-005-errors-as-values-go-style-tuples.md`
+
+Already updated — the ADR now allows plain data objects conforming to Zod schemas as the error side of tuples, alongside Error classes. Error classes are still appropriate for internal use (stack traces, logging); Zod schema data objects are preferred when errors cross API boundaries.
+
+### 7. Update tests
 **File:** `apps/daemon/src/hono/HonoApplication.test.ts`
 
 - Update existing 422 assertions to verify response body matches the discriminated union shape
@@ -206,7 +211,7 @@ The webapp's `useDaemon` hook (`apps/webapp/src/ui/hooks/useDaemon.ts:77`) calls
 - Add test for `PartialDisableFailure` verifying `removedCount` and `failedCount` fields
 - Verify no raw error messages or file paths appear in response bodies
 
-### 7. Regenerate OpenAPI schema
+### 8. Regenerate OpenAPI schema
 **File:** `apps/daemon/openapi.schema.json`
 
 Run schema generation — the discriminated union will produce a `oneOf` with distinct schemas per reason in the OpenAPI spec, making it self-documenting for client developers.
