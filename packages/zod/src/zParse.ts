@@ -1,4 +1,3 @@
-import { err, ok, type Result } from "neverthrow";
 import type { ZodError, ZodType, z } from "zod";
 
 /**
@@ -38,18 +37,18 @@ export function zParse<S extends ZodType>(value: z.input<S>, schema: S): z.outpu
 }
 
 /**
- * Validates a value using a Zod schema and returns a `neverthrow` Result,
+ * Validates a value using a Zod schema and returns a Go-style tuple,
  * enforcing strict TypeScript type safety at compile time.
  *
  * This wrapper guarantees that the input `value` matches the schema's expected
- * input type during development. At runtime, it returns a `Result<Output, ZodError>`,
- * forcing the consumer to handle both the success (`ok`) and failure (`err`) paths
+ * input type during development. At runtime, it returns a `[Output, null] | [undefined, ZodError]`,
+ * forcing the consumer to handle both the success and failure paths
  * explicitly, eliminating unhandled runtime exceptions.
  *
  * @template S - The Zod schema type, inferred from the `schema` parameter.
  * @param {z.input<S>} value - The data to validate. Must structurally match the schema's input type at compile time.
  * @param {S} schema - The Zod schema to validate the value against at runtime.
- * @returns {Result<z.output<S>, ZodError>} A `neverthrow` Result containing either the parsed data or a ZodError.
+ * @returns A tuple containing either [parsedData, null] or [undefined, ZodError].
  *
  * @example
  * const UserSchema = z.object({ email: z.string().email() });
@@ -57,23 +56,26 @@ export function zParse<S extends ZodType>(value: z.input<S>, schema: S): z.outpu
  * // ❌ Fails at compile-time (Type mismatch)
  * zParseWithResult({ email: 123 }, UserSchema);
  *
- * // ✅ Passes compile-time, returns a Result for runtime handling
- * const result = zParseWithResult({ email: "test@example.com" }, UserSchema);
+ * // ✅ Passes compile-time, returns a tuple for runtime handling
+ * const [user, error] = zParseWithResult({ email: "test@example.com" }, UserSchema);
  *
- * // `neverthrow` forces you to handle both cases neatly:
- * result.match(
- *   (validUser) => console.log("Success:", validUser.email),
- *   (error) => console.error("Validation failed:", error.issues)
- * );
+ * if (error) {
+ *   console.error("Validation failed:", error.issues);
+ * } else {
+ *   console.log("Success:", user.email);
+ * }
  */
-export function zParseWithResult<S extends ZodType>(value: z.input<S>, schema: S): Result<z.output<S>, ZodError> {
+export function zParseWithResult<S extends ZodType>(
+	value: z.input<S>,
+	schema: S,
+): [z.output<S>, null] | [undefined, ZodError] {
 	const result = schema.safeParse(value);
 
 	if (result.success) {
-		return ok(result.data);
+		return [result.data, null];
 	}
 
-	return err(result.error);
+	return [undefined, result.error];
 }
 
 /**
