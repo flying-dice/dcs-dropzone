@@ -18,7 +18,7 @@ export class LocalFileSystem implements FileSystem {
 		}
 	}
 
-	async ensureSymlink(src: string, dest: string): Promise<void> {
+	async ensureSymlink(src: string, dest: string): Promise<Result<void, Error>> {
 		logger.debug(`Ensuring symlink from ${dest} to ${src}`);
 		const parent = dirname(dest);
 
@@ -32,8 +32,10 @@ export class LocalFileSystem implements FileSystem {
 		if (res.isErr()) {
 			const [, message] = res.error;
 			logger.error(`Failed to create symlink: ${message}`);
-			throw new Error(`Failed to create symlink from ${dest} to ${src}: ${message}`);
+			return err(new Error(`Failed to create symlink from ${dest} to ${src}: ${message}`));
 		}
+
+		return ok(undefined);
 	}
 
 	removeDir(path: string): void {

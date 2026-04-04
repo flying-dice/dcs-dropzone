@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { ok } from "neverthrow";
+import { err, ok } from "neverthrow";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
 
 export class TestFileSystem implements FileSystem {
@@ -13,11 +13,12 @@ export class TestFileSystem implements FileSystem {
 		this.dirs.add(path);
 	}
 
-	async ensureSymlink(src: string, dest: string): Promise<void> {
+	async ensureSymlink(src: string, dest: string) {
 		if (this.symlinkError) {
-			throw this.symlinkError;
+			return err(this.symlinkError);
 		}
 		this.symlinks.set(dest, src);
+		return ok(undefined as void);
 	}
 
 	removeDir(path: string): void {

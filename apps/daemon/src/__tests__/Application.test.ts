@@ -208,12 +208,19 @@ describe.each(TestCases)("$label", ({ build }) => {
 			expect(downloadJobs[0]?.state).toEqual(JobState.Success);
 			expect(extractJobs[0]?.state).toEqual(JobState.Success);
 
-			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
+			const resolvedLinks = (await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
 			const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
 			ok(symlinkInstalledPath);
 			expect(symlinkInstalledPath).toEndWith("test.lua");
+
+			expect(resolvedLinks.length).toEqual(symbolicLinks.length);
+			for (const resolved of resolvedLinks) {
+				expect(resolved.id).toBeDefined();
+				expect(resolved.src).toBeDefined();
+				expect(resolved.dest).toEndWith("test.lua");
+			}
 		});
 
 		it("should write Mission Scripting Files", async () => {
@@ -440,6 +447,53 @@ describe("Symlink creation failure", () => {
 		expect(releases.length).toEqual(1);
 		expect(releases[0]?.status).not.toBe(DownloadedReleaseStatus.ENABLED);
 	});
+
+	it("should rollback previously created symlinks when a subsequent symlink creation fails", async () => {
+		const multiLinkRelease: ModAndReleaseData = {
+			...modAndReleaseData,
+			symbolicLinks: [
+				{
+					id: "symbolic-link-1",
+					name: "First Script",
+					src: "sample/first.lua",
+					dest: "Scripts/first.lua",
+					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+				},
+				{
+					id: "symbolic-link-2",
+					name: "Second Script",
+					src: "sample/second.lua",
+					dest: "Scripts/second.lua",
+					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+				},
+			],
+		};
+
+		app.addRelease(multiLinkRelease)._unsafeUnwrap();
+		await waitForJobsForRelease(app.deps, multiLinkRelease.releaseId, 5);
+
+		const fileSystem = app.deps.fileSystem as TestFileSystem;
+		let callCount = 0;
+		const originalEnsureSymlink = fileSystem.ensureSymlink.bind(fileSystem);
+		fileSystem.ensureSymlink = async (src: string, dest: string) => {
+			callCount++;
+			if (callCount === 2) {
+				fileSystem.symlinkError = new Error("UAC elevation denied");
+			}
+			return originalEnsureSymlink(src, dest);
+		};
+
+		const result = await app.enableRelease(multiLinkRelease.releaseId);
+
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(SymlinkCreationFailed);
+
+		// Verify the first symlink was rolled back (removed from disk)
+		const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(multiLinkRelease.releaseId);
+		for (const link of symbolicLinks) {
+			expect(link.installedPath).toBeNull();
+		}
+	});
 });
 
 describe("ReleaseNotFound", () => {
@@ -451,6 +505,14 @@ describe("ReleaseNotFound", () => {
 
 	it("should return ReleaseNotFound when enabling a release that does not exist", async () => {
 		const result = await app.enableRelease("non-existent-release-id");
+
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
+		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotFound");
+	});
+
+	it("should return ReleaseNotFound when disabling a release that does not exist", () => {
+		const result = app.disableRelease("non-existent-release-id");
 
 		expect(result.isErr()).toBe(true);
 		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);

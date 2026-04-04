@@ -19,15 +19,21 @@ Disabling a [release](#) deactivates the [mod](#) in DCS World by removing the [
 
 | Assertion | Status |
 |-----------|--------|
-| The release must exist in the Daemon's local store | <Badge type="warning" text="Not Implemented" /> |
+| The release must exist in the Daemon's local store | <Badge type="tip" text="Implemented" /> |
 
 ### Outputs
 
-`Result<void, DcsPathNotConfigured>`
-:   On success, returns `void`. On failure, returns the following error type:
+`Result<void, ReleaseToggleError>`
+:   On success, returns `void`. On failure, returns one of the following error types:
+
+`ReleaseNotFound`
+:   The release does not exist in the Daemon's local store.
 
 `DcsPathNotConfigured`
 :   The DCS path required to rebuild the mission scripting files and remove-symlinks script has not been configured.
+
+`DropzoneModsDirNotConfigured`
+:   The mods directory has not been configured or does not exist on disk.
 
 ### Effects
 
@@ -45,7 +51,10 @@ Disabling a [release](#) deactivates the [mod](#) in DCS World by removing the [
 
 ```mermaid
 flowchart TD
-    Start([disable releaseId]) --> GetLinks[Get symlinks for release<br/>from local store]
+    Start([disable releaseId]) --> Exists{Release exists?}
+
+    Exists -- No --> ErrNotFound([Reject: ReleaseNotFound])
+    Exists -- Yes --> GetLinks[Get symlinks for release<br/>from local store]
 
     GetLinks --> Loop{More symlinks?}
 
@@ -70,6 +79,7 @@ flowchart TD
 
     RebuildBat --> Done([Release reaches DISABLED state])
 
+    style ErrNotFound fill:#f87171,color:#fff
     style ErrDcsPath fill:#f87171,color:#fff
     style LogError fill:#fb923c,color:#fff
     style Done fill:#4ade80,color:#000

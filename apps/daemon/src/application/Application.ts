@@ -9,10 +9,10 @@ import type { ReleaseRepository } from "./ports/ReleaseRepository.ts";
 import type { UUIDGenerator } from "./ports/UUIDGenerator.ts";
 import type { ModAndReleaseData } from "./schemas/ModAndReleaseData.ts";
 import { MissionScriptingFilesManager } from "./services/MissionScriptingFilesManager.ts";
-import { type DcsPathNotConfigured, type DropzoneModsDirNotConfigured, PathResolver } from "./services/PathResolver.ts";
+import { type DropzoneModsDirNotConfigured, PathResolver } from "./services/PathResolver.ts";
 import { ReleaseAssetManager } from "./services/ReleaseAssetManager.ts";
 import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
-import { ReleaseToggle, type ReleaseToggleError } from "./services/ReleaseToggle.ts";
+import { ReleaseToggle, type ReleaseToggleError, type ResolvedSymbolicLink } from "./services/ReleaseToggle.ts";
 import { RemoveSymlinksScriptManager } from "./services/RemoveSymlinksScriptManager.ts";
 import { Settings } from "./services/Settings.ts";
 
@@ -95,15 +95,15 @@ export abstract class Application {
 		return this.daemonInstanceId;
 	}
 
-	public async enableRelease(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
+	public async enableRelease(releaseId: string): Promise<Result<ResolvedSymbolicLink[], ReleaseToggleError>> {
 		return this.releaseToggleService.enable(releaseId);
 	}
 
-	public disableRelease(releaseId: string): Result<void, DcsPathNotConfigured> {
+	public disableRelease(releaseId: string): Result<void, ReleaseToggleError> {
 		return this.releaseToggleService.disable(releaseId);
 	}
 
-	public async toggleRelease(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
+	public async toggleRelease(releaseId: string): Promise<Result<ResolvedSymbolicLink[] | void, ReleaseToggleError>> {
 		const release = this.deps.releaseRepository.getById(releaseId);
 		if (release?.enabled) {
 			return this.releaseToggleService.disable(releaseId);

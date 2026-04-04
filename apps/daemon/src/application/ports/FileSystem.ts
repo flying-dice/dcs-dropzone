@@ -2,7 +2,7 @@ import type { Result } from "neverthrow";
 
 export interface FileSystem {
 	ensureDir(path: string): void;
-	ensureSymlink(src: string, dest: string): Promise<void>;
+	ensureSymlink(src: string, dest: string): Promise<Result<void, Error>>;
 	removeDir(path: string): void;
 	writeFile(filePath: string, content: string): void;
 	resolve(...paths: string[]): string;

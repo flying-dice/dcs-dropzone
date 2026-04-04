@@ -3,7 +3,7 @@ import { err, ok, type Result } from "neverthrow";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import type { DcsPathNotConfigured, PathResolver, PathResolverError } from "./PathResolver.ts";
+import type { PathResolver, PathResolverError } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
@@ -25,7 +25,20 @@ export class SymlinkCreationFailed extends Error {
 	readonly type = "SymlinkCreationFailed" as const;
 }
 
+export class SymlinkRemovalFailed extends Error {
+	readonly type = "SymlinkRemovalFailed" as const;
+	constructor(linkId: string, cause: unknown) {
+		super(`Failed to remove symlink for linkId ${linkId}: ${cause}`);
+	}
+}
+
 export type ReleaseToggleError = PathResolverError | ReleaseNotFound | ReleaseNotReady | SymlinkCreationFailed;
+
+export type ResolvedSymbolicLink = {
+	id: string;
+	src: string;
+	dest: string;
+};
 
 const logger = getLogger("ReleaseToggle");
 
@@ -41,7 +54,7 @@ type Deps = {
 export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
-	async enable(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
+	async enable(releaseId: string): Promise<Result<ResolvedSymbolicLink[], ReleaseToggleError>> {
 		logger.info(`Enabling Release ${releaseId}`);
 		const readyResult = this.checkReleaseIsReady(releaseId);
 		if (readyResult.isErr()) return err(readyResult.error);
@@ -49,26 +62,35 @@ export class ReleaseToggle {
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
 
+		const created: ResolvedSymbolicLink[] = [];
+
 		for (const link of links) {
 			const srcAbsResult = this.deps.pathResolver.resolveReleasePath(releaseId, link.src);
-			if (srcAbsResult.isErr()) return err(srcAbsResult.error);
+			if (srcAbsResult.isErr()) {
+				this.rollback(created);
+				return err(srcAbsResult.error);
+			}
 
 			const destAbsResult = this.deps.pathResolver.resolveSymbolicLinkPath(link.destRoot, link.dest);
-			if (destAbsResult.isErr()) return err(destAbsResult.error);
+			if (destAbsResult.isErr()) {
+				this.rollback(created);
+				return err(destAbsResult.error);
+			}
 
 			const srcAbs = srcAbsResult.value;
 			const destAbs = destAbsResult.value;
 
 			logger.debug(`Creating symlink (release=${releaseId}, linkId=${link.id}, src=${srcAbs}, dest=${destAbs})`);
-			try {
-				await this.deps.fileSystem.ensureSymlink(srcAbs, destAbs);
-			} catch (e) {
-				logger.error(`Failed to create symlink for linkId ${link.id}: ${e}`);
-				return err(new SymlinkCreationFailed(`Failed to create symlink for ${link.id}: ${e}`));
+			const symlinkResult = await this.deps.fileSystem.ensureSymlink(srcAbs, destAbs);
+			if (symlinkResult.isErr()) {
+				logger.error(`Failed to create symlink for linkId ${link.id}: ${symlinkResult.error}`);
+				this.rollback(created);
+				return err(new SymlinkCreationFailed(`Failed to create symlink for ${link.id}: ${symlinkResult.error}`));
 			}
 
 			this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, destAbs);
 			logger.debug(`Stored installed symlink path for linkId ${link.id}: ${destAbs}`);
+			created.push({ id: link.id, src: srcAbs, dest: destAbs });
 		}
 
 		this.deps.releaseRepository.setEnabled(releaseId, true);
@@ -82,11 +104,17 @@ export class ReleaseToggle {
 		if (removeSymlinksRebuildResult.isErr()) return err(removeSymlinksRebuildResult.error);
 
 		logger.info(`Finished enabling Release ${releaseId}`);
-		return ok(undefined);
+		return ok(created);
 	}
 
-	disable(releaseId: string): Result<void, DcsPathNotConfigured> {
+	disable(releaseId: string): Result<void, ReleaseToggleError> {
 		logger.info(`Disabling Release ${releaseId}`);
+
+		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
+		if (!exists) {
+			logger.warn(`Release ${releaseId} not found`);
+			return err(new ReleaseNotFound(releaseId));
+		}
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
@@ -118,6 +146,19 @@ export class ReleaseToggle {
 
 		logger.info(`Finished disabling Release ${releaseId}`);
 		return ok(undefined);
+	}
+
+	private rollback(created: ResolvedSymbolicLink[]): void {
+		logger.warn(`Rolling back ${created.length} created symlinks`);
+		for (const link of created) {
+			try {
+				this.deps.fileSystem.removeDir(link.dest);
+				this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, null);
+				logger.debug(`Rolled back symlink for linkId ${link.id} at ${link.dest}`);
+			} catch (e) {
+				logger.error(`Failed to rollback symlink for linkId ${link.id} at ${link.dest}: ${e}`);
+			}
+		}
 	}
 
 	private checkReleaseIsReady(releaseId: string): Result<void, ReleaseNotFound | ReleaseNotReady> {

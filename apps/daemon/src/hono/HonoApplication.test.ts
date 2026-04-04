@@ -1,15 +1,18 @@
 import "../__tests__/log4js.ts";
-import { describe, expect, it, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
+import { TestApplication } from "../__tests__/TestApplication.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { ReleaseNotFound, ReleaseNotReady } from "../application/services/ReleaseToggle.ts";
-import { TestApplication } from "../__tests__/TestApplication.ts";
 import { HonoApplication } from "./HonoApplication.ts";
 
 describe("HonoApplication", () => {
 	describe("Private Network Access CORS", () => {
 		it("should add Access-Control-Allow-Private-Network header when request includes Access-Control-Request-Private-Network", async () => {
 			const app = new TestApplication();
-			const honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			const honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
 
 			// Make an OPTIONS request with the PNA header
 			const response = await honoApp.request("/api/health", {
@@ -25,7 +28,10 @@ describe("HonoApplication", () => {
 
 		it("should not add Access-Control-Allow-Private-Network header when request does not include Access-Control-Request-Private-Network", async () => {
 			const app = new TestApplication();
-			const honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			const honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
 
 			// Make an OPTIONS request without the PNA header
 			const response = await honoApp.request("/api/health", {
@@ -40,7 +46,10 @@ describe("HonoApplication", () => {
 
 		it("should add Access-Control-Allow-Private-Network header for POST preflight requests with PNA header", async () => {
 			const app = new TestApplication();
-			const honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			const honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
 
 			// Make an OPTIONS preflight request for a POST with the PNA header
 			const response = await honoApp.request("/api/downloads", {
@@ -88,7 +97,10 @@ describe("HonoApplication", () => {
 
 		beforeEach(async () => {
 			app = new TestApplication();
-			honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
 		});
 
 		describe("POST /api/toggle/:releaseId/enable", () => {
@@ -127,6 +139,13 @@ describe("HonoApplication", () => {
 
 				expect(response.status).toBe(200);
 				expect(await response.json()).toEqual({ ok: true });
+			});
+
+			it("should return 422 with ReleaseNotFound when release does not exist", async () => {
+				const response = await honoApp.request("/api/toggle/non-existent-id/disable", { method: "POST" });
+
+				expect(response.status).toBe(422);
+				expect((await response.json()).reason).toBe(ReleaseNotFound.name);
 			});
 		});
 
