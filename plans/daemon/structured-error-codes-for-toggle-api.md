@@ -39,8 +39,20 @@ export const DropzoneModsDirNotConfiguredError = z.object({
   reason: z.literal("DropzoneModsDirNotConfigured"),
 });
 
+export const DropzoneModsDirInvalidError = z.object({
+  reason: z.literal("DropzoneModsDirInvalid"),
+  errorCode: z.enum(["PATH_NOT_FOUND"]),
+  path: z.string(), // the configured path that doesn't exist
+});
+
 export const DcsPathNotConfiguredError = z.object({
   reason: z.literal("DcsPathNotConfigured"),
+});
+
+export const DcsPathInvalidError = z.object({
+  reason: z.literal("DcsPathInvalid"),
+  errorCode: z.enum(["PATH_NOT_FOUND"]),
+  path: z.string(), // the configured path that doesn't exist
 });
 
 export const SymlinkCreationFailedError = z.object({
@@ -66,13 +78,16 @@ export const EnableReleaseError = z.discriminatedUnion("reason", [
   ReleaseNotFoundError,
   ReleaseNotReadyError,
   DropzoneModsDirNotConfiguredError,
+  DropzoneModsDirInvalidError,
   DcsPathNotConfiguredError,
+  DcsPathInvalidError,
   SymlinkCreationFailedError,
 ]);
 
 export const DisableReleaseError = z.discriminatedUnion("reason", [
   ReleaseNotFoundError,
   DcsPathNotConfiguredError,
+  DcsPathInvalidError,
   PartialDisableFailureError,
 ]);
 
@@ -80,7 +95,9 @@ export const ToggleReleaseError = z.discriminatedUnion("reason", [
   ReleaseNotFoundError,
   ReleaseNotReadyError,
   DropzoneModsDirNotConfiguredError,
+  DropzoneModsDirInvalidError,
   DcsPathNotConfiguredError,
+  DcsPathInvalidError,
   SymlinkCreationFailedError,
   PartialDisableFailureError,
 ]);
@@ -95,14 +112,23 @@ The error side of the Go-style tuple changes from Error class instances to plain
 
 The `checkReleaseIsReady` method currently returns a boolean. It needs to be expanded to query the job states and return counts so the error data includes `pendingCount` and `failedCount`. This lets the client distinguish between "still downloading" (pending > 0) and "download failed" (failed > 0) and show appropriate messaging.
 
-For example, where `PathResolver` currently returns:
+`PathResolver` currently conflates "not configured" with "path doesn't exist" under one error. Split into distinct cases:
+
 ```typescript
-return [undefined, new DropzoneModsDirNotConfigured()];
-```
-It becomes:
-```typescript
+// Setting is empty/missing
 return [undefined, { reason: "DropzoneModsDirNotConfigured" as const }];
+
+// Setting has a value but path doesn't exist on disk
+return [undefined, { reason: "DropzoneModsDirInvalid" as const, errorCode: "PATH_NOT_FOUND" as const, path: dropzoneModsFolder }];
 ```
+
+Same split for DCS path:
+```typescript
+return [undefined, { reason: "DcsPathNotConfigured" as const }];
+return [undefined, { reason: "DcsPathInvalid" as const, errorCode: "PATH_NOT_FOUND" as const, path: rootPath }];
+```
+
+The `path` field is included because it's user-configured data, not an internal implementation detail — the user needs to see which path is invalid so they can fix it in settings.
 
 And where `ReleaseToggle.enable()` encounters a `SymlinkCreationFailed` from the linker, it passes through the system-level error message:
 ```typescript
@@ -166,7 +192,9 @@ Run schema generation — the discriminated union will produce a `oneOf` with di
 | `ReleaseNotFound` | — | The mod/release no longer exists |
 | `ReleaseNotReady` | `pendingCount: number`, `failedCount: number` | Jobs not yet complete — client can distinguish "still downloading" (pending > 0) from "download failed" (failed > 0) |
 | `DropzoneModsDirNotConfigured` | — | Dropzone mods directory needs to be configured in settings |
+| `DropzoneModsDirInvalid` | `errorCode: PATH_NOT_FOUND`, `path: string` | Configured dropzone mods directory doesn't exist on disk |
 | `DcsPathNotConfigured` | — | DCS installation path needs to be configured in settings |
+| `DcsPathInvalid` | `errorCode: PATH_NOT_FOUND`, `path: string` | Configured DCS path doesn't exist on disk |
 | `SymlinkCreationFailed` | `errorCode: SOURCE_NOT_FOUND \| LINK_ALREADY_EXISTS \| PERMISSION_DENIED \| LINK_CREATION_FAILED`, `systemError?: string` | Symlink creation failed — `errorCode` tells the client the specific cause, `systemError` carries the OS-level error (e.g. `EPERM: operation not permitted`) |
 | `PartialDisableFailure` | `removedCount: number`, `failedCount: number`, `systemError?: string` | Some mod files could not be removed during disable |
 
