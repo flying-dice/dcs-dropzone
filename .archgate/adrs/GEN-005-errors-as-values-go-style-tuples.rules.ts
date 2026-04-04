@@ -5,7 +5,7 @@ export default defineRules({
 		description: "neverthrow must not be imported — use Go-style tuples instead (GEN-005).",
 		severity: "error",
 		async check(ctx) {
-			const matches = await ctx.grepFiles(/from\s+["']neverthrow["']/, "{apps,packages}/*/src/**/*.ts");
+			const matches = await ctx.grepFiles(/from\s+["']neverthrow["']/, "{apps,packages}/*/src/**/*.{ts,tsx}");
 			const filtered = matches.filter((m) => {
 				if (m.file.includes(".test.") || m.file.includes("__tests__")) return false;
 				return true;
