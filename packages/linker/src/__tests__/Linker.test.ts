@@ -1,25 +1,58 @@
 import "./log4js.ts";
-import { beforeEach, describe, expect, it } from "bun:test";
-import { err } from "neverthrow";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { LinkerErrorCode, SymlinkCreationFailed } from "../errors.ts";
 import { Linker } from "../Linker.ts";
-import { SymlinkCreationFailed } from "../errors.ts";
 import type { LinkDefinition } from "../types.ts";
-import { TestLinkerFileSystem } from "./TestLinkerFileSystem.ts";
 
 describe("Linker", () => {
-	let fileSystem: TestLinkerFileSystem;
+	let tempDir: string;
+	let srcDir: string;
+	let destDir: string;
 	let linker: Linker;
 
 	beforeEach(() => {
-		fileSystem = new TestLinkerFileSystem();
-		linker = new Linker({ fileSystem });
+		tempDir = mkdtempSync(join(tmpdir(), "linker-test-"));
+		srcDir = join(tempDir, "src");
+		destDir = join(tempDir, "dest");
+		mkdirSync(srcDir, { recursive: true });
+		mkdirSync(destDir, { recursive: true });
+		linker = new Linker();
+	});
+
+	afterEach(() => {
+		rmSync(tempDir, { recursive: true, force: true });
 	});
 
 	describe("enable", () => {
 		it("should create symlinks for all link definitions and return resolved links", async () => {
+			writeFileSync(join(srcDir, "test.lua"), 'print("hello")');
+
 			const links: LinkDefinition[] = [
-				{ id: "link-1", src: "/mods/release-1/file.lua", dest: "/dcs/Scripts/file.lua" },
-				{ id: "link-2", src: "/mods/release-1/dir", dest: "/dcs/Mods/dir" },
+				{ id: "link-1", src: join(srcDir, "test.lua"), dest: join(destDir, "test.lua") },
+			];
+
+			const result = await linker.enable(links);
+
+			expect(result.isOk()).toBe(true);
+			const resolved = result._unsafeUnwrap();
+			expect(resolved.length).toEqual(1);
+			expect(resolved[0]?.id).toBe("link-1");
+			expect(resolved[0]?.src).toBe(join(srcDir, "test.lua"));
+			expect(resolved[0]?.dest).toBe(join(destDir, "test.lua"));
+
+			expect(existsSync(join(destDir, "test.lua"))).toBe(true);
+		});
+
+		it("should create symlinks for multiple files", async () => {
+			writeFileSync(join(srcDir, "first.lua"), "first");
+			writeFileSync(join(srcDir, "second.lua"), "second");
+
+			const links: LinkDefinition[] = [
+				{ id: "link-1", src: join(srcDir, "first.lua"), dest: join(destDir, "first.lua") },
+				{ id: "link-2", src: join(srcDir, "second.lua"), dest: join(destDir, "second.lua") },
 			];
 
 			const result = await linker.enable(links);
@@ -27,13 +60,33 @@ describe("Linker", () => {
 			expect(result.isOk()).toBe(true);
 			const resolved = result._unsafeUnwrap();
 			expect(resolved.length).toEqual(2);
-			expect(resolved[0]?.id).toBe("link-1");
-			expect(resolved[0]?.src).toBe("/mods/release-1/file.lua");
-			expect(resolved[0]?.dest).toBe("/dcs/Scripts/file.lua");
-			expect(resolved[1]?.id).toBe("link-2");
+			expect(existsSync(join(destDir, "first.lua"))).toBe(true);
+			expect(existsSync(join(destDir, "second.lua"))).toBe(true);
+		});
 
-			expect(fileSystem.hasSymlink("/dcs/Scripts/file.lua")).toBe(true);
-			expect(fileSystem.hasSymlink("/dcs/Mods/dir")).toBe(true);
+		it("should create symlinks for directories", async () => {
+			const subDir = join(srcDir, "mymod");
+			mkdirSync(subDir);
+			writeFileSync(join(subDir, "init.lua"), "mod init");
+
+			const links: LinkDefinition[] = [{ id: "link-1", src: subDir, dest: join(destDir, "mymod") }];
+
+			const result = await linker.enable(links);
+
+			expect(result.isOk()).toBe(true);
+			expect(existsSync(join(destDir, "mymod", "init.lua"))).toBe(true);
+		});
+
+		it("should create parent directories for dest if they do not exist", async () => {
+			writeFileSync(join(srcDir, "test.lua"), "content");
+			const nestedDest = join(destDir, "deep", "nested", "test.lua");
+
+			const links: LinkDefinition[] = [{ id: "link-1", src: join(srcDir, "test.lua"), dest: nestedDest }];
+
+			const result = await linker.enable(links);
+
+			expect(result.isOk()).toBe(true);
+			expect(existsSync(nestedDest)).toBe(true);
 		});
 
 		it("should return an empty array when no links are provided", async () => {
@@ -43,86 +96,111 @@ describe("Linker", () => {
 			expect(result._unsafeUnwrap()).toEqual([]);
 		});
 
-		it("should return SymlinkCreationFailed when symlink creation fails", async () => {
-			fileSystem.symlinkError = new Error("permission denied");
-
+		it("should return SourceNotFound error when source does not exist", async () => {
 			const links: LinkDefinition[] = [
-				{ id: "link-1", src: "/mods/release-1/file.lua", dest: "/dcs/Scripts/file.lua" },
+				{ id: "link-1", src: join(srcDir, "nonexistent.lua"), dest: join(destDir, "test.lua") },
 			];
 
 			const result = await linker.enable(links);
 
 			expect(result.isErr()).toBe(true);
-			expect(result._unsafeUnwrapErr()).toBeInstanceOf(SymlinkCreationFailed);
-			expect(result._unsafeUnwrapErr().type).toBe("SymlinkCreationFailed");
+			const error = result._unsafeUnwrapErr();
+			expect(error).toBeInstanceOf(SymlinkCreationFailed);
+			expect(error.type).toBe("SymlinkCreationFailed");
+			expect(error.linkId).toBe("link-1");
+			expect(error.code).toBe(LinkerErrorCode.SourceNotFound);
+		});
+
+		it("should return LinkAlreadyExists error when dest already exists", async () => {
+			writeFileSync(join(srcDir, "test.lua"), "content");
+			writeFileSync(join(destDir, "test.lua"), "existing content");
+
+			const links: LinkDefinition[] = [
+				{ id: "link-1", src: join(srcDir, "test.lua"), dest: join(destDir, "test.lua") },
+			];
+
+			const result = await linker.enable(links);
+
+			expect(result.isErr()).toBe(true);
+			const error = result._unsafeUnwrapErr();
+			expect(error).toBeInstanceOf(SymlinkCreationFailed);
+			expect(error.code).toBe(LinkerErrorCode.LinkAlreadyExists);
+			expect(error.linkId).toBe("link-1");
 		});
 
 		it("should rollback previously created symlinks when a subsequent link fails", async () => {
-			let callCount = 0;
-			const originalEnsureSymlink = fileSystem.ensureSymlink.bind(fileSystem);
-			fileSystem.ensureSymlink = async (src: string, dest: string) => {
-				callCount++;
-				if (callCount === 2) {
-					return err(new Error("UAC elevation denied"));
-				}
-				return originalEnsureSymlink(src, dest);
-			};
+			writeFileSync(join(srcDir, "first.lua"), "first");
+			// second.lua does NOT exist → will fail
 
 			const links: LinkDefinition[] = [
-				{ id: "link-1", src: "/mods/release-1/first.lua", dest: "/dcs/Scripts/first.lua" },
-				{ id: "link-2", src: "/mods/release-1/second.lua", dest: "/dcs/Scripts/second.lua" },
+				{ id: "link-1", src: join(srcDir, "first.lua"), dest: join(destDir, "first.lua") },
+				{ id: "link-2", src: join(srcDir, "nonexistent.lua"), dest: join(destDir, "second.lua") },
 			];
 
 			const result = await linker.enable(links);
 
 			expect(result.isErr()).toBe(true);
-			expect(result._unsafeUnwrapErr()).toBeInstanceOf(SymlinkCreationFailed);
+			expect(result._unsafeUnwrapErr().linkId).toBe("link-2");
 
 			// First symlink should have been rolled back
-			expect(fileSystem.hasSymlink("/dcs/Scripts/first.lua")).toBe(false);
+			expect(existsSync(join(destDir, "first.lua"))).toBe(false);
 			// Second symlink was never created
-			expect(fileSystem.hasSymlink("/dcs/Scripts/second.lua")).toBe(false);
+			expect(existsSync(join(destDir, "second.lua"))).toBe(false);
 		});
 
-		it("should include the failing link id in the error message", async () => {
-			fileSystem.symlinkError = new Error("access denied");
-
+		it("should include the failing link id in the error", async () => {
 			const links: LinkDefinition[] = [
-				{ id: "my-special-link", src: "/mods/file.lua", dest: "/dcs/file.lua" },
+				{ id: "my-special-link", src: join(srcDir, "nope.lua"), dest: join(destDir, "test.lua") },
 			];
 
 			const result = await linker.enable(links);
 
 			expect(result.isErr()).toBe(true);
+			expect(result._unsafeUnwrapErr().linkId).toBe("my-special-link");
 			expect(result._unsafeUnwrapErr().message).toContain("my-special-link");
 		});
 	});
 
 	describe("disable", () => {
 		it("should remove symlinks at installed paths and return removed IDs", async () => {
-			// First enable some links
-			const links: LinkDefinition[] = [
-				{ id: "link-1", src: "/mods/release-1/file.lua", dest: "/dcs/Scripts/file.lua" },
-				{ id: "link-2", src: "/mods/release-1/dir", dest: "/dcs/Mods/dir" },
-			];
-			await linker.enable(links);
+			writeFileSync(join(srcDir, "file.lua"), "content");
+			await linker.enable([{ id: "link-1", src: join(srcDir, "file.lua"), dest: join(destDir, "file.lua") }]);
 
-			expect(fileSystem.hasSymlink("/dcs/Scripts/file.lua")).toBe(true);
-			expect(fileSystem.hasSymlink("/dcs/Mods/dir")).toBe(true);
+			expect(existsSync(join(destDir, "file.lua"))).toBe(true);
 
-			// Now disable
-			const removed = linker.disable([
-				{ id: "link-1", installedPath: "/dcs/Scripts/file.lua" },
-				{ id: "link-2", installedPath: "/dcs/Mods/dir" },
+			const removed = linker.disable([{ id: "link-1", installedPath: join(destDir, "file.lua") }]);
+
+			expect(removed).toEqual(["link-1"]);
+			expect(existsSync(join(destDir, "file.lua"))).toBe(false);
+		});
+
+		it("should remove multiple symlinks", async () => {
+			writeFileSync(join(srcDir, "a.lua"), "a");
+			writeFileSync(join(srcDir, "b.lua"), "b");
+			await linker.enable([
+				{ id: "link-a", src: join(srcDir, "a.lua"), dest: join(destDir, "a.lua") },
+				{ id: "link-b", src: join(srcDir, "b.lua"), dest: join(destDir, "b.lua") },
 			]);
 
-			expect(removed).toEqual(["link-1", "link-2"]);
-			expect(fileSystem.hasSymlink("/dcs/Scripts/file.lua")).toBe(false);
-			expect(fileSystem.hasSymlink("/dcs/Mods/dir")).toBe(false);
+			const removed = linker.disable([
+				{ id: "link-a", installedPath: join(destDir, "a.lua") },
+				{ id: "link-b", installedPath: join(destDir, "b.lua") },
+			]);
+
+			expect(removed).toEqual(["link-a", "link-b"]);
+			expect(existsSync(join(destDir, "a.lua"))).toBe(false);
+			expect(existsSync(join(destDir, "b.lua"))).toBe(false);
+		});
+
+		it("should succeed when installed path does not exist", () => {
+			const removed = linker.disable([{ id: "link-1", installedPath: join(destDir, "nonexistent") }]);
+
+			expect(removed).toEqual(["link-1"]);
 		});
 
 		it("should handle empty link list without error", () => {
-			expect(() => linker.disable([])).not.toThrow();
+			const removed = linker.disable([]);
+			expect(removed).toEqual([]);
 		});
 	});
 });

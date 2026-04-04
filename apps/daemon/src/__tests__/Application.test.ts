@@ -1,9 +1,9 @@
 import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { ok } from "node:assert";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { InMemoryJobRecordRepository, JobState } from "@packages/queue";
-import { err } from "neverthrow";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import { Application } from "../application/Application.ts";
 import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
@@ -22,6 +22,21 @@ import { TestReleaseRepository } from "./TestReleaseRepository.ts";
 import type { TestTempDir } from "./TestTempDir.ts";
 import { TestUUIDGenerator } from "./TestUUIDGenerator.ts";
 import { waitForJobsForRelease } from "./utils.ts";
+
+/**
+ * Creates real source files on disk that the Linker expects to exist.
+ * In test mode, the download/extract processors are stubs that don't create real files,
+ * but the concrete Linker needs real source files to create symlinks.
+ */
+function createSourceFilesOnDisk(app: Application, releaseData: ModAndReleaseData) {
+	const modsDir = app.settings.getDropzoneModsDir();
+	if (!modsDir) return;
+	for (const link of releaseData.symbolicLinks) {
+		const srcPath = join(modsDir, releaseData.releaseId, link.src);
+		mkdirSync(dirname(srcPath), { recursive: true });
+		writeFileSync(srcPath, "test content");
+	}
+}
 
 describe.each(TestCases)("$label", ({ build }) => {
 	let modAndReleaseData: ModAndReleaseData;
@@ -199,6 +214,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const downloadJobs = app.deps.jobRecordRepository.findAllForProcessor("download");
 			const extractJobs = app.deps.jobRecordRepository.findAllForProcessor("extract");
@@ -227,6 +243,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should write Mission Scripting Files", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
@@ -245,6 +262,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should reflect ENABLED status in getAllReleasesWithStatus after enabling", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
@@ -256,6 +274,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should reflect DISABLED status in getAllReleasesWithStatus after disabling", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
@@ -268,6 +287,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should generate removeSymlinks.bat after enabling a release", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
@@ -281,6 +301,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should regenerate removeSymlinks.bat after disabling a release", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
@@ -419,14 +440,12 @@ describe("Symlink creation failure", () => {
 		};
 	});
 
-	it("should return SymlinkCreationFailed error when symlink creation fails (e.g. UAC denied)", async () => {
+	it("should return SymlinkCreationFailed error when source files do not exist on disk", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
 		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-		// Simulate symlink creation failure (e.g. UAC elevation denied)
-		const fileSystem = app.deps.fileSystem as TestFileSystem;
-		fileSystem.symlinkError = new Error("UAC elevation denied");
-
+		// The Linker will fail because the source files don't exist on disk
+		// (TestApplication uses in-memory processors that don't create real files)
 		const result = await app.enableRelease(modAndReleaseData.releaseId);
 
 		expect(result.isErr()).toBe(true);
@@ -438,10 +457,6 @@ describe("Symlink creation failure", () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
 		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-		// Simulate symlink creation failure
-		const fileSystem = app.deps.fileSystem as TestFileSystem;
-		fileSystem.symlinkError = new Error("UAC elevation denied");
-
 		await app.enableRelease(modAndReleaseData.releaseId);
 
 		const releases = app.getAllReleasesWithStatus();
@@ -449,48 +464,13 @@ describe("Symlink creation failure", () => {
 		expect(releases[0]?.status).not.toBe(DownloadedReleaseStatus.ENABLED);
 	});
 
-	it("should rollback previously created symlinks when a subsequent symlink creation fails", async () => {
-		const multiLinkRelease: ModAndReleaseData = {
-			...modAndReleaseData,
-			symbolicLinks: [
-				{
-					id: "symbolic-link-1",
-					name: "First Script",
-					src: "sample/first.lua",
-					dest: "Scripts/first.lua",
-					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
-				},
-				{
-					id: "symbolic-link-2",
-					name: "Second Script",
-					src: "sample/second.lua",
-					dest: "Scripts/second.lua",
-					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
-				},
-			],
-		};
+	it("should not store installed paths when symlink creation fails", async () => {
+		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-		app.addRelease(multiLinkRelease)._unsafeUnwrap();
-		await waitForJobsForRelease(app.deps, multiLinkRelease.releaseId, 5);
+		await app.enableRelease(modAndReleaseData.releaseId);
 
-		const fileSystem = app.deps.fileSystem as TestFileSystem;
-		let callCount = 0;
-		const originalEnsureSymlink = fileSystem.ensureSymlink.bind(fileSystem);
-		fileSystem.ensureSymlink = async (src: string, dest: string) => {
-			callCount++;
-			if (callCount === 2) {
-				return err(new Error("UAC elevation denied"));
-			}
-			return originalEnsureSymlink(src, dest);
-		};
-
-		const result = await app.enableRelease(multiLinkRelease.releaseId);
-
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBeInstanceOf(SymlinkCreationFailed);
-
-		// Verify the first symlink was rolled back (removed from disk)
-		const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(multiLinkRelease.releaseId);
+		const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
 		for (const link of symbolicLinks) {
 			expect(link.installedPath).toBeNull();
 		}

@@ -1,3 +1,4 @@
+import { Linker } from "@packages/linker";
 import type { JobRecordRepository } from "@packages/queue";
 import { getLogger } from "log4js";
 import type { Result } from "neverthrow";
@@ -78,6 +79,7 @@ export abstract class Application {
 			pathResolver,
 			missionScriptingFilesManager,
 			removeSymlinksScriptManager,
+			linker: new Linker(),
 		});
 
 		this.releaseCatalog = new ReleaseCatalog({

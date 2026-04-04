@@ -1,4 +1,4 @@
-import { type LinkerError, type Linker, type ResolvedLink, SymlinkCreationFailed } from "@packages/linker";
+import { type Linker, type LinkerError, type ResolvedLink, SymlinkCreationFailed } from "@packages/linker";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
@@ -21,7 +21,7 @@ export class ReleaseNotReady extends Error {
 	}
 }
 
-export { SymlinkCreationFailed, type ResolvedLink as ResolvedSymbolicLink };
+export { type ResolvedLink as ResolvedSymbolicLink, SymlinkCreationFailed };
 
 export type ReleaseToggleError = PathResolverError | LinkerError | ReleaseNotFound | ReleaseNotReady;
 

@@ -5,7 +5,6 @@ import type { FileSystem } from "../application/ports/FileSystem.ts";
 export class TestFileSystem implements FileSystem {
 	private readonly files = new Map<string, string>();
 	private readonly dirs = new Set<string>();
-	private readonly symlinks = new Map<string, string>();
 
 	ensureDir(path: string): void {
 		this.dirs.add(path);
@@ -21,12 +20,6 @@ export class TestFileSystem implements FileSystem {
 		Array.from(this.files.keys()).forEach((file) => {
 			if (file.startsWith(`${path}/`)) {
 				this.files.delete(file);
-			}
-		});
-
-		Array.from(this.symlinks.keys()).forEach((link) => {
-			if (link.startsWith(`${path}/`)) {
-				this.symlinks.delete(link);
 			}
 		});
 	}
@@ -50,17 +43,7 @@ export class TestFileSystem implements FileSystem {
 			}
 		}
 
-		for (const symlink of this.symlinks.keys()) {
-			if (symlink.startsWith(path) && glob.match(symlink)) {
-				files.push(symlink);
-			}
-		}
-
 		return files;
-	}
-
-	hasSymlink(linkPath: string): boolean {
-		return this.symlinks.has(linkPath);
 	}
 
 	hasFile(filePath: string): boolean {
@@ -76,6 +59,6 @@ export class TestFileSystem implements FileSystem {
 	}
 
 	exists(path: string) {
-		return ok(this.dirs.has(path) || this.files.has(path) || this.symlinks.has(path));
+		return ok(this.dirs.has(path) || this.files.has(path));
 	}
 }
