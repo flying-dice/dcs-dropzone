@@ -8,14 +8,6 @@ import type { LinkDefinition, ResolvedLink } from "./types.ts";
 
 const logger = getLogger("Linker");
 
-function safeLstat(path: string): [ReturnType<typeof lstatSync> | undefined, null] | [undefined, Error] {
-	try {
-		return [lstatSync(path, { throwIfNoEntry: false }), null];
-	} catch (e) {
-		return [undefined, e instanceof Error ? e : new Error(String(e))];
-	}
-}
-
 /**
  * The Linker is responsible for creating and removing symbolic links on disk.
  *
@@ -70,19 +62,14 @@ export class Linker {
 		for (const link of links) {
 			logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
 
-			const [statValue, statErr] = safeLstat(link.installedPath);
-			if (statErr) {
-				failed.push(new RemovalFailed(link.id, `Cannot stat path: ${statErr.message}`));
-				logger.error(`Failed to stat path for linkId ${link.id}: ${statErr.message}`);
-				continue;
-			}
-			if (!statValue) {
-				removed.push(link.id);
-				logger.debug(`Symlink already absent for linkId ${link.id}, treating as removed`);
-				continue;
-			}
-
 			try {
+				const stat = lstatSync(link.installedPath, { throwIfNoEntry: false });
+				if (!stat) {
+					removed.push(link.id);
+					logger.debug(`Symlink already absent for linkId ${link.id}, treating as removed`);
+					continue;
+				}
+
 				rmSync(link.installedPath, { force: true, recursive: true });
 				removed.push(link.id);
 				logger.debug(`Removed symlink for linkId ${link.id}`);
@@ -97,21 +84,27 @@ export class Linker {
 		return failed.length > 0 ? [undefined, { removed, failed }] : [removed, null];
 	}
 
+	/**
+	 * Orchestrates creating a single symlink — checks source exists, ensures parent dirs,
+	 * checks dest is free, then delegates to mklink. Categorises any failure into a
+	 * {@link SymlinkCreationFailed} with a specific {@link LinkerErrorCode}.
+	 */
 	private async createLink(link: LinkDefinition): Promise<[ResolvedLink, null] | [undefined, SymlinkCreationFailed]> {
 		logger.debug(`Creating symlink (linkId=${link.id}, src=${link.src}, dest=${link.dest})`);
 
-		const [srcStat, srcStatErr] = safeLstat(link.src);
-		if (srcStatErr || !srcStat) {
+		// --- source must exist ---
+		const srcStat = lstatSync(link.src, { throwIfNoEntry: false });
+		if (!srcStat) {
 			return [
 				undefined,
 				new SymlinkCreationFailed(link.id, LinkerErrorCode.SourceNotFound, `Source path does not exist: ${link.src}`),
 			];
 		}
 
+		// --- ensure parent directory for dest ---
 		try {
 			const parent = dirname(link.dest);
-			const [parentStat, parentStatErr] = safeLstat(parent);
-			if (parentStatErr || !parentStat) {
+			if (!lstatSync(parent, { throwIfNoEntry: false })) {
 				mkdirSync(parent, { recursive: true });
 			}
 		} catch (e) {
@@ -125,28 +118,32 @@ export class Linker {
 			];
 		}
 
-		const [destStat, destStatErr] = safeLstat(link.dest);
-		if (destStatErr) {
+		// --- dest must not already exist ---
+		try {
+			const destStat = lstatSync(link.dest, { throwIfNoEntry: false });
+			if (destStat) {
+				return [
+					undefined,
+					new SymlinkCreationFailed(
+						link.id,
+						LinkerErrorCode.LinkAlreadyExists,
+						`Destination path already exists: ${link.dest}`,
+					),
+				];
+			}
+		} catch (e) {
+			const message = e instanceof Error ? e.message : String(e);
 			return [
 				undefined,
 				new SymlinkCreationFailed(
 					link.id,
 					LinkerErrorCode.PermissionDenied,
-					`Cannot access destination path: ${destStatErr.message}`,
-				),
-			];
-		}
-		if (destStat) {
-			return [
-				undefined,
-				new SymlinkCreationFailed(
-					link.id,
-					LinkerErrorCode.LinkAlreadyExists,
-					`Destination path already exists: ${link.dest}`,
+					`Cannot access destination path: ${message}`,
 				),
 			];
 		}
 
+		// --- create the link ---
 		const [, mklinkErr] = await mklink({ link: link.dest, target: link.src });
 		if (mklinkErr) {
 			const [, message] = mklinkErr;
@@ -167,7 +164,7 @@ export class Linker {
 		logger.warn(`Rolling back ${created.length} created symlinks`);
 		for (const link of created) {
 			try {
-				const [stat] = safeLstat(link.dest);
+				const stat = lstatSync(link.dest, { throwIfNoEntry: false });
 				if (stat) {
 					rmSync(link.dest, { force: true, recursive: true });
 				}

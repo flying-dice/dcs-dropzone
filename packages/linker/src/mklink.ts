@@ -56,28 +56,6 @@ New-Item -ItemType SymbolicLink -Path ${psSingleQuote(linkPath)} -Target ${psSin
 	return runPowerShellElevated(cmd);
 }
 
-function trySymlink(
-	target: string,
-	link: string,
-	type: "dir" | "file" | "junction",
-): [undefined, null] | [undefined, Error] {
-	try {
-		symlinkSync(target, link, type);
-		return [undefined, null];
-	} catch (e) {
-		return [undefined, e instanceof Error ? e : new Error(String(e))];
-	}
-}
-
-function tryHardlink(target: string, link: string): [undefined, null] | [undefined, Error] {
-	try {
-		linkSync(target, link);
-		return [undefined, null];
-	} catch (e) {
-		return [undefined, e instanceof Error ? e : new Error(String(e))];
-	}
-}
-
 const logger = getLogger("mklink");
 
 const Options = z.object({
@@ -95,6 +73,9 @@ enum ExitCodes {
 
 /**
  * Creates a symbolic or hard link based on the provided options.
+ *
+ * This is the orchestrator that selects the right link strategy for the platform,
+ * attempts the operation, and categorises failures into known exit codes.
  *
  * @param {Options} options - The options for creating the link, including `link` and `target` paths.
  * @returns A tuple: `[ExitCodes, null]` on success, or `[undefined, [ExitCodes, string]]` on failure.
@@ -117,12 +98,13 @@ export async function mklink(options: Options): Promise<[ExitCodes, null] | [und
 	if (!isWindows) {
 		console.info("Creating symbolic link.");
 		const type = targetStat.isDirectory() ? "dir" : "file";
-		const [, symlinkErr] = trySymlink(target, link, type);
-		if (symlinkErr) {
-			logger.error(`Failed to create symbolic link: ${symlinkErr}`);
-			return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create symbolic link: ${symlinkErr}`]];
+		try {
+			symlinkSync(target, link, type);
+			return [ExitCodes.LinkCreated, null];
+		} catch (e) {
+			logger.error(`Failed to create symbolic link: ${e}`);
+			return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create symbolic link: ${e}`]];
 		}
-		return [ExitCodes.LinkCreated, null];
 	}
 
 	// On Windows, check if the link and target are on different NTFS volumes
@@ -132,43 +114,45 @@ export async function mklink(options: Options): Promise<[ExitCodes, null] | [und
 	// If target is a directory, create a junction
 	if (targetStat.isDirectory()) {
 		console.info("Creating junction for directory.");
-		const [, junctionErr] = trySymlink(target, link, "junction");
-		if (junctionErr) {
-			logger.error(`Failed to create junction: ${junctionErr}`);
-			return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create junction: ${junctionErr}`]];
+		try {
+			symlinkSync(target, link, "junction");
+			return [ExitCodes.LinkCreated, null];
+		} catch (e) {
+			logger.error(`Failed to create junction: ${e}`);
+			return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create junction: ${e}`]];
 		}
-		return [ExitCodes.LinkCreated, null];
 	}
 
 	// If on the same volume and target is a file, create a hard link
 	if (linkRoot === targetRoot) {
 		console.info("Creating hard link.");
-		const [, hardlinkErr] = tryHardlink(target, link);
-		if (hardlinkErr) {
-			logger.error(`Failed to create hard link: ${hardlinkErr}`);
-			return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create hard link: ${hardlinkErr}`]];
+		try {
+			linkSync(target, link);
+			return [ExitCodes.LinkCreated, null];
+		} catch (e) {
+			logger.error(`Failed to create hard link: ${e}`);
+			return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create hard link: ${e}`]];
 		}
-		return [ExitCodes.LinkCreated, null];
 	}
 
 	// Cross-volume file: create a symbolic link, possibly with elevation
 	console.info("Creating symbolic link for file (cross-volume).");
-	const [, symlinkErr] = trySymlink(target, link, "file");
-	if (!symlinkErr) {
+	try {
+		symlinkSync(target, link, "file");
 		return [ExitCodes.LinkCreated, null];
-	}
-
-	console.error(symlinkErr.message);
-	if ((symlinkErr as any).code === "EPERM") {
-		console.info("Creating symbolic link with elevated permissions");
-		const [, elevatedErr] = await createSymlinkElevated(link, target);
-		if (elevatedErr) {
-			logger.error(`Failed to create symbolic link elevated: ${elevatedErr}`);
-			return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create symbolic link elevated: ${elevatedErr}`]];
+	} catch (e: any) {
+		console.error(e.message);
+		if (e?.code === "EPERM") {
+			console.info("Creating symbolic link with elevated permissions");
+			const [, elevatedErr] = await createSymlinkElevated(link, target);
+			if (elevatedErr) {
+				logger.error(`Failed to create symbolic link elevated: ${elevatedErr}`);
+				return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create symbolic link elevated: ${elevatedErr}`]];
+			}
+			return [ExitCodes.LinkCreated, null];
 		}
-		return [ExitCodes.LinkCreated, null];
-	}
 
-	logger.error(`Failed to create symbolic link: ${symlinkErr}`);
-	return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create symbolic link: ${symlinkErr}`]];
+		logger.error(`Failed to create symbolic link: ${e}`);
+		return [undefined, [ExitCodes.LinkCreationFailed, `Failed to create symbolic link: ${e}`]];
+	}
 }
