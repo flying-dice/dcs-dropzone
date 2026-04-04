@@ -180,10 +180,23 @@ Update `describeRoute` OpenAPI response schemas to reference the discriminated u
 
 Update `enableRelease()`, `disableRelease()`, and `toggleRelease()` return types to use the Zod-inferred error types from the schemas.
 
-### 5. Fix webapp consumer
-**File:** `apps/webapp/src/ui/commands/ToggleReleaseById.ts`
+### 5. Consolidate toggle logic — single shared implementation
 
-Update error handling to read the structured response body. The webapp can now switch on `reason` and use type-narrowed fields (e.g. `errorCode` for `SymlinkCreationFailed`, `failedCount` for `PartialDisableFailure`) to build localised messages.
+There are currently three overlapping toggle implementations:
+
+1. `packages/clients/src/toggleReleaseById.ts` — shared client, calls the `/api/toggle/:releaseId` endpoint, defines its own `ToggleReleaseError` / `FailedToGetDaemonReleasesError` / `FailedToFindDaemonReleaseError` error classes extending `DropzoneClientError`
+2. `apps/webapp/src/ui/commands/ToggleReleaseById.ts` — webapp-local duplicate, calls separate `enableRelease`/`disableRelease` endpoints, defines its own error classes in `apps/webapp/src/application/errors.ts`
+3. `packages/dzui/src/hooks/useToggleReleaseById.ts` — React hook that wraps #1
+
+The webapp's `useDaemon` hook (`apps/webapp/src/ui/hooks/useDaemon.ts:77`) calls the local duplicate (#2) instead of the shared client (#1). The dzui hook (#3) exists but is unused by the webapp.
+
+**Consolidation:**
+
+- **Delete** `apps/webapp/src/ui/commands/ToggleReleaseById.ts` and the duplicate error classes from `apps/webapp/src/application/errors.ts` (`FailedToGetDaemonReleasesError`, `FailedToFindDaemonReleaseError`, `ToggleReleaseError`)
+- **Update** `packages/clients/src/toggleReleaseById.ts` to handle the new structured 422 response body. Instead of wrapping in `ToggleReleaseError({ message, data, status })`, return the parsed discriminated union data from the daemon response directly as the error side of the tuple
+- **Move the toggle error Zod schemas to a shared location** — since both the daemon (producing) and the client (consuming/parsing) need the same schemas, place them in a shared package (e.g. `packages/clients/src/daemon/schemas/` or a new shared schemas package). The daemon imports them for response construction, the client imports them for response parsing with `z.parse()`
+- **Update** `useDaemon` in the webapp to use the shared `toggleReleaseById` from `packages/clients` (or the dzui `useToggleReleaseById` hook) instead of the local command
+- **Update** `useToggleReleaseById` in dzui to handle the structured error data and render reason-aware feedback
 
 ### 6. Update tests
 **File:** `apps/daemon/src/hono/HonoApplication.test.ts`
