@@ -1,5 +1,6 @@
 import { getLogger } from "log4js";
 import type { SymbolicLinkDestRoot } from "webapp";
+import type { z } from "zod";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type {
 	DcsPathInvalidError,
@@ -7,7 +8,6 @@ import type {
 	DropzoneModsDirInvalidError,
 	DropzoneModsDirNotConfiguredError,
 } from "../schemas/ToggleErrors.ts";
-import type { z } from "zod";
 
 const _logger = getLogger("PathResolver");
 

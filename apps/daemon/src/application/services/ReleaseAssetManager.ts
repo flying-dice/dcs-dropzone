@@ -130,7 +130,9 @@ export class ReleaseAssetManager {
 		return !allJobs.some((it) => [JobState.Pending, JobState.Running].includes(it.state));
 	}
 
-	getReleaseReadiness(releaseId: string): { ready: true } | { ready: false; pendingCount: number; failedCount: number } {
+	getReleaseReadiness(
+		releaseId: string,
+	): { ready: true } | { ready: false; pendingCount: number; failedCount: number } {
 		const allJobs = this.deps.releaseRepository
 			.getJobIdsForRelease(releaseId)
 			.flatMap((it) => this.queue.getAllByJobId(it));

@@ -32,16 +32,22 @@ export default async function (command: ToggleReleaseByIdCommand): Promise<Toggl
 	if (subscription.status === ModAndReleaseDataStatus.ENABLED) {
 		const disableResponse = await disableRelease(releaseId);
 		if (disableResponse.status !== StatusCodes.OK) {
-			const data = disableResponse.data as { error?: string };
-			return [undefined, new ToggleReleaseError(data?.error ?? "Failed to disable release")];
+			const data = disableResponse.data as { reason?: string; systemError?: string };
+			const reason = data?.reason;
+			const systemError = data?.systemError;
+			const message = systemError ? `${reason}: ${systemError}` : (reason ?? "Failed to disable release");
+			return [undefined, new ToggleReleaseError(message)];
 		}
 		return ["Disabled", null];
 	}
 
 	const enableResponse = await enableRelease(releaseId);
 	if (enableResponse.status !== StatusCodes.OK) {
-		const data = enableResponse.data as { error?: string };
-		return [undefined, new ToggleReleaseError(data?.error ?? "Failed to enable release")];
+		const data = enableResponse.data as { reason?: string; systemError?: string };
+		const reason = data?.reason;
+		const systemError = data?.systemError;
+		const message = systemError ? `${reason}: ${systemError}` : (reason ?? "Failed to enable release");
+		return [undefined, new ToggleReleaseError(message)];
 	}
 	return ["Enabled", null];
 }

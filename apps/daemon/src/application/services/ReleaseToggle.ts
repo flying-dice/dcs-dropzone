@@ -1,13 +1,13 @@
 import type { LinkDefinition, Linker } from "@packages/linker";
 import { getLogger } from "log4js";
-import type { EnableReleaseError, DisableReleaseError, ToggleReleaseError } from "../schemas/ToggleErrors.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
+import type { DisableReleaseError, EnableReleaseError, ToggleReleaseError } from "../schemas/ToggleErrors.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
 import type { DcsPathError, PathResolver } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
-export type { EnableReleaseError, DisableReleaseError, ToggleReleaseError };
+export type { DisableReleaseError, EnableReleaseError, ToggleReleaseError };
 
 const logger = getLogger("ReleaseToggle");
 
@@ -134,9 +134,7 @@ export class ReleaseToggle {
 		return [undefined, null];
 	}
 
-	private checkReleaseIsReady(
-		releaseId: string,
-	): EnableReleaseError | undefined {
+	private checkReleaseIsReady(releaseId: string): EnableReleaseError | undefined {
 		logger.debug(`Checking if release ${releaseId} is ready`);
 
 		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;

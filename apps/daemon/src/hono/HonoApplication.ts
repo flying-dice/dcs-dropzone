@@ -1,7 +1,7 @@
 import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
-import { ErrorData, OkData, UnprocessableEntityData } from "@packages/hono/schemas";
+import { ErrorData, OkData } from "@packages/hono/schemas";
 import { zParse } from "@packages/zod/zParse";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
@@ -16,6 +16,7 @@ import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import {
 	DisableReleaseError,
+	DropzoneModsDirInvalidError,
 	DropzoneModsDirNotConfiguredError,
 	EnableReleaseError,
 	ToggleReleaseError,
@@ -141,6 +142,11 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private addReleaseToDaemon() {
+		const AddReleaseError = z.discriminatedUnion("reason", [
+			DropzoneModsDirNotConfiguredError,
+			DropzoneModsDirInvalidError,
+		]);
+
 		this.post(
 			"/api/downloads",
 			describeRoute({
@@ -153,7 +159,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					[StatusCodes.UNPROCESSABLE_ENTITY]: {
 						description: "Unprocessable Entity",
-						content: { "application/json": { schema: resolver(DropzoneModsDirNotConfiguredError) } },
+						content: { "application/json": { schema: resolver(AddReleaseError) } },
 					},
 				},
 			}),

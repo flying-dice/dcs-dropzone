@@ -12,6 +12,14 @@ export class FailedToFindDaemonReleaseError extends DropzoneClientError {
 
 export class ToggleReleaseError extends DropzoneClientError {
 	readonly type = "ToggleReleaseError" as const;
+
+	/**
+	 * The structured error reason from the daemon API (e.g. "ReleaseNotFound", "SymlinkCreationFailed").
+	 * Available when the daemon returns a 422 with structured error data.
+	 */
+	get reason(): string | undefined {
+		return (this.data as { reason?: string })?.reason;
+	}
 }
 
 export type ToggleReleaseByIdResultError =
@@ -52,10 +60,14 @@ export async function toggleReleaseById(props: {
 
 	const result = await toggleRelease(releaseId);
 	if (result.status !== StatusCodes.OK) {
+		const errorData = result.data as { reason?: string; systemError?: string };
+		const reason = errorData?.reason;
+		const systemError = errorData?.systemError;
+		const message = systemError ? `${reason}: ${systemError}` : (reason ?? "Failed to toggle release");
 		return [
 			undefined,
 			new ToggleReleaseError({
-				message: "Failed to toggle release",
+				message,
 				data: result.data,
 				status: result.status,
 			}),

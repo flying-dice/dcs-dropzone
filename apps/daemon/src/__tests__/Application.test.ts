@@ -388,9 +388,7 @@ describe("Unconfigured paths", () => {
 		it("should return a DropzoneModsDirInvalid error when default path does not exist", () => {
 			const [, err] = app.addRelease(modAndReleaseData);
 
-			expect(err).toEqual(
-				expect.objectContaining({ reason: "DropzoneModsDirInvalid", errorCode: "PATH_NOT_FOUND" }),
-			);
+			expect(err).toEqual(expect.objectContaining({ reason: "DropzoneModsDirInvalid", errorCode: "PATH_NOT_FOUND" }));
 		});
 
 		it("should not persist an orphaned release record", () => {
@@ -558,7 +556,11 @@ describe("ReleaseNotReady", () => {
 		const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
 
 		expect(enableErr).toEqual(
-			expect.objectContaining({ reason: "ReleaseNotReady", pendingCount: expect.any(Number), failedCount: expect.any(Number) }),
+			expect.objectContaining({
+				reason: "ReleaseNotReady",
+				pendingCount: expect.any(Number),
+				failedCount: expect.any(Number),
+			}),
 		);
 	});
 });
