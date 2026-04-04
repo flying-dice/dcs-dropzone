@@ -40,6 +40,7 @@
         "@packages/dz-config": "workspace:*",
         "@packages/dzui": "workspace:*",
         "@packages/hono": "workspace:*",
+        "@packages/linker": "workspace:*",
         "@packages/manifest": "workspace:*",
         "@packages/queue": "workspace:*",
         "@packages/zod": "workspace:*",
@@ -219,6 +220,17 @@
         "hono-openapi": ">=1",
         "http-status-codes": ">=2",
         "log4js": ">=6",
+        "zod": ">=4",
+      },
+    },
+    "packages/linker": {
+      "name": "@packages/linker",
+      "dependencies": {
+        "@packages/zod": "workspace:*",
+      },
+      "peerDependencies": {
+        "log4js": ">=6",
+        "neverthrow": ">=8",
         "zod": ">=4",
       },
     },
@@ -571,6 +583,8 @@
     "@packages/dzui": ["@packages/dzui@workspace:packages/dzui"],
 
     "@packages/hono": ["@packages/hono@workspace:packages/hono"],
+
+    "@packages/linker": ["@packages/linker@workspace:packages/linker"],
 
     "@packages/manifest": ["@packages/manifest@workspace:packages/manifest"],
 

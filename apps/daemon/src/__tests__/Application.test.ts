@@ -1,26 +1,35 @@
 import "./log4js.ts";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { ok } from "node:assert";
-import { join } from "node:path";
-import { InMemoryJobRecordRepository, JobState } from "@packages/queue";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { JobState } from "@packages/queue";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
-import { Application } from "../application/Application.ts";
+import type { Application } from "../application/Application.ts";
 import { DownloadedReleaseStatus } from "../application/enums/DownloadedReleaseStatus.ts";
-import type { DownloadJobData, DownloadJobResult } from "../application/ports/DownloadProcessor.ts";
-import type { ExtractJobData, ExtractJobResult } from "../application/ports/ExtractProcessor.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
 import { ReleaseNotFound, ReleaseNotReady, SymlinkCreationFailed } from "../application/services/ReleaseToggle.ts";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../constants.ts";
-import { TestApplication } from "./TestApplication.ts";
+import { ProdApplication } from "../ProdApplication.ts";
 import { TestCases } from "./TestCases.ts";
-import { TestDelayProcessor } from "./TestDelayProcessor.ts";
-import { TestFileSystem } from "./TestFileSystem.ts";
-import { TestKeyValueRepository } from "./TestKeyValueRepository.ts";
-import { TestReleaseRepository } from "./TestReleaseRepository.ts";
-import type { TestTempDir } from "./TestTempDir.ts";
-import { TestUUIDGenerator } from "./TestUUIDGenerator.ts";
-import { waitForJobsForRelease } from "./utils.ts";
+import { TestTempDir } from "./TestTempDir.ts";
+import { SYSTEM_7ZIP_PATH, SYSTEM_WGET_PATH, waitForJobsForRelease } from "./utils.ts";
+
+/**
+ * Creates real source files on disk that the Linker expects to exist.
+ * In test mode, the download/extract processors are stubs that don't create real files,
+ * but the concrete Linker needs real source files to create symlinks.
+ */
+function createSourceFilesOnDisk(app: Application, releaseData: ModAndReleaseData) {
+	const modsDir = app.settings.getDropzoneModsDir();
+	if (!modsDir) return;
+	for (const link of releaseData.symbolicLinks) {
+		const srcPath = join(modsDir, releaseData.releaseId, link.src);
+		mkdirSync(dirname(srcPath), { recursive: true });
+		writeFileSync(srcPath, "test content");
+	}
+}
 
 describe.each(TestCases)("$label", ({ build }) => {
 	let modAndReleaseData: ModAndReleaseData;
@@ -198,6 +207,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const downloadJobs = app.deps.jobRecordRepository.findAllForProcessor("download");
 			const extractJobs = app.deps.jobRecordRepository.findAllForProcessor("extract");
@@ -214,11 +224,17 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const symlinkInstalledPath = symbolicLinks[0]?.installedPath;
 			ok(symlinkInstalledPath);
 			expect(symlinkInstalledPath).toEndWith("test.lua");
+
+			for (const link of symbolicLinks) {
+				expect(link.installedPath).toBeDefined();
+				expect(link.installedPath).toEndWith("test.lua");
+			}
 		});
 
 		it("should write Mission Scripting Files", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
@@ -237,6 +253,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should reflect ENABLED status in getAllReleasesWithStatus after enabling", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
@@ -248,6 +265,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should reflect DISABLED status in getAllReleasesWithStatus after disabling", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
@@ -260,6 +278,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should generate removeSymlinks.bat after enabling a release", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 
@@ -273,6 +292,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should regenerate removeSymlinks.bat after disabling a release", async () => {
 			app.addRelease(modAndReleaseData)._unsafeUnwrap();
 			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			(await app.enableRelease(modAndReleaseData.releaseId))._unsafeUnwrap();
 			app.disableRelease(modAndReleaseData.releaseId)._unsafeUnwrap();
@@ -286,26 +306,37 @@ describe.each(TestCases)("$label", ({ build }) => {
 	});
 });
 
-class UnconfiguredTestApplication extends Application {
-	constructor() {
-		super({
-			jobRecordRepository: new InMemoryJobRecordRepository(),
-			downloadProcessor: new TestDelayProcessor<"download", DownloadJobData, DownloadJobResult>("download"),
-			extractProcessor: new TestDelayProcessor<"extract", ExtractJobData, ExtractJobResult>("extract"),
-			keyValueRepository: new TestKeyValueRepository(),
-			releaseRepository: new TestReleaseRepository(),
-			fileSystem: new TestFileSystem(),
-			generateUuid: TestUUIDGenerator(),
-		});
-	}
+function buildUnconfiguredApp() {
+	return new ProdApplication({
+		databaseUrl: ":memory:",
+		wgetExecutablePath: SYSTEM_WGET_PATH,
+		sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
+	});
+}
+
+function buildConfiguredApp() {
+	const tempDir = new TestTempDir();
+	const modsDir = tempDir.join("dcs-dropzone", "mods");
+	const dcsWorkingDir = tempDir.join("dcs-dropzone", "dcs", "working");
+	const dcsInstallDir = tempDir.join("dcs-dropzone", "dcs", "install");
+	mkdirSync(modsDir, { recursive: true });
+	mkdirSync(dcsWorkingDir, { recursive: true });
+	mkdirSync(dcsInstallDir, { recursive: true });
+	const app = new ProdApplication({
+		databaseUrl: ":memory:",
+		wgetExecutablePath: SYSTEM_WGET_PATH,
+		sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
+	});
+	app.settings.setAll({ dropzoneModsDir: modsDir, dcsWorkingDir, dcsInstallDir });
+	return { app, tempDir };
 }
 
 describe("Unconfigured paths", () => {
-	let app: UnconfiguredTestApplication;
+	let app: Application;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new UnconfiguredTestApplication();
+		app = buildUnconfiguredApp();
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -373,11 +404,14 @@ describe("Unconfigured paths", () => {
 });
 
 describe("Symlink creation failure", () => {
-	let app: TestApplication;
+	let app: Application;
+	let tempDir: TestTempDir;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -385,19 +419,8 @@ describe("Symlink creation failure", () => {
 			dependencies: [],
 			version: "1.0.0",
 			versionHash: Date.now().toString(),
-			assets: [
-				{
-					id: "test-release-id__asset-1",
-					name: "Test Asset",
-					urls: [
-						{
-							id: "test-release-id__asset-1__url-1",
-							url: "https://example.com/sample.zip",
-						},
-					],
-					isArchive: true,
-				},
-			],
+			// No assets → release is immediately "ready" without waiting for downloads
+			assets: [],
 			symbolicLinks: [
 				{
 					id: "symbolic-link-1",
@@ -411,14 +434,14 @@ describe("Symlink creation failure", () => {
 		};
 	});
 
-	it("should return SymlinkCreationFailed error when symlink creation fails (e.g. UAC denied)", async () => {
+	afterEach(() => {
+		tempDir.cleanup();
+	});
+
+	it("should return SymlinkCreationFailed error when source files do not exist on disk", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
-		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
 
-		// Simulate symlink creation failure (e.g. UAC elevation denied)
-		const fileSystem = app.deps.fileSystem as TestFileSystem;
-		fileSystem.symlinkError = new Error("UAC elevation denied");
-
+		// No assets → immediately ready. The Linker fails because the source path does not exist on disk.
 		const result = await app.enableRelease(modAndReleaseData.releaseId);
 
 		expect(result.isErr()).toBe(true);
@@ -428,11 +451,6 @@ describe("Symlink creation failure", () => {
 
 	it("should not mark release as enabled when symlink creation fails", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
-		await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
-
-		// Simulate symlink creation failure
-		const fileSystem = app.deps.fileSystem as TestFileSystem;
-		fileSystem.symlinkError = new Error("UAC elevation denied");
 
 		await app.enableRelease(modAndReleaseData.releaseId);
 
@@ -440,13 +458,31 @@ describe("Symlink creation failure", () => {
 		expect(releases.length).toEqual(1);
 		expect(releases[0]?.status).not.toBe(DownloadedReleaseStatus.ENABLED);
 	});
+
+	it("should not store installed paths when symlink creation fails", async () => {
+		app.addRelease(modAndReleaseData)._unsafeUnwrap();
+
+		await app.enableRelease(modAndReleaseData.releaseId);
+
+		const symbolicLinks = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
+		for (const link of symbolicLinks) {
+			expect(link.installedPath).toBeNull();
+		}
+	});
 });
 
 describe("ReleaseNotFound", () => {
-	let app: TestApplication;
+	let app: Application;
+	let tempDir: TestTempDir;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
+	});
+
+	afterEach(() => {
+		tempDir.cleanup();
 	});
 
 	it("should return ReleaseNotFound when enabling a release that does not exist", async () => {
@@ -456,14 +492,25 @@ describe("ReleaseNotFound", () => {
 		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
 		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotFound");
 	});
+
+	it("should return ReleaseNotFound when disabling a release that does not exist", () => {
+		const result = app.disableRelease("non-existent-release-id");
+
+		expect(result.isErr()).toBe(true);
+		expect(result._unsafeUnwrapErr()).toBeInstanceOf(ReleaseNotFound);
+		expect(result._unsafeUnwrapErr().type).toBe("ReleaseNotFound");
+	});
 });
 
 describe("ReleaseNotReady", () => {
-	let app: TestApplication;
+	let app: Application;
+	let tempDir: TestTempDir;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -484,6 +531,10 @@ describe("ReleaseNotReady", () => {
 		};
 	});
 
+	afterEach(() => {
+		tempDir.cleanup();
+	});
+
 	it("should return ReleaseNotReady when enabling a release with incomplete jobs", async () => {
 		app.addRelease(modAndReleaseData)._unsafeUnwrap();
 
@@ -497,11 +548,14 @@ describe("ReleaseNotReady", () => {
 });
 
 describe("toggleRelease", () => {
-	let app: TestApplication;
+	let app: Application;
+	let tempDir: TestTempDir;
 	let modAndReleaseData: ModAndReleaseData;
 
 	beforeEach(() => {
-		app = new TestApplication();
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
 		modAndReleaseData = {
 			releaseId: "test-release-id",
 			modId: "test-mod-id",
@@ -513,6 +567,10 @@ describe("toggleRelease", () => {
 			symbolicLinks: [],
 			missionScripts: [],
 		};
+	});
+
+	afterEach(() => {
+		tempDir.cleanup();
 	});
 
 	it("should return ReleaseNotFound when toggling a release that does not exist", async () => {

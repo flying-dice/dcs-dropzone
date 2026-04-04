@@ -168,10 +168,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					(error) => {
 						logger.error("Failed to add release: %s - %s", error.type, error.name);
-						return c.json(
-							zParse({ reason: error.type }, _UnprocessableEntityData),
-							StatusCodes.UNPROCESSABLE_ENTITY,
-						);
+						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
 					},
 				);
 			},
@@ -469,10 +466,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					(error) => {
 						logger.error("Failed to toggle release %s: %s", releaseId, error.type);
-						return c.json(
-							zParse({ reason: error.type }, _UnprocessableEntityData),
-							StatusCodes.UNPROCESSABLE_ENTITY,
-						);
+						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
 					},
 				);
 			},
@@ -521,10 +515,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					(error) => {
 						logger.error("Failed to enable release %s: %s", releaseId, error.type);
-						return c.json(
-							zParse({ reason: error.type }, _UnprocessableEntityData),
-							StatusCodes.UNPROCESSABLE_ENTITY,
-						);
+						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
 					},
 				);
 			},
@@ -532,7 +523,7 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private disableRelease() {
-		const _UnprocessableEntityData = UnprocessableEntityData(["DcsPathNotConfigured"]);
+		const _UnprocessableEntityData = UnprocessableEntityData([DcsPathNotConfigured.name, ReleaseNotFound.name]);
 
 		this.post(
 			"/api/toggle/:releaseId/disable",
@@ -566,10 +557,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					(error) => {
 						logger.error("Failed to disable release %s: %s", releaseId, error.type);
-						return c.json(
-							zParse({ reason: error.type }, _UnprocessableEntityData),
-							StatusCodes.UNPROCESSABLE_ENTITY,
-						);
+						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
 					},
 				);
 			},

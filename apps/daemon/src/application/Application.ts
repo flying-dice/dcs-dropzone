@@ -1,3 +1,4 @@
+import type { Linker } from "@packages/linker";
 import type { JobRecordRepository } from "@packages/queue";
 import { getLogger } from "log4js";
 import type { Result } from "neverthrow";
@@ -12,7 +13,7 @@ import { MissionScriptingFilesManager } from "./services/MissionScriptingFilesMa
 import { type DcsPathNotConfigured, type DropzoneModsDirNotConfigured, PathResolver } from "./services/PathResolver.ts";
 import { ReleaseAssetManager } from "./services/ReleaseAssetManager.ts";
 import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
-import { ReleaseToggle, type ReleaseToggleError } from "./services/ReleaseToggle.ts";
+import { type ReleaseNotFound, ReleaseToggle, type ReleaseToggleError } from "./services/ReleaseToggle.ts";
 import { RemoveSymlinksScriptManager } from "./services/RemoveSymlinksScriptManager.ts";
 import { Settings } from "./services/Settings.ts";
 
@@ -28,6 +29,7 @@ type Deps = {
 
 	generateUuid: UUIDGenerator;
 	fileSystem: FileSystem;
+	linker: Linker;
 };
 
 export abstract class Application {
@@ -99,7 +101,7 @@ export abstract class Application {
 		return this.releaseToggleService.enable(releaseId);
 	}
 
-	public disableRelease(releaseId: string): Result<void, DcsPathNotConfigured> {
+	public disableRelease(releaseId: string): Result<void, ReleaseNotFound | DcsPathNotConfigured> {
 		return this.releaseToggleService.disable(releaseId);
 	}
 

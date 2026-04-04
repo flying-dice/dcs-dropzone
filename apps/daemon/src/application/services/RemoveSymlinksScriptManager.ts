@@ -32,6 +32,21 @@ export class RemoveSymlinksScriptManager {
 	rebuild(): Result<void, DcsPathNotConfigured> {
 		logger.info("Regenerating removeSymlinks.bat");
 
+		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
+		if (!dropzoneModsFolder) {
+			return err(new DcsPathNotConfigured());
+		}
+
+		const existsResult = this.deps.fileSystem.exists(dropzoneModsFolder);
+		const folderExists = existsResult.match(
+			(v) => v,
+			() => false,
+		);
+		if (!folderExists) {
+			logger.info("Mods folder does not exist, skipping removeSymlinks.bat generation");
+			return ok(undefined);
+		}
+
 		const installedPaths = this.deps.releaseRepository.getAllInstalledSymbolicLinkPaths();
 		logger.debug(`Found ${installedPaths.length} installed symbolic link paths`);
 

@@ -3,7 +3,6 @@ import { dirname, join, resolve } from "node:path";
 import { getLogger } from "log4js";
 import { err, ok, type Result } from "neverthrow";
 import type { FileSystem } from "../application/ports/FileSystem.ts";
-import { mklink } from "../utils/mklink.ts";
 
 const logger = getLogger("LocalFileSystemService");
 
@@ -15,24 +14,6 @@ export class LocalFileSystem implements FileSystem {
 			mkdirSync(path, { recursive: true });
 		} else {
 			logger.debug(`Directory already exists at path: ${path}`);
-		}
-	}
-
-	async ensureSymlink(src: string, dest: string): Promise<void> {
-		logger.debug(`Ensuring symlink from ${dest} to ${src}`);
-		const parent = dirname(dest);
-
-		if (!existsSync(parent)) {
-			logger.debug(`Creating parent directory: ${parent}`);
-			mkdirSync(parent, { recursive: true });
-		}
-
-		logger.debug(`Creating link from ${dest} to ${src}`);
-		const res = await mklink({ link: dest, target: src });
-		if (res.isErr()) {
-			const [, message] = res.error;
-			logger.error(`Failed to create symlink: ${message}`);
-			throw new Error(`Failed to create symlink from ${dest} to ${src}: ${message}`);
 		}
 	}
 

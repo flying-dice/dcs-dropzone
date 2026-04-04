@@ -1,4 +1,5 @@
-import { normalize } from "node:path";
+import { platform } from "node:os";
+import { join, normalize } from "node:path";
 import { expandEnvVars } from "@packages/zod/expandEnvVars";
 import { SymbolicLinkDestRoot } from "webapp";
 import type { FileSystem } from "../ports/FileSystem.ts";
@@ -33,9 +34,16 @@ export class Settings {
 	private static readonly DCS_INSTALL_DIR_KEY = "dcs_install_dir";
 	private static readonly DROPZONE_MODS_DIR_KEY = "dropzone_mods_dir";
 
-	private static readonly DEFAULT_DCS_WORKING_DIR = "%USERPROFILE%\\Saved Games\\DCS";
-	private static readonly DEFAULT_DCS_INSTALL_DIR = "%PROGRAMFILES%\\Eagle Dynamics\\DCS World";
-	private static readonly DEFAULT_DROPZONE_MODS_DIR = "%LOCALAPPDATA%\\DCS Dropzone\\Mods";
+	private static readonly DEFAULT_DCS_WORKING_DIR =
+		platform() === "win32" ? join("%USERPROFILE%", "Saved Games", "DCS") : join("$HOME", "Saved Games", "DCS");
+	private static readonly DEFAULT_DCS_INSTALL_DIR =
+		platform() === "win32"
+			? join("%PROGRAMFILES%", "Eagle Dynamics", "DCS World")
+			: join("$HOME", "Eagle Dynamics", "DCS World");
+	private static readonly DEFAULT_DROPZONE_MODS_DIR =
+		platform() === "win32"
+			? join("%LOCALAPPDATA%", "DCS Dropzone", "Mods")
+			: join("$HOME", ".local", "share", "DCS Dropzone", "Mods");
 
 	constructor(protected deps: Deps) {}
 
@@ -44,7 +52,11 @@ export class Settings {
 	 */
 	private static resolvePath(raw: string | undefined): string | undefined {
 		if (raw === undefined || raw.length === 0) return undefined;
-		return normalize(expandEnvVars(raw));
+		const expanded = expandEnvVars(raw);
+		// If any %VAR% or $VAR / ${VAR} placeholders remain, the env var wasn't defined — path is unusable
+		if (/%[A-Za-z0-9_()]+%/.test(expanded) || /\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})/.test(expanded))
+			return undefined;
+		return normalize(expanded);
 	}
 
 	private get(key: string): string | undefined {

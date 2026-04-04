@@ -54,7 +54,7 @@ Enabling a [release](#) activates the [mod](#) in DCS World by creating [symlink
 | `Scripts/DropzoneMissionScriptsBeforeSanitize.lua` is rebuilt to include before-sanitize mission scripts from this release | <Badge type="tip" text="Implemented" /> |
 | `Scripts/DropzoneMissionScriptsAfterSanitize.lua` is rebuilt to include after-sanitize mission scripts from this release | <Badge type="tip" text="Implemented" /> |
 | `removeSymlinks.bat` is rebuilt to include the newly created symlinks | <Badge type="tip" text="Implemented" /> |
-| On failure, all changes are rolled back | <Badge type="warning" text="Not Implemented" /> |
+| On failure, all changes are rolled back | <Badge type="tip" text="Implemented" /> |
 
 ## Behavior
 

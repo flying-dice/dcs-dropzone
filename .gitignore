@@ -66,3 +66,6 @@ apps/launcher/0.0.0/
 docs/.vitepress/dist
 docs/.vitepress/cache
 nul
+
+# Test artifacts from Windows-default settings evaluated on Linux
+apps/daemon/%*/

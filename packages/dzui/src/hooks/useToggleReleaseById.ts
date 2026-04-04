@@ -1,16 +1,9 @@
-import { type ToggleReleaseByIdResultError, toggleReleaseById } from "@packages/clients";
+import { toggleReleaseById } from "@packages/clients";
 import { useAsyncFn } from "react-use";
-import type { I18nKeys } from "../I18nKeys.ts";
 import { showErrorNotification } from "../showErrorNotification.tsx";
 import { showSuccessNotification } from "../showSuccessNotification.tsx";
 import { useAppTranslation } from "../useAppTranslation.ts";
 import { useErrorModal } from "./useErrorModal.tsx";
-
-const localisations: Record<ToggleReleaseByIdResultError["type"], I18nKeys> = {
-	FailedToFindDaemonReleaseError: "MOD_NOT_FOUND_ERROR",
-	FailedToGetDaemonReleasesError: "DAEMON_RELEASES_ERROR_DESC",
-	ToggleReleaseError: "TOGGLE",
-};
 
 export function useToggleReleaseById() {
 	const { t } = useAppTranslation();

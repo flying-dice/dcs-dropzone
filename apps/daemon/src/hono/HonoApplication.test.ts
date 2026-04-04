@@ -1,15 +1,50 @@
 import "../__tests__/log4js.ts";
-import { describe, expect, it, beforeEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { mkdirSync } from "node:fs";
+import { TestTempDir } from "../__tests__/TestTempDir.ts";
+import { SYSTEM_7ZIP_PATH, SYSTEM_WGET_PATH } from "../__tests__/utils.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { ReleaseNotFound, ReleaseNotReady } from "../application/services/ReleaseToggle.ts";
-import { TestApplication } from "../__tests__/TestApplication.ts";
+import { ProdApplication } from "../ProdApplication.ts";
 import { HonoApplication } from "./HonoApplication.ts";
+
+function buildConfiguredApp() {
+	const tempDir = new TestTempDir();
+	const modsDir = tempDir.join("mods");
+	const dcsWorkingDir = tempDir.join("dcs", "working");
+	const dcsInstallDir = tempDir.join("dcs", "install");
+	mkdirSync(modsDir, { recursive: true });
+	mkdirSync(dcsWorkingDir, { recursive: true });
+	mkdirSync(dcsInstallDir, { recursive: true });
+	const app = new ProdApplication({
+		databaseUrl: ":memory:",
+		wgetExecutablePath: SYSTEM_WGET_PATH,
+		sevenZipExecutablePath: SYSTEM_7ZIP_PATH,
+	});
+	app.settings.setAll({ dropzoneModsDir: modsDir, dcsWorkingDir, dcsInstallDir });
+	return { app, tempDir };
+}
 
 describe("HonoApplication", () => {
 	describe("Private Network Access CORS", () => {
+		let app: ProdApplication;
+		let tempDir: TestTempDir;
+
+		beforeEach(() => {
+			const configured = buildConfiguredApp();
+			app = configured.app;
+			tempDir = configured.tempDir;
+		});
+
+		afterEach(() => {
+			tempDir.cleanup();
+		});
+
 		it("should add Access-Control-Allow-Private-Network header when request includes Access-Control-Request-Private-Network", async () => {
-			const app = new TestApplication();
-			const honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			const honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
 
 			// Make an OPTIONS request with the PNA header
 			const response = await honoApp.request("/api/health", {
@@ -24,8 +59,10 @@ describe("HonoApplication", () => {
 		});
 
 		it("should not add Access-Control-Allow-Private-Network header when request does not include Access-Control-Request-Private-Network", async () => {
-			const app = new TestApplication();
-			const honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			const honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
 
 			// Make an OPTIONS request without the PNA header
 			const response = await honoApp.request("/api/health", {
@@ -39,8 +76,10 @@ describe("HonoApplication", () => {
 		});
 
 		it("should add Access-Control-Allow-Private-Network header for POST preflight requests with PNA header", async () => {
-			const app = new TestApplication();
-			const honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			const honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
 
 			// Make an OPTIONS preflight request for a POST with the PNA header
 			const response = await honoApp.request("/api/downloads", {
@@ -57,8 +96,9 @@ describe("HonoApplication", () => {
 	});
 
 	describe("Toggle routes", () => {
-		let app: TestApplication;
+		let app: ProdApplication;
 		let honoApp: HonoApplication;
+		let tempDir: TestTempDir;
 
 		// A release with no assets is immediately "ready" — no jobs to wait for
 		const readyRelease: ModAndReleaseData = {
@@ -87,8 +127,17 @@ describe("HonoApplication", () => {
 		};
 
 		beforeEach(async () => {
-			app = new TestApplication();
-			honoApp = await HonoApplication.build(app, { enableGenerateSchema: false, uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" } });
+			const configured = buildConfiguredApp();
+			app = configured.app;
+			tempDir = configured.tempDir;
+			honoApp = await HonoApplication.build(app, {
+				enableGenerateSchema: false,
+				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+			});
+		});
+
+		afterEach(() => {
+			tempDir.cleanup();
 		});
 
 		describe("POST /api/toggle/:releaseId/enable", () => {
@@ -127,6 +176,13 @@ describe("HonoApplication", () => {
 
 				expect(response.status).toBe(200);
 				expect(await response.json()).toEqual({ ok: true });
+			});
+
+			it("should return 422 with ReleaseNotFound when release does not exist", async () => {
+				const response = await honoApp.request("/api/toggle/non-existent-id/disable", { method: "POST" });
+
+				expect(response.status).toBe(422);
+				expect((await response.json()).reason).toBe(ReleaseNotFound.name);
 			});
 		});
 

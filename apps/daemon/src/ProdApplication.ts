@@ -1,3 +1,4 @@
+import { Linker } from "@packages/linker";
 import { getLogger } from "log4js";
 import { DrizzleJobRecordRepository } from "./adapters/DrizzleJobRecordRepository.ts";
 import { DrizzleKeyValueRepository } from "./adapters/DrizzleKeyValueRepository.ts";
@@ -43,6 +44,7 @@ export class ProdApplication extends Application {
 			jobRecordRepository,
 			downloadProcessor,
 			extractProcessor,
+			linker: new Linker(),
 		});
 
 		this.appDatabase = appDatabase;
