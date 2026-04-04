@@ -17,13 +17,30 @@ Additionally, the webapp consumer at `apps/webapp/src/ui/commands/ToggleReleaseB
 
 ## Changes
 
-### 1. Define per-error Zod schemas in `application/schemas/`
+### 1. Define reusable data schemas and per-error Zod schemas
+
+#### 1a. Reusable data schemas
+**File:** `apps/daemon/src/application/schemas/InvalidPathData.ts` (new)
+
+Extract the shared path validation error shape into a reusable schema. This is not toggle-specific — any endpoint that validates a configured path can use it.
+
+```typescript
+import { z } from "zod";
+
+export const InvalidPathData = z.object({
+  errorCode: z.enum(["PATH_NOT_FOUND"]),
+  path: z.string(), // the configured path that failed validation
+});
+```
+
+#### 1b. Toggle error schemas
 **File:** `apps/daemon/src/application/schemas/ToggleErrors.ts` (new)
 
 Each error type gets its own Zod object schema with `reason` as the discriminant. The error side of the Go-style tuple is the Zod-inferred type — plain data, not an Error class.
 
 ```typescript
 import { z } from "zod";
+import { InvalidPathData } from "./InvalidPathData.ts";
 
 export const ReleaseNotFoundError = z.object({
   reason: z.literal("ReleaseNotFound"),
@@ -41,9 +58,7 @@ export const DropzoneModsDirNotConfiguredError = z.object({
 
 export const DropzoneModsDirInvalidError = z.object({
   reason: z.literal("DropzoneModsDirInvalid"),
-  errorCode: z.enum(["PATH_NOT_FOUND"]),
-  path: z.string(), // the configured path that doesn't exist
-});
+}).merge(InvalidPathData);
 
 export const DcsPathNotConfiguredError = z.object({
   reason: z.literal("DcsPathNotConfigured"),
@@ -51,9 +66,7 @@ export const DcsPathNotConfiguredError = z.object({
 
 export const DcsPathInvalidError = z.object({
   reason: z.literal("DcsPathInvalid"),
-  errorCode: z.enum(["PATH_NOT_FOUND"]),
-  path: z.string(), // the configured path that doesn't exist
-});
+}).merge(InvalidPathData);
 
 export const SymlinkCreationFailedError = z.object({
   reason: z.literal("SymlinkCreationFailed"),
