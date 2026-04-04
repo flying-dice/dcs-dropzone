@@ -24,13 +24,13 @@ const jobRepo = new InMemoryJobRepo(runRepo);
 const exponentCalculator = new ExponentialBackoff();
 
 // Define a processor
-const myProcessor: Processor = {
+const myProcessor: Processor<{ foo: string }, string> = {
   name: "my-job",
   process: async (data, ctx) => {
     try {
       // Your job logic here
-      await doWork(data);
-      return [undefined, null];
+      const result = await doWork(data);
+      return [result, null];
     } catch (error) {
       return [undefined, error.message];
     }
