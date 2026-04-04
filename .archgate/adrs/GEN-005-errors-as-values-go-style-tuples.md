@@ -128,7 +128,7 @@ async function processOrder(orderId: string) {
 
 ### Don't
 
-- **Don't** use `neverthrow`, `Result`, `ResultAsync`, or any other wrapper library for new code — use native tuples instead.
+- **Don't** use wrapper library `Result` types for new code — use native tuples instead.
 - **Don't** return raw strings or plain objects as errors — always use `Error` subclasses.
 - **Don't** throw known domain errors — return them in the tuple.
 - **Don't** create global utility types or functions for the tuple pattern — the power is in the inline, zero-dependency signatures.
@@ -156,21 +156,19 @@ The goal is **not** to avoid all `try/catch` — it is to codify known errors. I
 
 ### Risks
 
-- **Migration Complete:** All `neverthrow` usage has been removed from the codebase. The `neverthrow` dependency is no longer present.
+- **Paradigm Shift:** Developers familiar with exception-based error handling will need onboarding on the tuple pattern.
 
 ## Supersedes
 
 This ADR supersedes:
 
-- **BE-001** — Standardized Error Handling with Neverthrow
+- **BE-001** — Standardized Error Handling (deleted)
 - **GEN-003** — Error Handling: Checked vs Unchecked Errors
-
-The `neverthrow` library has been fully removed from the codebase. All error handling now uses the tuple pattern described above.
 
 ## Compliance and Enforcement
 
 - All custom error classes must extend `Error` — enforced by `archgate check`.
-- New code must use the tuple return pattern for known errors, not `neverthrow` `Result` types — enforced during code review.
+- New code must use the tuple return pattern for known errors — enforced during code review.
 - `throw` is reserved for contract violations and unrecoverable errors — enforced during code review.
 
 ## References

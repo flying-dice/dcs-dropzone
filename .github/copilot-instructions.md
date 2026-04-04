@@ -163,7 +163,7 @@ The daemon build script bundles the app with third-party binaries (wget.exe, 7za
 - Strict type checking enabled
 - `noExplicitAny`: off (explicit any allowed)
 - `noNonNullAssertion`: off (! operator allowed)
-- Use `neverthrow` Result types for error handling (ok/err pattern)
+- Use Go-style tuple pattern for error handling (`[T, null] | [undefined, E]`) as per GEN-005
 - Prefer functional patterns with ts-pattern for control flow
 
 ### Testing Conventions
@@ -184,7 +184,7 @@ The daemon build script bundles the app with third-party binaries (wget.exe, 7za
 - **Ports & Adapters**: Separate interfaces (ports) from implementations (adapters)
 - **Repository Pattern**: Used for data access (e.g., `JobRepo`, `ModRepository`)
 - **Service Layer**: Business logic in service classes (e.g., `UserMods`, `PublicMods`)
-- **Result Pattern**: Use `neverthrow` for error handling instead of exceptions
+- **Error Pattern**: Use Go-style tuples (`[T, null] | [undefined, E]`) for error handling instead of exceptions
 
 ## Common Pitfalls & Workarounds
 

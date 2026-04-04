@@ -249,14 +249,3 @@ function divide(a: number, b: number): number {
 
 If a well-written caller could do something meaningful with the error, return it as a value. If the error means the program is in a broken state, throw.
 
-## Migration from neverthrow
-
-The `neverthrow` library has been fully removed from this codebase. All error handling now uses Go-style tuples as described above.
-
-If you encounter any legacy code that still uses `neverthrow` patterns, convert it following these steps:
-
-1. Convert `Result<T, E>` return types to `[T, null] | [undefined, E]`
-2. Replace `ok(value)` with `[value, null]`
-3. Replace `err(error)` with `[undefined, error]`
-4. Replace `.andThen()` chains with sequential destructuring and early returns
-5. Replace `.match()` calls with `if (err)` checks
