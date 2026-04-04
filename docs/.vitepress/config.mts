@@ -34,7 +34,10 @@ export default defineConfig({
       },
       {
         text: 'Reference',
-        items: []
+        items: [
+          { text: 'Linker', link: '/packages/linker' },
+          { text: 'Queue', link: '/packages/queue' },
+        ]
       },
       {
         text: 'Spec',
