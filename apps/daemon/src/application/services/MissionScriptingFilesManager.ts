@@ -1,5 +1,4 @@
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../../constants.ts";
 import { generateDropzoneMissionScriptingScript } from "../functions/generateDropzoneMissionScriptingScript.ts";
@@ -23,31 +22,30 @@ export class MissionScriptingFilesManager {
 		},
 	) {}
 
-	rebuild(): Result<void, DcsPathNotConfigured> {
+	rebuild(): [void, null] | [undefined, DcsPathNotConfigured] {
 		logger.info("Regenerating Dropzone Mission Scripting Files");
 
-		const beforeAbsPathResult = this.deps.pathResolver.resolveSymbolicLinkPath(
+		const [beforeAbsPath, beforeAbsPathErr] = this.deps.pathResolver.resolveSymbolicLinkPath(
 			SymbolicLinkDestRoot.DCS_WORKING_DIR,
 			MissionScriptingFilesManager.PATHS.MISSION_START_BEFORE_SANITIZE,
 		);
-		if (beforeAbsPathResult.isErr()) return err(beforeAbsPathResult.error);
+		if (beforeAbsPathErr) return [undefined, beforeAbsPathErr] as const;
 
-		const afterAbsPathResult = this.deps.pathResolver.resolveSymbolicLinkPath(
+		const [afterAbsPath, afterAbsPathErr] = this.deps.pathResolver.resolveSymbolicLinkPath(
 			SymbolicLinkDestRoot.DCS_WORKING_DIR,
 			MissionScriptingFilesManager.PATHS.MISSION_START_AFTER_SANITIZE,
 		);
-		if (afterAbsPathResult.isErr()) return err(afterAbsPathResult.error);
+		if (afterAbsPathErr) return [undefined, afterAbsPathErr] as const;
 
-		const dcsWorkingDirResult = this.deps.pathResolver.resolveSymbolicLinkPath(SymbolicLinkDestRoot.DCS_WORKING_DIR);
-		if (dcsWorkingDirResult.isErr()) return err(dcsWorkingDirResult.error);
-
-		const dcsWorkingDirExists = this.deps.fileSystem.exists(dcsWorkingDirResult.value).match(
-			(v) => v,
-			() => false,
+		const [dcsWorkingDir, dcsWorkingDirErr] = this.deps.pathResolver.resolveSymbolicLinkPath(
+			SymbolicLinkDestRoot.DCS_WORKING_DIR,
 		);
+		if (dcsWorkingDirErr) return [undefined, dcsWorkingDirErr] as const;
+
+		const dcsWorkingDirExists = this.deps.fileSystem.exists(dcsWorkingDir);
 		if (!dcsWorkingDirExists) {
 			logger.info("DCS working dir does not exist, skipping mission scripting files generation");
-			return ok(undefined);
+			return [undefined, null];
 		}
 
 		logger.debug("Fetching mission scripts to run before sanitize");
@@ -58,17 +56,17 @@ export class MissionScriptingFilesManager {
 
 		logger.debug(`Fetched ${beforeScripts.length} scripts to run before sanitize, generating file...`);
 
-		const beforePathsResult = this.mapScriptsToPaths(beforeScripts);
-		if (beforePathsResult.isErr()) return err(beforePathsResult.error);
+		const [beforePaths, beforePathsErr] = this.mapScriptsToPaths(beforeScripts);
+		if (beforePathsErr) return [undefined, beforePathsErr] as const;
 
 		const beforeFile = generateDropzoneMissionScriptingScript(
 			MissionScriptRunOn.MISSION_START_BEFORE_SANITIZE,
-			beforePathsResult.value,
+			beforePaths,
 		);
 
 		logger.debug("Writing before sanitize mission scripting file...");
 
-		this.deps.fileSystem.writeFile(beforeAbsPathResult.value, beforeFile);
+		this.deps.fileSystem.writeFile(beforeAbsPath, beforeFile);
 
 		logger.debug("Fetching mission scripts to run after sanitize");
 
@@ -78,21 +76,21 @@ export class MissionScriptingFilesManager {
 
 		logger.debug(`Fetched ${afterScripts.length} scripts to run after sanitize, generating file...`);
 
-		const afterPathsResult = this.mapScriptsToPaths(afterScripts);
-		if (afterPathsResult.isErr()) return err(afterPathsResult.error);
+		const [afterPaths, afterPathsErr] = this.mapScriptsToPaths(afterScripts);
+		if (afterPathsErr) return [undefined, afterPathsErr] as const;
 
 		const afterFile = generateDropzoneMissionScriptingScript(
 			MissionScriptRunOn.MISSION_START_AFTER_SANITIZE,
-			afterPathsResult.value,
+			afterPaths,
 		);
 
 		logger.debug("Writing after sanitize mission scripting file...");
 
-		this.deps.fileSystem.writeFile(afterAbsPathResult.value, afterFile);
+		this.deps.fileSystem.writeFile(afterAbsPath, afterFile);
 
 		logger.info("Regenerated Dropzone Mission Scripting Files");
 
-		return ok(undefined);
+		return [undefined, null];
 	}
 
 	private mapScriptsToPaths(
@@ -102,16 +100,16 @@ export class MissionScriptingFilesManager {
 			path: string;
 			pathRoot: SymbolicLinkDestRoot;
 		}[],
-	): Result<{ id: string; path: string }[], DcsPathNotConfigured> {
+	): [{ id: string; path: string }[], null] | [undefined, DcsPathNotConfigured] {
 		const results: { id: string; path: string }[] = [];
 		for (const it of scripts) {
-			const pathResult = this.deps.pathResolver.resolveSymbolicLinkPath(it.pathRoot, it.path);
-			if (pathResult.isErr()) return err(pathResult.error);
+			const [resolvedPath, pathErr] = this.deps.pathResolver.resolveSymbolicLinkPath(it.pathRoot, it.path);
+			if (pathErr) return [undefined, pathErr] as const;
 			results.push({
 				id: `${it.modName}-${it.modVersion}`,
-				path: pathResult.value,
+				path: resolvedPath,
 			});
 		}
-		return ok(results);
+		return [results, null];
 	}
 }

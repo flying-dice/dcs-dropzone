@@ -1,6 +1,5 @@
 import type { Processor, ProcessorContext } from "@packages/queue";
 import { getLogger } from "log4js";
-import { ok, type Result } from "neverthrow";
 import { delay } from "./utils.ts";
 
 const logger = getLogger("TestDownloadProcessor");
@@ -12,7 +11,7 @@ export class TestDelayProcessor<NAME extends string, TData, TResult> implements 
 		this.name = name;
 	}
 
-	async process(data: TData, ctx: ProcessorContext): Promise<Result<TResult, string>> {
+	async process(data: TData, ctx: ProcessorContext): Promise<[TResult, null] | [undefined, string]> {
 		logger.debug(`Processing download job: ${JSON.stringify(data)}`);
 
 		await delay(50, ctx.abortSignal);
@@ -27,6 +26,6 @@ export class TestDelayProcessor<NAME extends string, TData, TResult> implements 
 		await delay(50, ctx.abortSignal);
 		ctx.updateProgress(100);
 
-		return ok({} as TResult);
+		return [{} as TResult, null];
 	}
 }

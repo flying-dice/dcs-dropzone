@@ -1,7 +1,6 @@
 import type { Linker } from "@packages/linker";
 import type { JobRecordRepository } from "@packages/queue";
 import { getLogger } from "log4js";
-import type { Result } from "neverthrow";
 import type { DownloadProcessor } from "./ports/DownloadProcessor.ts";
 import type { ExtractProcessor } from "./ports/ExtractProcessor.ts";
 import type { FileSystem } from "./ports/FileSystem.ts";
@@ -97,15 +96,15 @@ export abstract class Application {
 		return this.daemonInstanceId;
 	}
 
-	public async enableRelease(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
+	public async enableRelease(releaseId: string): Promise<[void, null] | [undefined, ReleaseToggleError]> {
 		return this.releaseToggleService.enable(releaseId);
 	}
 
-	public disableRelease(releaseId: string): Result<void, ReleaseNotFound | DcsPathNotConfigured> {
+	public disableRelease(releaseId: string): [void, null] | [undefined, ReleaseNotFound | DcsPathNotConfigured] {
 		return this.releaseToggleService.disable(releaseId);
 	}
 
-	public async toggleRelease(releaseId: string): Promise<Result<void, ReleaseToggleError>> {
+	public async toggleRelease(releaseId: string): Promise<[void, null] | [undefined, ReleaseToggleError]> {
 		const release = this.deps.releaseRepository.getById(releaseId);
 		if (release?.enabled) {
 			return this.releaseToggleService.disable(releaseId);
@@ -113,7 +112,7 @@ export abstract class Application {
 		return this.releaseToggleService.enable(releaseId);
 	}
 
-	public addRelease(data: ModAndReleaseData): Result<void, DropzoneModsDirNotConfigured> {
+	public addRelease(data: ModAndReleaseData): [void, null] | [undefined, DropzoneModsDirNotConfigured] {
 		return this.releaseCatalog.add(data);
 	}
 
@@ -121,10 +120,10 @@ export abstract class Application {
 		// Try to disable the release first (removes symlinks, rebuilds scripts).
 		// Path configuration errors are non-fatal during removal since there are no
 		// symlinks or generated files to clean up if paths were never configured.
-		const disableResult = this.releaseToggleService.disable(releaseId);
-		if (disableResult.isErr()) {
+		const [, disableErr] = this.releaseToggleService.disable(releaseId);
+		if (disableErr) {
 			logger.warn(
-				`Could not fully disable release ${releaseId} during removal (${disableResult.error.type}), proceeding with cleanup`,
+				`Could not fully disable release ${releaseId} during removal (${disableErr.type}), proceeding with cleanup`,
 			);
 		}
 		this.releaseCatalog.remove(releaseId);

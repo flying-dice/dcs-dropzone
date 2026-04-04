@@ -1,5 +1,4 @@
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import type { SymbolicLinkDestRoot } from "webapp";
 import type { FileSystem } from "../ports/FileSystem.ts";
 
@@ -30,40 +29,39 @@ type Deps = {
 export class PathResolver {
 	constructor(protected deps: Deps) {}
 
-	resolveReleasePath(releaseId: string, path?: string): Result<string, DropzoneModsDirNotConfigured> {
+	resolveReleasePath(releaseId: string, path?: string): [string, null] | [undefined, DropzoneModsDirNotConfigured] {
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 
 		if (!dropzoneModsFolder) {
-			return err(new DropzoneModsDirNotConfigured());
+			return [undefined, new DropzoneModsDirNotConfigured()];
 		}
 
-		const existsResult = this.deps.fileSystem.exists(dropzoneModsFolder);
-		const exists = existsResult.match(
-			(v) => v,
-			() => false,
-		);
+		const exists = this.deps.fileSystem.exists(dropzoneModsFolder);
 		if (!exists) {
-			return err(new DropzoneModsDirNotConfigured());
+			return [undefined, new DropzoneModsDirNotConfigured()];
 		}
 
 		if (path) {
-			return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId, path));
+			return [this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId, path), null];
 		}
 
-		return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId));
+		return [this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId), null];
 	}
 
-	resolveSymbolicLinkPath(root: SymbolicLinkDestRoot, path?: string): Result<string, DcsPathNotConfigured> {
+	resolveSymbolicLinkPath(
+		root: SymbolicLinkDestRoot,
+		path?: string,
+	): [string, null] | [undefined, DcsPathNotConfigured] {
 		const rootPath = this.deps.getDcsPathForSymbolicLinkDestRoot(root);
 
 		if (!rootPath) {
-			return err(new DcsPathNotConfigured());
+			return [undefined, new DcsPathNotConfigured()];
 		}
 
 		if (path) {
-			return ok(this.deps.fileSystem.resolve(rootPath, path));
+			return [this.deps.fileSystem.resolve(rootPath, path), null];
 		}
 
-		return ok(this.deps.fileSystem.resolve(rootPath));
+		return [this.deps.fileSystem.resolve(rootPath), null];
 	}
 }

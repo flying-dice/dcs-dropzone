@@ -1,5 +1,4 @@
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import { SymbolicLinkDestRoot } from "webapp";
 import { MISSION_START_AFTER_SANITIZE, MISSION_START_BEFORE_SANITIZE } from "../../constants.ts";
 import { generateRemoveSymlinksScript } from "../functions/generateRemoveSymlinksScript.ts";
@@ -19,32 +18,28 @@ export class RemoveSymlinksScriptManager {
 		},
 	) {}
 
-	filePath(): Result<string, DcsPathNotConfigured> {
+	filePath(): [string, null] | [undefined, DcsPathNotConfigured] {
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 
 		if (!dropzoneModsFolder) {
-			return err(new DcsPathNotConfigured());
+			return [undefined, new DcsPathNotConfigured()];
 		}
 
-		return ok(this.deps.fileSystem.resolve(dropzoneModsFolder, "removeSymlinks.bat"));
+		return [this.deps.fileSystem.resolve(dropzoneModsFolder, "removeSymlinks.bat"), null];
 	}
 
-	rebuild(): Result<void, DcsPathNotConfigured> {
+	rebuild(): [void, null] | [undefined, DcsPathNotConfigured] {
 		logger.info("Regenerating removeSymlinks.bat");
 
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 		if (!dropzoneModsFolder) {
-			return err(new DcsPathNotConfigured());
+			return [undefined, new DcsPathNotConfigured()];
 		}
 
-		const existsResult = this.deps.fileSystem.exists(dropzoneModsFolder);
-		const folderExists = existsResult.match(
-			(v) => v,
-			() => false,
-		);
+		const folderExists = this.deps.fileSystem.exists(dropzoneModsFolder);
 		if (!folderExists) {
 			logger.info("Mods folder does not exist, skipping removeSymlinks.bat generation");
-			return ok(undefined);
+			return [undefined, null];
 		}
 
 		const installedPaths = this.deps.releaseRepository.getAllInstalledSymbolicLinkPaths();
@@ -52,28 +47,29 @@ export class RemoveSymlinksScriptManager {
 
 		const missionScriptPaths: string[] = [];
 
-		const beforeAbsPathResult = this.deps.pathResolver.resolveSymbolicLinkPath(
+		const [beforeAbsPath, beforeAbsPathErr] = this.deps.pathResolver.resolveSymbolicLinkPath(
 			SymbolicLinkDestRoot.DCS_WORKING_DIR,
 			MISSION_START_BEFORE_SANITIZE,
 		);
-		if (beforeAbsPathResult.isErr()) return err(beforeAbsPathResult.error);
-		missionScriptPaths.push(beforeAbsPathResult.value);
+		if (beforeAbsPathErr) return [undefined, beforeAbsPathErr] as const;
+		missionScriptPaths.push(beforeAbsPath);
 
-		const afterAbsPathResult = this.deps.pathResolver.resolveSymbolicLinkPath(
+		const [afterAbsPath, afterAbsPathErr] = this.deps.pathResolver.resolveSymbolicLinkPath(
 			SymbolicLinkDestRoot.DCS_WORKING_DIR,
 			MISSION_START_AFTER_SANITIZE,
 		);
-		if (afterAbsPathResult.isErr()) return err(afterAbsPathResult.error);
-		missionScriptPaths.push(afterAbsPathResult.value);
+		if (afterAbsPathErr) return [undefined, afterAbsPathErr] as const;
+		missionScriptPaths.push(afterAbsPath);
 
 		const content = generateRemoveSymlinksScript(installedPaths, missionScriptPaths);
 
-		return this.filePath().andThen((_path) => {
-			logger.debug(`Writing removeSymlinks.bat to ${_path}`);
-			this.deps.fileSystem.writeFile(_path, content);
+		const [filePath, filePathErr] = this.filePath();
+		if (filePathErr) return [undefined, filePathErr] as const;
 
-			logger.info("Regenerated removeSymlinks.bat");
-			return ok(undefined);
-		});
+		logger.debug(`Writing removeSymlinks.bat to ${filePath}`);
+		this.deps.fileSystem.writeFile(filePath, content);
+
+		logger.info("Regenerated removeSymlinks.bat");
+		return [undefined, null];
 	}
 }

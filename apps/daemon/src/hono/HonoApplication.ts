@@ -161,16 +161,14 @@ export class HonoApplication extends Hono<Env> {
 				const modAndRelease = c.req.valid("json");
 				logger.info("Adding release to daemon: %s", modAndRelease.releaseId ?? "unknown");
 
-				return c.var.app.addRelease(modAndRelease).match(
-					() => {
-						logger.info("Release added successfully");
-						return c.json(null, StatusCodes.OK);
-					},
-					(error) => {
-						logger.error("Failed to add release: %s - %s", error.type, error.name);
-						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
-					},
-				);
+				const [, addErr] = c.var.app.addRelease(modAndRelease);
+				if (addErr) {
+					logger.error("Failed to add release: %s - %s", addErr.type, addErr.name);
+					return c.json(zParse({ reason: addErr.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
+				}
+
+				logger.info("Release added successfully");
+				return c.json(null, StatusCodes.OK);
 			},
 		);
 	}
@@ -458,17 +456,14 @@ export class HonoApplication extends Hono<Env> {
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
 				logger.info("Toggling release %s", releaseId);
-				const result = await c.var.app.toggleRelease(releaseId);
-				return result.match(
-					() => {
-						logger.info("Release %s toggled successfully", releaseId);
-						return c.json(zParse({ ok: true }, OkData), StatusCodes.OK);
-					},
-					(error) => {
-						logger.error("Failed to toggle release %s: %s", releaseId, error.type);
-						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
-					},
-				);
+				const [, toggleErr] = await c.var.app.toggleRelease(releaseId);
+				if (toggleErr) {
+					logger.error("Failed to toggle release %s: %s", releaseId, toggleErr.type);
+					return c.json(zParse({ reason: toggleErr.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
+				}
+
+				logger.info("Release %s toggled successfully", releaseId);
+				return c.json(zParse({ ok: true }, OkData), StatusCodes.OK);
 			},
 		);
 	}
@@ -507,17 +502,14 @@ export class HonoApplication extends Hono<Env> {
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
 				logger.info("Enabling release %s", releaseId);
-				const result = await c.var.app.enableRelease(releaseId);
-				return result.match(
-					() => {
-						logger.info("Release %s enabled successfully", releaseId);
-						return c.json(zParse({ ok: true }, OkData), StatusCodes.OK);
-					},
-					(error) => {
-						logger.error("Failed to enable release %s: %s", releaseId, error.type);
-						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
-					},
-				);
+				const [, enableErr] = await c.var.app.enableRelease(releaseId);
+				if (enableErr) {
+					logger.error("Failed to enable release %s: %s", releaseId, enableErr.type);
+					return c.json(zParse({ reason: enableErr.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
+				}
+
+				logger.info("Release %s enabled successfully", releaseId);
+				return c.json(zParse({ ok: true }, OkData), StatusCodes.OK);
 			},
 		);
 	}
@@ -550,16 +542,17 @@ export class HonoApplication extends Hono<Env> {
 			async (c) => {
 				const { releaseId } = c.req.valid("param");
 				logger.info("Disabling release %s", releaseId);
-				return c.var.app.disableRelease(releaseId).match(
-					() => {
-						logger.info("Release %s disabled successfully", releaseId);
-						return c.json(zParse({ ok: true }, OkData), StatusCodes.OK);
-					},
-					(error) => {
-						logger.error("Failed to disable release %s: %s", releaseId, error.type);
-						return c.json(zParse({ reason: error.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
-					},
-				);
+				const [, disableErr] = c.var.app.disableRelease(releaseId);
+				if (disableErr) {
+					logger.error("Failed to disable release %s: %s", releaseId, disableErr.type);
+					return c.json(
+						zParse({ reason: disableErr.type }, _UnprocessableEntityData),
+						StatusCodes.UNPROCESSABLE_ENTITY,
+					);
+				}
+
+				logger.info("Release %s disabled successfully", releaseId);
+				return c.json(zParse({ ok: true }, OkData), StatusCodes.OK);
 			},
 		);
 	}

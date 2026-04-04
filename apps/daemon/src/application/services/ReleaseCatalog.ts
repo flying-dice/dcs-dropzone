@@ -1,5 +1,4 @@
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import { AssetStatus } from "../enums/AssetStatus.ts";
 import { inferReleaseStatusFromAssets } from "../functions/inferReleaseStatusFromAssets.ts";
 import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
@@ -21,19 +20,19 @@ type Deps = {
 export class ReleaseCatalog {
 	constructor(protected deps: Deps) {}
 
-	add(data: ModAndReleaseData): Result<void, DropzoneModsDirNotConfigured> {
+	add(data: ModAndReleaseData): [void, null] | [undefined, DropzoneModsDirNotConfigured] {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
 		// Verify dropzone mods directory is configured before persisting to prevent orphaned records
-		const pathCheck = this.deps.pathResolver.resolveReleasePath(data.releaseId);
-		if (pathCheck.isErr()) return err(pathCheck.error);
+		const [, pathCheckErr] = this.deps.pathResolver.resolveReleasePath(data.releaseId);
+		if (pathCheckErr) return [undefined, pathCheckErr] as const;
 
 		this.deps.releaseRepository.saveRelease(data);
-		const addResult = this.deps.releaseAssetManager.addRelease(data.releaseId);
-		if (addResult.isErr()) return err(addResult.error);
+		const [, addErr] = this.deps.releaseAssetManager.addRelease(data.releaseId);
+		if (addErr) return [undefined, addErr] as const;
 
 		logger.info(`Successfully added releaseId: ${data.releaseId}`);
-		return ok(undefined);
+		return [undefined, null];
 	}
 
 	remove(releaseId: string): void {
@@ -62,12 +61,7 @@ export class ReleaseCatalog {
 			let symlinkIntegrityValid = true;
 			if (release.enabled && symbolicLinks.length > 0) {
 				symlinkIntegrityValid = symbolicLinks.every(
-					(link) =>
-						link.installedPath !== null &&
-						this.deps.fileSystem.exists(link.installedPath).match(
-							(exists) => exists,
-							() => false,
-						),
+					(link) => link.installedPath !== null && this.deps.fileSystem.exists(link.installedPath),
 				);
 			}
 
