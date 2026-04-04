@@ -13,11 +13,7 @@ import { MissionScriptingFilesManager } from "./services/MissionScriptingFilesMa
 import { type DcsPathNotConfigured, type DropzoneModsDirNotConfigured, PathResolver } from "./services/PathResolver.ts";
 import { ReleaseAssetManager } from "./services/ReleaseAssetManager.ts";
 import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
-import {
-	type ReleaseNotFound,
-	ReleaseToggle,
-	type ReleaseToggleError,
-} from "./services/ReleaseToggle.ts";
+import { type ReleaseNotFound, ReleaseToggle, type ReleaseToggleError } from "./services/ReleaseToggle.ts";
 import { RemoveSymlinksScriptManager } from "./services/RemoveSymlinksScriptManager.ts";
 import { Settings } from "./services/Settings.ts";
 

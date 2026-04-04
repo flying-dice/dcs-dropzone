@@ -38,6 +38,18 @@ export class MissionScriptingFilesManager {
 		);
 		if (afterAbsPathResult.isErr()) return err(afterAbsPathResult.error);
 
+		const dcsWorkingDirResult = this.deps.pathResolver.resolveSymbolicLinkPath(SymbolicLinkDestRoot.DCS_WORKING_DIR);
+		if (dcsWorkingDirResult.isErr()) return err(dcsWorkingDirResult.error);
+
+		const dcsWorkingDirExists = this.deps.fileSystem.exists(dcsWorkingDirResult.value).match(
+			(v) => v,
+			() => false,
+		);
+		if (!dcsWorkingDirExists) {
+			logger.info("DCS working dir does not exist, skipping mission scripting files generation");
+			return ok(undefined);
+		}
+
 		logger.debug("Fetching mission scripts to run before sanitize");
 
 		const beforeScripts = this.deps.releaseRepository.getMissionScriptsByRunOn(

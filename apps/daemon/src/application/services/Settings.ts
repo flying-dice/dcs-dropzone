@@ -1,5 +1,5 @@
-import { normalize, join } from "node:path";
 import { platform } from "node:os";
+import { join, normalize } from "node:path";
 import { expandEnvVars } from "@packages/zod/expandEnvVars";
 import { SymbolicLinkDestRoot } from "webapp";
 import type { FileSystem } from "../ports/FileSystem.ts";
@@ -35,9 +35,7 @@ export class Settings {
 	private static readonly DROPZONE_MODS_DIR_KEY = "dropzone_mods_dir";
 
 	private static readonly DEFAULT_DCS_WORKING_DIR =
-		platform() === "win32"
-			? join("%USERPROFILE%", "Saved Games", "DCS")
-			: join("$HOME", "Saved Games", "DCS");
+		platform() === "win32" ? join("%USERPROFILE%", "Saved Games", "DCS") : join("$HOME", "Saved Games", "DCS");
 	private static readonly DEFAULT_DCS_INSTALL_DIR =
 		platform() === "win32"
 			? join("%PROGRAMFILES%", "Eagle Dynamics", "DCS World")

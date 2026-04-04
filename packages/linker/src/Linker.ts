@@ -9,6 +9,11 @@ import type { LinkDefinition, ResolvedLink } from "./types.ts";
 
 const logger = getLogger("Linker");
 
+const safeLstat = fromThrowable(
+	(path: string) => lstatSync(path, { throwIfNoEntry: false }),
+	(e) => (e instanceof Error ? e : new Error(String(e))),
+);
+
 /**
  * The Linker is responsible for creating and removing symbolic links on disk.
  *
@@ -65,7 +70,13 @@ export class Linker {
 		for (const link of links) {
 			logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
 
-			if (!lstatSync(link.installedPath, { throwIfNoEntry: false })) {
+			const statResult = safeLstat(link.installedPath);
+			if (statResult.isErr()) {
+				failed.push(new RemovalFailed(link.id, `Cannot stat path: ${statResult.error.message}`));
+				logger.error(`Failed to stat path for linkId ${link.id}: ${statResult.error.message}`);
+				continue;
+			}
+			if (!statResult.value) {
 				removed.push(link.id);
 				logger.debug(`Symlink already absent for linkId ${link.id}, treating as removed`);
 				continue;
@@ -90,7 +101,8 @@ export class Linker {
 	private async createLink(link: LinkDefinition): Promise<Result<ResolvedLink, SymlinkCreationFailed>> {
 		logger.debug(`Creating symlink (linkId=${link.id}, src=${link.src}, dest=${link.dest})`);
 
-		if (!lstatSync(link.src, { throwIfNoEntry: false })) {
+		const srcStat = safeLstat(link.src);
+		if (srcStat.isErr() || !srcStat.value) {
 			return err(
 				new SymlinkCreationFailed(link.id, LinkerErrorCode.SourceNotFound, `Source path does not exist: ${link.src}`),
 			);
@@ -98,7 +110,8 @@ export class Linker {
 
 		try {
 			const parent = dirname(link.dest);
-			if (!lstatSync(parent, { throwIfNoEntry: false })) {
+			const parentStat = safeLstat(parent);
+			if (parentStat.isOk() && !parentStat.value) {
 				mkdirSync(parent, { recursive: true });
 			}
 		} catch (e) {
@@ -111,7 +124,17 @@ export class Linker {
 			);
 		}
 
-		if (lstatSync(link.dest, { throwIfNoEntry: false })) {
+		const destStat = safeLstat(link.dest);
+		if (destStat.isErr()) {
+			return err(
+				new SymlinkCreationFailed(
+					link.id,
+					LinkerErrorCode.PermissionDenied,
+					`Cannot access destination path: ${destStat.error.message}`,
+				),
+			);
+		}
+		if (destStat.value) {
 			return err(
 				new SymlinkCreationFailed(
 					link.id,
@@ -141,7 +164,8 @@ export class Linker {
 		logger.warn(`Rolling back ${created.length} created symlinks`);
 		for (const link of created) {
 			try {
-				if (lstatSync(link.dest, { throwIfNoEntry: false })) {
+				const stat = safeLstat(link.dest);
+				if (stat.isOk() && stat.value) {
 					rmSync(link.dest, { force: true, recursive: true });
 				}
 				logger.debug(`Rolled back symlink for linkId ${link.id} at ${link.dest}`);
