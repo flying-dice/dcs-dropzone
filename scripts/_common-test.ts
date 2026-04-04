@@ -4,7 +4,10 @@ import _debug, { type Debugger } from "debug";
 
 async function test(debug: Debugger, env: typeof process.env) {
 	debug("Running test...");
-	const res = await $`bun test --coverage --pass-with-no-tests 2>&1`.nothrow().quiet().env(env);
+	const res = await $`bun test --coverage --reporter junit --reporter-outfile unit.junit.xml --pass-with-no-tests 2>&1`
+		.nothrow()
+		.quiet()
+		.env(env);
 
 	await Bun.write(".test.log", Bun.stripANSI(res.text()));
 	debug(res.text());

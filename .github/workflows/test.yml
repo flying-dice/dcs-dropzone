@@ -73,4 +73,4 @@ jobs:
         uses: mikepenz/action-junit-report@v5
         if: success() || failure() # always run even if the previous step fails
         with:
-          report_paths: 'unit.junit.xml'
+          report_paths: 'apps/**/unit.junit.xml,packages/**/unit.junit.xml'
