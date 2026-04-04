@@ -210,21 +210,17 @@ export type GetSettingsValidation200 = {
 	dropzoneModsDir: GetSettingsValidation200DropzoneModsDir;
 };
 
-export type AddReleaseToDaemon422Code = (typeof AddReleaseToDaemon422Code)[keyof typeof AddReleaseToDaemon422Code];
+export type AddReleaseToDaemon422Reason =
+	(typeof AddReleaseToDaemon422Reason)[keyof typeof AddReleaseToDaemon422Reason];
 
-export const AddReleaseToDaemon422Code = {
+export const AddReleaseToDaemon422Reason = {
 	DropzoneModsDirNotConfigured: "DropzoneModsDirNotConfigured",
 } as const;
 
 export type AddReleaseToDaemon422 = {
-	/**
-	 * @minimum 100
-	 * @maximum 599
-	 */
-	status: number;
-	code: AddReleaseToDaemon422Code;
-	message: string;
-	data: unknown;
+	code?: 422;
+	message?: string;
+	reason: AddReleaseToDaemon422Reason;
 };
 
 export type GetDaemonHealth200 = {
@@ -236,6 +232,38 @@ export type GetDaemonHealth503 = {
 	status: "DOWN";
 	daemonInstanceId: string;
 	error: string;
+};
+
+export type ToggleRelease422Reason = (typeof ToggleRelease422Reason)[keyof typeof ToggleRelease422Reason];
+
+export const ToggleRelease422Reason = {
+	DropzoneModsDirNotConfigured: "DropzoneModsDirNotConfigured",
+	DcsPathNotConfigured: "DcsPathNotConfigured",
+	ReleaseNotFound: "ReleaseNotFound",
+	ReleaseNotReady: "ReleaseNotReady",
+	SymlinkCreationFailed: "SymlinkCreationFailed",
+} as const;
+
+export type ToggleRelease422 = {
+	code?: 422;
+	message?: string;
+	reason: ToggleRelease422Reason;
+};
+
+export type EnableRelease422Reason = (typeof EnableRelease422Reason)[keyof typeof EnableRelease422Reason];
+
+export const EnableRelease422Reason = {
+	DropzoneModsDirNotConfigured: "DropzoneModsDirNotConfigured",
+	DcsPathNotConfigured: "DcsPathNotConfigured",
+	ReleaseNotFound: "ReleaseNotFound",
+	ReleaseNotReady: "ReleaseNotReady",
+	SymlinkCreationFailed: "SymlinkCreationFailed",
+} as const;
+
+export type EnableRelease422 = {
+	code?: 422;
+	message?: string;
+	reason: EnableRelease422Reason;
 };
 
 export type DisableRelease422Reason = (typeof DisableRelease422Reason)[keyof typeof DisableRelease422Reason];
@@ -762,7 +790,7 @@ export function useGetSettingsValidation<TData = Awaited<ReturnType<typeof getSe
 }
 
 export type addReleaseToDaemonResponse200 = {
-	data: void;
+	data: null;
 	status: 200;
 };
 
@@ -952,7 +980,7 @@ export function useGetAllDaemonReleases<TData = Awaited<ReturnType<typeof getAll
 }
 
 export type removeReleaseFromDaemonResponse200 = {
-	data: void;
+	data: null;
 	status: 200;
 };
 
@@ -1147,6 +1175,82 @@ export function useGetDaemonHealth<TData = Awaited<ReturnType<typeof getDaemonHe
 }
 
 /**
+ * Enables the release if currently disabled, or disables it if currently enabled.
+ * @summary Toggle a release enabled state
+ */
+export type toggleReleaseResponse200 = {
+	data: OkData;
+	status: 200;
+};
+
+export type toggleReleaseResponse422 = {
+	data: ToggleRelease422;
+	status: 422;
+};
+
+export type toggleReleaseResponse500 = {
+	data: ErrorData;
+	status: 500;
+};
+
+export type toggleReleaseResponseSuccess = toggleReleaseResponse200 & {
+	headers: Headers;
+};
+export type toggleReleaseResponseError = (toggleReleaseResponse422 | toggleReleaseResponse500) & {
+	headers: Headers;
+};
+
+export type toggleReleaseResponse = toggleReleaseResponseSuccess | toggleReleaseResponseError;
+
+export const getToggleReleaseUrl = (releaseId: string) => {
+	return `/api/toggle/${releaseId}`;
+};
+
+export const toggleRelease = async (releaseId: string, options?: RequestInit): Promise<toggleReleaseResponse> => {
+	return fetch<toggleReleaseResponse>(getToggleReleaseUrl(releaseId), {
+		...options,
+		method: "POST",
+	});
+};
+
+export const getToggleReleaseMutationOptions = <TError = ToggleRelease422 | ErrorData, TContext = unknown>(options?: {
+	mutation?: UseMutationOptions<Awaited<ReturnType<typeof toggleRelease>>, TError, { releaseId: string }, TContext>;
+	request?: SecondParameter<typeof fetch>;
+}): UseMutationOptions<Awaited<ReturnType<typeof toggleRelease>>, TError, { releaseId: string }, TContext> => {
+	const mutationKey = ["toggleRelease"];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<Awaited<ReturnType<typeof toggleRelease>>, { releaseId: string }> = (props) => {
+		const { releaseId } = props ?? {};
+
+		return toggleRelease(releaseId, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type ToggleReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof toggleRelease>>>;
+
+export type ToggleReleaseMutationError = ToggleRelease422 | ErrorData;
+
+/**
+ * @summary Toggle a release enabled state
+ */
+export const useToggleRelease = <TError = ToggleRelease422 | ErrorData, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<Awaited<ReturnType<typeof toggleRelease>>, TError, { releaseId: string }, TContext>;
+		request?: SecondParameter<typeof fetch>;
+	},
+	queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof toggleRelease>>, TError, { releaseId: string }, TContext> => {
+	return useMutation(getToggleReleaseMutationOptions(options), queryClient);
+};
+
+/**
  * @summary Enable a release by creating its symbolic links
  */
 export type enableReleaseResponse200 = {
@@ -1155,7 +1259,7 @@ export type enableReleaseResponse200 = {
 };
 
 export type enableReleaseResponse422 = {
-	data: ErrorData;
+	data: EnableRelease422;
 	status: 422;
 };
 
@@ -1184,7 +1288,7 @@ export const enableRelease = async (releaseId: string, options?: RequestInit): P
 	});
 };
 
-export const getEnableReleaseMutationOptions = <TError = ErrorData, TContext = unknown>(options?: {
+export const getEnableReleaseMutationOptions = <TError = EnableRelease422 | ErrorData, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
 	request?: SecondParameter<typeof fetch>;
 }): UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext> => {
@@ -1206,12 +1310,12 @@ export const getEnableReleaseMutationOptions = <TError = ErrorData, TContext = u
 
 export type EnableReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof enableRelease>>>;
 
-export type EnableReleaseMutationError = ErrorData;
+export type EnableReleaseMutationError = EnableRelease422 | ErrorData;
 
 /**
  * @summary Enable a release by creating its symbolic links
  */
-export const useEnableRelease = <TError = ErrorData, TContext = unknown>(
+export const useEnableRelease = <TError = EnableRelease422 | ErrorData, TContext = unknown>(
 	options?: {
 		mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
 		request?: SecondParameter<typeof fetch>;

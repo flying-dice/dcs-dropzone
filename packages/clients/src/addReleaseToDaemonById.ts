@@ -119,7 +119,7 @@ export async function addReleaseToDaemonById(
 
 	if (result.status !== StatusCodes.OK) {
 		return err(
-			result.data.code === "DropzoneModsDirNotConfigured"
+			result.data.reason === "DropzoneModsDirNotConfigured"
 				? new DropzoneModsDirNotConfiguredError({
 						message: "Failed to add release to daemon because mods directory is not configured",
 						data: result.data,
