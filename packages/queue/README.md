@@ -9,7 +9,7 @@ This package provides a simple job queue with automatic retries, scheduled execu
 ## Usage
 
 ```typescript
-import { ok, err } from "neverthrow";
+
 import {
   Queue,
   InMemoryJobRepo,
@@ -30,9 +30,9 @@ const myProcessor: Processor = {
     try {
       // Your job logic here
       await doWork(data);
-      return ok(undefined);
+      return [undefined, null];
     } catch (error) {
-      return err(error.message);
+      return [undefined, error.message];
     }
   },
 };
@@ -85,4 +85,4 @@ See the TypeScript types for detailed API documentation. Key exports:
 
 - **Single-instance only**: This queue does not support distributed locking or multi-instance coordination
 - **Jobs are retried on failure**: Use `ExponentialBackoff` to configure retry delays
-- **Processors must return `Result<T, string>`**: Use `ok()` for success and `err()` for failure
+- **Processors must return a `[TResult, null] | [undefined, string]` tuple**: Return `[result, null]` for success and `[undefined, reason]` for failure

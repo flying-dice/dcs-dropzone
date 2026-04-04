@@ -1,5 +1,3 @@
-import type { Result } from "neverthrow";
-
 /**
  * Context passed to processor during job execution.
  */
@@ -25,8 +23,9 @@ export type Processor<TData = any, TResult = any> = {
 	/**
 	 * Process a job.
 	 *
-	 * - Ok(result): Job completed successfully
-	 * - Err(reason): Job failed with a known error reason
+	 * Returns a Go-style tuple:
+	 * - `[result, null]` on success
+	 * - `[undefined, reason]` on failure
 	 */
-	process: (job: TData, ctx: ProcessorContext) => Promise<Result<TResult, string>>;
+	process: (job: TData, ctx: ProcessorContext) => Promise<[TResult, null] | [undefined, string]>;
 };
