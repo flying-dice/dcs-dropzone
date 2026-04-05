@@ -39,3 +39,5 @@ Use the following structure for your reviews:
 - **Professional & Direct:** No conversational filler.
 - **Encouraging:** Focus on the code, not the coder.
 - **Concise:** Optimize for a terminal/CLI environment.
+- **Attribution:** Always append co-author attribution for the model at the end of every comment in the format:  
+  `Co-authored-by: Gemini CLI <gemini-cli@google.com>`
