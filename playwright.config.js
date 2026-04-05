@@ -31,14 +31,27 @@ export default defineConfig({
 	// Configure projects for major browsers.
 	projects: [
 		{
-			name: "chromium",
+			name: "webapp",
+			testMatch: "**/01-*.spec-pw.ts",
 			use: { ...devices["Desktop Chrome"] },
 		},
+		{
+			name: "daemon",
+			testMatch: "**/02-*.spec-pw.ts",
+			use: { ...devices["Desktop Chrome"], baseURL: "http://localhost:56499" },
+		},
 	],
-	// Run your local dev server before starting the tests.
-	webServer: {
-		command: "bun playwright.setup.ts",
-		url: "http://localhost:3000",
-		reuseExistingServer: !process.env.CI,
-	},
+	// Run your local dev servers before starting the tests.
+	webServer: [
+		{
+			command: "bun playwright.setup.ts",
+			url: "http://localhost:3000",
+			reuseExistingServer: !process.env.CI,
+		},
+		{
+			command: "bun playwright.daemon.setup.ts",
+			url: "http://localhost:56499/api/health",
+			reuseExistingServer: !process.env.CI,
+		},
+	],
 });
