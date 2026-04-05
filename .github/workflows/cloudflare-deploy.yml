@@ -26,7 +26,6 @@ jobs:
         run: bun install
 
       - name: Sync secrets to Cloudflare
-        working-directory: packages/cloudflare
         run: |
           jq -n \
             --arg a "$DZ_WEBAPP_MONGO_URI" \
