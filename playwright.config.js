@@ -11,8 +11,8 @@ export default defineConfig({
 	// Retry on CI only.
 	retries: process.env.CI ? 2 : 0,
 
-	// Opt out of parallel tests on CI.
-	workers: process.env.CI ? 1 : undefined,
+	// Run webapp and daemon projects in parallel (they target independent servers).
+	workers: process.env.CI ? 2 : undefined,
 
 	// Reporter to use
 	reporter: [["html", { outputFolder: ".playwright-report" }]],
@@ -25,8 +25,8 @@ export default defineConfig({
 		// Collect trace when retrying the failed test.
 		trace: "on-first-retry",
 
-		// Record video for every test.
-		video: "on",
+		// Only record video on failure to save time and storage.
+		video: "retain-on-failure",
 	},
 	// Configure projects for major browsers.
 	projects: [
