@@ -32,22 +32,29 @@ export default async function (command: ToggleReleaseByIdCommand): Promise<Toggl
 	if (subscription.status === ModAndReleaseDataStatus.ENABLED) {
 		const disableResponse = await disableRelease(releaseId);
 		if (disableResponse.status !== StatusCodes.OK) {
-			const data = disableResponse.data as { reason?: string; systemError?: string };
-			const reason = data?.reason;
-			const systemError = data?.systemError;
-			const message = systemError ? `${reason}: ${systemError}` : (reason ?? "Failed to disable release");
-			return [undefined, new ToggleReleaseError(message)];
+			return [
+				undefined,
+				new ToggleReleaseError(extractErrorMessage(disableResponse.data, "Failed to disable release")),
+			];
 		}
 		return ["Disabled", null];
 	}
 
 	const enableResponse = await enableRelease(releaseId);
 	if (enableResponse.status !== StatusCodes.OK) {
-		const data = enableResponse.data as { reason?: string; systemError?: string };
-		const reason = data?.reason;
-		const systemError = data?.systemError;
-		const message = systemError ? `${reason}: ${systemError}` : (reason ?? "Failed to enable release");
-		return [undefined, new ToggleReleaseError(message)];
+		return [undefined, new ToggleReleaseError(extractErrorMessage(enableResponse.data, "Failed to enable release"))];
 	}
 	return ["Enabled", null];
+}
+
+function extractErrorMessage(data: unknown, fallback: string): string {
+	const errorData = data as {
+		reason?: string;
+		systemError?: string;
+		failures?: { linkId: string; message: string }[];
+	};
+	const reason = errorData?.reason;
+	if (!reason) return fallback;
+	const detail = errorData?.systemError ?? errorData?.failures?.map((f) => `${f.linkId}: ${f.message}`).join("; ");
+	return detail ? `${reason}: ${detail}` : reason;
 }

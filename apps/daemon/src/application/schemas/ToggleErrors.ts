@@ -54,7 +54,7 @@ export const PartialDisableFailureError = z
 		reason: z.literal("PartialDisableFailure"),
 		removedCount: z.number().int(),
 		failedCount: z.number().int(),
-		systemError: z.string().optional(),
+		failures: z.array(z.object({ linkId: z.string(), message: z.string() })),
 	})
 	.meta({ ref: "PartialDisableFailureError" });
 

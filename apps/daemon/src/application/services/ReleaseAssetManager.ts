@@ -122,14 +122,6 @@ export class ReleaseAssetManager {
 		this.deps.releaseRepository.clearJobsForRelease(releaseId);
 	}
 
-	isReleaseReady(releaseId: string) {
-		const allJobs = this.deps.releaseRepository
-			.getJobIdsForRelease(releaseId)
-			.flatMap((it) => this.queue.getAllByJobId(it));
-
-		return !allJobs.some((it) => [JobState.Pending, JobState.Waiting, JobState.Running].includes(it.state));
-	}
-
 	getReleaseReadiness(
 		releaseId: string,
 	): { ready: true } | { ready: false; pendingCount: number; failedCount: number } {

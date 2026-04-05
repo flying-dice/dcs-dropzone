@@ -3,7 +3,7 @@ import { getLogger } from "log4js";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import type { DisableReleaseError, EnableReleaseError, ToggleReleaseError } from "../schemas/ToggleErrors.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import type { DcsPathError, PathResolver } from "./PathResolver.ts";
+import type { PathResolver } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
@@ -25,7 +25,7 @@ export class ReleaseToggle {
 
 	async enable(releaseId: string): Promise<[void, null] | [undefined, EnableReleaseError]> {
 		logger.info(`Enabling Release ${releaseId}`);
-		const readyErr = this.checkReleaseIsReady(releaseId);
+		const [, readyErr] = this.checkReleaseIsReady(releaseId);
 		if (readyErr) return [undefined, readyErr] as const;
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
@@ -98,19 +98,19 @@ export class ReleaseToggle {
 				logger.warn(`Could not remove symlink (linkId=${failure.linkId}): ${failure.message}`);
 			}
 
+			// Only clear installed paths for links that were actually removed
 			for (const id of removedIds) {
 				this.deps.releaseRepository.setInstalledPathForSymbolicLink(id, null);
 			}
 
-			this.deps.releaseRepository.setEnabled(releaseId, false);
-
+			// Keep the release enabled — some symlinks still remain on disk
 			return [
 				undefined,
 				{
 					reason: "PartialDisableFailure" as const,
 					removedCount: removedIds.length,
 					failedCount: linkerErr.failed.length,
-					systemError: linkerErr.failed.map((f) => f.message).join("; "),
+					failures: linkerErr.failed.map((f) => ({ linkId: f.linkId, message: f.message })),
 				},
 			];
 		}
@@ -134,26 +134,29 @@ export class ReleaseToggle {
 		return [undefined, null];
 	}
 
-	private checkReleaseIsReady(releaseId: string): EnableReleaseError | undefined {
+	private checkReleaseIsReady(releaseId: string): [void, null] | [undefined, EnableReleaseError] {
 		logger.debug(`Checking if release ${releaseId} is ready`);
 
 		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
 		if (!exists) {
 			logger.warn(`Release ${releaseId} not found`);
-			return { reason: "ReleaseNotFound" as const };
+			return [undefined, { reason: "ReleaseNotFound" as const }];
 		}
 
 		const readiness = this.deps.releaseAssetManager.getReleaseReadiness(releaseId);
 		if (!readiness.ready) {
 			logger.warn(`Release ${releaseId} is not ready: some jobs are incomplete`);
-			return {
-				reason: "ReleaseNotReady" as const,
-				pendingCount: readiness.pendingCount,
-				failedCount: readiness.failedCount,
-			};
+			return [
+				undefined,
+				{
+					reason: "ReleaseNotReady" as const,
+					pendingCount: readiness.pendingCount,
+					failedCount: readiness.failedCount,
+				},
+			];
 		}
 
 		logger.debug(`Release ${releaseId} is ready for activation`);
-		return undefined;
+		return [undefined, null];
 	}
 }
