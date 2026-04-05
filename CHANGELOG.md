@@ -1,3 +1,12 @@
+## [1.10.4](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.3...v1.10.4) (2026-04-05)
+
+
+### Bug Fixes
+
+* add missing build scripts and scope Dockerfile build to webapp ([6f9a1b6](https://github.com/flying-dice/dcs-dropzone/commit/6f9a1b6b91ce08a9f1bae0c0153d0f9f37a97824))
+* use correct build script in webapp Dockerfile ([c97ea18](https://github.com/flying-dice/dcs-dropzone/commit/c97ea18b44033b2b58273db6a4ce7ebf04da8dd4))
+* use full build command everywhere, set CI=true in Dockerfile ([b9b37ea](https://github.com/flying-dice/dcs-dropzone/commit/b9b37eae0fc8f0eba5e0ef3983b3ff8b56a017c7))
+
 ## [1.10.3](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.2...v1.10.3) (2026-01-29)
 
 
