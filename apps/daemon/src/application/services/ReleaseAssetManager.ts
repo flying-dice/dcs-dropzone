@@ -127,7 +127,7 @@ export class ReleaseAssetManager {
 			.getJobIdsForRelease(releaseId)
 			.flatMap((it) => this.queue.getAllByJobId(it));
 
-		return !allJobs.some((it) => [JobState.Pending, JobState.Running].includes(it.state));
+		return !allJobs.some((it) => [JobState.Pending, JobState.Waiting, JobState.Running].includes(it.state));
 	}
 
 	getReleaseReadiness(
