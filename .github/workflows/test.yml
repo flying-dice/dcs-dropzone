@@ -117,6 +117,18 @@ jobs:
           name: playwright-report
           path: playwright-report/
 
+      - name: Deploy Playwright Report to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        if: always()
+        id: cf-pages
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: dcs-dropzone-playwright
+          directory: playwright-report
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref || github.ref_name }}
+
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
         if: success() || failure()
@@ -153,3 +165,7 @@ jobs:
           Add-Content $env:GITHUB_STEP_SUMMARY "| **Total** | **$total** |"
           Add-Content $env:GITHUB_STEP_SUMMARY ""
           Add-Content $env:GITHUB_STEP_SUMMARY "_Duration: $([math]::Round($time, 1))s across $($xmlFiles.Count) workspaces_"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "## 🎭 Playwright Report"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "${{ steps.cf-pages.outputs.url }}"
