@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { expect, test } from "playwright/test";
+import { expect, test } from "./fixtures.ts";
 
 test.describe("02 - Daemon Settings: API Tests", () => {
 	let tempDir: string;

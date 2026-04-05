@@ -1,4 +1,4 @@
-import { expect, test } from "playwright/test";
+import { expect, test } from "./fixtures.ts";
 
 const BASE_URL = "http://localhost:3000";
 
