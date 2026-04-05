@@ -30,7 +30,7 @@ export function _ListModCard(props: ModCardProps) {
 							</Text>
 						</Stack>
 						<Group wrap={"nowrap"}>
-							<Badge variant={"light"}>{props.category}</Badge>
+							<Badge variant={"light"} data-testid="mod-card-category">{props.category}</Badge>
 							<Group wrap={"nowrap"} gap={"xs"}>
 								<Stat icon={FaDownload} stat={props.downloads} />
 							</Group>

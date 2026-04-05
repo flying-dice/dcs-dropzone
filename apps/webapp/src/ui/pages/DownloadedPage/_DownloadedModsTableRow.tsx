@@ -68,6 +68,7 @@ export function _DownloadedModsTableRow(props: DownloadedModsTableRowProps) {
 						size={"sm"}
 						c={isLatest === undefined ? "gray" : isLatest ? "green" : "orange"}
 						fw={isLatest ? "normal" : "bold"}
+						data-testid="downloaded-mod-version"
 					>
 						{props.mod?.version}
 					</Text>

@@ -19,6 +19,7 @@ export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
 		<Stack gap={"xs"}>
 			{daemonRelease?.status && (
 				<Button
+					data-testid="toggle-release-button"
 					variant={"light"}
 					onClick={() => daemon.toggle(daemonRelease.releaseId)}
 					loading={daemon.toggling.loading}
@@ -34,6 +35,7 @@ export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
 			)}
 			{daemonRelease ? (
 				<Button
+					data-testid="remove-release-button"
 					variant={"light"}
 					onClick={() => daemon.remove(daemonRelease.releaseId)}
 					loading={daemon.removing.loading}
@@ -43,6 +45,7 @@ export function ModReleaseDaemonControls(props: ModReleaseDaemonControlsProps) {
 				</Button>
 			) : (
 				<Button
+					data-testid="download-release-button"
 					variant={"light"}
 					onClick={() => daemon.add(props.isUserModRelease, props.mod.id, props.release.id, props.form)}
 					loading={daemon.adding.loading}

@@ -63,7 +63,9 @@ export class PublicMods {
 		};
 	}
 
-	async getModById(modId: string): Promise<[{ mod: ModData; maintainers: UserData[] }, null] | [undefined, ModNotFoundError]> {
+	async getModById(
+		modId: string,
+	): Promise<[{ mod: ModData; maintainers: UserData[] }, null] | [undefined, ModNotFoundError]> {
 		logger.debug("Fetching mod by ID", { modId });
 
 		const result = await this.deps.modRepository.findPublicModById(modId);
@@ -76,10 +78,13 @@ export class PublicMods {
 		const maintainers = await this.deps.userRepository.findAllByIds(result.maintainers);
 		logger.info("Mod retrieved", { modId, name: result.name });
 
-		return [{
-			mod: result,
-			maintainers,
-		}, null];
+		return [
+			{
+				mod: result,
+				maintainers,
+			},
+			null,
+		];
 	}
 
 	async getAllFeaturedMods(): Promise<ModSummaryData[]> {

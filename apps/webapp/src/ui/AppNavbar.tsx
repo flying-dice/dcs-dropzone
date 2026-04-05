@@ -38,6 +38,7 @@ export function AppNavbar(props: AppNavbarProps) {
 					/>
 
 					<DzNavLink
+						data-testid="nav-browse-mods"
 						icon={AppIcons.Mods}
 						label={t("BROWSE_MODS")}
 						active={location.pathname === "/mods"}
@@ -56,6 +57,7 @@ export function AppNavbar(props: AppNavbarProps) {
 					<Divider label={t("LIBRARY")} labelPosition={"center"} />
 
 					<DzNavLink
+						data-testid="nav-downloaded"
 						icon={AppIcons.Downloaded}
 						label={t("DOWNLOADED")}
 						active={location.pathname === "/downloaded"}

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { platform } from "node:os";
 import { resolve } from "node:path";
 import { $ } from "bun";
 import { z } from "zod";
@@ -21,4 +22,6 @@ const _env = {
 
 await _checks(_env);
 await $`bun scripts/_build.ts`.env(_env);
-await $`iscc installer.iss`.env(_env);
+if (platform() === "win32") {
+	await $`iscc installer.iss`.env(_env);
+}
