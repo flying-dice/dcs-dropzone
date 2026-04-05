@@ -180,8 +180,8 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 	await expect(page).toHaveURL(/#\/user-mods\/.+$/);
 
 	// Verify 0.1.0 release is listed with PUBLIC visibility badge
-	await expect(page.getByText(RELEASE.version, { exact: true })).toBeVisible();
-	await expect(page.getByText("PUBLIC", { exact: true })).toBeVisible({ timeout: 10_000 });
+	await expect(page.getByTestId("release-version").filter({ hasText: RELEASE.version })).toBeVisible();
+	await expect(page.getByTestId("release-visibility-badge").filter({ hasText: "PUBLIC" })).toBeVisible({ timeout: 10_000 });
 
 	await page.getByTestId("mod-save-changes").click();
 	await expect(page.locator(".mantine-Notification-root").last()).toBeVisible({ timeout: 5_000 });
@@ -190,7 +190,8 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 	await page.getByTestId("mod-back-to-mods").click();
 	await expect(page).toHaveURL(/#\/user-mods$/);
 
-	await expect(page.getByText(MOD.name, { exact: true })).toBeVisible();
-	await expect(page.getByText(MOD.description)).toBeVisible();
-	await expect(page.getByTestId("mod-card-category").filter({ hasText: MOD.category })).toBeVisible();
+	const modCard = page.locator(".mantine-Card-root", { hasText: MOD.name });
+	await expect(modCard).toBeVisible();
+	await expect(modCard.getByText(MOD.description)).toBeVisible();
+	await expect(modCard.getByTestId("mod-card-category")).toHaveText(MOD.category);
 });
