@@ -25,8 +25,8 @@ export default defineConfig({
 		// Collect trace when retrying the failed test.
 		trace: "on-first-retry",
 
-		// Only record video on failure to save time and storage.
-		video: "retain-on-failure",
+		// Record video for every test.
+		video: "on",
 	},
 	// Configure projects for major browsers.
 	projects: [
