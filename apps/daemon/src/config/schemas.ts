@@ -15,7 +15,7 @@ export const AppConfig = z.object({
 	wgetPath: zen.path({ resolve: true, normalize: true, expandEnvVars: true }),
 	sevenzipPath: zen.path({ resolve: true, normalize: true, expandEnvVars: true }),
 
-	databasePath: zen.path({ resolve: true, normalize: true, expandEnvVars: true }),
+	databasePath: zen.path({ resolve: false, normalize: true, expandEnvVars: true }),
 
 	webviewWorkerModulePath: z.string(),
 });
