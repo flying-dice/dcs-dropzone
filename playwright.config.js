@@ -33,12 +33,12 @@ export default defineConfig({
 	projects: [
 		{
 			name: "webapp",
-			testMatch: "**/01-*.spec-pw.ts",
+			testMatch: "**/0{1,3}-*.spec-pw.ts",
 			use: { ...devices["Desktop Chrome"] },
 		},
 		{
 			name: "daemon",
-			testMatch: "**/02-*.spec-pw.ts",
+			testMatch: "**/0{2,4}-*.spec-pw.ts",
 			use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:56499" },
 		},
 	],

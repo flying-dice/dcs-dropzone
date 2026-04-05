@@ -255,6 +255,7 @@ export default {
 		DAEMON_CONNECTION_SUCCESS: "Connected to daemon successfully",
 		DAEMON_CONNECTING: "Connecting to daemon...",
 		DAEMON_CONNECTION_ERROR: "Error connecting to daemon",
+		DAEMON_ACTIVITY: "Daemon activity",
 		NO_ACTIVE_DOWNLOADS: "No active downloads",
 
 		ERROR_TAKING_ACTION_TITLE: "Action Failed",
