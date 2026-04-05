@@ -12,7 +12,12 @@ export function AssetActivity() {
 		<Popover>
 			<Popover.Target>
 				<Indicator withBorder processing disabled={!daemon.isActive}>
-					<ActionIcon size={"lg"} variant={"light"} color={daemon.isSuccess ? "green" : "red"}>
+					<ActionIcon
+						data-testid="daemon-activity-button"
+						size={"lg"}
+						variant={"light"}
+						color={daemon.isSuccess ? "green" : "red"}
+					>
 						{daemon.isSuccess ? <MdFileDownload /> : <MdFileDownloadOff />}
 					</ActionIcon>
 				</Indicator>
