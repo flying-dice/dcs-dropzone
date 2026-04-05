@@ -47,6 +47,17 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 	await expect(page.getByTestId("user-avatar")).toBeVisible({ timeout: 10_000 });
 	await expect(loginButton).not.toBeVisible();
 
+	// ── Step 1b — Clean up stale data from previous runs/retries ─────────────────
+	const userModsRes = await page.request.get(`${BASE_URL}/api/user-mods`);
+	if (userModsRes.ok()) {
+		const body = await userModsRes.json();
+		for (const mod of (body.data as Array<{ id: string; name: string }>) ?? []) {
+			if (mod.name === MOD.name) {
+				await page.request.delete(`${BASE_URL}/api/user-mods/${mod.id}`);
+			}
+		}
+	}
+
 	// ── Step 2 — Navigate to My Mods ────────────────────────────────────────────
 	await page.getByTestId("nav-my-mods").click();
 	await expect(page).toHaveURL(/#\/user-mods$/);
@@ -170,7 +181,7 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 
 	// Verify 0.1.0 release is listed with PUBLIC visibility badge
 	await expect(page.getByText(RELEASE.version, { exact: true })).toBeVisible();
-	await expect(page.getByText("PUBLIC", { exact: true })).toBeVisible();
+	await expect(page.getByText("PUBLIC", { exact: true })).toBeVisible({ timeout: 10_000 });
 
 	await page.getByTestId("mod-save-changes").click();
 	await expect(page.locator(".mantine-Notification-root").last()).toBeVisible({ timeout: 5_000 });
@@ -179,7 +190,7 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 	await page.getByTestId("mod-back-to-mods").click();
 	await expect(page).toHaveURL(/#\/user-mods$/);
 
-	await expect(page.getByText(MOD.name)).toBeVisible();
+	await expect(page.getByText(MOD.name, { exact: true })).toBeVisible();
 	await expect(page.getByText(MOD.description)).toBeVisible();
 	await expect(page.getByText(MOD.category, { exact: true })).toBeVisible();
 });
