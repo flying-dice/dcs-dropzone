@@ -9,40 +9,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Check Cloudflare secrets
-        working-directory: packages/cloudflare
+      - name: Check required GitHub secrets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DZ_WEBAPP_MONGO_URI: ${{ secrets.DZ_WEBAPP_MONGO_URI }}
+          DZ_WEBAPP_USER_COOKIE_SECRET: ${{ secrets.DZ_WEBAPP_USER_COOKIE_SECRET }}
+          DZ_WEBAPP_AUTH_REDIRECT_URL: ${{ secrets.DZ_WEBAPP_AUTH_REDIRECT_URL }}
+          DZ_WEBAPP_URL: ${{ secrets.DZ_WEBAPP_URL }}
+          DZ_WEBAPP_AUTH_SERVICE_GH: ${{ secrets.DZ_WEBAPP_AUTH_SERVICE_GH }}
         run: |
-          REQUIRED_SECRETS="DZ_WEBAPP_MONGO_URI DZ_WEBAPP_USER_COOKIE_SECRET DZ_WEBAPP_AUTH_REDIRECT_URL DZ_WEBAPP_URL DZ_WEBAPP_AUTH_SERVICE_GH"
-
-          EXISTING=$(bunx wrangler secret list --format json | jq -r '.[].name')
-
           MISSING=""
-          for secret in $REQUIRED_SECRETS; do
-            if ! echo "$EXISTING" | grep -q "^${secret}$"; then
+          for secret in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID DZ_WEBAPP_MONGO_URI DZ_WEBAPP_USER_COOKIE_SECRET DZ_WEBAPP_AUTH_REDIRECT_URL DZ_WEBAPP_URL DZ_WEBAPP_AUTH_SERVICE_GH; do
+            if [ -z "${!secret}" ]; then
               MISSING="$MISSING $secret"
             fi
           done
 
           if [ -n "$MISSING" ]; then
-            echo "::error::Missing Cloudflare secrets:$MISSING"
+            echo "::error::Missing GitHub secrets:$MISSING"
             echo ""
-            echo "Set them with:"
-            for secret in $MISSING; do
-              echo "  wrangler secret put $secret"
-            done
+            echo "Add them at: Settings > Secrets and variables > Actions"
             exit 1
           fi
 
-          echo "All required Cloudflare secrets are configured."
+          echo "All required GitHub secrets are configured."
