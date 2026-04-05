@@ -38,7 +38,7 @@ export default defineConfig({
 		},
 		{
 			name: "daemon",
-			testMatch: "**/0{2,4}-*.spec-pw.ts",
+			testMatch: "**/0{2,4,6}-*.spec-pw.ts",
 			use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:56499" },
 		},
 	],
