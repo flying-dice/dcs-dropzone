@@ -33,7 +33,7 @@ export default defineConfig({
 	projects: [
 		{
 			name: "webapp",
-			testMatch: "**/0{1,3}-*.spec-pw.ts",
+			testMatch: "**/0{1,3,5}-*.spec-pw.ts",
 			use: { ...devices["Desktop Chrome"] },
 		},
 		{
