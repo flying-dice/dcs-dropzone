@@ -14,6 +14,7 @@
 		"build": "bun run --filter '*' --filter '-cloudflare' build",
 		"tests": "bun run --filter '*' --filter '-cloudflare' tests",
 		"test:playwright": "bunx playwright test",
+		"test:playwright:serve": "bunx playwright show-report .playwright-report",
 		"docs:dev": "vitepress dev docs",
 		"docs:build": "vitepress build docs",
 		"docs:preview": "vitepress preview docs",
