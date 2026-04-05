@@ -34,12 +34,27 @@ jobs:
       - name: Tests
         run: bun run tests
 
+      - name: Install Playwright browsers
+        run: bunx playwright install chromium --with-deps
+
+      - name: Playwright Tests
+        run: bun run test:playwright
+
       - name: Upload log artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Logs
           path: logs/
+
+      - name: Upload JUnit Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-results
+          path: |
+            apps/**/unit.junit.xml
+            packages/**/unit.junit.xml
 
       - name: Upload Daemon Build Artifact
         if: success()
