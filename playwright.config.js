@@ -8,8 +8,9 @@ export default defineConfig({
 	// Fail the build on CI if you accidentally left test.only in the source code.
 	forbidOnly: !!process.env.CI,
 
-	// Retry on CI only.
-	retries: process.env.CI ? 2 : 0,
+	// Retry once on CI to handle transient flakes, but not more — retries accumulate
+	// state in tests that create data (e.g. CreateMod), causing strict-mode locator failures.
+	retries: process.env.CI ? 1 : 0,
 
 	// Run webapp and daemon projects in parallel (they target independent servers).
 	workers: process.env.CI ? 2 : undefined,
