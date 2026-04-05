@@ -32,6 +32,7 @@ async function tsc(debug: Debugger, env: typeof process.env) {
 }
 
 async function biome(debug: Debugger, env: typeof process.env) {
+	if (env.CI) return; // Run once at repo root in CI (see test.yml Lint step) instead of once per workspace
 	debug("Running biome...");
 	const res = await $`bunx biome check --write 2>&1`.env(env).nothrow().quiet();
 
