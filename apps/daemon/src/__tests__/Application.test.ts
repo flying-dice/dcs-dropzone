@@ -386,6 +386,14 @@ describe("Unconfigured paths", () => {
 	});
 
 	describe("addRelease without dropzone mods dir configured", () => {
+		beforeEach(() => {
+			// Point to a path that is guaranteed not to exist so the test is
+			// deterministic regardless of what the default resolves to on a
+			// given machine (e.g. Jenkins may have created the default dir in
+			// a prior build).
+			app.settings.setAll({ dropzoneModsDir: "/this/path/does/not/exist/dropzone/mods" });
+		});
+
 		it("should return a DropzoneModsDirInvalid error when default path does not exist", () => {
 			const [, err] = app.addRelease(modAndReleaseData);
 
