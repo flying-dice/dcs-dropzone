@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -18,11 +17,11 @@ const RELEASE = {
 };
 
 const ASSET = {
-	id: randomUUID(),
+	id: "test-07-asset-1",
 	name: "hello-world",
 	urls: [
 		{
-			id: randomUUID(),
+			id: "test-07-asset-1-url-1",
 			url: "https://github.com/flying-dice/hello-world-mod/releases/download/0.1.0/hello-world.lua",
 		},
 	],
@@ -30,12 +29,15 @@ const ASSET = {
 };
 
 const SYMLINK = {
-	id: randomUUID(),
+	id: "test-07-symlink-1",
 	name: "hello-world.lua",
 	src: "hello-world.lua",
 	destRoot: "DCS_WORKING_DIR",
 	dest: "Scripts/Hooks/hello-world.lua",
 };
+
+/** Deterministic release ID for the ReleaseNotReady test. */
+const NOT_READY_RELEASE_ID = "test-07-not-ready-release";
 
 test.describe("07 - Toggle Release: E2E", () => {
 	let tempDir: string;
@@ -220,24 +222,27 @@ test.describe("07 - Toggle Release: E2E", () => {
 			data: { dcsWorkingDir, dcsInstallDir: join(tempDir, "dcs-install-notready"), dropzoneModsDir },
 		});
 
-		// ── Step 2 — Add a release with assets directly to the daemon ───────────
+		// ── Step 2 — Clean up stale release from a prior failed attempt ─────────
+		await request.post(`${DAEMON_BASE_URL}/api/toggle/${NOT_READY_RELEASE_ID}/disable`);
+		await request.delete(`${DAEMON_BASE_URL}/api/downloads/${NOT_READY_RELEASE_ID}`);
+
+		// ── Step 3 — Add a release with assets directly to the daemon ───────────
 		// This release has assets so it won't be immediately ready (jobs will be pending/in-progress)
-		const releaseId = `notready-${randomUUID()}`;
 		const addRes = await request.post(`${DAEMON_BASE_URL}/api/downloads`, {
 			data: {
-				releaseId,
-				modId: "notready-mod-id",
+				releaseId: NOT_READY_RELEASE_ID,
+				modId: "test-07-notready-mod",
 				modName: "Not Ready Mod",
 				dependencies: [],
 				version: "1.0.0",
-				versionHash: Date.now().toString(),
+				versionHash: "hash-07-not-ready",
 				assets: [
 					{
-						id: `${releaseId}__asset-1`,
+						id: `${NOT_READY_RELEASE_ID}__asset-1`,
 						name: "some-asset",
 						urls: [
 							{
-								id: `${releaseId}__asset-1__url-1`,
+								id: `${NOT_READY_RELEASE_ID}__asset-1__url-1`,
 								url: "https://example.com/nonexistent-file-that-will-not-complete.zip",
 							},
 						],
@@ -250,15 +255,15 @@ test.describe("07 - Toggle Release: E2E", () => {
 		});
 		expect(addRes.ok()).toBeTruthy();
 
-		// ── Step 3 — Attempt to enable — should fail with ReleaseNotReady ───────
-		const enableRes = await request.post(`${DAEMON_BASE_URL}/api/toggle/${releaseId}/enable`);
+		// ── Step 4 — Attempt to enable — should fail with ReleaseNotReady ───────
+		const enableRes = await request.post(`${DAEMON_BASE_URL}/api/toggle/${NOT_READY_RELEASE_ID}/enable`);
 
 		expect(enableRes.status()).toBe(422);
 		const body = await enableRes.json();
 		expect(body.reason).toBe("ReleaseNotReady");
 
 		// ── Cleanup ─────────────────────────────────────────────────────────────
-		await request.delete(`${DAEMON_BASE_URL}/api/downloads/${releaseId}`);
+		await request.delete(`${DAEMON_BASE_URL}/api/downloads/${NOT_READY_RELEASE_ID}`);
 	});
 
 	test("Returns ReleaseNotFound when toggling a non-existent release", async ({ request }) => {

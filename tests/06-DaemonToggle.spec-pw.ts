@@ -1,8 +1,25 @@
-import { randomUUID } from "node:crypto";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "./fixtures.ts";
+
+/** Deterministic release IDs — one per test case — so retries reuse the same ID and cleanup is reliable. */
+const RELEASE_IDS = {
+	enableReady: "test-06-enable-ready",
+	enableNotReady: "test-06-enable-not-ready",
+	disableEnabled: "test-06-disable-enabled",
+	toggleEnable: "test-06-toggle-enable",
+	toggleDisable: "test-06-toggle-disable",
+};
+
+/** Remove a release from the daemon, ignoring 404 / already-absent. */
+async function cleanupRelease(
+	request: { post: (...args: never) => unknown; delete: (...args: never) => unknown },
+	releaseId: string,
+) {
+	await request.post(`/api/toggle/${releaseId}/disable`);
+	await request.delete(`/api/downloads/${releaseId}`);
+}
 
 test.describe("06 - Daemon Toggle: API Tests", () => {
 	let tempDir: string;
@@ -26,19 +43,24 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 		await request.put("/api/settings", {
 			data: { dcsWorkingDir, dcsInstallDir, dropzoneModsDir },
 		});
+
+		// Deterministic cleanup — remove any stale releases left by a previous failed attempt
+		for (const id of Object.values(RELEASE_IDS)) {
+			await cleanupRelease(request, id);
+		}
 	});
 
 	test.describe("POST /api/toggle/:releaseId/enable", () => {
 		test("returns 200 and ok:true when enabling a ready release", async ({ request }) => {
-			const releaseId = `ready-${randomUUID()}`;
+			const releaseId = RELEASE_IDS.enableReady;
 			const addRes = await request.post("/api/downloads", {
 				data: {
 					releaseId,
-					modId: "test-mod-id",
+					modId: "test-06-mod",
 					modName: "Test Mod",
 					dependencies: [],
 					version: "1.0.0",
-					versionHash: Date.now().toString(),
+					versionHash: "hash-06-enable-ready",
 					assets: [],
 					symbolicLinks: [],
 					missionScripts: [],
@@ -57,8 +79,7 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 			expect(downloads.find((d) => d.releaseId === releaseId)?.status).toBe("ENABLED");
 
 			// Cleanup
-			await request.post(`/api/toggle/${releaseId}/disable`);
-			await request.delete(`/api/downloads/${releaseId}`);
+			await cleanupRelease(request, releaseId);
 		});
 
 		test("returns 422 with ReleaseNotFound when release does not exist", async ({ request }) => {
@@ -70,15 +91,15 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 		});
 
 		test("returns 422 with ReleaseNotReady when release has incomplete jobs", async ({ request }) => {
-			const releaseId = `notready-${randomUUID()}`;
+			const releaseId = RELEASE_IDS.enableNotReady;
 			const addRes = await request.post("/api/downloads", {
 				data: {
 					releaseId,
-					modId: "notready-mod-id",
+					modId: "test-06-notready-mod",
 					modName: "Not Ready Mod",
 					dependencies: [],
 					version: "1.0.0",
-					versionHash: Date.now().toString(),
+					versionHash: "hash-06-enable-not-ready",
 					assets: [
 						{
 							id: `${releaseId}__asset-1`,
@@ -107,21 +128,21 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 			expect(body.failedCount).toBeGreaterThanOrEqual(0);
 
 			// Cleanup
-			await request.delete(`/api/downloads/${releaseId}`);
+			await cleanupRelease(request, releaseId);
 		});
 	});
 
 	test.describe("POST /api/toggle/:releaseId/disable", () => {
 		test("returns 200 and ok:true when disabling an enabled release", async ({ request }) => {
-			const releaseId = `disable-${randomUUID()}`;
+			const releaseId = RELEASE_IDS.disableEnabled;
 			const addRes = await request.post("/api/downloads", {
 				data: {
 					releaseId,
-					modId: "test-mod-id",
+					modId: "test-06-mod",
 					modName: "Test Mod",
 					dependencies: [],
 					version: "1.0.0",
-					versionHash: Date.now().toString(),
+					versionHash: "hash-06-disable-enabled",
 					assets: [],
 					symbolicLinks: [],
 					missionScripts: [],
@@ -145,7 +166,7 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 			expect(downloads.find((d) => d.releaseId === releaseId)?.status).toBe("DISABLED");
 
 			// Cleanup
-			await request.delete(`/api/downloads/${releaseId}`);
+			await cleanupRelease(request, releaseId);
 		});
 
 		test("returns 422 with ReleaseNotFound when release does not exist", async ({ request }) => {
@@ -159,15 +180,15 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 
 	test.describe("POST /api/toggle/:releaseId", () => {
 		test("returns 200 and enables a disabled release", async ({ request }) => {
-			const releaseId = `toggle-enable-${randomUUID()}`;
+			const releaseId = RELEASE_IDS.toggleEnable;
 			const addRes = await request.post("/api/downloads", {
 				data: {
 					releaseId,
-					modId: "test-mod-id",
+					modId: "test-06-mod",
 					modName: "Test Mod",
 					dependencies: [],
 					version: "1.0.0",
-					versionHash: Date.now().toString(),
+					versionHash: "hash-06-toggle-enable",
 					assets: [],
 					symbolicLinks: [],
 					missionScripts: [],
@@ -186,20 +207,19 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 			expect(downloads.find((d) => d.releaseId === releaseId)?.status).toBe("ENABLED");
 
 			// Cleanup
-			await request.post(`/api/toggle/${releaseId}/disable`);
-			await request.delete(`/api/downloads/${releaseId}`);
+			await cleanupRelease(request, releaseId);
 		});
 
 		test("returns 200 and disables an enabled release", async ({ request }) => {
-			const releaseId = `toggle-disable-${randomUUID()}`;
+			const releaseId = RELEASE_IDS.toggleDisable;
 			const addRes = await request.post("/api/downloads", {
 				data: {
 					releaseId,
-					modId: "test-mod-id",
+					modId: "test-06-mod",
 					modName: "Test Mod",
 					dependencies: [],
 					version: "1.0.0",
-					versionHash: Date.now().toString(),
+					versionHash: "hash-06-toggle-disable",
 					assets: [],
 					symbolicLinks: [],
 					missionScripts: [],
@@ -223,7 +243,7 @@ test.describe("06 - Daemon Toggle: API Tests", () => {
 			expect(downloads.find((d) => d.releaseId === releaseId)?.status).toBe("DISABLED");
 
 			// Cleanup
-			await request.delete(`/api/downloads/${releaseId}`);
+			await cleanupRelease(request, releaseId);
 		});
 
 		test("returns 422 with ReleaseNotFound when release does not exist", async ({ request }) => {
