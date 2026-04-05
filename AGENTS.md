@@ -229,6 +229,18 @@ Before committing changes, ALWAYS:
 6. Ensure changes work on Windows (CI target platform)
 7. **If you modified any files under `docs/`**, run `bun run docs:build` to verify there are no dead links or build errors before committing
 
+## PR Reviews
+
+When reviewing a pull request, **always**:
+
+1. Run `git pull` first to ensure local state is current.
+2. Check **all** CI checks with `gh pr checks <NUMBER> --repo flying-dice/dcs-dropzone` — every check must show `pass`, not just `pending`.
+3. Two checks are required — both must be green before approving:
+   - **`build-app`** — GitHub Actions (`.github/workflows/test.yml`)
+   - **`dcs-dropzone`** — Jenkins (`falcon.beluga-sirius.ts.net/job/dcs-dropzone/`)
+
+Use the `/review-pr` skill (`.claude/skills/review-pr/skill.md`) for a structured review process.
+
 ## Pipeline Verification (Required Before Closing Work Items)
 
 **Never consider a work item done on a green local run alone.** After pushing, both CI pipelines must be green:
