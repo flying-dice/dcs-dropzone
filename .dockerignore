@@ -22,9 +22,11 @@ yarn-error.log
 **/.env
 **/.env.*
 
-# Exclude specific monorepo apps you don't need for this container
-apps/launcher/
-apps/daemon/
+# Exclude specific monorepo apps you don't need for this container (keep schema files)
+apps/launcher/dist/
+apps/launcher/node_modules/
+apps/daemon/dist/
+apps/daemon/node_modules/
 
 # Exclude Docker-related files (optional but good practice)
 Dockerfile
