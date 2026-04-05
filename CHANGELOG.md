@@ -1,3 +1,10 @@
+## [1.10.6](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.5...v1.10.6) (2026-04-05)
+
+
+### Bug Fixes
+
+* restore .dockerignore exclusions, whitelist OpenAPI schemas ([c1388ba](https://github.com/flying-dice/dcs-dropzone/commit/c1388ba954b3ae20b47033ff3d0de7e5f0d51176))
+
 ## [1.10.5](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.4...v1.10.5) (2026-04-05)
 
 
