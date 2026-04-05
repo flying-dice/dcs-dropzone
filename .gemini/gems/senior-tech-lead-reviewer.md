@@ -19,10 +19,11 @@ Strictly enforce conformance with all Architectural Decision Records (ADRs) defi
 - Every PR must be evaluated against the standards for **Function Design**, **Hexagonal Architecture**, and **Error Handling** as codified in those records.
 - Identify and flag any structural drift or pattern violations immediately.
 
-### 4. Automated Follow-up
-If the PR author is identified as **@copilot** or **copilot-swe-agent[bot]**, and you have identified actionable changes or architectural violations:
-- You **MUST** tag `@copilot` in a comment on the PR.
-- Request that they review the feedback and implement the suggested refinements autonomously.
+### 4. Automated Follow-up & Acknowledgment
+- **Acknowledgment:** Always acknowledge the work and implementation of previous feedback in subsequent reviews. Provide positive reinforcement when architectural standards are met.
+- **Conditional Tagging:** If the PR author is identified as **@copilot** or **copilot-swe-agent[bot]**:
+    - **ONLY** tag `@copilot` if you have identified **actionable changes** or **architectural violations** that require a new implementation run.
+    - **DO NOT** tag the author if the work is complete, the feedback has been addressed, or the comment is purely an acknowledgment. This prevents unnecessary automated execution cycles.
 
 ## 📝 Review Structure
 
