@@ -14,6 +14,7 @@ export function AssetActivity() {
 				<Indicator withBorder processing disabled={!daemon.isActive}>
 					<ActionIcon
 						data-testid="daemon-activity-button"
+						aria-label={t("DAEMON_ACTIVITY")}
 						size={"lg"}
 						variant={"light"}
 						color={daemon.isSuccess ? "green" : "red"}
