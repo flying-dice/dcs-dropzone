@@ -129,8 +129,10 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          $xmlFiles = Get-ChildItem -Recurse -Filter "unit.junit.xml" -ErrorAction SilentlyContinue |
+          $root = "${{ github.workspace }}"
+          $xmlFiles = Get-ChildItem -Path $root -Recurse -Filter "unit.junit.xml" |
             Where-Object { $_.FullName -notlike "*node_modules*" }
+          Write-Output "Found $($xmlFiles.Count) JUnit file(s)"
           $total = 0; $failures = 0; $skipped = 0; $time = 0.0
           foreach ($f in $xmlFiles) {
             [xml]$x = Get-Content $f.FullName
@@ -141,16 +143,13 @@ jobs:
           }
           $passed = $total - $failures - $skipped
           $icon = if ($failures -gt 0) { "❌" } else { "✅" }
-          $md = @"
-          ## $icon Unit Tests
-
-          | Result | Count |
-          |--------|-------|
-          | ✅ Passed  | $passed |
-          | ❌ Failed  | $failures |
-          | ⏭ Skipped | $skipped |
-          | **Total**  | **$total** |
-
-          _Duration: $([math]::Round($time, 1))s across $($xmlFiles.Count) workspaces_
-          "@
-          $md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          Add-Content $env:GITHUB_STEP_SUMMARY "## $icon Unit Tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Result | Count |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|--------|-------|"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| ✅ Passed | $passed |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| ❌ Failed | $failures |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| ⏭ Skipped | $skipped |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| **Total** | **$total** |"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "_Duration: $([math]::Round($time, 1))s across $($xmlFiles.Count) workspaces_"
