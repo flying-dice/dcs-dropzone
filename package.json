@@ -8,7 +8,9 @@
 	"scripts": {
 		"archgate": "archgate check",
 		"daemon:dev": "cd apps/daemon && bun run dev",
+		"daemon:build": "bun run --filter daemon build",
 		"launcher:dev": "cd apps/launcher && bun run dev",
+		"launcher:build": "bun run --filter launcher build",
 		"webapp:dev": "cd apps/webapp && bun run dev",
 		"webapp:deploy": "bun run --filter cloudflare deploy",
 		"build": "bun run --filter '*' --filter '-cloudflare' build",
