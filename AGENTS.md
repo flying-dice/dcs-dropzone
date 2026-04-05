@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-**DCS Dropzone** is a mod manager system for DCS World (Digital Combat Simulator) consisting of a daemon application and a web application. The project is a Bun monorepo using TypeScript with two main applications and four shared packages.
+**DCS Dropzone** is a mod manager system for DCS World (Digital Combat Simulator) consisting of a daemon, a launcher, and a web application. The project is a Bun monorepo using TypeScript with three applications and nine shared packages.
 
 - **Size**: Medium-sized TypeScript monorepo (~300 source files)
 - **Runtime**: Bun v1.3.5+ (NOT Node.js)
@@ -18,16 +18,23 @@
 │   ├── daemon/        # Backend daemon for DCS mod management
 │   │   ├── src/
 │   │   ├── bin/       # Third-party binaries (wget.exe, 7za.exe, etc.)
-│   │   ├── dzConfig.toml
-│   │   ├── _build.ts
-│   │   ├── drizzle.ze.ts
+│   │   ├── scripts/   # Build, dev, and migration scripts
+│   │   ├── drizzle.config.ts
+│   │   └── package.json
+│   ├── launcher/      # Launcher application
 │   │   └── package.json
 │   └── webapp/        # Web UI for mod management
 │       ├── src/
-│       ├── orval.dzConfig.cjs
+│       ├── scripts/   # Build and dev scripts
 │       └── package.json
 ├── packages/
+│   ├── clients/       # API clients
+│   ├── cloudflare/    # Cloudflare worker
+│   ├── dz-config/     # Shared configuration
+│   ├── dzui/          # Shared UI components
 │   ├── hono/          # Shared Hono utilities
+│   ├── linker/        # Linking utilities
+│   ├── manifest/      # Manifest handling
 │   ├── queue/         # Job queue library (single-instance only)
 │   └── zod/           # Shared Zod schemas and validators
 ├── biome.json         # Code formatting and linting config
@@ -70,7 +77,7 @@ cd apps/daemon && bun test
 - Tests use Bun's built-in test runner
 - Coverage reports generate `unit.junit.xml` at root
 - Tests take ~11 seconds total
-- 184 tests across 21 files with 96%+ coverage
+- 256 tests across 26 files
 
 ### Linting & Type Checking
 
@@ -97,12 +104,12 @@ cd apps/daemon && bun run tsc
 
 ```bash
 # Start webapp dev server
-bun run dev:webapp
+bun run webapp:dev
 # Or: cd apps/webapp && bun run dev
 
 # Start daemon dev server
-bun run dev:daemon
-# Or: cd apps/daemon && bun --watch src/ze.ts
+bun run daemon:dev
+# Or: cd apps/daemon && bun run dev
 ```
 
 ### Building
@@ -115,7 +122,7 @@ cd apps/webapp && bun run build
 cd apps/daemon && bun run build
 ```
 
-The daemon build script (`_build.ts`) bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
+The daemon build script (`scripts/build.ts`) bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
 
 ## CI/CD Pipeline
 
@@ -200,12 +207,12 @@ These are bundled with the built daemon and must exist for tests to pass.
 
 ### 3. Database Configuration
 
-- **Daemon**: SQLite via Drizzle ORM (`apps/daemon/drizzle.ze.ts`)
+- **Daemon**: SQLite via Drizzle ORM (`apps/daemon/drizzle.config.ts`)
   - Migrations in `apps/daemon/src/database/ddl/`
-  - Schema in `apps/daemon/src/database/ConfigSchema.ts`
+  - Schema in `apps/daemon/src/database/schema.ts`
 - **Webapp**: MongoDB via Mongoose
   - In-memory MongoDB for tests (`mongodb-memory-server`)
-  - Connection string parsing in `apps/webapp/src/database/MongoUrl.ts`
+  - Database setup in `apps/webapp/src/database/index.ts`
 
 ### 4. Workspace Dependencies
 
