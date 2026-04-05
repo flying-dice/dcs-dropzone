@@ -4,7 +4,6 @@ import { mkdirSync } from "node:fs";
 import { TestTempDir } from "../__tests__/TestTempDir.ts";
 import { SYSTEM_7ZIP_PATH, SYSTEM_WGET_PATH } from "../__tests__/utils.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
-import { ReleaseNotFound, ReleaseNotReady } from "../application/services/ReleaseToggle.ts";
 import { ProdApplication } from "../ProdApplication.ts";
 import { HonoApplication } from "./HonoApplication.ts";
 
@@ -155,7 +154,8 @@ describe("HonoApplication", () => {
 				const response = await honoApp.request("/api/toggle/non-existent-id/enable", { method: "POST" });
 
 				expect(response.status).toBe(422);
-				expect((await response.json()).reason).toBe(ReleaseNotFound.name);
+				const body = await response.json();
+				expect(body.reason).toBe("ReleaseNotFound");
 			});
 
 			it("should return 422 with ReleaseNotReady when release has incomplete jobs", async () => {
@@ -165,7 +165,10 @@ describe("HonoApplication", () => {
 				const response = await honoApp.request(`/api/toggle/${notReadyRelease.releaseId}/enable`, { method: "POST" });
 
 				expect(response.status).toBe(422);
-				expect((await response.json()).reason).toBe(ReleaseNotReady.name);
+				const body = await response.json();
+				expect(body.reason).toBe("ReleaseNotReady");
+				expect(body.pendingCount).toBeNumber();
+				expect(body.failedCount).toBeNumber();
 			});
 		});
 
@@ -186,7 +189,8 @@ describe("HonoApplication", () => {
 				const response = await honoApp.request("/api/toggle/non-existent-id/disable", { method: "POST" });
 
 				expect(response.status).toBe(422);
-				expect((await response.json()).reason).toBe(ReleaseNotFound.name);
+				const body = await response.json();
+				expect(body.reason).toBe("ReleaseNotFound");
 			});
 		});
 
@@ -219,7 +223,8 @@ describe("HonoApplication", () => {
 				const response = await honoApp.request("/api/toggle/non-existent-id", { method: "POST" });
 
 				expect(response.status).toBe(422);
-				expect((await response.json()).reason).toBe(ReleaseNotFound.name);
+				const body = await response.json();
+				expect(body.reason).toBe("ReleaseNotFound");
 			});
 		});
 	});

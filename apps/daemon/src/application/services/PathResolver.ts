@@ -1,24 +1,23 @@
 import { getLogger } from "log4js";
 import type { SymbolicLinkDestRoot } from "webapp";
+import type { z } from "zod";
 import type { FileSystem } from "../ports/FileSystem.ts";
+import type {
+	DcsPathInvalidError,
+	DcsPathNotConfiguredError,
+	DropzoneModsDirInvalidError,
+	DropzoneModsDirNotConfiguredError,
+} from "../schemas/ToggleErrors.ts";
 
 const _logger = getLogger("PathResolver");
 
-export class DropzoneModsDirNotConfigured extends Error {
-	readonly type = "DropzoneModsDirNotConfigured" as const;
-	constructor() {
-		super("Dropzone mods directory is not configured");
-	}
-}
+export type DropzoneModsDirError =
+	| z.infer<typeof DropzoneModsDirNotConfiguredError>
+	| z.infer<typeof DropzoneModsDirInvalidError>;
 
-export class DcsPathNotConfigured extends Error {
-	readonly type = "DcsPathNotConfigured" as const;
-	constructor() {
-		super("DCS path is not configured");
-	}
-}
+export type DcsPathError = z.infer<typeof DcsPathNotConfiguredError> | z.infer<typeof DcsPathInvalidError>;
 
-export type PathResolverError = DropzoneModsDirNotConfigured | DcsPathNotConfigured;
+export type PathResolverError = DropzoneModsDirError | DcsPathError;
 
 type Deps = {
 	getDropzoneModsFolder: () => string | undefined;
@@ -29,16 +28,19 @@ type Deps = {
 export class PathResolver {
 	constructor(protected deps: Deps) {}
 
-	resolveReleasePath(releaseId: string, path?: string): [string, null] | [undefined, DropzoneModsDirNotConfigured] {
+	resolveReleasePath(releaseId: string, path?: string): [string, null] | [undefined, DropzoneModsDirError] {
 		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
 
 		if (!dropzoneModsFolder) {
-			return [undefined, new DropzoneModsDirNotConfigured()];
+			return [undefined, { reason: "DropzoneModsDirNotConfigured" as const }];
 		}
 
 		const exists = this.deps.fileSystem.exists(dropzoneModsFolder);
 		if (!exists) {
-			return [undefined, new DropzoneModsDirNotConfigured()];
+			return [
+				undefined,
+				{ reason: "DropzoneModsDirInvalid" as const, errorCode: "PATH_NOT_FOUND" as const, path: dropzoneModsFolder },
+			];
 		}
 
 		if (path) {
@@ -48,14 +50,11 @@ export class PathResolver {
 		return [this.deps.fileSystem.resolve(dropzoneModsFolder, releaseId), null];
 	}
 
-	resolveSymbolicLinkPath(
-		root: SymbolicLinkDestRoot,
-		path?: string,
-	): [string, null] | [undefined, DcsPathNotConfigured] {
+	resolveSymbolicLinkPath(root: SymbolicLinkDestRoot, path?: string): [string, null] | [undefined, DcsPathError] {
 		const rootPath = this.deps.getDcsPathForSymbolicLinkDestRoot(root);
 
 		if (!rootPath) {
-			return [undefined, new DcsPathNotConfigured()];
+			return [undefined, { reason: "DcsPathNotConfigured" as const }];
 		}
 
 		if (path) {

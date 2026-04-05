@@ -1,7 +1,7 @@
 import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
-import { ErrorData, OkData, UnprocessableEntityData } from "@packages/hono/schemas";
+import { ErrorData, OkData } from "@packages/hono/schemas";
 import { zParse } from "@packages/zod/zParse";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
@@ -14,8 +14,13 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import type { Application } from "../application/Application.ts";
 import { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
-import { DcsPathNotConfigured, DropzoneModsDirNotConfigured } from "../application/services/PathResolver.ts";
-import { ReleaseNotFound, ReleaseNotReady, SymlinkCreationFailed } from "../application/services/ReleaseToggle.ts";
+import {
+	DisableReleaseError,
+	DropzoneModsDirInvalidError,
+	DropzoneModsDirNotConfiguredError,
+	EnableReleaseError,
+	ToggleReleaseError,
+} from "../application/schemas/ToggleErrors.ts";
 import { UiAppConfig } from "../config/schemas.ts";
 
 type BuildOptions = {
@@ -137,7 +142,10 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private addReleaseToDaemon() {
-		const _UnprocessableEntityData = UnprocessableEntityData([DropzoneModsDirNotConfigured.name]);
+		const AddReleaseError = z.discriminatedUnion("reason", [
+			DropzoneModsDirNotConfiguredError,
+			DropzoneModsDirInvalidError,
+		]);
 
 		this.post(
 			"/api/downloads",
@@ -151,7 +159,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					[StatusCodes.UNPROCESSABLE_ENTITY]: {
 						description: "Unprocessable Entity",
-						content: { "application/json": { schema: resolver(_UnprocessableEntityData) } },
+						content: { "application/json": { schema: resolver(AddReleaseError) } },
 					},
 				},
 			}),
@@ -163,8 +171,8 @@ export class HonoApplication extends Hono<Env> {
 
 				const [, addErr] = c.var.app.addRelease(modAndRelease);
 				if (addErr) {
-					logger.error("Failed to add release: %s - %s", addErr.type, addErr.name);
-					return c.json(zParse({ reason: addErr.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
+					logger.error("Failed to add release: %s", addErr.reason);
+					return c.json(addErr, StatusCodes.UNPROCESSABLE_ENTITY);
 				}
 
 				logger.info("Release added successfully");
@@ -422,14 +430,6 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private toggleRelease() {
-		const _UnprocessableEntityData = UnprocessableEntityData([
-			DropzoneModsDirNotConfigured.name,
-			DcsPathNotConfigured.name,
-			ReleaseNotFound.name,
-			ReleaseNotReady.name,
-			SymlinkCreationFailed.name,
-		]);
-
 		this.post(
 			"/api/toggle/:releaseId",
 			describeRoute({
@@ -444,7 +444,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					[StatusCodes.UNPROCESSABLE_ENTITY]: {
 						description: "Failed to toggle release due to unprocessable entity error",
-						content: { "application/json": { schema: resolver(_UnprocessableEntityData) } },
+						content: { "application/json": { schema: resolver(ToggleReleaseError) } },
 					},
 					[StatusCodes.INTERNAL_SERVER_ERROR]: {
 						description: "Failed to toggle release due to internal server error",
@@ -458,8 +458,8 @@ export class HonoApplication extends Hono<Env> {
 				logger.info("Toggling release %s", releaseId);
 				const [, toggleErr] = await c.var.app.toggleRelease(releaseId);
 				if (toggleErr) {
-					logger.error("Failed to toggle release %s: %s", releaseId, toggleErr.type);
-					return c.json(zParse({ reason: toggleErr.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
+					logger.error("Failed to toggle release %s: %s", releaseId, toggleErr.reason);
+					return c.json(toggleErr, StatusCodes.UNPROCESSABLE_ENTITY);
 				}
 
 				logger.info("Release %s toggled successfully", releaseId);
@@ -469,14 +469,6 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private enableRelease() {
-		const _UnprocessableEntityData = UnprocessableEntityData([
-			DropzoneModsDirNotConfigured.name,
-			DcsPathNotConfigured.name,
-			ReleaseNotFound.name,
-			ReleaseNotReady.name,
-			SymlinkCreationFailed.name,
-		]);
-
 		this.post(
 			"/api/toggle/:releaseId/enable",
 			describeRoute({
@@ -490,7 +482,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					[StatusCodes.UNPROCESSABLE_ENTITY]: {
 						description: "Failed to enable release due to unprocessable entity error",
-						content: { "application/json": { schema: resolver(_UnprocessableEntityData) } },
+						content: { "application/json": { schema: resolver(EnableReleaseError) } },
 					},
 					[StatusCodes.INTERNAL_SERVER_ERROR]: {
 						description: "Failed to enable release due to internal server error",
@@ -504,8 +496,8 @@ export class HonoApplication extends Hono<Env> {
 				logger.info("Enabling release %s", releaseId);
 				const [, enableErr] = await c.var.app.enableRelease(releaseId);
 				if (enableErr) {
-					logger.error("Failed to enable release %s: %s", releaseId, enableErr.type);
-					return c.json(zParse({ reason: enableErr.type }, _UnprocessableEntityData), StatusCodes.UNPROCESSABLE_ENTITY);
+					logger.error("Failed to enable release %s: %s", releaseId, enableErr.reason);
+					return c.json(enableErr, StatusCodes.UNPROCESSABLE_ENTITY);
 				}
 
 				logger.info("Release %s enabled successfully", releaseId);
@@ -515,8 +507,6 @@ export class HonoApplication extends Hono<Env> {
 	}
 
 	private disableRelease() {
-		const _UnprocessableEntityData = UnprocessableEntityData([DcsPathNotConfigured.name, ReleaseNotFound.name]);
-
 		this.post(
 			"/api/toggle/:releaseId/disable",
 			describeRoute({
@@ -530,7 +520,7 @@ export class HonoApplication extends Hono<Env> {
 					},
 					[StatusCodes.UNPROCESSABLE_ENTITY]: {
 						description: "Failed to disable release due to unprocessable entity error",
-						content: { "application/json": { schema: resolver(_UnprocessableEntityData) } },
+						content: { "application/json": { schema: resolver(DisableReleaseError) } },
 					},
 					[StatusCodes.INTERNAL_SERVER_ERROR]: {
 						description: "Failed to disable release due to internal server error",
@@ -544,11 +534,8 @@ export class HonoApplication extends Hono<Env> {
 				logger.info("Disabling release %s", releaseId);
 				const [, disableErr] = c.var.app.disableRelease(releaseId);
 				if (disableErr) {
-					logger.error("Failed to disable release %s: %s", releaseId, disableErr.type);
-					return c.json(
-						zParse({ reason: disableErr.type }, _UnprocessableEntityData),
-						StatusCodes.UNPROCESSABLE_ENTITY,
-					);
+					logger.error("Failed to disable release %s: %s", releaseId, disableErr.reason);
+					return c.json(disableErr, StatusCodes.UNPROCESSABLE_ENTITY);
 				}
 
 				logger.info("Release %s disabled successfully", releaseId);

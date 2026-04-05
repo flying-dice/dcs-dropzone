@@ -8,11 +8,12 @@ import type { KeyValueRepository } from "./ports/KeyValueRepository.ts";
 import type { ReleaseRepository } from "./ports/ReleaseRepository.ts";
 import type { UUIDGenerator } from "./ports/UUIDGenerator.ts";
 import type { ModAndReleaseData } from "./schemas/ModAndReleaseData.ts";
+import type { DisableReleaseError, EnableReleaseError, ToggleReleaseError } from "./schemas/ToggleErrors.ts";
 import { MissionScriptingFilesManager } from "./services/MissionScriptingFilesManager.ts";
-import { type DcsPathNotConfigured, type DropzoneModsDirNotConfigured, PathResolver } from "./services/PathResolver.ts";
+import { type DropzoneModsDirError, PathResolver } from "./services/PathResolver.ts";
 import { ReleaseAssetManager } from "./services/ReleaseAssetManager.ts";
 import { ReleaseCatalog } from "./services/ReleaseCatalog.ts";
-import { type ReleaseNotFound, ReleaseToggle, type ReleaseToggleError } from "./services/ReleaseToggle.ts";
+import { ReleaseToggle } from "./services/ReleaseToggle.ts";
 import { RemoveSymlinksScriptManager } from "./services/RemoveSymlinksScriptManager.ts";
 import { Settings } from "./services/Settings.ts";
 
@@ -96,15 +97,15 @@ export abstract class Application {
 		return this.daemonInstanceId;
 	}
 
-	public async enableRelease(releaseId: string): Promise<[void, null] | [undefined, ReleaseToggleError]> {
+	public async enableRelease(releaseId: string): Promise<[void, null] | [undefined, EnableReleaseError]> {
 		return this.releaseToggleService.enable(releaseId);
 	}
 
-	public disableRelease(releaseId: string): [void, null] | [undefined, ReleaseNotFound | DcsPathNotConfigured] {
+	public disableRelease(releaseId: string): [void, null] | [undefined, DisableReleaseError] {
 		return this.releaseToggleService.disable(releaseId);
 	}
 
-	public async toggleRelease(releaseId: string): Promise<[void, null] | [undefined, ReleaseToggleError]> {
+	public async toggleRelease(releaseId: string): Promise<[void, null] | [undefined, ToggleReleaseError]> {
 		const release = this.deps.releaseRepository.getById(releaseId);
 		if (release?.enabled) {
 			return this.releaseToggleService.disable(releaseId);
@@ -112,7 +113,7 @@ export abstract class Application {
 		return this.releaseToggleService.enable(releaseId);
 	}
 
-	public addRelease(data: ModAndReleaseData): [void, null] | [undefined, DropzoneModsDirNotConfigured] {
+	public addRelease(data: ModAndReleaseData): [void, null] | [undefined, DropzoneModsDirError] {
 		return this.releaseCatalog.add(data);
 	}
 
@@ -123,7 +124,7 @@ export abstract class Application {
 		const [, disableErr] = this.releaseToggleService.disable(releaseId);
 		if (disableErr) {
 			logger.warn(
-				`Could not fully disable release ${releaseId} during removal (${disableErr.type}), proceeding with cleanup`,
+				`Could not fully disable release ${releaseId} during removal (${disableErr.reason}), proceeding with cleanup`,
 			);
 		}
 		this.releaseCatalog.remove(releaseId);

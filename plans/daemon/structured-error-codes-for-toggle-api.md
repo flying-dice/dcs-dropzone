@@ -1,5 +1,7 @@
 # Plan: Structured Error Codes for Enable/Disable Mod API
 
+> **Status: Implemented** — Core changes merged. See PR for details.
+
 ## Context
 
 The Daemon API's 422 error responses currently return only a class name as `reason` with no structured detail. Users can't tell *why* enabling/disabling failed. The error classes internally carry rich info (`SymlinkCreationFailed` has a `LinkerErrorCode` enum, release IDs, file paths) but none of it reaches the API consumer.

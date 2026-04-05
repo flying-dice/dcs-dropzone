@@ -1,28 +1,13 @@
-import { type LinkDefinition, type Linker, type LinkerError, SymlinkCreationFailed } from "@packages/linker";
+import type { LinkDefinition, Linker } from "@packages/linker";
 import { getLogger } from "log4js";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
+import type { DisableReleaseError, EnableReleaseError, ToggleReleaseError } from "../schemas/ToggleErrors.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
-import type { DcsPathNotConfigured, PathResolver, PathResolverError } from "./PathResolver.ts";
+import type { PathResolver } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
 
-export class ReleaseNotFound extends Error {
-	readonly type = "ReleaseNotFound" as const;
-	constructor(releaseId: string) {
-		super(`Release ${releaseId} not found`);
-	}
-}
-
-export class ReleaseNotReady extends Error {
-	readonly type = "ReleaseNotReady" as const;
-	constructor(releaseId: string) {
-		super(`Cannot enable release ${releaseId} because not all jobs are completed`);
-	}
-}
-
-export { SymlinkCreationFailed };
-
-export type ReleaseToggleError = PathResolverError | LinkerError | ReleaseNotFound | ReleaseNotReady;
+export type { DisableReleaseError, EnableReleaseError, ToggleReleaseError };
 
 const logger = getLogger("ReleaseToggle");
 
@@ -38,7 +23,7 @@ type Deps = {
 export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
-	async enable(releaseId: string): Promise<[void, null] | [undefined, ReleaseToggleError]> {
+	async enable(releaseId: string): Promise<[void, null] | [undefined, EnableReleaseError]> {
 		logger.info(`Enabling Release ${releaseId}`);
 		const [, readyErr] = this.checkReleaseIsReady(releaseId);
 		if (readyErr) return [undefined, readyErr] as const;
@@ -59,7 +44,16 @@ export class ReleaseToggle {
 		}
 
 		const [resolvedLinks, linkerErr] = await this.deps.linker.enable(linkDefinitions);
-		if (linkerErr) return [undefined, linkerErr] as const;
+		if (linkerErr) {
+			return [
+				undefined,
+				{
+					reason: "SymlinkCreationFailed" as const,
+					errorCode: linkerErr.code,
+					systemError: linkerErr.message,
+				},
+			];
+		}
 
 		for (const resolved of resolvedLinks) {
 			this.deps.releaseRepository.setInstalledPathForSymbolicLink(resolved.id, resolved.dest);
@@ -80,13 +74,13 @@ export class ReleaseToggle {
 		return [undefined, null];
 	}
 
-	disable(releaseId: string): [void, null] | [undefined, ReleaseNotFound | DcsPathNotConfigured] {
+	disable(releaseId: string): [void, null] | [undefined, DisableReleaseError] {
 		logger.info(`Disabling Release ${releaseId}`);
 
 		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
 		if (!exists) {
 			logger.warn(`Release ${releaseId} not found`);
-			return [undefined, new ReleaseNotFound(releaseId)];
+			return [undefined, { reason: "ReleaseNotFound" as const }];
 		}
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
@@ -103,6 +97,22 @@ export class ReleaseToggle {
 			for (const failure of linkerErr.failed) {
 				logger.warn(`Could not remove symlink (linkId=${failure.linkId}): ${failure.message}`);
 			}
+
+			// Only clear installed paths for links that were actually removed
+			for (const id of removedIds) {
+				this.deps.releaseRepository.setInstalledPathForSymbolicLink(id, null);
+			}
+
+			// Keep the release enabled — some symlinks still remain on disk
+			return [
+				undefined,
+				{
+					reason: "PartialDisableFailure" as const,
+					removedCount: removedIds.length,
+					failedCount: linkerErr.failed.length,
+					failures: linkerErr.failed.map((f) => ({ linkId: f.linkId, message: f.message })),
+				},
+			];
 		}
 
 		for (const id of removedIds) {
@@ -124,18 +134,26 @@ export class ReleaseToggle {
 		return [undefined, null];
 	}
 
-	private checkReleaseIsReady(releaseId: string): [void, null] | [undefined, ReleaseNotFound | ReleaseNotReady] {
+	private checkReleaseIsReady(releaseId: string): [void, null] | [undefined, EnableReleaseError] {
 		logger.debug(`Checking if release ${releaseId} is ready`);
 
 		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
 		if (!exists) {
 			logger.warn(`Release ${releaseId} not found`);
-			return [undefined, new ReleaseNotFound(releaseId)];
+			return [undefined, { reason: "ReleaseNotFound" as const }];
 		}
 
-		if (!this.deps.releaseAssetManager.isReleaseReady(releaseId)) {
+		const readiness = this.deps.releaseAssetManager.getReleaseReadiness(releaseId);
+		if (!readiness.ready) {
 			logger.warn(`Release ${releaseId} is not ready: some jobs are incomplete`);
-			return [undefined, new ReleaseNotReady(releaseId)];
+			return [
+				undefined,
+				{
+					reason: "ReleaseNotReady" as const,
+					pendingCount: readiness.pendingCount,
+					failedCount: readiness.failedCount,
+				},
+			];
 		}
 
 		logger.debug(`Release ${releaseId} is ready for activation`);
