@@ -11,7 +11,7 @@
 		"launcher:dev": "cd apps/launcher && bun run dev",
 		"webapp:dev": "cd apps/webapp && bun run dev",
 		"webapp:deploy": "bun run --filter cloudflare deploy",
-		"build": "bun run --sequential --filter '*' --filter '-cloudflare' build",
+		"build": "bun run --filter '*' --filter '-cloudflare' build",
 		"tests": "bun run --filter '*' --filter '-cloudflare' tests",
 		"test:playwright": "bunx playwright test",
 		"docs:dev": "vitepress dev docs",
