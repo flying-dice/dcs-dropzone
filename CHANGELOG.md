@@ -1,3 +1,10 @@
+## [1.10.7](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.6...v1.10.7) (2026-04-05)
+
+
+### Bug Fixes
+
+* remove node:assert import from client-side useDaemon hook ([18e14c8](https://github.com/flying-dice/dcs-dropzone/commit/18e14c8f00ddf3a09f2d7bdced31f56897976eb4))
+
 ## [1.10.6](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.5...v1.10.6) (2026-04-05)
 
 
