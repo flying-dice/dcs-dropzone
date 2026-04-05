@@ -1,0 +1,36 @@
+name: Cloudflare Preflight
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check required GitHub secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DZ_WEBAPP_MONGO_URI: ${{ secrets.DZ_WEBAPP_MONGO_URI }}
+          DZ_WEBAPP_USER_COOKIE_SECRET: ${{ secrets.DZ_WEBAPP_USER_COOKIE_SECRET }}
+          DZ_WEBAPP_AUTH_REDIRECT_URL: ${{ secrets.DZ_WEBAPP_AUTH_REDIRECT_URL }}
+          DZ_WEBAPP_URL: ${{ secrets.DZ_WEBAPP_URL }}
+          DZ_WEBAPP_AUTH_SERVICE_GH: ${{ secrets.DZ_WEBAPP_AUTH_SERVICE_GH }}
+        run: |
+          MISSING=""
+          for secret in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID DZ_WEBAPP_MONGO_URI DZ_WEBAPP_USER_COOKIE_SECRET DZ_WEBAPP_AUTH_REDIRECT_URL DZ_WEBAPP_URL DZ_WEBAPP_AUTH_SERVICE_GH; do
+            if [ -z "${!secret}" ]; then
+              MISSING="$MISSING $secret"
+            fi
+          done
+
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing GitHub secrets:$MISSING"
+            echo ""
+            echo "Add them at: Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+
+          echo "All required GitHub secrets are configured."
