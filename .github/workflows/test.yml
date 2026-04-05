@@ -122,3 +122,35 @@ jobs:
         if: success() || failure()
         with:
           report_paths: 'apps/**/unit.junit.xml,packages/**/unit.junit.xml'
+          detailed_summary: true
+          include_passed: true
+
+      - name: Write Job Summary
+        if: always()
+        shell: pwsh
+        run: |
+          $xmlFiles = Get-ChildItem -Recurse -Filter "unit.junit.xml" -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notlike "*node_modules*" }
+          $total = 0; $failures = 0; $skipped = 0; $time = 0.0
+          foreach ($f in $xmlFiles) {
+            [xml]$x = Get-Content $f.FullName
+            $total    += [int]$x.testsuites.tests
+            $failures += [int]$x.testsuites.failures
+            $skipped  += [int]$x.testsuites.skipped
+            $time     += [double]$x.testsuites.time
+          }
+          $passed = $total - $failures - $skipped
+          $icon = if ($failures -gt 0) { "❌" } else { "✅" }
+          $md = @"
+          ## $icon Unit Tests
+
+          | Result | Count |
+          |--------|-------|
+          | ✅ Passed  | $passed |
+          | ❌ Failed  | $failures |
+          | ⏭ Skipped | $skipped |
+          | **Total**  | **$total** |
+
+          _Duration: $([math]::Round($time, 1))s across $($xmlFiles.Count) workspaces_
+          "@
+          $md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
