@@ -229,6 +229,22 @@ Before committing changes, ALWAYS:
 6. Ensure changes work on Windows (CI target platform)
 7. **If you modified any files under `docs/`**, run `bun run docs:build` to verify there are no dead links or build errors before committing
 
+## Pipeline Verification (Required Before Closing Work Items)
+
+**Never consider a work item done on a green local run alone.** After pushing, both CI pipelines must be green:
+
+- **GitHub Actions** — `.github/workflows/test.yml` runs on every push (windows-latest)
+- **Jenkins** — `dcs-dropzone` job at `https://falcon.beluga-sirius.ts.net/job/dcs-dropzone/` polls for SCM changes
+
+Use the `/verify-pipelines` skill (`.claude/skills/verify-pipelines/skill.md`) to monitor both pipelines and get a definitive pass/fail verdict. The skill covers:
+
+- Locating the GitHub Actions run for the current commit and watching it to completion
+- Polling Jenkins until the build triggered by the push finishes
+- Pulling logs and diagnosing failures automatically
+- Treating Jenkins `UNSTABLE` (JUnit failures) as a failure, not a pass
+
+A work item is only closed when **both** pipelines report green.
+
 ## Additional Notes
 
 - **Job Queue**: The `@packages/queue` library is for single-instance use only (no distributed locking)
