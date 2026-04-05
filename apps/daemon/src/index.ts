@@ -1,34 +1,33 @@
 import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import appConfig from "./config";
+import { appConfig } from "./config";
+import { UiAppConfig } from "./config/schemas.ts";
 import { HonoApplication } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
+import index from "./ui/index.html";
 import { WebviewWorker } from "./webview";
-import index from "./wui/index.html";
 
 const logger = getLogger("bootstrap");
 
 logger.debug("Creating ProdApplication instance...");
 const app = new ProdApplication({
-	databaseUrl: appConfig.database.url,
-	wgetExecutablePath: appConfig.binaries.wget,
-	sevenZipExecutablePath: appConfig.binaries.sevenzip,
-	dropzoneModsFolder: appConfig.app.mods_dir,
-	dcsPaths: {
-		DCS_WORKING_DIR: appConfig.dcs.dcs_working_dir,
-		DCS_INSTALL_DIR: appConfig.dcs.dcs_install_dir,
-	},
+	databaseUrl: appConfig.databasePath,
+	wgetExecutablePath: appConfig.wgetPath,
+	sevenZipExecutablePath: appConfig.sevenzipPath,
 });
 
 logger.debug("Creating Hono application wrapper...");
-const honoApp = await HonoApplication.build(app);
+const honoApp = await HonoApplication.build(app, {
+	enableGenerateSchema: appConfig.enableGenerateSchema,
+	uiAppConfig: UiAppConfig.parse(appConfig),
+});
 
 logger.debug("Starting Bun server...");
 const bunServer = serve({
-	hostname: appConfig.server.host,
-	port: appConfig.server.port,
-	development: process.env.NODE_ENV !== "production",
+	hostname: appConfig.host,
+	port: appConfig.port,
+	development: appConfig.enableServeDevelopment,
 	routes: {
 		"/*": index,
 		"/api": honoApp.fetch,
@@ -39,9 +38,7 @@ const bunServer = serve({
 
 logger.info(`🚀 Server running at ${bunServer.url}`);
 
-const webviewWorker: WebviewWorker = new WebviewWorker({
-	debug: process.env.NODE_ENV !== "production",
-});
+const webviewWorker: WebviewWorker = new WebviewWorker(appConfig.webviewWorkerModulePath);
 
 webviewWorker.onMessage(async (message) => {
 	switch (message.type) {

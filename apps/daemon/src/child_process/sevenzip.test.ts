@@ -23,38 +23,35 @@ describe("Sevenzip Child Process", () => {
 	});
 
 	test("should return PropsError if executable path does not exist", async () => {
-		const result = await spawnSevenzip({
+		const [, err] = await spawnSevenzip({
 			exePath: join(tmpdir(), "7za.exe"),
 			archivePath: "test.7z",
 			targetDir: tempDir.path,
 			onProgress: () => {},
 		});
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBe(SevenzipErrors.PropsError);
+		expect(err).toBe(SevenzipErrors.PropsError);
 	});
 
 	test("should return PropsError if executable path is a directory", async () => {
-		const result = await spawnSevenzip({
+		const [, err] = await spawnSevenzip({
 			exePath: tmpdir(),
 			archivePath: "test.7z",
 			targetDir: tempDir.path,
 			onProgress: () => {},
 		});
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBe(SevenzipErrors.PropsError);
+		expect(err).toBe(SevenzipErrors.PropsError);
 	});
 
 	test("should return PropsError if archive path does not exist", async () => {
-		const result = await spawnSevenzip({
+		const [, err] = await spawnSevenzip({
 			exePath: SYSTEM_7ZIP_PATH,
 			archivePath: "nonexistent/test.7z",
 			targetDir: tempDir.path,
 			onProgress: () => {},
 		});
 
-		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBe(SevenzipErrors.PropsError);
+		expect(err).toBe(SevenzipErrors.PropsError);
 	});
 });

@@ -6,7 +6,6 @@ import { useAsyncFn } from "react-use";
 import { match } from "ts-pattern";
 import icon from "./assets/icon.svg";
 import logo from "./assets/logo.svg";
-import { constants } from "./constants.ts";
 import { AppIcons } from "./icons.ts";
 import { showErrorNotification } from "./showErrorNotification.tsx";
 import { useAppTranslation } from "./useAppTranslation.ts";
@@ -55,9 +54,12 @@ function ActionMenuFooterItem(props: ActionMenuItemProps) {
 }
 
 export type DzAppShellProps = Omit<AppShellProps, "header" | "footer"> & {
-	variant: "webapp" | "daemon";
+	variant: "webapp" | "daemon" | "settings";
 	headerSection?: ReactNode;
 	navbarDisclosure?: UseDisclosureReturnValue;
+	daemonUrl: string;
+	webappUrl: string;
+	isDaemonSuccess?: boolean;
 };
 export function DzAppShell(props: DzAppShellProps) {
 	const { isSm, isXs } = useBreakpoint();
@@ -66,22 +68,36 @@ export function DzAppShell(props: DzAppShellProps) {
 
 	const [webappOpening, openWebapp] = useAsyncFn(async () => {
 		try {
-			await fetch(new URL("/api/health", constants.WEBAPP_URL));
-			window.open(constants.WEBAPP_URL, "_self");
+			await fetch(new URL("/api/health", props.webappUrl));
+			window.open(props.webappUrl, "_self");
 		} catch (e) {
 			showErrorNotification(e);
 		}
-	}, []);
+	}, [props.webappUrl]);
+
 	const [daemonOpening, openDaemon] = useAsyncFn(async () => {
 		try {
-			await fetch(new URL("/api/health", constants.DAEMON_URL));
-			const daemonUrl = new URL(constants.DAEMON_URL);
+			await fetch(new URL("/api/health", props.daemonUrl));
+			const daemonUrl = new URL(props.daemonUrl);
 			daemonUrl.searchParams.set("nocache", Date.now().toString());
+			daemonUrl.hash = "#/";
 			window.open(daemonUrl.toString(), "_self");
 		} catch (e) {
 			showErrorNotification(e);
 		}
-	}, []);
+	}, [props.daemonUrl]);
+
+	const [settingsOpening, openSettings] = useAsyncFn(async () => {
+		try {
+			await fetch(new URL("/api/health", props.daemonUrl));
+			const settingsUrl = new URL(props.daemonUrl);
+			settingsUrl.searchParams.set("nocache", Date.now().toString());
+			settingsUrl.hash = "#/settings";
+			window.open(settingsUrl.toString(), "_self");
+		} catch (e) {
+			showErrorNotification(e);
+		}
+	}, [props.daemonUrl]);
 
 	const actions: ActionMenuItemProps[] = [
 		{
@@ -100,7 +116,16 @@ export function DzAppShell(props: DzAppShellProps) {
 			icon: AppIcons.Library,
 			onClick: openDaemon,
 			loading: daemonOpening.loading,
-			disabled: !!daemonOpening.error,
+			disabled: props.isDaemonSuccess === false || !!daemonOpening.error,
+		},
+		{
+			id: "settings",
+			label: t("SETTINGS"),
+			active: props.variant === "settings",
+			icon: AppIcons.Settings,
+			onClick: openSettings,
+			loading: settingsOpening.loading,
+			disabled: props.isDaemonSuccess === false || !!settingsOpening.error,
 		},
 	];
 

@@ -1,8 +1,3 @@
-CREATE TABLE `APP_ATTRIBUTES` (
-	`key` text PRIMARY KEY NOT NULL,
-	`value` text NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE `JOBS` (
 	`run_id` text PRIMARY KEY NOT NULL,
 	`job_id` text NOT NULL,
@@ -27,13 +22,19 @@ CREATE TABLE `JOBS_FOR_RELEASE` (
 	FOREIGN KEY (`job_id`) REFERENCES `JOBS`(`job_id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `KEY_VALUE` (
+	`key` text PRIMARY KEY NOT NULL,
+	`value` text NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `MOD_RELEASES` (
 	`release_id` text PRIMARY KEY NOT NULL,
 	`mod_id` text NOT NULL,
 	`mod_name` text NOT NULL,
 	`version` text NOT NULL,
 	`version_hash` text NOT NULL,
-	`dependencies` text NOT NULL
+	`dependencies` text NOT NULL,
+	`enabled` integer DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `MOD_RELEASE_ASSETS` (

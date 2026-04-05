@@ -6,42 +6,57 @@ jobs:
     name: build-app
     runs-on: windows-latest
     env:
-      BUN_INSTALL_CACHE_DIR: ${{ github.workspace }}\.cache\bun
+      NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Install bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Cache Bun install cache
+      - name: Cache node_modules
         uses: actions/cache@v4
+        id: node_modules_cache
         with:
-          path: ${{ github.workspace }}\.bun\install\cache
-          key: ${{ runner.os }}-bun-install-cache-${{ hashFiles('**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-install-cache-
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/bun.lockb') }}
 
       - name: Install dependencies
-        run: bun install
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~\AppData\Local\ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-chromium-
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install chromium --with-deps
+
+      - name: Lint
+        run: bunx biome check --write
 
       - name: Add daemon bins to PATH
         run: echo "${{ github.workspace }}\apps\daemon\bin" >> $env:GITHUB_PATH
 
-      - name: Run TypeScript Compiler
-        run: bun run tsc
+      - name: Build
+        run: bun run build
 
-      - name: Build Webapp
-        run: bun run webapp:build
+      - name: Tests
+        run: bun run tests
 
-      - name: Build Daemon
-        run: bun run daemon:build
-
-      - name: Build Launcher
-        run: bun run launcher:build
-
-      - name: Run tests
-        run: bun test
+      - name: Playwright Tests
+        run: bun run test:playwright
 
       - name: Upload log artifact
         if: always()
@@ -49,6 +64,15 @@ jobs:
         with:
           name: Logs
           path: logs/
+
+      - name: Upload JUnit Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-results
+          path: |
+            apps/**/unit.junit.xml
+            packages/**/unit.junit.xml
 
       - name: Upload Daemon Build Artifact
         if: success()
@@ -71,8 +95,77 @@ jobs:
           name: Dropzone_Launcher.exe
           path: 'apps/launcher/dist/Dropzone_Launcher.exe'
 
+      - name: Upload Setup Installer Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dropzone_Setup.exe
+          path: 'apps/launcher/dist/Dropzone_Setup.exe'
+
+      - name: Rename Playwright Report for upload
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path .playwright-report) {
+            Move-Item .playwright-report playwright-report
+          }
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - name: Deploy Playwright Report to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        if: always()
+        id: cf-pages
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: dcs-dropzone-playwright
+          directory: playwright-report
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref || github.ref_name }}
+
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
-        if: success() || failure() # always run even if the previous step fails
+        if: success() || failure()
         with:
-          report_paths: 'unit.junit.xml'
+          report_paths: 'apps/**/unit.junit.xml,packages/**/unit.junit.xml'
+          detailed_summary: true
+          include_passed: true
+
+      - name: Write Job Summary
+        if: always()
+        shell: pwsh
+        run: |
+          $root = "${{ github.workspace }}"
+          $xmlFiles = Get-ChildItem -Path $root -Recurse -Filter "unit.junit.xml" |
+            Where-Object { $_.FullName -notlike "*node_modules*" }
+          Write-Output "Found $($xmlFiles.Count) JUnit file(s)"
+          $total = 0; $failures = 0; $skipped = 0; $time = 0.0
+          foreach ($f in $xmlFiles) {
+            [xml]$x = Get-Content $f.FullName
+            $total    += [int]$x.testsuites.tests
+            $failures += [int]$x.testsuites.failures
+            $skipped  += [int]$x.testsuites.skipped
+            $time     += [double]$x.testsuites.time
+          }
+          $passed = $total - $failures - $skipped
+          $icon = if ($failures -gt 0) { "❌" } else { "✅" }
+          Add-Content $env:GITHUB_STEP_SUMMARY "## $icon Unit Tests"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "| Result | Count |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "|--------|-------|"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| ✅ Passed | $passed |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| ❌ Failed | $failures |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| ⏭ Skipped | $skipped |"
+          Add-Content $env:GITHUB_STEP_SUMMARY "| **Total** | **$total** |"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "_Duration: $([math]::Round($time, 1))s across $($xmlFiles.Count) workspaces_"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "## 🎭 Playwright Report"
+          Add-Content $env:GITHUB_STEP_SUMMARY ""
+          Add-Content $env:GITHUB_STEP_SUMMARY "${{ steps.cf-pages.outputs.url }}"

@@ -1,69 +1,26 @@
-import * as assert from "node:assert";
-import { getShapeFromZodObject } from "@packages/zod/ze";
-import inquirer from "inquirer";
-import { get, merge } from "lodash";
-import { ZodOptional, type ZodType, z } from "zod";
-import { readConfigFile, writeConfigFile } from "./configFile.ts";
-import { ConfigSchema } from "./configSchema.ts";
-import { CONFIG_FILE_PATH, defaultConfig } from "./defaultConfig.ts";
-import { FileConfigSchema } from "./fileConfigSchema.ts";
+import { BuildEnv } from "@packages/dz-config";
+import { SEVEN_ZIP_BINARIES, WGET_BINARIES } from "../constants.ts";
+import { which } from "../utils/which.ts";
+import { AppConfig, BuildConfig, EnvConfig } from "./schemas.ts";
 
-// biome-ignore lint/style/useConst: Required for while loop below
-let appConfig: ConfigSchema;
-let _appConfig: ConfigSchema | null = null;
+const buildEnv: BuildConfig | undefined = BuildEnv.load(BuildConfig);
+const env: EnvConfig = EnvConfig.parse({ ...buildEnv, ...process.env });
 
-// Configuration Loading
-while (!_appConfig) {
-	console.log(`Loading Configuration File: ${CONFIG_FILE_PATH}`);
-	const configFile = await readConfigFile(CONFIG_FILE_PATH);
-	const configWithDefaults = merge({}, defaultConfig, configFile);
-	const parseResult = ConfigSchema.safeParse(configWithDefaults);
+export const appConfig = AppConfig.parse({
+	host: env.DZ_DAEMON_HOST,
+	port: env.DZ_DAEMON_PORT,
+	webappUrl: env.DZ_WEBAPP_URL,
+	daemonUrl: env.DZ_DAEMON_URL,
+	webviewWindowTitle: env.DZ_DAEMON_WEBVIEW_WINDOW_TITLE,
 
-	if (parseResult.success) {
-		await writeConfigFile(CONFIG_FILE_PATH, configFile || {});
-		_appConfig = parseResult.data;
-	} else {
-		console.error("Failed to load configuration:");
+	enableServeDevelopment: env.DZ_ENABLE_SERVE_DEVELOPMENT,
+	enableWebviewWorkerDebug: env.DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG,
+	enableGenerateSchema: env.DZ_ENABLE_GENERATE_SCHEMA,
 
-		console.table(
-			parseResult.error.issues.map((it) => ({
-				Path: it.path.join("."),
-				Value: get(configWithDefaults, it.path),
-				Error: it.message,
-			})),
-		);
+	wgetPath: env.DZ_DAEMON_WGET_PATH ?? WGET_BINARIES.map(which).find(Boolean),
+	sevenzipPath: env.DZ_DAEMON_SEVENZIP_PATH ?? SEVEN_ZIP_BINARIES.map(which).find(Boolean),
 
-		console.log("Updating Failed Config Values...");
+	databasePath: env.DZ_DAEMON_DATABASE_PATH,
 
-		const answers = await inquirer.prompt(
-			parseResult.error.issues.map((issue) => ({
-				type: "input",
-				name: issue.path.join("."),
-				message: `${issue.path.join(".")}`,
-				default: () => {
-					const p = issue.path.map(String);
-					const shape = getShapeFromZodObject(FileConfigSchema, p);
-					return (shape instanceof ZodOptional ? (shape.unwrap() as ZodType) : shape)?.meta()?.default;
-				},
-				validate: (it) => {
-					const shape = getShapeFromZodObject(ConfigSchema, issue.path);
-					if (shape) {
-						const parseResult = shape.safeParse(it);
-						if (parseResult.error) {
-							return z.treeifyError(parseResult.error).errors;
-						}
-					}
-
-					return true;
-				},
-			})),
-		);
-
-		console.log("Updating config file and reloading...");
-		await writeConfigFile(CONFIG_FILE_PATH, merge(configFile, answers));
-	}
-}
-
-assert.ok(_appConfig);
-appConfig = _appConfig;
-export default appConfig;
+	webviewWorkerModulePath: env.DZ_DAEMON_WEBVIEW_WORKER_MODULE_PATH,
+});

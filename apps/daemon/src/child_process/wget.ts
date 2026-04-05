@@ -3,7 +3,6 @@ import { statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { mkdirSync, pathExistsSync } from "fs-extra";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import { z } from "zod";
 import { extractPercentage } from "../application/functions/extract-percentage.ts";
 
@@ -60,25 +59,24 @@ const SpawnWgetProps = z
 		};
 	})
 	.superRefine((it, ctx) => {
-		try {
-			if (!pathExistsSync(it.exePath)) {
+		if (!pathExistsSync(it.exePath)) {
+			ctx.addIssue({
+				code: "custom",
+				message: `Executable path does not exist: ${it.exePath}`,
+			});
+		} else {
+			const stat = statSync(it.exePath, { throwIfNoEntry: false });
+			if (!stat) {
 				ctx.addIssue({
 					code: "custom",
-					message: `Executable path does not exist: ${it.exePath}`,
+					message: `Failed to stat executable path: ${it.exePath}`,
 				});
-			}
-
-			if (statSync(it.exePath).isDirectory()) {
+			} else if (stat.isDirectory()) {
 				ctx.addIssue({
 					code: "custom",
 					message: `Executable path is a directory: ${it.exePath}`,
 				});
 			}
-		} catch (e) {
-			ctx.addIssue({
-				code: "custom",
-				message: `Failed to validate executable path: ${it.exePath} - ${e}`,
-			});
 		}
 
 		try {
@@ -86,7 +84,7 @@ const SpawnWgetProps = z
 		} catch (e) {
 			ctx.addIssue({
 				code: "custom",
-				message: `Failed to create target directory: ${it.target} - ${e}`,
+				message: `Failed to create target directory: ${it.target} - ${e instanceof Error ? e : new Error(String(e))}`,
 			});
 		}
 	});
@@ -95,10 +93,10 @@ export type SpawnWgetProps = z.infer<typeof SpawnWgetProps>;
 
 /**
  * Result of the wget spawn process
- * - Ok: string - Path to the downloaded file
- * - Err: WgetErrors - Error type
+ * - Ok: [string, null] - Path to the downloaded file
+ * - Err: [undefined, WgetErrors] - Error type
  */
-export type WgetResult = Result<string, WgetErrors>;
+export type WgetResult = [string, null] | [undefined, WgetErrors];
 
 /**
  * Enum representing possible errors that can occur during the wget process.
@@ -125,7 +123,7 @@ export async function spawnWget(props: SpawnWgetProps, abortSignal?: AbortSignal
 
 	if (!parsedProps.success) {
 		logger.error(`Invalid wget props`, parsedProps.error.issues);
-		return err(WgetErrors.PropsError);
+		return [undefined, WgetErrors.PropsError];
 	}
 
 	const { exePath, target, url, onProgress } = parsedProps.data;
@@ -177,11 +175,11 @@ export async function spawnWget(props: SpawnWgetProps, abortSignal?: AbortSignal
 	}).then(
 		() => {
 			logger.info(`Wget process completed successfully for URL: ${url}`);
-			return ok(join(target, basename(url)));
+			return [join(target, basename(url)), null] as WgetResult;
 		},
 		(error) => {
 			logger.error("Wget process error", { error, url });
-			return err(WgetErrors.ProcessError);
+			return [undefined, WgetErrors.ProcessError] as WgetResult;
 		},
 	);
 }

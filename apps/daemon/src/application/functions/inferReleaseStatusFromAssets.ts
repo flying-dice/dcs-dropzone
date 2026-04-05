@@ -3,9 +3,10 @@ import { DownloadedReleaseStatus } from "../enums/DownloadedReleaseStatus.ts";
 
 export function inferReleaseStatusFromAssets(
 	assetStatus: AssetStatus[],
-	symbolicLinksData: { installedPath: string | null }[],
+	enabled: boolean,
+	symlinkIntegrityValid: boolean = true,
 ): DownloadedReleaseStatus {
-	if (assetStatus.every((it) => it === AssetStatus.PENDING)) {
+	if (assetStatus.length > 0 && assetStatus.every((it) => it === AssetStatus.PENDING)) {
 		return DownloadedReleaseStatus.PENDING;
 	}
 
@@ -14,9 +15,10 @@ export function inferReleaseStatusFromAssets(
 	}
 
 	if (assetStatus.every((it) => it === AssetStatus.COMPLETED)) {
-		return symbolicLinksData.every((it) => it.installedPath)
-			? DownloadedReleaseStatus.ENABLED
-			: DownloadedReleaseStatus.DISABLED;
+		if (enabled && !symlinkIntegrityValid) {
+			return DownloadedReleaseStatus.INCONSISTENT;
+		}
+		return enabled ? DownloadedReleaseStatus.ENABLED : DownloadedReleaseStatus.DISABLED;
 	}
 
 	return DownloadedReleaseStatus.IN_PROGRESS;

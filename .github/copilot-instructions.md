@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-**DCS Dropzone** is a mod manager system for DCS World (Digital Combat Simulator) consisting of a daemon application and a web application. The project is a Bun monorepo using TypeScript with two main applications and four shared packages.
+**DCS Dropzone** is a mod manager system for DCS World (Digital Combat Simulator) consisting of a daemon application, a web application, and a launcher. The project is a Bun monorepo using TypeScript with three main applications and eight shared packages.
 
 - **Size**: Medium-sized TypeScript monorepo (~300 source files)
 - **Runtime**: Bun v1.3.5+ (NOT Node.js)
@@ -15,20 +15,27 @@
 ```
 /
 ├── apps/
-│   ├── daemon/        # Backend daemon for DCS mod management
+│   ├── daemon/        # Client-side daemon for DCS mod management
 │   │   ├── src/
 │   │   ├── bin/       # Third-party binaries (wget.exe, 7za.exe, etc.)
-│   │   ├── config.toml
-│   │   ├── build.ts
-│   │   ├── drizzle.ze.ts
+│   │   ├── drizzle.config.ts
+│   │   ├── scripts/
 │   │   └── package.json
-│   └── webapp/        # Web UI for mod management
+│   ├── launcher/      # Updater that downloads and runs the daemon
+│   │   ├── src/
+│   │   ├── scripts/
+│   │   └── package.json
+│   └── webapp/        # Server-side web UI for mod browsing and management
 │       ├── src/
-│       ├── orval.config.cjs
+│       ├── scripts/
 │       └── package.json
 ├── packages/
-│   ├── decorators/    # Shared decorators (e.g., @Log)
-│   ├── hono/          # Shared Hono utilities
+│   ├── clients/       # Generated API clients (Orval) for daemon & webapp
+│   ├── cloudflare/    # Cloudflare worker deployment
+│   ├── dz-config/     # Configuration utilities with Zod
+│   ├── dzui/          # Shared React UI components & i18n
+│   ├── hono/          # Shared Hono utilities and middleware
+│   ├── manifest/      # Manifest format definitions
 │   ├── queue/         # Job queue library (single-instance only)
 │   └── zod/           # Shared Zod schemas and validators
 ├── biome.json         # Code formatting and linting config
@@ -60,34 +67,25 @@ bun install
 ### Testing
 
 ```bash
-# Run all tests with coverage
-bun test
+# Run all tests (from root)
+bun run tests
 
 # Run workspace-specific tests
-cd apps/webapp && bun test
-cd apps/daemon && bun test
+cd apps/webapp && bun run tests
+cd apps/daemon && bun run tests
 ```
 
-- Tests use Bun's built-in test runner
+- Tests use Bun's built-in test runner via workspace scripts
 - Coverage reports generate `unit.junit.xml` at root
 - Tests take ~11 seconds total
-- 184 tests across 21 files with 96%+ coverage
 
 ### Linting & Type Checking
 
 ```bash
-# Check all workspaces (runs biome + tsc + depcheck in each)
-bun run check
-
-# Workspace-level commands (run from root or within workspace)
-bun run biome      # Format and lint with Biome
-bun run tsc        # Type checking with TypeScript
-bunx depcheck      # Check for unused dependencies
-
-# Run checks in specific workspaces
-cd apps/webapp && bun run biome    # Fast: ~863ms
-cd apps/webapp && bun run tsc      # Type checking only
-cd apps/daemon && bun run biome    # Fast: ~478ms
+# Run checks in specific workspaces (run from within workspace directory)
+cd apps/webapp && bun run biome    # Format and lint with Biome
+cd apps/webapp && bun run tsc      # Type checking with TypeScript
+cd apps/daemon && bun run biome
 cd apps/daemon && bun run tsc
 ```
 
@@ -98,25 +96,34 @@ cd apps/daemon && bun run tsc
 
 ```bash
 # Start webapp dev server
-bun run dev:webapp
+bun run webapp:dev
 # Or: cd apps/webapp && bun run dev
 
-# Start daemon dev server  
-bun run dev:daemon
-# Or: cd apps/daemon && bun --watch src/ze.ts
+# Start daemon dev server
+bun run daemon:dev
+# Or: cd apps/daemon && bun run dev
+
+# Start launcher dev
+bun run launcher:dev
+# Or: cd apps/launcher && bun run dev
 ```
 
 ### Building
 
 ```bash
-# Build webapp (creates compiled binary)
-cd apps/webapp && bun run build
+# Build all workspaces (webapp, daemon, launcher)
+bun run build
 
-# Build daemon (creates compiled binary with assets)
+# Build a specific workspace
+cd apps/webapp && bun run build
 cd apps/daemon && bun run build
+cd apps/launcher && bun run build
+
+# Serve the daemon build locally (for launcher testing)
+cd apps/daemon && bun run build:serve
 ```
 
-The daemon build script (`build.ts`) bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
+The daemon build script bundles the app with third-party binaries (wget.exe, 7za.exe) into `dist/daemon/`.
 
 ## CI/CD Pipeline
 
@@ -130,14 +137,16 @@ The daemon build script (`build.ts`) bundles the app with third-party binaries (
   3. Cache Bun downloads (`bun.lockb` hash key)
   4. `bun install`
   5. Add `apps/daemon/bin` to PATH (for wget/7zip binaries)
-  6. `bun test` (runs all tests)
-  7. Upload logs/ directory as artifact
-  8. Publish JUnit test report from `unit.junit.xml`
+  6. `bun run build` (builds all workspaces)
+  7. `bun run tests` (runs all tests)
+  8. Upload logs/ directory as artifact
+  9. Upload build artifacts (daemon tar, manifest, launcher exe, setup installer)
+  10. Publish JUnit test report from `unit.junit.xml`
 
 **Key CI Requirements**:
 - Windows binaries (wget.exe, 7za.exe) must be in `apps/daemon/bin/`
 - Tests must generate `unit.junit.xml` at root
-- Always ensure `bun test` passes before pushing
+- Always ensure `bun run build && bun run tests` passes before pushing
 
 ## Code Style & Conventions
 
@@ -154,7 +163,7 @@ The daemon build script (`build.ts`) bundles the app with third-party binaries (
 - Strict type checking enabled
 - `noExplicitAny`: off (explicit any allowed)
 - `noNonNullAssertion`: off (! operator allowed)
-- Use `neverthrow` Result types for error handling (ok/err pattern)
+- Use Go-style tuple pattern for error handling (`[T, null] | [undefined, E]`) as per GEN-005
 - Prefer functional patterns with ts-pattern for control flow
 
 ### Testing Conventions
@@ -175,13 +184,13 @@ The daemon build script (`build.ts`) bundles the app with third-party binaries (
 - **Ports & Adapters**: Separate interfaces (ports) from implementations (adapters)
 - **Repository Pattern**: Used for data access (e.g., `JobRepo`, `ModRepository`)
 - **Service Layer**: Business logic in service classes (e.g., `UserMods`, `PublicMods`)
-- **Result Pattern**: Use `neverthrow` for error handling instead of exceptions
+- **Error Pattern**: Use Go-style tuples (`[T, null] | [undefined, E]`) for error handling instead of exceptions
 
 ## Common Pitfalls & Workarounds
 
-### 1. Depcheck Failures with Bun 1.3.5
+### 1. Depcheck Failures
 
-**Symptom**: `bun run check` crashes with "Assertion failure: Expected metadata to be set"
+**Symptom**: `bunx depcheck` crashes with "Assertion failure: Expected metadata to be set"
 
 **Workaround**: Run checks separately:
 ```bash
@@ -201,7 +210,7 @@ These are bundled with the built daemon and must exist for tests to pass.
 
 ### 3. Database Configuration
 
-- **Daemon**: SQLite via Drizzle ORM (`apps/daemon/drizzle.ze.ts`)
+- **Daemon**: SQLite via Drizzle ORM (`apps/daemon/drizzle.config.ts`)
   - Migrations in `apps/daemon/src/database/ddl/`
   - Schema in `apps/daemon/src/database/ConfigSchema.ts`
 - **Webapp**: MongoDB via Mongoose
@@ -218,25 +227,32 @@ Packages reference each other using `workspace:*` protocol:
 
 Always run `bun install` after adding workspace dependencies.
 
+### 5. API Client Generation
+
+The `packages/clients` package uses Orval (`orval.config.cjs`) to generate typed API clients from OpenAPI schemas. Regenerate clients after changing the API schema.
+
 ## Validation Checklist
 
 Before committing changes, ALWAYS:
 
 1. ✅ Run `bun install` if dependencies changed
-2. ✅ Run `bun test` to ensure all tests pass
-3. ✅ Run `bun run biome` in affected workspaces to check formatting
-4. ✅ Run `bun run tsc` in affected workspaces to check types
-5. ✅ Verify no unintended files are staged (check `.gitignore`)
-6. ✅ Ensure changes work on Windows (CI target platform)
+2. ✅ Run `bun run build` to ensure all workspaces build
+3. ✅ Run `bun run tests` to ensure all tests pass
+4. ✅ Run `bun run biome` in affected workspaces to check formatting
+5. ✅ Run `bun run tsc` in affected workspaces to check types
+6. ✅ Verify no unintended files are staged (check `.gitignore`)
+7. ✅ Ensure changes work on Windows (CI target platform)
+8. ✅ **If you modified any files under `docs/`**, run `bun run docs:build` to verify there are no dead links or build errors before committing
 
 ## Additional Notes
 
 - **Job Queue**: The `@packages/queue` library is for single-instance use only (no distributed locking)
 - **React Version**: Uses React 19 (latest)
 - **UI Framework**: Mantine 8.3.10 for React components, see documentation https://mantine.dev/llms.txt
-- **Internationalization**: i18next with browser language detection
+- **Internationalization**: i18next with browser language detection (in `@packages/dzui`)
 - **Drag & Drop**: @dnd-kit libraries for UI interactions
 - **Monaco Editor**: Code editor component (@monaco-editor/react)
+- **Cloudflare**: The `packages/cloudflare` workspace is excluded from the default `build` and `tests` runs (use `webapp:deploy` for it)
 
 ## Trust These Instructions
 

@@ -1,7 +1,5 @@
-import { Log } from "@packages/decorators";
 import type { ProcessorContext } from "@packages/queue";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import type { DownloadJobData, DownloadJobResult, DownloadProcessor } from "../application/ports/DownloadProcessor.ts";
 import { spawnWget } from "../child_process/wget.ts";
 
@@ -16,10 +14,12 @@ export class WgetDownloadProcessor implements DownloadProcessor {
 
 	constructor(protected readonly deps: Deps) {}
 
-	@Log(logger)
-	async process(jobData: DownloadJobData, ctx: ProcessorContext): Promise<Result<DownloadJobResult, string>> {
+	async process(
+		jobData: DownloadJobData,
+		ctx: ProcessorContext,
+	): Promise<[DownloadJobResult, null] | [undefined, string]> {
 		logger.debug(`Processing download job: ${JSON.stringify(jobData)}`);
-		const res = await spawnWget({
+		const [filePath, wgetErr] = await spawnWget({
 			url: jobData.url,
 			exePath: this.deps.wgetExecutablePath,
 			target: jobData.destinationFolder,
@@ -28,19 +28,12 @@ export class WgetDownloadProcessor implements DownloadProcessor {
 			},
 		});
 
-		logger.debug("Wget download completed with result: ", res);
-		return res.match(
-			(result) => {
-				logger.debug("Wget download successful, file path: ", result);
+		if (wgetErr) {
+			logger.error("Wget download failed with error: ", wgetErr);
+			return [undefined, wgetErr];
+		}
 
-				return ok({
-					filePath: result,
-				});
-			},
-			(error) => {
-				logger.error("Wget download failed with error: ", error);
-				return err(error);
-			},
-		);
+		logger.debug("Wget download successful, file path: ", filePath);
+		return [{ filePath }, null];
 	}
 }

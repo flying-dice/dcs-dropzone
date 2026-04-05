@@ -23,6 +23,7 @@ const modAndReleaseDataStatusContent: Record<ModAndReleaseDataStatus, string> = 
 	[ModAndReleaseDataStatus.DISABLED]: "Disabled",
 	[ModAndReleaseDataStatus.ERROR]: "Error",
 	[ModAndReleaseDataStatus.IN_PROGRESS]: "Fetching...",
+	[ModAndReleaseDataStatus.INCONSISTENT]: "Inconsistent",
 };
 
 export default {
@@ -30,6 +31,9 @@ export default {
 		...modCategoryContent,
 		...modAndReleaseDataStatusContent,
 
+		ROUTER_ERROR_TITLE: "Oops! Nothing to see here.",
+		ROUTER_ERROR_DESC: "We couldn't find what you were looking for.",
+		GO_BACK: "Go Back",
 		ADD_DEPENDENCY: "Add dependency",
 		ADD_MISSION_SCRIPT: "Add Mission Script",
 		ADD_SYMBOLIC_LINK: "Add Symbolic Link",
@@ -61,6 +65,10 @@ export default {
 
 		DAEMON_RELEASES_ERROR_TITLE: "Error fetching daemon releases",
 		DAEMON_RELEASES_ERROR_DESC: "There was an error fetching the daemon releases. Please try again later.",
+
+		MOD_INCONSISTENT_TITLE: "Mod in Inconsistent State",
+		MOD_INCONSISTENT_DESC:
+			"This mod is marked as enabled but one or more symlinks are missing. Please disable and re-enable it, or remove and re-download it.",
 
 		MODS_FETCH_ERROR_TITLE: "Error fetching mods",
 		MODS_FETCH_ERROR_DESC: "There was an error fetching the mods. Please try again later.",
@@ -121,6 +129,7 @@ export default {
 		EMPTY_RELEASES_TITLE: "No Releases Added",
 		ERROR_LOADING_MOD: "Error loading mod.",
 		ERROR_LOADING_RELEASE: "Error loading release.",
+		ERROR_ADDING_TO_DAEMON: "Error adding release to daemon.",
 		ERROR_STATUS: "Error: {{status}}",
 		FEATURED_MODS: "Featured Mods",
 		LIGHT: "Light",
@@ -177,6 +186,7 @@ export default {
 		DOWNLOADED: "Downloaded",
 		SYMBOLIC_LINK_DEST_DESCRIPTION: "Path relative to the selected destination root",
 		SYMBOLIC_LINK_DEST_LABEL: "Destination Path",
+		SYMBOLIC_LINK_INSTALLED_PATH_LABEL: "Local Path",
 		SYMBOLIC_LINK_DEST_PLACEHOLDER: "e.g., Mods/MyMod or Scripts/MyScript.lua",
 		SYMBOLIC_LINK_DEST_ROOT_DESCRIPTION: "Select the DCS directory root where the link will be created",
 		SYMBOLIC_LINK_DEST_ROOT_INSTALL_DIR: "DCS Install Directory",
@@ -245,6 +255,7 @@ export default {
 		DAEMON_CONNECTION_SUCCESS: "Connected to daemon successfully",
 		DAEMON_CONNECTING: "Connecting to daemon...",
 		DAEMON_CONNECTION_ERROR: "Error connecting to daemon",
+		DAEMON_ACTIVITY: "Daemon activity",
 		NO_ACTIVE_DOWNLOADS: "No active downloads",
 
 		ERROR_TAKING_ACTION_TITLE: "Action Failed",
@@ -283,5 +294,32 @@ export default {
 		COUNT_DOWNLOADS: "{{count}} Downloads",
 		DISCOVER: "Discover",
 		LIBRARY: "Library",
+		SETTINGS: "Settings",
+		SETTINGS_PAGE_TITLE: "Settings",
+		SETTINGS_DCS_WORKING_DIR_LABEL: "DCS Working Directory",
+		SETTINGS_DCS_WORKING_DIR_DESCRIPTION:
+			"Path to your DCS Saved Games folder (e.g., C:\\Users\\You\\Saved Games\\DCS)",
+		SETTINGS_DCS_INSTALL_DIR_LABEL: "DCS Install Directory",
+		SETTINGS_DCS_INSTALL_DIR_DESCRIPTION:
+			"Path to your DCS World installation folder (e.g., C:\\Program Files\\Eagle Dynamics\\DCS World)",
+		SETTINGS_DROPZONE_MODS_DIR_LABEL: "Dropzone Mods Directory",
+		SETTINGS_DROPZONE_MODS_DIR_DESCRIPTION: "Path where Dropzone stores downloaded mods",
+		SETTINGS_SAVED_SUCCESS_TITLE: "Settings Saved",
+		SETTINGS_SAVED_SUCCESS_DESC: "Your settings have been updated successfully.",
+		SETTINGS_SAVED_ERROR_TITLE: "Error Saving Settings",
+		SETTINGS_REQUIRED_TITLE: "Configuration Required",
+		SETTINGS_REQUIRED_DESC:
+			"Your directory settings are missing or invalid. Please configure your settings before continuing.",
+		SETTINGS_ERROR_NOT_RESOLVED:
+			"This directory could not be resolved. Please ensure environment variables are correct: {{dir}}",
+		SETTINGS_ERROR_NOT_FOUND: "This directory does not exist on disk: {{dir}}",
+		SETTINGS_ERROR_FAILED: "This directory failed validation due to {{err}} {{dir}}",
+		SETTINGS_ERROR_UNEXPECTED: "An unexpected error occurred during validation",
+		OPEN_SETTINGS: "Open Settings",
+
+		DropzoneModsDirNotConfigured:
+			"Dropzone mods directory is not configured. Please set it in Settings before managing releases.",
+		DcsPathNotConfigured:
+			"DCS path is not configured. Please set your DCS directories in Settings before enabling releases.",
 	},
 };

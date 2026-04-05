@@ -3,6 +3,12 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import type { Application } from "../application/Application.ts";
 import { ModCategory } from "../application/enums/ModCategory.ts";
 import { ModVisibility } from "../application/enums/ModVisibility.ts";
+import {
+	ModNotFoundError,
+	NotMaintainerError,
+	ReleaseNotFoundError,
+	UserNotFoundError,
+} from "../application/errors.ts";
 import type { UserData } from "../application/schemas/UserData.ts";
 import { TestCases } from "./TestCases.ts";
 
@@ -31,28 +37,17 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 	describe("Users Service", () => {
 		it("should get user by id", async () => {
-			const result = await app.users.getUserById(TEST_USER.id);
+			const [user, userErr] = await app.users.getUserById(TEST_USER.id);
 
-			expect(result.isOk()).toBe(true);
-			result.match(
-				(user) => {
-					expect(user.id).toBe(TEST_USER.id);
-					expect(user.username).toBe(TEST_USER.username);
-				},
-				() => {},
-			);
+			expect(userErr).toBeNull();
+			expect(user!.id).toBe(TEST_USER.id);
+			expect(user!.username).toBe(TEST_USER.username);
 		});
 
 		it("should return UserNotFound for non-existent user", async () => {
-			const result = await app.users.getUserById("non-existent-id");
+			const [, error] = await app.users.getUserById("non-existent-id");
 
-			expect(result.isErr()).toBe(true);
-			result.match(
-				() => {},
-				(error) => {
-					expect(error).toBe("UserNotFound");
-				},
-			);
+			expect(error).toBeInstanceOf(UserNotFoundError);
 		});
 	});
 
@@ -86,14 +81,9 @@ describe.each(TestCases)("$label", ({ build }) => {
 				const mod = await app.userMods.createMod(TEST_USER, createData);
 
 				// Verify persistence using public API
-				const findResult = await app.userMods.findById(TEST_USER, mod.id);
-				expect(findResult.isOk()).toBe(true);
-				findResult.match(
-					(found) => {
-						expect(found.id).toBe(mod.id);
-					},
-					() => {},
-				);
+				const [found, findErr] = await app.userMods.findById(TEST_USER, mod.id);
+				expect(findErr).toBeNull();
+				expect(found!.id).toBe(mod.id);
 			});
 		});
 
@@ -106,28 +96,17 @@ describe.each(TestCases)("$label", ({ build }) => {
 				};
 
 				const created = await app.userMods.createMod(TEST_USER, createData);
-				const result = await app.userMods.findById(TEST_USER, created.id);
+				const [mod, modErr] = await app.userMods.findById(TEST_USER, created.id);
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(mod) => {
-						expect(mod.id).toBe(created.id);
-						expect(mod.name).toBe("Findable Mod");
-					},
-					() => {},
-				);
+				expect(modErr).toBeNull();
+				expect(mod!.id).toBe(created.id);
+				expect(mod!.name).toBe("Findable Mod");
 			});
 
 			it("should return ModNotFound for non-existent mod", async () => {
-				const result = await app.userMods.findById(TEST_USER, "non-existent-mod");
+				const [, error] = await app.userMods.findById(TEST_USER, "non-existent-mod");
 
-				expect(result.isErr()).toBe(true);
-				result.match(
-					() => {},
-					(error) => {
-						expect(error).toBe("ModNotFound");
-					},
-				);
+				expect(error).toBeInstanceOf(ModNotFoundError);
 			});
 
 			it("should return NotMaintainer when user is not a maintainer", async () => {
@@ -147,15 +126,9 @@ describe.each(TestCases)("$label", ({ build }) => {
 					profileUrl: "https://example.com/other-profile",
 				};
 
-				const result = await app.userMods.findById(otherUser, created.id);
+				const [, error] = await app.userMods.findById(otherUser, created.id);
 
-				expect(result.isErr()).toBe(true);
-				result.match(
-					() => {},
-					(error) => {
-						expect(error).toBe("NotMaintainer");
-					},
-				);
+				expect(error).toBeInstanceOf(NotMaintainerError);
 			});
 		});
 
@@ -169,7 +142,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 				const created = await app.userMods.createMod(TEST_USER, createData);
 
-				const result = await app.userMods.updateMod(TEST_USER, {
+				const [mod, modErr] = await app.userMods.updateMod(TEST_USER, {
 					id: created.id,
 					name: "Updated Name",
 					description: "Updated description",
@@ -183,15 +156,10 @@ describe.each(TestCases)("$label", ({ build }) => {
 					thumbnail: created.thumbnail,
 				});
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(mod) => {
-						expect(mod.name).toBe("Updated Name");
-						expect(mod.description).toBe("Updated description");
-						expect(mod.visibility).toBe(ModVisibility.PUBLIC);
-					},
-					() => {},
-				);
+				expect(modErr).toBeNull();
+				expect(mod!.name).toBe("Updated Name");
+				expect(mod!.description).toBe("Updated description");
+				expect(mod!.visibility).toBe(ModVisibility.PUBLIC);
 			});
 		});
 
@@ -206,23 +174,17 @@ describe.each(TestCases)("$label", ({ build }) => {
 				const created = await app.userMods.createMod(TEST_USER, createData);
 				const result = await app.userMods.deleteMod(TEST_USER, created.id);
 
-				expect(result.isOk()).toBe(true);
+				expect(result[1]).toBeNull();
 
 				// Verify mod is gone using public API
 				const findResult = await app.userMods.findById(TEST_USER, created.id);
-				expect(findResult.isErr()).toBe(true);
+				expect(findResult[0]).toBeUndefined();
 			});
 
 			it("should return ModNotFound for non-existent mod", async () => {
-				const result = await app.userMods.deleteMod(TEST_USER, "non-existent");
+				const [, error] = await app.userMods.deleteMod(TEST_USER, "non-existent");
 
-				expect(result.isErr()).toBe(true);
-				result.match(
-					() => {},
-					(error) => {
-						expect(error).toBe("ModNotFound");
-					},
-				);
+				expect(error).toBeInstanceOf(ModNotFoundError);
 			});
 		});
 
@@ -266,23 +228,18 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 		describe("createRelease", () => {
 			it("should create a new release for a mod", async () => {
-				const result = await app.userMods.createRelease(TEST_USER, {
+				const [release, releaseErr] = await app.userMods.createRelease(TEST_USER, {
 					modId,
 					version: "1.0.0",
 				});
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(release) => {
-						expect(release.id).toBeDefined();
-						expect(release.modId).toBe(modId);
-						expect(release.version).toBe("1.0.0");
-						expect(release.versionHash).toBeDefined();
-						expect(release.visibility).toBe(ModVisibility.PUBLIC);
-						expect(release.downloadsCount).toBe(0);
-					},
-					() => {},
-				);
+				expect(releaseErr).toBeNull();
+				expect(release!.id).toBeDefined();
+				expect(release!.modId).toBe(modId);
+				expect(release!.version).toBe("1.0.0");
+				expect(release!.versionHash).toBeDefined();
+				expect(release!.visibility).toBe(ModVisibility.PUBLIC);
+				expect(release!.downloadsCount).toBe(0);
 			});
 
 			it("should persist the release in repository", async () => {
@@ -291,27 +248,21 @@ describe.each(TestCases)("$label", ({ build }) => {
 					version: "1.0.0",
 				});
 
-				expect(createResult.isOk()).toBe(true);
-				const release = createResult._unsafeUnwrap();
+				expect(createResult[1]).toBeNull();
+				const release = createResult[0]!;
 
 				// Verify persistence using public API
 				const findResult = await app.userMods.findReleaseById(TEST_USER, modId, release.id);
-				expect(findResult.isOk()).toBe(true);
+				expect(findResult[1]).toBeNull();
 			});
 
 			it("should return ModNotFound for non-existent mod", async () => {
-				const result = await app.userMods.createRelease(TEST_USER, {
+				const [, error] = await app.userMods.createRelease(TEST_USER, {
 					modId: "non-existent",
 					version: "1.0.0",
 				});
 
-				expect(result.isErr()).toBe(true);
-				result.match(
-					() => {},
-					(error) => {
-						expect(error).toBe("ModNotFound");
-					},
-				);
+				expect(error).toBeInstanceOf(ModNotFoundError);
 			});
 		});
 
@@ -322,18 +273,13 @@ describe.each(TestCases)("$label", ({ build }) => {
 					version: "1.0.0",
 				});
 
-				const releaseId = createResult._unsafeUnwrap().id;
+				const releaseId = createResult[0]!.id;
 
-				const result = await app.userMods.findReleaseById(TEST_USER, modId, releaseId);
+				const [release, releaseErr] = await app.userMods.findReleaseById(TEST_USER, modId, releaseId);
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(release) => {
-						expect(release.id).toBe(releaseId);
-						expect(release.version).toBe("1.0.0");
-					},
-					() => {},
-				);
+				expect(releaseErr).toBeNull();
+				expect(release!.id).toBe(releaseId);
+				expect(release!.version).toBe("1.0.0");
 			});
 		});
 
@@ -342,15 +288,10 @@ describe.each(TestCases)("$label", ({ build }) => {
 				await app.userMods.createRelease(TEST_USER, { modId, version: "1.0.0" });
 				await app.userMods.createRelease(TEST_USER, { modId, version: "1.1.0" });
 
-				const result = await app.userMods.findReleases(TEST_USER, modId);
+				const [releases, releasesErr] = await app.userMods.findReleases(TEST_USER, modId);
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(releases) => {
-						expect(releases.length).toBe(2);
-					},
-					() => {},
-				);
+				expect(releasesErr).toBeNull();
+				expect(releases!.length).toBe(2);
 			});
 		});
 
@@ -361,9 +302,9 @@ describe.each(TestCases)("$label", ({ build }) => {
 					version: "1.0.0",
 				});
 
-				const release = createResult._unsafeUnwrap();
+				const release = createResult[0]!;
 
-				const result = await app.userMods.updateRelease(TEST_USER, {
+				const [updated, updateErr] = await app.userMods.updateRelease(TEST_USER, {
 					id: release.id,
 					modId,
 					version: "1.0.1",
@@ -375,14 +316,9 @@ describe.each(TestCases)("$label", ({ build }) => {
 					downloadsCount: 0,
 				});
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(updated) => {
-						expect(updated.version).toBe("1.0.1");
-						expect(updated.changelog).toBe("Updated changelog");
-					},
-					() => {},
-				);
+				expect(updateErr).toBeNull();
+				expect(updated!.version).toBe("1.0.1");
+				expect(updated!.changelog).toBe("Updated changelog");
 			});
 		});
 
@@ -393,27 +329,21 @@ describe.each(TestCases)("$label", ({ build }) => {
 					version: "1.0.0",
 				});
 
-				const releaseId = createResult._unsafeUnwrap().id;
+				const releaseId = createResult[0]!.id;
 
 				const result = await app.userMods.deleteRelease(TEST_USER, modId, releaseId);
 
-				expect(result.isOk()).toBe(true);
+				expect(result[1]).toBeNull();
 
 				// Verify release is gone using public API
 				const findResult = await app.userMods.findReleaseById(TEST_USER, modId, releaseId);
-				expect(findResult.isErr()).toBe(true);
+				expect(findResult[0]).toBeUndefined();
 			});
 
 			it("should return ReleaseNotFound for non-existent release", async () => {
-				const result = await app.userMods.deleteRelease(TEST_USER, modId, "non-existent");
+				const [, error] = await app.userMods.deleteRelease(TEST_USER, modId, "non-existent");
 
-				expect(result.isErr()).toBe(true);
-				result.match(
-					() => {},
-					(error) => {
-						expect(error).toBe("ReleaseNotFound");
-					},
-				);
+				expect(error).toBeInstanceOf(ReleaseNotFoundError);
 			});
 		});
 	});
@@ -494,22 +424,17 @@ describe.each(TestCases)("$label", ({ build }) => {
 				const publicMod = allPublicMods.data[0];
 				expect(publicMod).toBeDefined();
 
-				const result = await app.publicMods.getModById(publicMod!.id);
+				const [data, dataErr] = await app.publicMods.getModById(publicMod!.id);
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					({ mod, maintainers }) => {
-						expect(mod.id).toBe(publicMod!.id);
-						expect(maintainers).toEqual([TEST_USER]);
-					},
-					() => {},
-				);
+				expect(dataErr).toBeNull();
+				expect(data!.mod.id).toBe(publicMod!.id);
+				expect(data!.maintainers).toEqual([TEST_USER]);
 			});
 
 			it("should return error for non-existent mod", async () => {
 				const result = await app.publicMods.getModById("non-existent-mod-id");
 
-				expect(result.isErr()).toBe(true);
+				expect(result[0]).toBeUndefined();
 			});
 		});
 
@@ -566,56 +491,41 @@ describe.each(TestCases)("$label", ({ build }) => {
 				version: "1.0.0",
 			});
 
-			publicReleaseId = releaseResult._unsafeUnwrap().id;
+			publicReleaseId = releaseResult[0]!.id;
 		});
 
 		describe("findPublicModReleases", () => {
 			it("should return releases for a public mod", async () => {
-				const result = await app.publicMods.findPublicModReleases(publicModId);
+				const [releases, releasesErr] = await app.publicMods.findPublicModReleases(publicModId);
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(releases) => {
-						expect(releases.length).toBe(1);
-						expect(releases[0]!.version).toBe("1.0.0");
-					},
-					() => {},
-				);
+				expect(releasesErr).toBeNull();
+				expect(releases!.length).toBe(1);
+				expect(releases![0]!.version).toBe("1.0.0");
 			});
 
 			it("should return error for non-existent mod", async () => {
 				const result = await app.publicMods.findPublicModReleases("non-existent");
 
-				expect(result.isErr()).toBe(true);
+				expect(result[0]).toBeUndefined();
 			});
 		});
 
 		describe("findPublicModReleaseById", () => {
 			it("should return a specific release", async () => {
-				const result = await app.publicMods.findPublicModReleaseById(publicModId, publicReleaseId);
+				const [release, releaseErr] = await app.publicMods.findPublicModReleaseById(publicModId, publicReleaseId);
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(release) => {
-						expect(release.id).toBe(publicReleaseId);
-						expect(release.version).toBe("1.0.0");
-					},
-					() => {},
-				);
+				expect(releaseErr).toBeNull();
+				expect(release!.id).toBe(publicReleaseId);
+				expect(release!.version).toBe("1.0.0");
 			});
 		});
 
 		describe("findLatestPublicModRelease", () => {
 			it("should return the latest release", async () => {
-				const result = await app.publicMods.findLatestPublicModRelease(publicModId);
+				const [release, releaseErr] = await app.publicMods.findLatestPublicModRelease(publicModId);
 
-				expect(result.isOk()).toBe(true);
-				result.match(
-					(release) => {
-						expect(release.id).toBe(publicReleaseId);
-					},
-					() => {},
-				);
+				expect(releaseErr).toBeNull();
+				expect(release!.id).toBe(publicReleaseId);
 			});
 		});
 
@@ -654,7 +564,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				version: "1.0.0",
 			});
 
-			publicReleaseId = releaseResult._unsafeUnwrap().id;
+			publicReleaseId = releaseResult[0]!.id;
 		});
 
 		describe("registerModReleaseDownload", () => {
@@ -700,7 +610,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				visibility: ModVisibility.PUBLIC,
 				tags: ["test", "e2e"],
 			});
-			expect(updateResult.isOk()).toBe(true);
+			expect(updateResult[1]).toBeNull();
 			expect(await app.publicMods.getAllPublishedMods({ page: 1, size: 10, filter: {} })).toEqual({
 				data: [
 					{
@@ -738,17 +648,17 @@ describe.each(TestCases)("$label", ({ build }) => {
 				modId: mod.id,
 				version: "1.0.0",
 			});
-			expect(releaseResult.isOk()).toBe(true);
+			expect(releaseResult[1]).toBeNull();
 
-			const release = releaseResult._unsafeUnwrap();
+			const release = releaseResult[0]!;
 
 			// 4. Verify mod is visible publicly
 			const publicResult = await app.publicMods.getModById(mod.id);
-			expect(publicResult.isOk()).toBe(true);
+			expect(publicResult[1]).toBeNull();
 
 			// 5. Verify releases are visible publicly
 			const releasesResult = await app.publicMods.findPublicModReleases(mod.id);
-			expect(releasesResult.isOk()).toBe(true);
+			expect(releasesResult[1]).toBeNull();
 
 			// 6. Register a download
 			await app.downloads.registerModReleaseDownload(mod.id, release.id, "test-daemon");
@@ -760,15 +670,15 @@ describe.each(TestCases)("$label", ({ build }) => {
 
 			// 8. Delete the release
 			const deleteReleaseResult = await app.userMods.deleteRelease(TEST_USER, mod.id, release.id);
-			expect(deleteReleaseResult.isOk()).toBe(true);
+			expect(deleteReleaseResult[1]).toBeNull();
 
 			// 9. Delete the mod
 			const deleteModResult = await app.userMods.deleteMod(TEST_USER, mod.id);
-			expect(deleteModResult.isOk()).toBe(true);
+			expect(deleteModResult[1]).toBeNull();
 
 			// 10. Verify mod is no longer visible
 			const finalResult = await app.publicMods.getModById(mod.id);
-			expect(finalResult.isErr()).toBe(true);
+			expect(finalResult[0]).toBeUndefined();
 		});
 	});
 });

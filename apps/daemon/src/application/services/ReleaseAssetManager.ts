@@ -1,5 +1,4 @@
 import { basename, join } from "node:path";
-import { Log } from "@packages/decorators";
 import { type JobRecord, type JobRecordRepository, JobState, Queue, QueueEvents } from "@packages/queue";
 import { getLogger } from "log4js";
 import { inferAssetStatusFromJobs } from "../functions/inferAssetStatusFromJobs.ts";
@@ -10,7 +9,7 @@ import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import { ModReleaseAssetStatusData } from "../schemas/ModAndReleaseData.ts";
 import type { ReleaseAsset } from "../schemas/ReleaseAsset.ts";
-import type { PathResolver } from "./PathResolver.ts";
+import type { DropzoneModsDirError, PathResolver } from "./PathResolver.ts";
 
 const logger = getLogger("ReleaseAssetCoordinator");
 
@@ -55,7 +54,6 @@ export class ReleaseAssetManager {
 		this.queue.stop();
 	}
 
-	@Log(logger)
 	getProgressReportForAssets(releaseId: string): Record<string, ModReleaseAssetStatusData> {
 		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(releaseId);
 		const assetStatusData: Record<string, ModReleaseAssetStatusData> = {};
@@ -79,30 +77,32 @@ export class ReleaseAssetManager {
 		return assetStatusData;
 	}
 
-	@Log(logger)
-	addRelease(releaseId: string) {
-		const releaseFolder = this.deps.pathResolver.resolveReleasePath(releaseId);
+	addRelease(releaseId: string): [void, null] | [undefined, DropzoneModsDirError] {
+		const [releaseFolder, releaseFolderErr] = this.deps.pathResolver.resolveReleasePath(releaseId);
+		if (releaseFolderErr) return [undefined, releaseFolderErr] as const;
+
 		this.deps.fileSystem.ensureDir(releaseFolder);
 
 		const assets = this.deps.releaseRepository.getReleaseAssetsForRelease(releaseId);
 
 		for (const asset of assets) {
 			for (const url of asset.urls) {
-				const downloadJobData = this.getDownloadJobData(asset, url);
+				const downloadJobData = this.getDownloadJobData(releaseFolder, asset, url);
 				const downloadJob = this.queue.add(this.deps.downloadProcessor.name, downloadJobData);
 				this.deps.releaseRepository.addJobForRelease(releaseId, downloadJob.jobId);
 			}
 
-			const extractJobData = this.getExtractJobData(asset);
+			const extractJobData = this.getExtractJobData(releaseFolder, asset);
 			if (extractJobData) {
 				const extractJob = this.queue.add(this.deps.extractProcessor.name, extractJobData, JobState.Pending);
 				this.deps.releaseRepository.addJobForRelease(releaseId, extractJob.jobId);
 			}
 		}
+
+		return [undefined, null];
 	}
 
-	@Log(logger)
-	removeRelease(releaseId: string) {
+	removeRelease(releaseId: string): void {
 		for (const jobId of this.deps.releaseRepository.getJobIdsForRelease(releaseId)) {
 			const job = this.queue.getLatestByJobId(jobId);
 			if (job && [JobState.Pending, JobState.Waiting, JobState.Running].includes(job.state)) {
@@ -110,19 +110,34 @@ export class ReleaseAssetManager {
 			}
 		}
 
-		const releaseFolder = this.deps.pathResolver.resolveReleasePath(releaseId);
-		this.deps.fileSystem.removeDir(releaseFolder);
+		const [releaseFolder, releaseFolderErr] = this.deps.pathResolver.resolveReleasePath(releaseId);
+		if (releaseFolder) {
+			this.deps.fileSystem.removeDir(releaseFolder);
+		} else {
+			logger.warn(
+				`Could not resolve release path for ${releaseId} during removal, skipping folder cleanup: ${releaseFolderErr!.reason}`,
+			);
+		}
 
 		this.deps.releaseRepository.clearJobsForRelease(releaseId);
 	}
 
-	@Log(logger)
-	isReleaseReady(releaseId: string) {
+	getReleaseReadiness(
+		releaseId: string,
+	): { ready: true } | { ready: false; pendingCount: number; failedCount: number } {
 		const allJobs = this.deps.releaseRepository
 			.getJobIdsForRelease(releaseId)
 			.flatMap((it) => this.queue.getAllByJobId(it));
 
-		return !allJobs.some((it) => [JobState.Pending, JobState.Running].includes(it.state));
+		const pendingCount = allJobs.filter((it) =>
+			[JobState.Pending, JobState.Waiting, JobState.Running].includes(it.state),
+		).length;
+		const failedCount = allJobs.filter((it) => it.state === JobState.Failed).length;
+
+		if (pendingCount > 0 || failedCount > 0) {
+			return { ready: false, pendingCount, failedCount };
+		}
+		return { ready: true };
 	}
 
 	private getAllJobsForReleaseId(
@@ -167,19 +182,22 @@ export class ReleaseAssetManager {
 		};
 	}
 
-	private getDownloadJobData(asset: ReleaseAsset, url: ReleaseAsset["urls"][number]): DownloadJobData {
+	private getDownloadJobData(
+		releaseFolder: string,
+		asset: ReleaseAsset,
+		url: ReleaseAsset["urls"][number],
+	): DownloadJobData {
 		return {
 			url: url.url,
 			urlId: url.id,
-			destinationFolder: this.deps.pathResolver.resolveReleasePath(asset.releaseId),
+			destinationFolder: releaseFolder,
 			releaseId: asset.releaseId,
 			assetId: asset.id,
 		};
 	}
 
-	private getExtractJobData(asset: ReleaseAsset): ExtractJobData | undefined {
+	private getExtractJobData(releaseFolder: string, asset: ReleaseAsset): ExtractJobData | undefined {
 		if (asset.isArchive) {
-			const releaseFolder = this.deps.pathResolver.resolveReleasePath(asset.releaseId);
 			const firstUrl = asset.urls[0]?.url;
 			if (firstUrl) {
 				const archivePath = join(releaseFolder, decodeURIComponent(basename(firstUrl)));

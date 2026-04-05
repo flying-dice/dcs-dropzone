@@ -1,9 +1,12 @@
 import * as assert from "node:assert";
 import { EventEmitter } from "node:events";
 import { getLogger } from "log4js";
+import type { DelayCalculator } from "./DelayCalculator.ts";
+import { ExponentialDelayCalculator } from "./ExponentialDelayCalculator.ts";
 import { JobErrorCode, type JobRecord, type JobRecordRepository, JobState } from "./JobRecordRepository.ts";
 import { JobRun } from "./JobRun.ts";
 import type { Processor } from "./Processor.ts";
+import { RetryBackoffManager } from "./RetryBackoffManager.ts";
 
 export enum QueueEvents {
 	Added = "added",
@@ -44,6 +47,13 @@ type Opts = {
 	 * @default 1000
 	 */
 	pollIntervalMs?: number;
+
+	/**
+	 * Custom delay calculator for retry backoff.
+	 *
+	 * @default ExponentialDelayCalculator(1000, 60000)
+	 */
+	delayCalculator?: DelayCalculator;
 };
 
 /**
@@ -54,9 +64,10 @@ type Opts = {
  * be used in environments where multiple instances may process the same jobs concurrently.
  */
 export class Queue extends EventEmitter {
-	private readonly processors: Processor[] = [];
+	private readonly processors: Processor[];
 	private readonly pollInterval: number;
-	private readonly jobRuns: Map<JobRecord["runId"], JobRun> = new Map();
+	private readonly jobRuns: Map<JobRecord["runId"], JobRun>;
+	private readonly retryBackoffManager: RetryBackoffManager;
 
 	private intervalId?: NodeJS.Timeout;
 
@@ -71,6 +82,10 @@ export class Queue extends EventEmitter {
 		super();
 		this.pollInterval = options.pollIntervalMs ?? 1000;
 		this.processors = [...options.processors];
+		this.jobRuns = new Map();
+		this.retryBackoffManager = new RetryBackoffManager(
+			options.delayCalculator ?? new ExponentialDelayCalculator(1000, 60000),
+		);
 	}
 
 	override on<TData, TResult>(event: QueueEvents.Added, listener: (job: JobRecord<TData, TResult>) => void): this;
@@ -183,6 +198,7 @@ export class Queue extends EventEmitter {
 			const jobs = this.deps.jobRecordRepository.findAllInState([JobState.Waiting], {
 				processorName: processor.name,
 				limit: 1,
+				excludedJobIds: this.retryBackoffManager.getAllJobIdsCurrentlyInBackoff(),
 			});
 
 			if (jobs.length === 0) {
@@ -261,6 +277,16 @@ export class Queue extends EventEmitter {
 		const existingRun = this.deps.jobRecordRepository.findByRunId(runId);
 		if (!existingRun) {
 			logger.warn("Cannot reschedule job. JobRecord not found for runId:", runId);
+			return;
+		}
+
+		this.retryBackoffManager.trackFailure(existingRun.jobId);
+
+		if (this.retryBackoffManager.hasExhaustedRetries(existingRun.jobId)) {
+			logger.info(
+				`Job ${existingRun.jobId} has exhausted all retries (${RetryBackoffManager.MAX_RETRIES}). Not rescheduling.`,
+			);
+			this.emit(QueueEvents.Failed, existingRun);
 			return;
 		}
 

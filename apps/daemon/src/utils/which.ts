@@ -1,4 +1,4 @@
-import { delimiter, join } from "node:path";
+import { delimiter, dirname, join } from "node:path";
 import { getLogger } from "log4js";
 
 const logger = getLogger("which");
@@ -6,13 +6,17 @@ const logger = getLogger("which");
 /**
  * Finds the full path of a command in the system's PATH.
  *
- * Adds the local "bin" directory to the PATH for resolution.
+ * Searches in the "bin" directory next to the executable,
+ * the cwd "bin" directory, and then the system PATH.
  */
 export function which(command: string): string | null {
-	logger.trace("Resolving command:", command);
-	const resolved = Bun.which(command, { PATH: [join(process.cwd(), "bin"), process.env.PATH].join(delimiter) });
-	logger.trace("Resolved path:", resolved);
+	logger.debug("Resolving command:", command);
+	const exeBin = join(dirname(process.execPath), "bin");
+	const cwdBin = join(process.cwd(), "bin");
+	const PATH = [exeBin, cwdBin, process.env.PATH].join(delimiter);
+	logger.debug(`Resolving ${command} in ${PATH}`);
+
+	const resolved = Bun.which(command, { PATH });
+	logger.debug("Resolved path:", resolved);
 	return resolved;
 }
-
-console.log(import.meta.file);

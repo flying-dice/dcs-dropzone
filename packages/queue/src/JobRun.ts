@@ -28,14 +28,21 @@ export class JobRun<TData = any, TResult = any> {
 			const res = await this.processor.process(this.jobRecord.jobData, ctx);
 
 			assert.ok(
-				typeof res === "object" && ["isOk", "isErr", "match"].every((it) => it in res),
-				`Processor returned an invalid value, expected type 'Result' but received type '${typeof res}'`,
+				Array.isArray(res) && res.length === 2,
+				`Processor returned an invalid value, expected a [result, null] | [undefined, error] tuple but received type '${typeof res}'`,
 			);
 
-			res.match(
-				(result) => props.onSuccess(result),
-				(message) => props.onFailed(JobErrorCode.ProcessorError, message),
-			);
+			const [result, error] = res;
+			if (typeof error === "string") {
+				props.onFailed(JobErrorCode.ProcessorError, error);
+			} else if (error === null || error === undefined) {
+				props.onSuccess(result as TResult);
+			} else {
+				props.onFailed(
+					JobErrorCode.ProcessorException,
+					`Processor returned an invalid error value, expected a string but received type '${typeof error}'`,
+				);
+			}
 		} catch (error) {
 			props.onFailed(JobErrorCode.ProcessorException, String(error));
 		}

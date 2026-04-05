@@ -3,16 +3,17 @@ import { getLoggingHook } from "@packages/hono/getLoggingHook";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { ze } from "@packages/zod/ze";
+import { zParse } from "@packages/zod/zParse";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
-import { setSignedCookie } from "hono/cookie";
+import { deleteCookie, setSignedCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
-import { describeRoute, openAPIRouteHandler, validator } from "hono-openapi";
+import type { BlankSchema } from "hono/types";
+import { describeRoute, generateSpecs, openAPIRouteHandler, validator } from "hono-openapi";
 import { StatusCodes } from "http-status-codes";
 import { getLogger } from "log4js";
 import { z } from "zod";
-import appConfig from "../ApplicationConfig.ts";
 import type { Application } from "../application/Application.ts";
 import { ErrorData } from "../application/schemas/ErrorData.ts";
 import { ModAvailableFilterData } from "../application/schemas/ModAvailableFilterData.ts";
@@ -30,9 +31,51 @@ import { TypedErrorData } from "../application/schemas/TypedErrorData.ts";
 import { UserData } from "../application/schemas/UserData.ts";
 import { UserModsMetaData } from "../application/schemas/UserModsMetaData.ts";
 import type { AuthenticationProvider } from "../authentication/AuthenticationProvider.ts";
-import Database from "../database";
-import database from "../database";
+import { appConfig, UiAppConfig } from "../config/index.ts";
+import { default as Database, default as database } from "../database";
 import { cookieAuth } from "./middleware/cookieAuth.ts";
+
+const openapiSchema: BlankSchema = {
+	documentation: {
+		info: {
+			title: "DCS Dropzone Registry API",
+			version: "1.0.0",
+			description: "API documentation for the DCS Dropzone Registry.",
+		},
+		tags: [
+			{ name: "Auth", description: "Authentication and session management" },
+			{ name: "Health", description: "Service health and readiness" },
+			{ name: "Dashboard", description: "Dashboard and metrics endpoints" },
+			{ name: "Categories", description: "Mod category endpoints" },
+			{ name: "Tags", description: "Mod tag endpoints" },
+			{ name: "Mods", description: "Public mod catalogue endpoints" },
+			{ name: "Mod Releases", description: "Public mod release endpoints" },
+			{ name: "Mod Release Downloads", description: "Mod release download endpoints" },
+			{
+				name: "User Mods",
+				description: "Manage mods owned by the authenticated user",
+			},
+			{
+				name: "User Mod Releases",
+				description: "Manage releases for user-owned mods",
+			},
+			{
+				name: "Migration",
+				description: "Administrative data migration endpoints",
+			},
+		],
+		components: {
+			securitySchemes: {
+				cookieAuth: {
+					type: "apiKey",
+					in: "cookie",
+					name: appConfig.userCookieName,
+					description: "Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
+				},
+			},
+		},
+	},
+};
 
 const logger = getLogger("HonoApplication");
 const loggingHook = getLoggingHook(logger);
@@ -45,116 +88,84 @@ type Env = {
 };
 
 export class HonoApplication extends Hono<Env> {
-	private readonly authProvider: AuthenticationProvider;
-
-	constructor(app: Application, authProvider: AuthenticationProvider) {
+	constructor(
+		protected readonly app: Application,
+		protected readonly authProvider: AuthenticationProvider,
+	) {
 		super();
+	}
 
-		this.authProvider = authProvider;
+	static async build(app: Application, authProvider: AuthenticationProvider): Promise<HonoApplication> {
+		const self = new HonoApplication(app, authProvider);
 
-		this.use("*", (c, next) => {
+		self.use("*", (c, next) => {
 			c.set("app", app);
 			return next();
 		});
 
-		this.use("/*", cors());
+		self.use("/*", cors());
 
-		this.use(requestId());
+		self.use(requestId());
 
-		this.use("*", requestResponseLogger);
+		self.use("*", requestResponseLogger);
 
 		// Auth routes
-		this.authProviderCallback();
-		this.authProviderLogin();
-		this.getAuthenticatedUser();
-		this.logout();
+		self.authProviderCallback();
+		self.authProviderLogin();
+		self.getAuthenticatedUser();
+		self.logout();
 
-		// Health route
-		this.health();
+		// Health & Config route
+		self.health();
+		self.config();
 
 		// Public mod routes
-		this.getMods();
-		this.getModById();
-		this.getModReleases();
-		this.getLatestModRelease();
-		this.getModReleaseById();
-		this.registerModReleaseDownload();
+		self.getMods();
+		self.getModById();
+		self.getModReleases();
+		self.getLatestModRelease();
+		self.getModReleaseById();
+		self.registerModReleaseDownload();
 
 		// Dashboard routes
-		this.getServerMetrics();
-		this.getFeaturedMods();
-		this.getPopularMods();
+		self.getServerMetrics();
+		self.getFeaturedMods();
+		self.getPopularMods();
 
 		// Category and tag routes
-		this.getCategories();
-		this.getTags();
+		self.getCategories();
+		self.getTags();
 
 		// User mod routes
-		this.getUserMods();
-		this.getUserModById();
-		this.createUserMod();
-		this.updateUserMod();
-		this.deleteUserMod();
+		self.getUserMods();
+		self.getUserModById();
+		self.createUserMod();
+		self.updateUserMod();
+		self.deleteUserMod();
 
 		// User mod release routes
-		this.getUserModReleases();
-		this.getUserModReleaseById();
-		this.createUserModRelease();
-		this.updateUserModRelease();
-		this.deleteUserModRelease();
+		self.getUserModReleases();
+		self.getUserModReleaseById();
+		self.createUserModRelease();
+		self.updateUserModRelease();
+		self.deleteUserModRelease();
 
 		// API docs
-		this.getApiDocs();
-		this.getScalarUi();
+		self.getApiDocs();
+		self.getScalarUi();
 
-		this.onError(jsonErrorTransformer);
+		self.onError(jsonErrorTransformer);
+
+		if (appConfig.enableGenerateSchema) {
+			const spec = await generateSpecs(self, openapiSchema);
+			await Bun.write("openapi.schema.json", JSON.stringify(spec, undefined, 2));
+		}
+
+		return self;
 	}
 
 	private getApiDocs() {
-		this.get(
-			"/v3/api-docs",
-			openAPIRouteHandler(this, {
-				documentation: {
-					info: {
-						title: "DCS Dropzone Registry API",
-						version: "1.0.0",
-						description: "API documentation for the DCS Dropzone Registry.",
-					},
-					tags: [
-						{ name: "Auth", description: "Authentication and session management" },
-						{ name: "Health", description: "Service health and readiness" },
-						{ name: "Dashboard", description: "Dashboard and metrics endpoints" },
-						{ name: "Categories", description: "Mod category endpoints" },
-						{ name: "Tags", description: "Mod tag endpoints" },
-						{ name: "Mods", description: "Public mod catalogue endpoints" },
-						{ name: "Mod Releases", description: "Public mod release endpoints" },
-						{ name: "Mod Release Downloads", description: "Mod release download endpoints" },
-						{
-							name: "User Mods",
-							description: "Manage mods owned by the authenticated user",
-						},
-						{
-							name: "User Mod Releases",
-							description: "Manage releases for user-owned mods",
-						},
-						{
-							name: "Migration",
-							description: "Administrative data migration endpoints",
-						},
-					],
-					components: {
-						securitySchemes: {
-							cookieAuth: {
-								type: "apiKey",
-								in: "cookie",
-								name: appConfig.userCookieName,
-								description: "Session cookie used for authenticating user endpoints. Set after successful OAuth login.",
-							},
-						},
-					},
-				},
-			}),
-		);
+		this.get("/v3/api-docs", openAPIRouteHandler(this, openapiSchema));
 	}
 
 	private getScalarUi() {
@@ -167,7 +178,7 @@ export class HonoApplication extends Hono<Env> {
 			describeJsonRoute({
 				operationId: "checkHealth",
 				summary: "Health Check",
-				description: "Checks the health status of the application.",
+				description: "Checks the health status of the applications.",
 				tags: ["Health"],
 				responses: {
 					[StatusCodes.OK]: z.object({
@@ -188,8 +199,29 @@ export class HonoApplication extends Hono<Env> {
 						StatusCodes.OK,
 					);
 				} catch (error) {
-					return c.json(ErrorData.parse({ error: String(error) }), StatusCodes.SERVICE_UNAVAILABLE);
+					return c.json(
+						zParse({ error: String(error), code: StatusCodes.SERVICE_UNAVAILABLE }, ErrorData),
+						StatusCodes.SERVICE_UNAVAILABLE,
+					);
 				}
+			},
+		);
+	}
+
+	private config() {
+		this.get(
+			"/api/config",
+			describeJsonRoute({
+				operationId: "getConfig",
+				summary: "Get Config",
+				description: "Retrieves the current application configuration.",
+				tags: ["Config"],
+				responses: {
+					[StatusCodes.OK]: UiAppConfig,
+				},
+			}),
+			async (c) => {
+				return c.json(UiAppConfig.parse(appConfig));
 			},
 		);
 	}
@@ -222,7 +254,7 @@ export class HonoApplication extends Hono<Env> {
 					maxAge: appConfig.userCookieMaxAge,
 				});
 
-				return c.redirect(appConfig.homepageUrl);
+				return c.redirect(appConfig.authRedirectUrl);
 			},
 		);
 	}
@@ -289,7 +321,8 @@ export class HonoApplication extends Hono<Env> {
 				},
 			}),
 			(c) => {
-				return c.redirect(appConfig.homepageUrl ?? "http://localhost:3000");
+				deleteCookie(c, appConfig.userCookieName);
+				return c.redirect(appConfig.authRedirectUrl);
 			},
 		);
 	}
@@ -474,12 +507,16 @@ export class HonoApplication extends Hono<Env> {
 			async (c) => {
 				const { id } = c.req.valid("param");
 
-				const result = await c.var.app.publicMods.getModById(id);
+				const [mod, modError] = await c.var.app.publicMods.getModById(id);
 
-				return result.match(
-					(mod) => c.json(mod, StatusCodes.OK),
-					(error) => c.json(ErrorData.parse(<ErrorData>{ code: StatusCodes.NOT_FOUND, error })),
-				);
+				if (modError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: modError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(mod, StatusCodes.OK);
 			},
 		);
 	}
@@ -507,25 +544,22 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`Fetching public releases for mod '${id}'`);
 
-				const result = await c.var.app.publicMods.findPublicModReleases(id);
+				const [data, releasesError] = await c.var.app.publicMods.findPublicModReleases(id);
 
-				return result.match(
-					(data) => c.json({ data }, StatusCodes.OK),
-					(error) =>
-						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
-				);
+				if (releasesError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: releasesError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json({ data }, StatusCodes.OK);
 			},
 		);
 	}
 
 	private getLatestModRelease() {
-		const LatestModReleaseErrors = z.enum(["ModNotFound", "ReleaseNotFound"]);
+		const LatestModReleaseErrors = z.enum(["ModNotFoundError", "ReleaseNotFoundError"]);
 
 		this.get(
 			"/api/mods/:id/releases/latest",
@@ -552,19 +586,16 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`Fetching latest release for mod '${id}'`);
 
-				const result = await c.var.app.publicMods.findLatestPublicModRelease(id);
+				const [data, releaseError] = await c.var.app.publicMods.findLatestPublicModRelease(id);
 
-				return result.match(
-					(data) => c.json(data, StatusCodes.OK),
-					(error) =>
-						c.json(
-							ErrorData.parse(<ErrorData>{
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
-				);
+				if (releaseError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(data, StatusCodes.OK);
 			},
 		);
 	}
@@ -596,19 +627,16 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`Fetching public release '${releaseId}' for mod '${id}'`);
 
-				const result = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
+				const [data, releaseError] = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
 
-				return result.match(
-					(data) => c.json(data, StatusCodes.OK),
-					(error) =>
-						c.json(
-							ErrorData.parse(<ErrorData>{
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
-				);
+				if (releaseError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(data, StatusCodes.OK);
 			},
 		);
 	}
@@ -642,22 +670,14 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`Registering download for release '${releaseId}' for mod '${id}'`);
 
-				const releaseResult = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
+				const [, releaseError] = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
 
-				return releaseResult.match(
-					async () => {
-						await c.var.app.downloads.registerModReleaseDownload(id, releaseId, daemonInstanceId);
-						return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
-					},
-					(error) => {
-						return c.json(
-							ErrorData.parse(<ErrorData>{
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-						);
-					},
-				);
+				if (releaseError) {
+					return c.json(zParse({ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name }, ErrorData));
+				}
+
+				await c.var.app.downloads.registerModReleaseDownload(id, releaseId, daemonInstanceId);
+				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
 	}
@@ -716,22 +736,16 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`User '${user.id}' is requesting mod '${id}'`);
 
-				const result = await c.var.app.userMods.findById(user, id);
+				const [body, findError] = await c.var.app.userMods.findById(user, id);
 
-				return result.match(
-					(body) => {
-						return c.json(body, StatusCodes.OK);
-					},
-					(error) => {
-						return c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						);
-					},
-				);
+				if (findError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: findError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(body, StatusCodes.OK);
 			},
 		);
 	}
@@ -789,22 +803,16 @@ export class HonoApplication extends Hono<Env> {
 				const updateData = c.req.valid("json");
 				const user = c.var.getUser();
 
-				const result = await c.var.app.userMods.updateMod(user, { ...updateData, id });
+				const [, updateError] = await c.var.app.userMods.updateMod(user, { ...updateData, id });
 
-				return result.match(
-					() => {
-						return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
-					},
-					(error) => {
-						return c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						);
-					},
-				);
+				if (updateError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: updateError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
 	}
@@ -831,22 +839,16 @@ export class HonoApplication extends Hono<Env> {
 				const { id } = c.req.valid("param");
 				const user = c.var.getUser();
 
-				const result = await c.var.app.userMods.deleteMod(user, id);
+				const [, deleteError] = await c.var.app.userMods.deleteMod(user, id);
 
-				return result.match(
-					() => {
-						return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
-					},
-					(error) => {
-						return c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						);
-					},
-				);
+				if (deleteError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: deleteError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(OkData.parse({ ok: true }), StatusCodes.OK);
 			},
 		);
 	}
@@ -878,19 +880,16 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`User '${user.id}' is requesting releases for mod '${id}'`);
 
-				const result = await c.var.app.userMods.findReleases(user, id);
+				const [data, releasesError] = await c.var.app.userMods.findReleases(user, id);
 
-				return result.match(
-					(data) => c.json({ data }, StatusCodes.OK),
-					(error) =>
-						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
-				);
+				if (releasesError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: releasesError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json({ data }, StatusCodes.OK);
 			},
 		);
 	}
@@ -926,19 +925,16 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`User '${user.id}' is requesting release '${releaseId}' for mod '${id}'`);
 
-				const result = await c.var.app.userMods.findReleaseById(user, id, releaseId);
+				const [body, findError] = await c.var.app.userMods.findReleaseById(user, id, releaseId);
 
-				return result.match(
-					(body) => c.json(body, StatusCodes.OK),
-					(error) =>
-						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
-				);
+				if (findError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: findError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(body, StatusCodes.OK);
 			},
 		);
 	}
@@ -969,19 +965,16 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`User '${user.id}' is creating a new release for mod '${id}'`);
 
-				const result = await c.var.app.userMods.createRelease(user, { ...createData, modId: id });
+				const [body, createError] = await c.var.app.userMods.createRelease(user, { ...createData, modId: id });
 
-				return result.match(
-					(body) => c.json(body, StatusCodes.CREATED),
-					(error) =>
-						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
-				);
+				if (createError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: createError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(body, StatusCodes.CREATED);
 			},
 		);
 	}
@@ -1019,28 +1012,24 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`User '${user.id}' is updating release '${releaseId}' for mod '${id}'`);
 
-				const result = await c.var.app.userMods.updateRelease(user, {
+				const [, updateError] = await c.var.app.userMods.updateRelease(user, {
 					id: releaseId,
 					modId: id,
 					...updates,
 				});
 
-				return result.match(
-					() =>
-						c.json(
-							OkData.parse({
-								ok: true,
-							}),
-							StatusCodes.OK,
-						),
-					(error) =>
-						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
+				if (updateError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: updateError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(
+					OkData.parse({
+						ok: true,
+					}),
+					StatusCodes.OK,
 				);
 			},
 		);
@@ -1077,24 +1066,20 @@ export class HonoApplication extends Hono<Env> {
 
 				logger.debug(`User '${user.id}' is deleting release '${releaseId}' for mod '${id}'`);
 
-				const result = await c.var.app.userMods.deleteRelease(user, id, releaseId);
+				const [, deleteError] = await c.var.app.userMods.deleteRelease(user, id, releaseId);
 
-				return result.match(
-					() =>
-						c.json(
-							OkData.parse({
-								ok: true,
-							}),
-							StatusCodes.OK,
-						),
-					(error) =>
-						c.json(
-							ErrorData.parse({
-								code: StatusCodes.NOT_FOUND,
-								error,
-							}),
-							StatusCodes.NOT_FOUND,
-						),
+				if (deleteError) {
+					return c.json(
+						zParse({ code: StatusCodes.NOT_FOUND, error: deleteError.constructor.name }, ErrorData),
+						StatusCodes.NOT_FOUND,
+					);
+				}
+
+				return c.json(
+					OkData.parse({
+						ok: true,
+					}),
+					StatusCodes.OK,
 				);
 			},
 		);

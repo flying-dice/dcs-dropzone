@@ -1,0 +1,32 @@
+# Dependency directories
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/.next/
+**/build/
+
+# Logs and test reports
+**/logs/
+**/.playwright-report/
+**/.test-results/
+npm-debug.log
+yarn-error.log
+
+# IDE and Git
+**/.idea/
+**/.vscode/
+.git/
+
+# Security
+**/.env
+**/.env.*
+
+# Exclude specific monorepo apps you don't need for this container
+apps/launcher/
+apps/daemon/
+
+# Exclude Docker-related files (optional but good practice)
+Dockerfile
+.dockerignore
+/apps/webapp/.data/

@@ -4,9 +4,12 @@ services:
       context: ../..
       dockerfile: apps/webapp/Dockerfile
     environment:
-      MONGO_URI: mongodb://mongodb:27017/dcs-dropzone
-      HOMEPAGE_URL: http://localhost:3000
-      USER_COOKIE_SECRET: 4Y0cfP8Hp2uE3VJz8zUuW4g2m3idli1f1wrBvUmdj8E
+      DZ_WEBAPP_MONGO_URI: mongodb://mongodb:27017/dcs-dropzone
+      DZ_WEBAPP_AUTH_REDIRECT_URL: http://localhost:3000/
+      DZ_WEBAPP_URL: http://localhost:3000/
+      DZ_WEBAPP_USER_COOKIE_SECRET: docker-compose-cookie-secret
+      DZ_WEBAPP_AUTH_SERVICE_GH: '{"clientId":"Ov23li5IVDqsPjGrdLkN","clientSecret":"4e4ba8824ca0458c02e5fc7b0ebc6232e85b4022","redirectUrl":"http://localhost:3000/auth/callback"}'
+
     ports:
       - "3000:3000"
 

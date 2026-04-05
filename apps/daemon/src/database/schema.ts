@@ -2,7 +2,7 @@ import type { JobErrorCode, JobState } from "@packages/queue";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 
-export const T_APP_ATTRIBUTES = sqliteTable("APP_ATTRIBUTES", {
+export const T_KEY_VALUE = sqliteTable("KEY_VALUE", {
 	key: text("key").primaryKey(),
 	value: text("value", { mode: "json" }).$type<any>().notNull(),
 });
@@ -14,6 +14,7 @@ export const T_MOD_RELEASES = sqliteTable("MOD_RELEASES", {
 	version: text("version").notNull(),
 	versionHash: text("version_hash").notNull(),
 	dependencies: text("dependencies", { mode: "json" }).$type<string[]>().notNull(),
+	enabled: int("enabled", { mode: "boolean" }).notNull().default(false),
 });
 
 export const T_MOD_RELEASE_ASSETS = sqliteTable("MOD_RELEASE_ASSETS", {

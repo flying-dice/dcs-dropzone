@@ -1,7 +1,7 @@
+import { Linker } from "@packages/linker";
 import { getLogger } from "log4js";
-import type { SymbolicLinkDestRoot } from "webapp";
-import { DrizzleAttributesRepository } from "./adapters/DrizzleAttributesRepository.ts";
 import { DrizzleJobRecordRepository } from "./adapters/DrizzleJobRecordRepository.ts";
+import { DrizzleKeyValueRepository } from "./adapters/DrizzleKeyValueRepository.ts";
 import { DrizzleReleaseRepository } from "./adapters/DrizzleReleaseRepository.ts";
 import { LocalFileSystem } from "./adapters/LocalFileSystem.ts";
 import { SevenZipExtractProcessor } from "./adapters/SevenZipExtractProcessor.ts";
@@ -16,8 +16,6 @@ type Deps = {
 	databaseUrl: string;
 	wgetExecutablePath: string;
 	sevenZipExecutablePath: string;
-	dropzoneModsFolder: string;
-	dcsPaths: Record<SymbolicLinkDestRoot, string>;
 };
 
 export class ProdApplication extends Application {
@@ -27,7 +25,7 @@ export class ProdApplication extends Application {
 		logger.info("Bootstrapping ProdApplication with config:", deps);
 		const { db, appDatabase } = Database(deps.databaseUrl);
 
-		const attributesRepository = new DrizzleAttributesRepository({ db });
+		const keyValueRepository = new DrizzleKeyValueRepository({ db });
 		const releaseRepository = new DrizzleReleaseRepository({ db });
 		const jobRecordRepository = new DrizzleJobRecordRepository({ db });
 
@@ -39,15 +37,14 @@ export class ProdApplication extends Application {
 		});
 
 		super({
-			dcsPaths: deps.dcsPaths,
-			dropzoneModsFolder: deps.dropzoneModsFolder,
 			generateUuid: () => crypto.randomUUID(),
-			attributesRepository,
+			keyValueRepository,
 			releaseRepository,
 			fileSystem,
 			jobRecordRepository,
 			downloadProcessor,
 			extractProcessor,
+			linker: new Linker(),
 		});
 
 		this.appDatabase = appDatabase;

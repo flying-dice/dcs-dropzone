@@ -14,13 +14,19 @@ export interface ReleaseRepository {
 
 	getAllReleases(): ReleaseInfo[];
 
+	getById(releaseId: string): ReleaseInfo | undefined;
+
 	getMissionScriptsByRunOn(runOn: MissionScriptRunOn): MissionScriptByRunOn[];
 
 	getReleaseAssetsForRelease(releaseId: string): ReleaseAsset[];
 
 	getSymbolicLinksForRelease(releaseId: string): SymbolicLink[];
 
+	getAllInstalledSymbolicLinkPaths(): string[];
+
 	setInstalledPathForSymbolicLink(symbolicLinkId: string, installedPath: string | null): void;
+
+	setEnabled(releaseId: string, enabled: boolean): void;
 
 	getMissionScriptsForRelease(releaseId: string): MissionScript[];
 

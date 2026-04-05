@@ -20,7 +20,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
 
 # caches
 .eslintcache
@@ -30,7 +29,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # IntelliJ based IDEs
 .idea
 
-# Finder (MacOS) folder config
+# Finder (MacOS) folder dzConfig
 .DS_Store
 
 .vscode/
@@ -55,3 +54,18 @@ packages/cloudflare/.wrangler
 apps/*/config.json
 apps/*/config.schema.json
 apps/*/.manifest
+
+.test-results/
+.playwright-report/
+/apps/webapp/.data/
+**/*.log
+**/*.log.*
+
+apps/launcher/0.0.0/
+
+docs/.vitepress/dist
+docs/.vitepress/cache
+nul
+
+# Test artifacts from Windows-default settings evaluated on Linux
+apps/daemon/%*/

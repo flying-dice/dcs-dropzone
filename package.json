@@ -6,18 +6,18 @@
 		"packages/*"
 	],
 	"scripts": {
-		"biome": "biome ci",
-		"daemon:build": "bun run --filter daemon build",
+		"archgate": "archgate check",
 		"daemon:dev": "cd apps/daemon && bun run dev",
-		"depcheck": "bun run --workspaces depcheck",
-		"launcher:build": "bun run --filter launcher build",
 		"launcher:dev": "cd apps/launcher && bun run dev",
-		"test": "bun run test",
-		"tests": "bun run --workspaces tests",
-		"tsc": "bun run --workspaces tsc",
-		"webapp:build": "bun run --filter webapp build",
+		"webapp:dev": "cd apps/webapp && bun run dev",
 		"webapp:deploy": "bun run --filter cloudflare deploy",
-		"webapp:dev": "cd apps/webapp && bun run dev"
+		"build": "bun run --filter '*' --filter '-cloudflare' build",
+		"tests": "bun run --filter '*' --filter '-cloudflare' tests",
+		"test:playwright": "bunx playwright test",
+		"docs:dev": "vitepress dev docs",
+		"docs:build": "vitepress build docs",
+		"docs:preview": "vitepress preview docs",
+		"claude:qwen3": "ollama launch claude --model qwen3-coder-next"
 	},
 	"release": {
 		"branches": [
@@ -29,7 +29,7 @@
 			[
 				"@semantic-release/exec",
 				{
-					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; bun run daemon:build\""
+					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; iscc /DMyAppVersion=${nextRelease.version} apps/launcher/installer.iss; if (!$?) { exit 1 }; bun run daemon:build\""
 				}
 			],
 			[
@@ -44,7 +44,8 @@
 					"assets": [
 						"apps/daemon/dist/dcs-dropzone.tar",
 						"apps/daemon/dist/dcs-dropzone.tar.manifest",
-						"apps/launcher/dist/Dropzone_Launcher.exe"
+						"apps/launcher/dist/Dropzone_Launcher.exe",
+						"apps/launcher/dist/Dropzone_Setup.exe"
 					]
 				}
 			],
@@ -60,12 +61,24 @@
 		]
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^2.4.8",
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/commit-analyzer": "^13.0.0",
 		"@semantic-release/exec": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
 		"@semantic-release/github": "^10.1.3",
 		"@semantic-release/release-notes-generator": "^14.0.1",
-		"semantic-release": "^24.0.0"
+		"@types/chalk": "^2.2.4",
+		"@types/debug": "^4.1.13",
+		"archgate": "^0.11.0",
+		"chalk": "^5.6.2",
+		"debug": "^4.4.3",
+		"playwright": "^1.58.2",
+		"semantic-release": "^24.0.0",
+		"vitepress": "^2.0.0-alpha.17"
+	},
+	"dependencies": {
+		"vitepress-mermaid-renderer": "^1.1.20",
+		"vitepress-plugin-llms": "^1.12.0"
 	}
 }

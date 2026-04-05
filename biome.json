@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.0/schema.json",
+	"$schema": "node_modules/@biomejs/biome/configuration_schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!packages/cloudflare/worker-configuration.d.ts"]
+		"includes": ["**", "!packages/cloudflare/worker-configuration.d.ts", "!**/openapi.schema.json"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -19,6 +19,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"correctness": {
+				"useHookAtTopLevel": "off"
+			},
 			"suspicious": {
 				"noExplicitAny": "off",
 				"noConfusingVoidType": "off"

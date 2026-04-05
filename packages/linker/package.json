@@ -1,0 +1,20 @@
+{
+	"name": "@packages/linker",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./*": "./src/*.ts"
+	},
+	"scripts": {
+		"tests": "bun scripts/test.ts",
+		"build": "bun scripts/build.ts"
+	},
+	"dependencies": {
+		"@packages/zod": "workspace:*"
+	},
+	"peerDependencies": {
+		"log4js": ">=6",
+		"zod": ">=4"
+	}
+}

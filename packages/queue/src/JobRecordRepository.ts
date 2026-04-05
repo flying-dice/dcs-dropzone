@@ -48,7 +48,10 @@ export interface JobRecordRepository {
 	findLatestByJobId(jobId: string): JobRecord | undefined;
 	findAllForProcessor(processorName: string): JobRecord[];
 
-	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string }): JobRecord[];
+	findAllInState(
+		state: JobState[],
+		opts?: { limit?: number; processorName?: string; excludedJobIds?: string[] },
+	): JobRecord[];
 
 	// -- Update --
 	updateProgressForRunId(runId: string, progress: number): void;

@@ -1,19 +1,20 @@
 import { existsSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fetchManifest, type ManifestData, readManifest, writeManifest } from "@packages/manifest";
+import { appConfig } from "./config";
 
-const RELEASE_BASEURL =
-	process.env.RELEASE_BASEURL ?? "https://github.com/flying-dice/dcs-dropzone/releases/latest/download";
-const DOWNLOAD_ASSET = "dcs-dropzone.tar";
-const MANIFEST_PATH = ".manifest";
-
-const stableAssetUrl = join(RELEASE_BASEURL, DOWNLOAD_ASSET);
-const stableAssetManifestUrl = `${stableAssetUrl}.manifest`;
+const stableAssetUrl = appConfig.dropzoneTarFile;
+const stableAssetManifestUrl = appConfig.dropzoneTarFileManifest;
+const manifestPath = appConfig.manifestPath;
 
 console.info(`Checking for updates from ${stableAssetUrl}...`);
 
 console.debug("Fetching latest release manifest...");
-const latestReleaseManifest: ManifestData = await fetchManifest(stableAssetManifestUrl);
+const latestReleaseManifest: ManifestData = await fetchManifest(stableAssetManifestUrl).catch((e) => {
+	console.error(`Failed to fetch latest release manifest from ${stableAssetManifestUrl}, Err: ${e.message}`);
+	prompt("Press Enter to exit...");
+	process.exit(1);
+});
 
 function getReleaseManifestFolderPath(manifest: ManifestData) {
 	return resolve(join(manifest.__version || manifest.createdAt.getTime().toString()));
@@ -24,7 +25,7 @@ function getReleasePath(manifest: ManifestData, path: string) {
 }
 
 console.debug("Reading installed release manifest...");
-const installedReleaseManifest: ManifestData | undefined = await readManifest(MANIFEST_PATH).catch((e) => {
+const installedReleaseManifest: ManifestData | undefined = await readManifest(manifestPath).catch((e) => {
 	console.warn(`Failed to read local manifest, Err: ${e.message}`);
 	console.info("Assuming no installed version.");
 	return undefined;
@@ -48,7 +49,7 @@ async function applyUpdate(latest: ManifestData, existing?: ManifestData) {
 	}
 
 	console.info("Update downloaded successfully, updating manifest.");
-	await writeManifest(MANIFEST_PATH, latestReleaseManifest);
+	await writeManifest(manifestPath, latestReleaseManifest);
 }
 
 if (
@@ -65,7 +66,7 @@ const executablePath = resolve(`${folderName}/Dropzone.exe`);
 Bun.spawn({
 	cmd: [executablePath],
 	cwd: folderName,
-	env: { ...process.env, DCS_DROPZONE__INSTALL_DIR: resolve(folderName), DCS_DROPZONE__WORKING_DIR: process.cwd() },
+	env: { DZ_DAEMON_DATABASE_PATH: join(process.cwd(), "data.sqlite"), ...process.env },
 	stdout: "inherit",
 	stdin: "inherit",
 	stderr: "inherit",

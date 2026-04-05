@@ -6,7 +6,11 @@ import { useAsyncFn } from "react-use";
 import { useAppTranslation } from "./useAppTranslation.ts";
 
 function canBeToggled(status: ModAndReleaseDataStatus | null | undefined) {
-	return status === ModAndReleaseDataStatus.ENABLED || status === ModAndReleaseDataStatus.DISABLED;
+	return (
+		status === ModAndReleaseDataStatus.ENABLED ||
+		status === ModAndReleaseDataStatus.DISABLED ||
+		status === ModAndReleaseDataStatus.INCONSISTENT
+	);
 }
 
 export type ModActionsMenuProps = {
@@ -14,6 +18,7 @@ export type ModActionsMenuProps = {
 
 	onToggle: () => Promise<void>;
 	onRemove: () => Promise<void>;
+	onShowSymlinks: () => void;
 
 	latest?: ModReleaseData;
 	isLatest?: boolean | undefined;
@@ -56,6 +61,9 @@ export function ModActionsMenu(props: ModActionsMenuProps) {
 				<Menu.Item disabled={toggleDisabled} onClick={handleToggle}>
 					{props.mod.status === ModAndReleaseDataStatus.ENABLED ? t("DISABLE") : t("ENABLE")}
 				</Menu.Item>
+				{props.mod.status === ModAndReleaseDataStatus.ENABLED && (
+					<Menu.Item onClick={props.onShowSymlinks}>Info</Menu.Item>
+				)}
 				<Menu.Item disabled={removeDisabled} onClick={handleRemove}>
 					{t("REMOVE")}
 				</Menu.Item>

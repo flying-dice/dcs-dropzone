@@ -1,5 +1,4 @@
 import * as crypto from "node:crypto";
-import { Log } from "@packages/decorators";
 import {
 	type CreateJobRecord,
 	type JobErrorCode,
@@ -9,11 +8,11 @@ import {
 } from "@packages/queue";
 import { and, desc, eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import { inArray } from "drizzle-orm/sql/expressions/conditions";
+import { inArray, notInArray } from "drizzle-orm/sql/expressions/conditions";
 import { getLogger } from "log4js";
 import { T_JOBS } from "../database/schema.ts";
 
-const logger = getLogger("DrizzleJobRecordRepository");
+const _logger = getLogger("DrizzleJobRecordRepository");
 
 function mapRowToJobRecord(row: typeof T_JOBS.$inferSelect): JobRecord {
 	return {
@@ -40,7 +39,6 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 		this.db = deps.db;
 	}
 
-	@Log(logger)
 	create(record: CreateJobRecord): JobRecord {
 		const data: typeof T_JOBS.$inferInsert = {
 			runId: crypto.randomUUID(),
@@ -54,36 +52,38 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 		return mapRowToJobRecord(this.db.insert(T_JOBS).values(data).returning().get());
 	}
 
-	@Log(logger)
 	findByRunId(runId: string): JobRecord | undefined {
 		const row = this.db.select().from(T_JOBS).where(eq(T_JOBS.runId, runId)).get();
 		return row ? mapRowToJobRecord(row) : undefined;
 	}
 
-	@Log(logger)
 	findAllByJobId(jobId: string): JobRecord[] {
 		const rows = this.db.select().from(T_JOBS).where(eq(T_JOBS.jobId, jobId)).all();
 		return rows.map(mapRowToJobRecord);
 	}
 
-	@Log(logger)
 	findLatestByJobId(jobId: string): JobRecord | undefined {
 		const row = this.db.select().from(T_JOBS).where(eq(T_JOBS.jobId, jobId)).orderBy(desc(T_JOBS.createdAt)).get();
 
 		return row ? mapRowToJobRecord(row) : undefined;
 	}
 
-	@Log(logger)
 	findAllForProcessor(processorName: string): JobRecord[] {
 		const rows = this.db.select().from(T_JOBS).where(eq(T_JOBS.processorName, processorName)).all();
 		return rows.map(mapRowToJobRecord);
 	}
 
-	@Log(logger)
-	findAllInState(state: JobState[], opts?: { limit?: number; processorName?: string }): JobRecord[] {
+	findAllInState(
+		state: JobState[],
+		opts?: { limit?: number; processorName?: string; excludedJobIds?: string[] },
+	): JobRecord[] {
 		const conditions = [inArray(T_JOBS.state, state)];
 		if (opts?.processorName) {
 			conditions.push(eq(T_JOBS.processorName, opts.processorName));
+		}
+
+		if (opts?.excludedJobIds && opts.excludedJobIds.length > 0) {
+			conditions.push(notInArray(T_JOBS.jobId, opts.excludedJobIds));
 		}
 
 		const query = this.db
@@ -100,7 +100,6 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 		return rows.map(mapRowToJobRecord);
 	}
 
-	@Log(logger)
 	markFailedForRunId(runId: string, errorCode: JobErrorCode, errorMessage: string): void {
 		this.db
 			.update(T_JOBS)
@@ -114,7 +113,6 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 			.run();
 	}
 
-	@Log(logger)
 	markRunningForRunId(runId: string): void {
 		this.db
 			.update(T_JOBS)
@@ -126,7 +124,6 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 			.run();
 	}
 
-	@Log(logger)
 	markSuccessForRunId(runId: string, result: any): void {
 		this.db
 			.update(T_JOBS)
@@ -139,7 +136,6 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 			.run();
 	}
 
-	@Log(logger)
 	markCancelledForRunId(runId: string) {
 		this.db
 			.update(T_JOBS)
@@ -150,7 +146,6 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 			.run();
 	}
 
-	@Log(logger)
 	markWaitingForRunId(runId: string) {
 		this.db
 			.update(T_JOBS)
@@ -161,7 +156,6 @@ export class DrizzleJobRecordRepository implements JobRecordRepository {
 			.run();
 	}
 
-	@Log(logger)
 	updateProgressForRunId(runId: string, progress: number): void {
 		this.db
 			.update(T_JOBS)

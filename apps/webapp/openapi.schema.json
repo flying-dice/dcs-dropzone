@@ -1,0 +1,2280 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DCS Dropzone Registry API",
+    "description": "API documentation for the DCS Dropzone Registry.",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication and session management"
+    },
+    {
+      "name": "Health",
+      "description": "Service health and readiness"
+    },
+    {
+      "name": "Dashboard",
+      "description": "Dashboard and metrics endpoints"
+    },
+    {
+      "name": "Categories",
+      "description": "Mod category endpoints"
+    },
+    {
+      "name": "Tags",
+      "description": "Mod tag endpoints"
+    },
+    {
+      "name": "Mods",
+      "description": "Public mod catalogue endpoints"
+    },
+    {
+      "name": "Mod Releases",
+      "description": "Public mod release endpoints"
+    },
+    {
+      "name": "Mod Release Downloads",
+      "description": "Mod release download endpoints"
+    },
+    {
+      "name": "User Mods",
+      "description": "Manage mods owned by the authenticated user"
+    },
+    {
+      "name": "User Mod Releases",
+      "description": "Manage releases for user-owned mods"
+    },
+    {
+      "name": "Migration",
+      "description": "Administrative data migration endpoints"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "USERID",
+        "description": "Session cookie used for authenticating user endpoints. Set after successful OAuth login."
+      }
+    },
+    "schemas": {
+      "UserData": {
+        "title": "User Data",
+        "description": "Data representation of a user.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "profileUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "avatarUrl",
+          "profileUrl"
+        ]
+      },
+      "ErrorData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "error"
+        ]
+      },
+      "ModSummaryData": {
+        "title": "Mod Summary Data",
+        "description": "Summary Data representation of a mod.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "CAMPAIGN",
+              "DEVICE_PROFILES",
+              "MOD",
+              "MISSION",
+              "SKIN",
+              "SOUND",
+              "TERRAIN",
+              "UTILITY",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "thumbnail": {
+            "type": "string"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "maintainers": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "downloadsCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "category",
+          "description",
+          "thumbnail",
+          "dependencies",
+          "maintainers",
+          "tags",
+          "downloadsCount"
+        ]
+      },
+      "ModAvailableFilterData": {
+        "title": "Mod Available Filter Data",
+        "description": "Data structure for filtering mods.",
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CAMPAIGN",
+                "DEVICE_PROFILES",
+                "MOD",
+                "MISSION",
+                "SKIN",
+                "SOUND",
+                "TERRAIN",
+                "UTILITY",
+                "OTHER"
+              ]
+            }
+          },
+          "maintainers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "username"
+              ]
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "categories",
+          "maintainers",
+          "tags"
+        ]
+      },
+      "ModData": {
+        "title": "Mod Data",
+        "description": "Data representation of a mod.",
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "CAMPAIGN",
+              "DEVICE_PROFILES",
+              "MOD",
+              "MISSION",
+              "SKIN",
+              "SOUND",
+              "TERRAIN",
+              "UTILITY",
+              "OTHER"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "downloadsCount": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "latestReleaseId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maintainers": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "screenshots": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "thumbnail": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "PUBLIC",
+              "PRIVATE",
+              "UNLISTED"
+            ]
+          }
+        },
+        "required": [
+          "category",
+          "content",
+          "dependencies",
+          "description",
+          "downloadsCount",
+          "id",
+          "maintainers",
+          "name",
+          "screenshots",
+          "tags",
+          "thumbnail",
+          "visibility"
+        ]
+      },
+      "ModReleaseAssetData": {
+        "title": "Mod Release Asset Data",
+        "description": "Data representation of a mod release asset.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "id",
+                "url"
+              ]
+            }
+          },
+          "isArchive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "urls",
+          "isArchive"
+        ]
+      },
+      "ModReleaseSymbolicLinkData": {
+        "title": "Mod Release Symbolic Link Data",
+        "description": "Data representation of a symbolic link configuration.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "src": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dest": {
+            "type": "string",
+            "minLength": 1
+          },
+          "destRoot": {
+            "type": "string",
+            "enum": [
+              "DCS_WORKING_DIR",
+              "DCS_INSTALL_DIR"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "src",
+          "dest",
+          "destRoot"
+        ]
+      },
+      "ModReleaseMissionScriptData": {
+        "title": "Mod Release Mission Script Data",
+        "description": "Data representation of a mission script configuration.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "root": {
+            "type": "string",
+            "enum": [
+              "DCS_WORKING_DIR",
+              "DCS_INSTALL_DIR"
+            ]
+          },
+          "runOn": {
+            "type": "string",
+            "enum": [
+              "MISSION_START_BEFORE_SANITIZE",
+              "MISSION_START_AFTER_SANITIZE"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "purpose",
+          "path",
+          "root",
+          "runOn"
+        ]
+      },
+      "ModReleaseData": {
+        "title": "Mod Release Data",
+        "description": "Data representation of a mod release.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "modId": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "versionHash": {
+            "type": "string"
+          },
+          "changelog": {
+            "type": "string"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModReleaseAssetData"
+            }
+          },
+          "symbolicLinks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModReleaseSymbolicLinkData"
+            }
+          },
+          "missionScripts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModReleaseMissionScriptData"
+            }
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "PUBLIC",
+              "PRIVATE",
+              "UNLISTED"
+            ]
+          },
+          "downloadsCount": {
+            "default": 0,
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "modId",
+          "version",
+          "versionHash",
+          "changelog",
+          "assets",
+          "symbolicLinks",
+          "missionScripts",
+          "visibility"
+        ]
+      },
+      "OkData": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "default": true,
+            "type": "boolean"
+          }
+        }
+      },
+      "UserModsMetaData": {
+        "title": "User Mods Meta Data",
+        "description": "Metadata representation of a user's mods.",
+        "type": "object",
+        "properties": {
+          "published": {
+            "type": "number"
+          },
+          "totalDownloads": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "published",
+          "totalDownloads"
+        ]
+      },
+      "ModCreateData": {
+        "title": "Mod Create Data",
+        "description": "Data required to create a new mod.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "CAMPAIGN",
+              "DEVICE_PROFILES",
+              "MOD",
+              "MISSION",
+              "SKIN",
+              "SOUND",
+              "TERRAIN",
+              "UTILITY",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "category",
+          "description"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/auth/callback": {
+      "get": {
+        "operationId": "authProviderCallback",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "OAuth provider callback",
+        "description": "Handles the OAuth callback from the selected provider and establishes a user session via a signed cookie.",
+        "responses": {
+          "302": {
+            "description": "Redirects the user to the homepage after successfully establishing a session."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/auth/login": {
+      "get": {
+        "operationId": "authProviderLogin",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Start OAuth login",
+        "description": "Initiates the OAuth web flow for the selected provider and redirects the user to the provider's authorization page.",
+        "responses": {
+          "302": {
+            "description": "Redirects the user agent to the provider authorization URL."
+          }
+        }
+      }
+    },
+    "/auth/user": {
+      "get": {
+        "operationId": "getAuthenticatedUser",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get authenticated user",
+        "description": "Returns the authenticated user's profile derived from the session cookie.",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "operationId": "logout",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout",
+        "description": "Clears the authentication cookie and redirects to the homepage.",
+        "responses": {
+          "302": {
+            "description": "Redirects the user to the homepage after logout."
+          },
+          "401": {
+            "description": "If the session is missing or invalid, the cookie is simply not present; redirect still occurs."
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "checkHealth",
+        "summary": "Health Check",
+        "description": "Checks the health status of the applications.",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "const": "ok"
+                    },
+                    "mongoStatus": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "mongoStatus"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "Get Config",
+        "description": "Retrieves the current application configuration.",
+        "tags": [
+          "Config"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "webappUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "daemonUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "webappUrl",
+                    "daemonUrl"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mods": {
+      "get": {
+        "operationId": "getMods",
+        "summary": "Get mods",
+        "description": "Retrieves a paginated list of all published mods.",
+        "tags": [
+          "Mods"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ModSummaryData"
+                      }
+                    },
+                    "page": {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "number",
+                          "minimum": 1
+                        },
+                        "totalElements": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "totalPages": {
+                          "type": "number",
+                          "minimum": 1
+                        },
+                        "number": {
+                          "type": "number",
+                          "minimum": 1
+                        }
+                      },
+                      "required": [
+                        "size",
+                        "totalElements",
+                        "totalPages",
+                        "number"
+                      ]
+                    },
+                    "filter": {
+                      "$ref": "#/components/schemas/ModAvailableFilterData"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page",
+                    "filter"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "minimum": 1
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number",
+              "minimum": 1
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CAMPAIGN",
+                "DEVICE_PROFILES",
+                "MOD",
+                "MISSION",
+                "SKIN",
+                "SOUND",
+                "TERRAIN",
+                "UTILITY",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "maintainers",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "term",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/mods/{id}": {
+      "get": {
+        "operationId": "getModById",
+        "summary": "Get mod by ID",
+        "description": "Retrieves a specific published mod by its ID.",
+        "tags": [
+          "Mods"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mod": {
+                      "$ref": "#/components/schemas/ModData"
+                    },
+                    "maintainers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserData"
+                      }
+                    }
+                  },
+                  "required": [
+                    "mod",
+                    "maintainers"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/mods/{id}/releases": {
+      "get": {
+        "operationId": "getModReleases",
+        "summary": "Get mod releases",
+        "description": "Retrieves all public releases for a specific mod.",
+        "tags": [
+          "Mod Releases"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ModReleaseData"
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/mods/{id}/releases/latest": {
+      "get": {
+        "operationId": "getLatestModReleaseById",
+        "summary": "Get latest mod release by ID",
+        "description": "Retrieves the latest public release for a mod by its ID.",
+        "tags": [
+          "Mod Releases"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModReleaseData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "ModNotFoundError",
+                        "ReleaseNotFoundError"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/mods/{id}/releases/{releaseId}": {
+      "get": {
+        "operationId": "getModReleaseById",
+        "summary": "Get mod release by ID",
+        "description": "Retrieves a specific public release for a mod by its ID.",
+        "tags": [
+          "Mod Releases"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModReleaseData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "releaseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/mods/{id}/releases/{releaseId}/downloads": {
+      "post": {
+        "operationId": "registerModReleaseDownloadById",
+        "summary": "Register mod release download by ID",
+        "description": "Registers a download for a specific public release for a mod by its ID.",
+        "tags": [
+          "Mod Release Downloads"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "releaseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "daemonInstanceId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "daemonInstanceId"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/server-metrics": {
+      "get": {
+        "operationId": "getServerMetrics",
+        "summary": "Get Server Metrics",
+        "description": "Retrieves the build metrics.",
+        "tags": [
+          "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalMods": {
+                      "type": "number"
+                    },
+                    "totalDownloads": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "totalMods",
+                    "totalDownloads"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/featured-mods": {
+      "get": {
+        "operationId": "getFeaturedMods",
+        "summary": "Get Featured mods",
+        "description": "Retrieves a set of featured mods.",
+        "tags": [
+          "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModSummaryData"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/popular-mods": {
+      "get": {
+        "operationId": "getPopularMods",
+        "summary": "Get Popular mods",
+        "description": "Retrieves a set of popular mods.",
+        "tags": [
+          "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModSummaryData"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "operationId": "getCategories",
+        "summary": "Get Categories",
+        "description": "Retrieves a list of all mod categories along with the count of published mods in each category.",
+        "tags": [
+          "Categories"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "operationId": "getTags",
+        "summary": "Get Tags",
+        "description": "Retrieves a list of all tags.",
+        "tags": [
+          "Tags"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user-mods": {
+      "get": {
+        "operationId": "getUserMods",
+        "summary": "Get user mods",
+        "description": "Retrieves a list of all mods owned by the authenticated user.",
+        "tags": [
+          "User Mods"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ModSummaryData"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/UserModsMetaData"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUserMod",
+        "summary": "Create user mod",
+        "description": "Creates a new mod owned by the authenticated user.",
+        "tags": [
+          "User Mods"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModCreateData"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user-mods/{id}": {
+      "get": {
+        "operationId": "getUserModById",
+        "summary": "Get user mod by ID",
+        "description": "Retrieves a specific mod owned by the authenticated user by its ID.",
+        "tags": [
+          "User Mods"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "updateUserMod",
+        "summary": "Update user mod",
+        "description": "Updates an existing mod owned by the authenticated user.",
+        "tags": [
+          "User Mods"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "CAMPAIGN",
+                      "DEVICE_PROFILES",
+                      "MOD",
+                      "MISSION",
+                      "SKIN",
+                      "SOUND",
+                      "TERRAIN",
+                      "UTILITY",
+                      "OTHER"
+                    ]
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "dependencies": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "latestReleaseId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maintainers": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "screenshots": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "thumbnail": {
+                    "type": "string"
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": [
+                      "PUBLIC",
+                      "PRIVATE",
+                      "UNLISTED"
+                    ]
+                  }
+                },
+                "required": [
+                  "category",
+                  "content",
+                  "dependencies",
+                  "description",
+                  "maintainers",
+                  "name",
+                  "screenshots",
+                  "tags",
+                  "thumbnail",
+                  "visibility"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUserMod",
+        "summary": "Delete user mod",
+        "description": "Deletes an existing mod owned by the authenticated user.",
+        "tags": [
+          "User Mods"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/user-mods/{id}/releases": {
+      "get": {
+        "operationId": "getUserModReleases",
+        "summary": "Get user mod releases",
+        "description": "Retrieves all releases for a specific mod owned by the authenticated user.",
+        "tags": [
+          "User Mod Releases"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ModReleaseData"
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createUserModRelease",
+        "summary": "Create user mod release",
+        "description": "Creates a new release for a mod owned by the authenticated user.",
+        "tags": [
+          "User Mod Releases"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModReleaseData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "version"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user-mods/{id}/releases/{releaseId}": {
+      "get": {
+        "operationId": "getUserModReleaseById",
+        "summary": "Get user mod release by ID",
+        "description": "Retrieves a specific release for a user-owned mod by its ID.",
+        "tags": [
+          "User Mod Releases"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModReleaseData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "releaseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "updateUserModRelease",
+        "summary": "Update user mod release",
+        "description": "Updates fields of an existing release for a mod owned by the authenticated user.",
+        "tags": [
+          "User Mod Releases"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "releaseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string"
+                  },
+                  "changelog": {
+                    "type": "string"
+                  },
+                  "assets": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ModReleaseAssetData"
+                    }
+                  },
+                  "symbolicLinks": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ModReleaseSymbolicLinkData"
+                    }
+                  },
+                  "missionScripts": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ModReleaseMissionScriptData"
+                    }
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": [
+                      "PUBLIC",
+                      "PRIVATE",
+                      "UNLISTED"
+                    ]
+                  },
+                  "downloadsCount": {
+                    "default": 0,
+                    "type": "number"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "version",
+                  "changelog",
+                  "assets",
+                  "symbolicLinks",
+                  "missionScripts",
+                  "visibility"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUserModRelease",
+        "summary": "Delete user mod release",
+        "description": "Deletes an existing release for a mod owned by the authenticated user.",
+        "tags": [
+          "User Mod Releases"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorData"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "releaseId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

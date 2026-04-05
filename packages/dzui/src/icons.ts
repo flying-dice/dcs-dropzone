@@ -1,10 +1,12 @@
 import { ModDataVisibility } from "@packages/clients/webapp";
+import type { IconType } from "react-icons";
 import { FaHome, FaStar, FaSyncAlt } from "react-icons/fa";
 import {
 	FaBox,
 	FaDownload,
 	FaEye,
 	FaEyeSlash,
+	FaGear,
 	FaListCheck,
 	FaStore,
 	FaTag,
@@ -31,9 +33,10 @@ export const AppIcons = {
 	Error: FaTriangleExclamation,
 	Store: FaStore,
 	Library: FaListCheck,
+	Settings: FaGear,
 };
 
-export const VisibilityIcons = {
+export const VisibilityIcons: Record<ModDataVisibility, IconType> = {
 	[ModDataVisibility.PUBLIC]: AppIcons.Public,
 	[ModDataVisibility.PRIVATE]: AppIcons.Private,
 	[ModDataVisibility.UNLISTED]: AppIcons.Unlisted,

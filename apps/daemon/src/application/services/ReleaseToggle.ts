@@ -1,83 +1,162 @@
-import { Log } from "@packages/decorators";
+import type { LinkDefinition, Linker } from "@packages/linker";
 import { getLogger } from "log4js";
-import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
+import type { DisableReleaseError, EnableReleaseError, ToggleReleaseError } from "../schemas/ToggleErrors.ts";
 import type { MissionScriptingFilesManager } from "./MissionScriptingFilesManager.ts";
 import type { PathResolver } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
+import type { RemoveSymlinksScriptManager } from "./RemoveSymlinksScriptManager.ts";
+
+export type { DisableReleaseError, EnableReleaseError, ToggleReleaseError };
 
 const logger = getLogger("ReleaseToggle");
 
 type Deps = {
 	missionScriptingFilesManager: MissionScriptingFilesManager;
+	removeSymlinksScriptManager: RemoveSymlinksScriptManager;
 	pathResolver: PathResolver;
 	releaseRepository: ReleaseRepository;
-	fileSystem: FileSystem;
+	linker: Linker;
 	releaseAssetManager: ReleaseAssetManager;
 };
 
 export class ReleaseToggle {
 	constructor(protected deps: Deps) {}
 
-	@Log(logger)
-	async enable(releaseId: string): Promise<void> {
+	async enable(releaseId: string): Promise<[void, null] | [undefined, EnableReleaseError]> {
 		logger.info(`Enabling Release ${releaseId}`);
-		this.ensureReleaseIsReady(releaseId);
+		const [, readyErr] = this.checkReleaseIsReady(releaseId);
+		if (readyErr) return [undefined, readyErr] as const;
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
 
+		const linkDefinitions: LinkDefinition[] = [];
+
 		for (const link of links) {
-			const srcAbs = this.deps.pathResolver.resolveReleasePath(releaseId, link.src);
-			const destAbs = this.deps.pathResolver.resolveSymbolicLinkPath(link.destRoot, link.dest);
+			const [srcAbs, srcAbsErr] = this.deps.pathResolver.resolveReleasePath(releaseId, link.src);
+			if (srcAbsErr) return [undefined, srcAbsErr] as const;
 
-			logger.debug(`Creating symlink (release=${releaseId}, linkId=${link.id}, src=${srcAbs}, dest=${destAbs})`);
-			await this.deps.fileSystem.ensureSymlink(srcAbs, destAbs);
+			const [destAbs, destAbsErr] = this.deps.pathResolver.resolveSymbolicLinkPath(link.destRoot, link.dest);
+			if (destAbsErr) return [undefined, destAbsErr] as const;
 
-			this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, destAbs);
-			logger.debug(`Stored installed symlink path for linkId ${link.id}: ${destAbs}`);
+			linkDefinitions.push({ id: link.id, src: srcAbs, dest: destAbs });
 		}
+
+		const [resolvedLinks, linkerErr] = await this.deps.linker.enable(linkDefinitions);
+		if (linkerErr) {
+			return [
+				undefined,
+				{
+					reason: "SymlinkCreationFailed" as const,
+					errorCode: linkerErr.code,
+					systemError: linkerErr.message,
+				},
+			];
+		}
+
+		for (const resolved of resolvedLinks) {
+			this.deps.releaseRepository.setInstalledPathForSymbolicLink(resolved.id, resolved.dest);
+			logger.debug(`Stored installed symlink path for linkId ${resolved.id}: ${resolved.dest}`);
+		}
+
+		this.deps.releaseRepository.setEnabled(releaseId, true);
 
 		logger.info(`Rebuilding mission scripting files after enabling release ${releaseId}`);
-		this.deps.missionScriptingFilesManager.rebuild();
+		const [, rebuildErr] = this.deps.missionScriptingFilesManager.rebuild();
+		if (rebuildErr) return [undefined, rebuildErr] as const;
+
+		logger.info(`Rebuilding remove-symlinks script after enabling release ${releaseId}`);
+		const [, removeSymlinksRebuildErr] = this.deps.removeSymlinksScriptManager.rebuild();
+		if (removeSymlinksRebuildErr) return [undefined, removeSymlinksRebuildErr] as const;
+
 		logger.info(`Finished enabling Release ${releaseId}`);
+		return [undefined, null];
 	}
 
-	@Log(logger)
-	disable(releaseId: string): void {
+	disable(releaseId: string): [void, null] | [undefined, DisableReleaseError] {
 		logger.info(`Disabling Release ${releaseId}`);
+
+		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
+		if (!exists) {
+			logger.warn(`Release ${releaseId} not found`);
+			return [undefined, { reason: "ReleaseNotFound" as const }];
+		}
 
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
 
-		for (const link of links) {
-			if (link.installedPath) {
-				logger.debug(`Removing symlink for linkId ${link.id} at ${link.installedPath}`);
-				try {
-					this.deps.fileSystem.removeDir(link.installedPath);
-					this.deps.releaseRepository.setInstalledPathForSymbolicLink(link.id, null);
-					logger.debug(`Cleared installed symlink path for linkId ${link.id}`);
-				} catch (err) {
-					logger.error(`Failed to remove path for linkId ${link.id} at ${link.installedPath}: ${err}`);
-				}
-			} else {
-				logger.trace(`Skipping linkId ${link.id} (no installedPath)`);
+		const installedLinks = links
+			.filter((link) => link.installedPath !== null)
+			.map((link) => ({ id: link.id, installedPath: link.installedPath! }));
+
+		const [removedOk, linkerErr] = this.deps.linker.disable(installedLinks);
+		const removedIds = removedOk ?? linkerErr?.removed ?? [];
+
+		if (linkerErr) {
+			for (const failure of linkerErr.failed) {
+				logger.warn(`Could not remove symlink (linkId=${failure.linkId}): ${failure.message}`);
 			}
+
+			// Only clear installed paths for links that were actually removed
+			for (const id of removedIds) {
+				this.deps.releaseRepository.setInstalledPathForSymbolicLink(id, null);
+			}
+
+			// Keep the release enabled — some symlinks still remain on disk
+			return [
+				undefined,
+				{
+					reason: "PartialDisableFailure" as const,
+					removedCount: removedIds.length,
+					failedCount: linkerErr.failed.length,
+					failures: linkerErr.failed.map((f) => ({ linkId: f.linkId, message: f.message })),
+				},
+			];
 		}
 
+		for (const id of removedIds) {
+			this.deps.releaseRepository.setInstalledPathForSymbolicLink(id, null);
+			logger.debug(`Cleared installed symlink path for linkId ${id}`);
+		}
+
+		this.deps.releaseRepository.setEnabled(releaseId, false);
+
 		logger.info(`Rebuilding mission scripting files after disabling release ${releaseId}`);
-		this.deps.missionScriptingFilesManager.rebuild();
+		const [, rebuildErr] = this.deps.missionScriptingFilesManager.rebuild();
+		if (rebuildErr) return [undefined, rebuildErr] as const;
+
+		logger.info(`Rebuilding remove-symlinks script after disabling release ${releaseId}`);
+		const [, removeSymlinksRebuildErr] = this.deps.removeSymlinksScriptManager.rebuild();
+		if (removeSymlinksRebuildErr) return [undefined, removeSymlinksRebuildErr] as const;
+
 		logger.info(`Finished disabling Release ${releaseId}`);
+		return [undefined, null];
 	}
 
-	private ensureReleaseIsReady(releaseId: string): void {
+	private checkReleaseIsReady(releaseId: string): [void, null] | [undefined, EnableReleaseError] {
 		logger.debug(`Checking if release ${releaseId} is ready`);
 
-		if (!this.deps.releaseAssetManager.isReleaseReady(releaseId)) {
+		const exists = this.deps.releaseRepository.getById(releaseId) !== undefined;
+		if (!exists) {
+			logger.warn(`Release ${releaseId} not found`);
+			return [undefined, { reason: "ReleaseNotFound" as const }];
+		}
+
+		const readiness = this.deps.releaseAssetManager.getReleaseReadiness(releaseId);
+		if (!readiness.ready) {
 			logger.warn(`Release ${releaseId} is not ready: some jobs are incomplete`);
-			throw new Error(`Cannot enable release ${releaseId} because not all jobs are completed.`);
+			return [
+				undefined,
+				{
+					reason: "ReleaseNotReady" as const,
+					pendingCount: readiness.pendingCount,
+					failedCount: readiness.failedCount,
+				},
+			];
 		}
 
 		logger.debug(`Release ${releaseId} is ready for activation`);
+		return [undefined, null];
 	}
 }

@@ -1,8 +1,7 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import type { ModCategory } from "../enums/ModCategory.ts";
 import { ModCategory as ModCategoryValues } from "../enums/ModCategory.ts";
+import { ModNotFoundError, NotFoundError, ReleaseNotFoundError } from "../errors.ts";
 import type { ModRepository } from "../ports/ModRepository.ts";
 import type { UserRepository } from "../ports/UserRepository.ts";
 import { ModAvailableFilterData } from "../schemas/ModAvailableFilterData.ts";
@@ -23,7 +22,6 @@ type Deps = {
 export class PublicMods {
 	constructor(private readonly deps: Deps) {}
 
-	@Log(logger)
 	async getAllPublishedMods(query: {
 		page: number;
 		size: number;
@@ -65,27 +63,25 @@ export class PublicMods {
 		};
 	}
 
-	@Log(logger)
-	async getModById(modId: string): Promise<Result<{ mod: ModData; maintainers: UserData[] }, "ModNotFound">> {
+	async getModById(modId: string): Promise<[{ mod: ModData; maintainers: UserData[] }, null] | [undefined, ModNotFoundError]> {
 		logger.debug("Fetching mod by ID", { modId });
 
 		const result = await this.deps.modRepository.findPublicModById(modId);
 
 		if (!result) {
 			logger.info("Mod not found", { modId });
-			return err("ModNotFound");
+			return [undefined, new ModNotFoundError()];
 		}
 
 		const maintainers = await this.deps.userRepository.findAllByIds(result.maintainers);
 		logger.info("Mod retrieved", { modId, name: result.name });
 
-		return ok({
+		return [{
 			mod: result,
 			maintainers,
-		});
+		}, null];
 	}
 
-	@Log(logger)
 	async getAllFeaturedMods(): Promise<ModSummaryData[]> {
 		logger.debug("Fetching featured mods");
 		const mods = await this.deps.modRepository.findAllFeaturedMods();
@@ -93,7 +89,6 @@ export class PublicMods {
 		return mods;
 	}
 
-	@Log(logger)
 	async getAllPopularMods(): Promise<ModSummaryData[]> {
 		logger.debug("Fetching popular mods");
 		const mods = await this.deps.modRepository.findAllPopularMods();
@@ -101,13 +96,11 @@ export class PublicMods {
 		return mods;
 	}
 
-	@Log(logger)
 	async getAllTags(): Promise<string[]> {
 		logger.debug("Fetching all tags");
 		return this.deps.modRepository.findAllTags();
 	}
 
-	@Log(logger)
 	async getCategoryCounts(): Promise<Record<ModCategory, number>> {
 		logger.debug("Fetching category counts");
 		const counts = await this.deps.modRepository.getCategoryCounts();
@@ -129,7 +122,6 @@ export class PublicMods {
 		return result;
 	}
 
-	@Log(logger)
 	async getServerMetrics(): Promise<{ totalMods: number; totalDownloads: number }> {
 		logger.debug("Fetching server metrics");
 		const metrics = await this.deps.modRepository.getServerMetrics();
@@ -137,55 +129,53 @@ export class PublicMods {
 		return ServerMetricsData.parse(metrics);
 	}
 
-	@Log(logger)
-	async findPublicModReleases(modId: string): Promise<Result<ModReleaseData[], "NotFound">> {
+	async findPublicModReleases(modId: string): Promise<[ModReleaseData[], null] | [undefined, NotFoundError]> {
 		logger.debug("Fetching mod releases", { modId });
 
 		const releases = await this.deps.modRepository.findPublicModReleases(modId);
 
 		if (releases === undefined) {
 			logger.info("Mod not found for releases", { modId });
-			return err("NotFound");
+			return [undefined, new NotFoundError()];
 		}
 
 		logger.info("Mod releases fetched", { modId, count: releases.length });
-		return ok(releases);
+		return [releases, null];
 	}
 
-	@Log(logger)
 	async findPublicModReleaseById(
 		modId: string,
 		releaseId: string,
-	): Promise<Result<ModReleaseData, "ModNotFound" | "ReleaseNotFound">> {
+	): Promise<[ModReleaseData, null] | [undefined, ModNotFoundError | ReleaseNotFoundError]> {
 		logger.debug("Fetching mod release", { modId, releaseId });
 
 		const release = await this.deps.modRepository.findPublicModRelease(modId, releaseId);
 
 		if (!release) {
 			logger.info("Release not found", { modId, releaseId });
-			return err("ReleaseNotFound");
+			return [undefined, new ReleaseNotFoundError()];
 		}
 
 		logger.info("Release retrieved", { modId, releaseId, version: release.version });
-		return ok(release);
+		return [release, null];
 	}
 
-	@Log(logger)
-	async findLatestPublicModRelease(modId: string): Promise<Result<ModReleaseData, "ModNotFound" | "ReleaseNotFound">> {
+	async findLatestPublicModRelease(
+		modId: string,
+	): Promise<[ModReleaseData, null] | [undefined, ModNotFoundError | ReleaseNotFoundError]> {
 		logger.debug("Fetching latest release", { modId });
 
 		const release = await this.deps.modRepository.findLatestPublicModRelease(modId);
 
 		if (!release) {
 			logger.info("Latest release not found", { modId });
-			return err("ReleaseNotFound");
+			return [undefined, new ReleaseNotFoundError()];
 		}
 
 		logger.info("Latest release retrieved", { modId, version: release.version });
-		return ok(release);
+		return [release, null];
 	}
 
-	@Log(logger)
 	async findUpdateInformationByIds(
 		modIds: string[],
 	): Promise<{ modId: string; id: string; version: string; createdAt: string }[]> {

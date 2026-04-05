@@ -22,8 +22,9 @@ It also supports mission scripting hooks that run on mission start, both before 
 ```text
 dcs-dropzone/
 ├─ apps/
-│  ├─ webapp/   # Server-side Web Application: publish, browse, download, enable/disable mods
-│  └─ daemon/   # Client-side Daemon with TUI + API: installs releases, creates/removes symlinks
+│  ├─ webapp/    # Server-side Web Application: publish, browse, download, enable/disable mods
+│  ├─ daemon/    # Client-side Daemon with TUI + API: installs releases, creates/removes symlinks
+│  └─ launcher/  # Updater that downloads and runs the correct version of the Daemon
 └─ ...
 ```
 
@@ -70,7 +71,15 @@ Consult individual mod documentation for exact scripting entry points and expect
 
 ## Getting started
 
-> TBC
+### Prerequisites
+
+Install [Inno Setup](https://jrsoftware.org/isinfo.php) to get the `iscc` command required by the `installer:build` script in `package.json`:
+
+```sh
+winget install jrsoftware.innosetup
+```
+
+> **Note:** winget does not add `iscc` to `PATH` automatically. After installing, add `C:\Users\<you>\AppData\Local\Programs\Inno Setup 6` to your PATH manually, then restart your terminal.
 
 ## Security and safety
 

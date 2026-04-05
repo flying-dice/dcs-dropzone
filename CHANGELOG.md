@@ -11,7 +11,7 @@
 ### Bug Fixes
 
 * **daemon:** refetch all daemon releases after enabling/disabling/removing mods ([7c20199](https://github.com/flying-dice/dcs-dropzone/commit/7c20199592222d5fbc0e01fe0691b51ab2f31019))
-* **daemon:** update artifact names and improve config ignore ([b0571ed](https://github.com/flying-dice/dcs-dropzone/commit/b0571ede77db5aad3444b58c20e7d17717c61954))
+* **daemon:** update artifact names and improve dzConfig ignore ([b0571ed](https://github.com/flying-dice/dcs-dropzone/commit/b0571ede77db5aad3444b58c20e7d17717c61954))
 * **daemon:** update build configuration for Dropzone ([c754738](https://github.com/flying-dice/dcs-dropzone/commit/c754738e975b457461e6576f3b8d2ea9c0d2304b))
 * **daemon:** update enableRelease and ensureSymlink to async ([4b58296](https://github.com/flying-dice/dcs-dropzone/commit/4b5829649bbc1748bf35fe98148bf7a1ad32e928))
 * **launcher:** update asset naming and improve update logic ([d749a56](https://github.com/flying-dice/dcs-dropzone/commit/d749a567287b3309bbbba097f0d0cc95de4ae606))
@@ -68,7 +68,7 @@
 
 ### Bug Fixes
 
-* update Dockerfile to include client_webapp and dzui packages ([cc46f9d](https://github.com/flying-dice/dcs-dropzone/commit/cc46f9d4ab28f3caf18add00b3dc1850a39463e8))
+* update Dockerfile to include clients and dzui packages ([cc46f9d](https://github.com/flying-dice/dcs-dropzone/commit/cc46f9d4ab28f3caf18add00b3dc1850a39463e8))
 
 # [1.6.0](https://github.com/flying-dice/dcs-dropzone/compare/v1.5.0...v1.6.0) (2026-01-25)
 
@@ -108,12 +108,12 @@
 
 ### Bug Fixes
 
-* **launcher:** add config.toml to symlinks post install linking ([f1b42b6](https://github.com/flying-dice/dcs-dropzone/commit/f1b42b6c6c567ef6ea151d08d0ef56c598fb1a05))
+* **launcher:** add dzConfig.toml to symlinks post install linking ([f1b42b6](https://github.com/flying-dice/dcs-dropzone/commit/f1b42b6c6c567ef6ea151d08d0ef56c598fb1a05))
 
 
 ### Features
 
-* **config:** implement config file reading and writing with validation ([a31b2ac](https://github.com/flying-dice/dcs-dropzone/commit/a31b2ac0ff648cb373a679faeb6de1a40ffc194d))
+* **dzConfig:** implement dzConfig file reading and writing with validation ([a31b2ac](https://github.com/flying-dice/dcs-dropzone/commit/a31b2ac0ff648cb373a679faeb6de1a40ffc194d))
 
 ## [1.2.1](https://github.com/flying-dice/dcs-dropzone/compare/v1.2.0...v1.2.1) (2026-01-21)
 

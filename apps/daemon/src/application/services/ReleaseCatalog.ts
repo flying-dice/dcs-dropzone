@@ -1,4 +1,3 @@
-import { Log } from "@packages/decorators";
 import { getLogger } from "log4js";
 import { AssetStatus } from "../enums/AssetStatus.ts";
 import { inferReleaseStatusFromAssets } from "../functions/inferReleaseStatusFromAssets.ts";
@@ -6,7 +5,7 @@ import { totalPercentProgress } from "../functions/totalPercentProgress.ts";
 import type { FileSystem } from "../ports/FileSystem.ts";
 import type { ReleaseRepository } from "../ports/ReleaseRepository.ts";
 import { ModAndReleaseData } from "../schemas/ModAndReleaseData.ts";
-import type { PathResolver } from "./PathResolver.ts";
+import type { DropzoneModsDirError, PathResolver } from "./PathResolver.ts";
 import type { ReleaseAssetManager } from "./ReleaseAssetManager.ts";
 
 const logger = getLogger("ReleaseCatalog");
@@ -21,23 +20,26 @@ type Deps = {
 export class ReleaseCatalog {
 	constructor(protected deps: Deps) {}
 
-	@Log(logger)
-	add(data: ModAndReleaseData) {
+	add(data: ModAndReleaseData): [void, null] | [undefined, DropzoneModsDirError] {
 		logger.info(`Adding releaseId: ${data.releaseId}`);
 
+		// Verify dropzone mods directory is configured before persisting to prevent orphaned records
+		const [, pathCheckErr] = this.deps.pathResolver.resolveReleasePath(data.releaseId);
+		if (pathCheckErr) return [undefined, pathCheckErr] as const;
+
 		this.deps.releaseRepository.saveRelease(data);
-		this.deps.releaseAssetManager.addRelease(data.releaseId);
+		const [, addErr] = this.deps.releaseAssetManager.addRelease(data.releaseId);
+		if (addErr) return [undefined, addErr] as const;
 
 		logger.info(`Successfully added releaseId: ${data.releaseId}`);
+		return [undefined, null];
 	}
 
-	@Log(logger)
 	remove(releaseId: string): void {
 		this.deps.releaseAssetManager.removeRelease(releaseId);
 		this.deps.releaseRepository.deleteRelease(releaseId);
 	}
 
-	@Log(logger)
 	getAllReleasesWithStatus(): ModAndReleaseData[] {
 		const releases: ModAndReleaseData[] = [];
 
@@ -56,6 +58,13 @@ export class ReleaseCatalog {
 			const symbolicLinks = this.deps.releaseRepository.getSymbolicLinksForRelease(release.releaseId);
 			const missionScripts = this.deps.releaseRepository.getMissionScriptsForRelease(release.releaseId);
 
+			let symlinkIntegrityValid = true;
+			if (release.enabled && symbolicLinks.length > 0) {
+				symlinkIntegrityValid = symbolicLinks.every(
+					(link) => link.installedPath !== null && this.deps.fileSystem.exists(link.installedPath),
+				);
+			}
+
 			releases.push({
 				...release,
 				assets,
@@ -63,7 +72,8 @@ export class ReleaseCatalog {
 				missionScripts,
 				status: inferReleaseStatusFromAssets(
 					assets.map((it) => it.statusData?.status ?? AssetStatus.PENDING),
-					symbolicLinks,
+					release.enabled,
+					symlinkIntegrityValid,
 				),
 				overallPercentProgress: totalPercentProgress(
 					assets.flatMap((it) => it.statusData?.overallPercentProgress ?? 0),

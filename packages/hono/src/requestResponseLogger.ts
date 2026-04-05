@@ -12,7 +12,7 @@ export const requestResponseLogger: MiddlewareHandler = async (c, next) => {
 	const params = c.req.param();
 	const query = c.req.query();
 
-	logger.debug({ requestId, method, path, params, query }, `Incoming ${method} ${path}`);
+	logger.trace({ requestId, method, path, params, query }, `Incoming ${method} ${path}`);
 
 	await next();
 
@@ -20,7 +20,7 @@ export const requestResponseLogger: MiddlewareHandler = async (c, next) => {
 	const status = c.res.status;
 
 	if (c.res.ok) {
-		logger.debug(
+		logger.trace(
 			{ requestId, method, path, status, duration },
 			`Completed ${method} ${path} -> ${status} in ${duration}ms`,
 		);

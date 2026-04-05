@@ -1,7 +1,5 @@
-import { Log } from "@packages/decorators";
 import type { ProcessorContext } from "@packages/queue";
 import { getLogger } from "log4js";
-import { err, ok, type Result } from "neverthrow";
 import type { ExtractJobData, ExtractJobResult, ExtractProcessor } from "../application/ports/ExtractProcessor.ts";
 import { spawnSevenzip } from "../child_process/sevenzip.ts";
 
@@ -16,10 +14,12 @@ export class SevenZipExtractProcessor implements ExtractProcessor {
 
 	constructor(protected readonly deps: Deps) {}
 
-	@Log(logger)
-	async process(jobData: ExtractJobData, ctx: ProcessorContext): Promise<Result<ExtractJobResult, string>> {
+	async process(
+		jobData: ExtractJobData,
+		ctx: ProcessorContext,
+	): Promise<[ExtractJobResult, null] | [undefined, string]> {
 		logger.debug(`Processing extract job: ${JSON.stringify(jobData)}`);
-		const res = await spawnSevenzip({
+		const [, sevenzipErr] = await spawnSevenzip({
 			archivePath: jobData.archivePath,
 			exePath: this.deps.sevenZipExecutablePath,
 			targetDir: jobData.destinationFolder,
@@ -28,18 +28,12 @@ export class SevenZipExtractProcessor implements ExtractProcessor {
 			},
 		});
 
-		logger.debug("SevenZip extraction completed with result: ", res);
-		return res.match(
-			(_result) => {
-				logger.debug("SevenZip extraction successful, destination folder: ", jobData.destinationFolder);
-				return ok({
-					destinationFolder: jobData.destinationFolder,
-				});
-			},
-			(error) => {
-				logger.error("SevenZip extraction failed with error: ", error);
-				return err(error);
-			},
-		);
+		if (sevenzipErr) {
+			logger.error("SevenZip extraction failed with error: ", sevenzipErr);
+			return [undefined, sevenzipErr];
+		}
+
+		logger.debug("SevenZip extraction successful, destination folder: ", jobData.destinationFolder);
+		return [{ destinationFolder: jobData.destinationFolder }, null];
 	}
 }
