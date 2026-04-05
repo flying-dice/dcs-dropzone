@@ -4,6 +4,7 @@ import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
+import { POPULAR_MODS_SECTION_TEST_ID } from "../../../../../../playwright.constants.ts";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 
@@ -14,7 +15,7 @@ export function _PopularMods() {
 	const popularMods = useGetPopularMods();
 
 	return (
-		<Stack>
+		<Stack data-testid={POPULAR_MODS_SECTION_TEST_ID}>
 			<Text fz={"lg"} fw={"bold"}>
 				{t("POPULAR_MODS")}
 			</Text>

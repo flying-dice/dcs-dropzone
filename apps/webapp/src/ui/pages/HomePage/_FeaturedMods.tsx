@@ -4,6 +4,7 @@ import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
+import { FEATURED_MODS_SECTION_TEST_ID } from "../../../../../../playwright.constants.ts";
 import { ModCard } from "../../components/ModCard";
 
 export function _FeaturedMods() {
@@ -12,7 +13,7 @@ export function _FeaturedMods() {
 	const featuredMods = useGetFeaturedMods();
 
 	return (
-		<Stack>
+		<Stack data-testid={FEATURED_MODS_SECTION_TEST_ID}>
 			<Text fz={"lg"} fw={"bold"}>
 				{t("FEATURED_MODS")}
 			</Text>
