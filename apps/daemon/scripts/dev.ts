@@ -2,7 +2,7 @@
 import { resolve } from "node:path";
 import { $ } from "bun";
 import { z } from "zod";
-import { envLocalDev } from "./env.ts";
+import { envLocalDev } from "./_env.ts";
 
 process.chdir(resolve(import.meta.dirname, "../"));
 

@@ -134,11 +134,11 @@ Configuration is defined as typed TypeScript objects inside each app's `scripts/
 
 | App          | Config file                          | Exported configs                                       |
 |--------------|--------------------------------------|--------------------------------------------------------|
-| **Daemon**   | `apps/daemon/scripts/env.ts`         | `envLocalDev`, `envLocalTest`, `envLocalBuild`, `envProdBuild` |
+| **Daemon**   | `apps/daemon/scripts/_env.ts`         | `envLocalDev`, `envLocalTest`, `envLocalBuild`, `envProdBuild` |
 | **Webapp**   | `apps/webapp/scripts/_env.ts`        | `envLocalDev`, `envLocalTest`, `envLocalBuild`, `envProdBuild` |
 | **Launcher** | `apps/launcher/scripts/_env.ts`      | `envLocalBuild`, `envProdBuild`                        |
 
-The target environment is selected via the `DZ_TARGET_ENV` environment variable (values: `local` | `prod`, default: `local`), handled by `scripts/_target-env.ts` at the repo root:
+The target environment is selected via the `DZ_TARGET_ENV` environment variable (values: `local` | `prod`, default: `local`), handled by `scripts/_target-_env.ts` at the repo root:
 
 - `bun run dev` — always uses the `local` dev config.
 - `bun run build` — uses `local` config by default; set `DZ_TARGET_ENV=prod` for production.

@@ -3,6 +3,7 @@ import { openModal } from "@mantine/modals";
 import { useTranslation } from "react-i18next";
 import { BiDetail, BiLogOut, BiLogoGithub, BiPackage } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
+import { LOGIN_BUTTON_TEST_ID } from "../../../../../playwright.constants.ts";
 import { useUserContext } from "../context/UserContext.ts";
 
 export function ProfileMenu() {
@@ -39,7 +40,7 @@ export function ProfileMenu() {
 	return (
 		<Stack pr="md">
 			{!user && (
-				<Button data-testid="login-button" variant="default" onClick={login}>
+				<Button data-testid={LOGIN_BUTTON_TEST_ID} variant="default" onClick={login}>
 					{t("LOGIN")}
 				</Button>
 			)}

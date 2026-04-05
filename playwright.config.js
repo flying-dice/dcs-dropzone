@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "playwright/test";
+import { PW_DAEMON_BASE_URL, PW_WEBAPP_BASE_URL } from "./playwright.constants";
 
 export default defineConfig({
 	// Look for test files in the "tests" directory, relative to this configuration file.
@@ -8,10 +9,6 @@ export default defineConfig({
 	// Fail the build on CI if you accidentally left test.only in the source code.
 	forbidOnly: !!process.env.CI,
 
-	// Retry once on CI to handle transient flakes, but not more — retries accumulate
-	// state in tests that create data (e.g. CreateMod), causing strict-mode locator failures.
-	retries: process.env.CI ? 1 : 0,
-
 	// Run webapp and daemon projects in parallel (they target independent servers).
 	workers: process.env.CI ? 2 : undefined,
 
@@ -20,9 +17,6 @@ export default defineConfig({
 	outputDir: ".test-results/",
 
 	use: {
-		// Base URL to use in actions like `await page.goto('/')`.
-		baseURL: "http://localhost:3000",
-
 		// Collect trace when retrying the failed test.
 		trace: "on-first-retry",
 
@@ -33,25 +27,25 @@ export default defineConfig({
 	projects: [
 		{
 			name: "webapp",
-			testMatch: "**/0{1,3,5,7}-*.spec-pw.ts",
-			use: { ...devices["Desktop Chrome"] },
+			testMatch: "tests/webapp/*.spec-pw.ts",
+			use: { ...devices["Desktop Chrome"], baseURL: PW_WEBAPP_BASE_URL },
 		},
 		{
 			name: "daemon",
-			testMatch: "**/0{2,4,6}-*.spec-pw.ts",
-			use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:56499" },
+			testMatch: "tests/daemon/*.spec-pw.ts",
+			use: { ...devices["Desktop Chrome"], baseURL: PW_DAEMON_BASE_URL },
 		},
 	],
 	// Run your local dev servers before starting the tests.
 	webServer: [
 		{
-			command: "bun playwright.setup.ts",
-			url: "http://localhost:3000",
+			command: "bun playwright.webapp.setup.ts",
+			url: `${PW_WEBAPP_BASE_URL}/api/health`,
 			reuseExistingServer: !process.env.CI,
 		},
 		{
 			command: "bun playwright.daemon.setup.ts",
-			url: "http://127.0.0.1:56499/api/health",
+			url: `${PW_DAEMON_BASE_URL}/api/health`,
 			reuseExistingServer: !process.env.CI,
 		},
 	],

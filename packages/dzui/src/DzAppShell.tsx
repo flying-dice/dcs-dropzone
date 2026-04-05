@@ -4,6 +4,12 @@ import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
 import { useAsyncFn } from "react-use";
 import { match } from "ts-pattern";
+import {
+	DISCOVER_BUTTON_TEST_ID,
+	HEADER_LOGO_TEST_ID,
+	LIBRARY_BUTTON_TEST_ID,
+	SETTINGS_BUTTON_TEST_ID,
+} from "../../../playwright.constants.ts";
 import icon from "./assets/icon.svg";
 import logo from "./assets/logo.svg";
 import { AppIcons } from "./icons.ts";
@@ -19,11 +25,13 @@ type ActionMenuItemProps = {
 	disabled?: boolean;
 	icon: IconType;
 	loading?: boolean;
+	"data-testid"?: string;
 };
 
 function ActionMenuButtonItem(props: ActionMenuItemProps) {
 	return (
 		<Button
+			data-testid={props["data-testid"]}
 			leftSection={<props.icon />}
 			variant={props.active ? "light" : "transparent"}
 			disabled={props.disabled}
@@ -101,6 +109,7 @@ export function DzAppShell(props: DzAppShellProps) {
 
 	const actions: ActionMenuItemProps[] = [
 		{
+			"data-testid": DISCOVER_BUTTON_TEST_ID,
 			id: "webapp",
 			label: t("DISCOVER"),
 			active: props.variant === "webapp",
@@ -110,6 +119,7 @@ export function DzAppShell(props: DzAppShellProps) {
 			disabled: !!webappOpening.error,
 		},
 		{
+			"data-testid": LIBRARY_BUTTON_TEST_ID,
 			id: "daemon",
 			label: t("LIBRARY"),
 			active: props.variant === "daemon",
@@ -119,6 +129,7 @@ export function DzAppShell(props: DzAppShellProps) {
 			disabled: props.isDaemonSuccess === false || !!daemonOpening.error,
 		},
 		{
+			"data-testid": SETTINGS_BUTTON_TEST_ID,
 			id: "settings",
 			label: t("SETTINGS"),
 			active: props.variant === "settings",
@@ -151,7 +162,7 @@ export function DzAppShell(props: DzAppShellProps) {
 							{props.navbarDisclosure && (
 								<Burger opened={props.navbarDisclosure[0]} onClick={props.navbarDisclosure[1].toggle} hiddenFrom="xs" />
 							)}
-							<Image w={"min-content"} h={44} src={isXs ? icon : logo} />
+							<Image data-testid={HEADER_LOGO_TEST_ID} w={"min-content"} h={44} src={isXs ? icon : logo} />
 							{variant !== "footer" && <Group gap={"xs"}>{actionMenu}</Group>}
 						</Group>
 

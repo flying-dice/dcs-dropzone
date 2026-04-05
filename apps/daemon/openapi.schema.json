@@ -265,26 +265,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "default": 422,
-                      "type": "number",
-                      "const": 422
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirNotConfiguredError"
                     },
-                    "message": {
-                      "default": "Unprocessable Entity",
-                      "type": "string"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "enum": [
-                        "DropzoneModsDirNotConfigured"
-                      ]
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirInvalidError"
                     }
-                  },
-                  "required": [
-                    "reason"
                   ]
                 }
               }
@@ -439,30 +426,31 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "default": 422,
-                      "type": "number",
-                      "const": 422
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ReleaseNotFoundError"
                     },
-                    "message": {
-                      "default": "Unprocessable Entity",
-                      "type": "string"
+                    {
+                      "$ref": "#/components/schemas/ReleaseNotReadyError"
                     },
-                    "reason": {
-                      "type": "string",
-                      "enum": [
-                        "DropzoneModsDirNotConfigured",
-                        "DcsPathNotConfigured",
-                        "ReleaseNotFound",
-                        "ReleaseNotReady",
-                        "SymlinkCreationFailed"
-                      ]
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirNotConfiguredError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirInvalidError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DcsPathNotConfiguredError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DcsPathInvalidError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SymlinkCreationFailedError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PartialDisableFailureError"
                     }
-                  },
-                  "required": [
-                    "reason"
                   ]
                 }
               }
@@ -514,30 +502,28 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "default": 422,
-                      "type": "number",
-                      "const": 422
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ReleaseNotFoundError"
                     },
-                    "message": {
-                      "default": "Unprocessable Entity",
-                      "type": "string"
+                    {
+                      "$ref": "#/components/schemas/ReleaseNotReadyError"
                     },
-                    "reason": {
-                      "type": "string",
-                      "enum": [
-                        "DropzoneModsDirNotConfigured",
-                        "DcsPathNotConfigured",
-                        "ReleaseNotFound",
-                        "ReleaseNotReady",
-                        "SymlinkCreationFailed"
-                      ]
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirNotConfiguredError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirInvalidError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DcsPathNotConfiguredError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DcsPathInvalidError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SymlinkCreationFailedError"
                     }
-                  },
-                  "required": [
-                    "reason"
                   ]
                 }
               }
@@ -589,26 +575,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "default": 422,
-                      "type": "number",
-                      "const": 422
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ReleaseNotFoundError"
                     },
-                    "message": {
-                      "default": "Unprocessable Entity",
-                      "type": "string"
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirNotConfiguredError"
                     },
-                    "reason": {
-                      "type": "string",
-                      "enum": [
-                        "DcsPathNotConfigured"
-                      ]
+                    {
+                      "$ref": "#/components/schemas/DropzoneModsDirInvalidError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DcsPathNotConfiguredError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DcsPathInvalidError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PartialDisableFailureError"
                     }
-                  },
-                  "required": [
-                    "reason"
                   ]
                 }
               }
@@ -640,6 +625,41 @@
   },
   "components": {
     "schemas": {
+      "DropzoneModsDirNotConfiguredError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "DropzoneModsDirNotConfigured"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DropzoneModsDirInvalidError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "DropzoneModsDirInvalid"
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "PATH_NOT_FOUND"
+            ]
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "errorCode",
+          "path"
+        ]
+      },
       "ModReleaseAssetStatusData": {
         "title": "Mod Release Asset Status Data",
         "description": "Status data representation of a mod release asset, including download and extraction progress.",
@@ -882,6 +902,145 @@
             "type": "boolean"
           }
         }
+      },
+      "ReleaseNotFoundError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "ReleaseNotFound"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "ReleaseNotReadyError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "ReleaseNotReady"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "failedCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "reason",
+          "pendingCount",
+          "failedCount"
+        ]
+      },
+      "DcsPathNotConfiguredError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "DcsPathNotConfigured"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DcsPathInvalidError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "DcsPathInvalid"
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "PATH_NOT_FOUND"
+            ]
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "errorCode",
+          "path"
+        ]
+      },
+      "SymlinkCreationFailedError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "SymlinkCreationFailed"
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "SOURCE_NOT_FOUND",
+              "LINK_ALREADY_EXISTS",
+              "PERMISSION_DENIED",
+              "LINK_CREATION_FAILED"
+            ]
+          },
+          "systemError": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "errorCode"
+        ]
+      },
+      "PartialDisableFailureError": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "const": "PartialDisableFailure"
+          },
+          "removedCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "failedCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "linkId": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "linkId",
+                "message"
+              ]
+            }
+          }
+        },
+        "required": [
+          "reason",
+          "removedCount",
+          "failedCount",
+          "failures"
+        ]
       },
       "ErrorData": {
         "type": "object",
