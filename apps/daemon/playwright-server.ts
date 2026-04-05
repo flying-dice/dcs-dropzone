@@ -1,10 +1,11 @@
-import "./log4js.ts";
+import "./src/log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
-import { SEVEN_ZIP_BINARIES, WGET_BINARIES } from "./constants.ts";
-import { HonoApplication } from "./hono/HonoApplication.ts";
-import { ProdApplication } from "./ProdApplication.ts";
-import { which } from "./utils/which.ts";
+import { SEVEN_ZIP_BINARIES, WGET_BINARIES } from "./src/constants.ts";
+import { HonoApplication } from "./src/hono/HonoApplication.ts";
+import { ProdApplication } from "./src/ProdApplication.ts";
+import index from "./src/ui/index.html";
+import { which } from "./src/utils/which.ts";
 
 const logger = getLogger("playwright-server");
 
@@ -24,13 +25,19 @@ const app = new ProdApplication({
 
 const honoApp = await HonoApplication.build(app, {
 	enableGenerateSchema: false,
-	uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
+	uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://127.0.0.1:56499/" },
 });
 
 const server = serve({
 	hostname: "127.0.0.1",
 	port: 56499,
-	fetch: honoApp.fetch,
+	development: true,
+	routes: {
+		"/*": index,
+		"/api": honoApp.fetch,
+		"/api/**": honoApp.fetch,
+		"/v3/api-docs": honoApp.fetch,
+	},
 });
 
 logger.info("Daemon Playwright test server running at %s", server.url);

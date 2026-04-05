@@ -38,7 +38,7 @@ export default defineConfig({
 		{
 			name: "daemon",
 			testMatch: "**/02-*.spec-pw.ts",
-			use: { ...devices["Desktop Chrome"], baseURL: "http://localhost:56499" },
+			use: { ...devices["Desktop Chrome"], baseURL: "http://127.0.0.1:56499" },
 		},
 	],
 	// Run your local dev servers before starting the tests.
@@ -50,7 +50,7 @@ export default defineConfig({
 		},
 		{
 			command: "bun playwright.daemon.setup.ts",
-			url: "http://localhost:56499/api/health",
+			url: "http://127.0.0.1:56499/api/health",
 			reuseExistingServer: !process.env.CI,
 		},
 	],
