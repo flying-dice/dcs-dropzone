@@ -72,6 +72,8 @@ export type EnableReleaseError = z.infer<typeof EnableReleaseError>;
 
 export const DisableReleaseError = z.discriminatedUnion("reason", [
 	ReleaseNotFoundError,
+	DropzoneModsDirNotConfiguredError,
+	DropzoneModsDirInvalidError,
 	DcsPathNotConfiguredError,
 	DcsPathInvalidError,
 	PartialDisableFailureError,

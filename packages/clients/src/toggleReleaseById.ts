@@ -67,7 +67,11 @@ export async function toggleReleaseById(props: {
 		};
 		const reason = errorData?.reason;
 		const detail = errorData?.systemError ?? errorData?.failures?.map((f) => `${f.linkId}: ${f.message}`).join("; ");
-		const message = detail ? `${reason}: ${detail}` : (reason ?? "Failed to toggle release");
+		const message = detail
+			? reason
+				? `${reason}: ${detail}`
+				: `Failed to toggle release: ${detail}`
+			: (reason ?? "Failed to toggle release");
 		return [
 			undefined,
 			new ToggleReleaseError({

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { ok } from "node:assert";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { RemovalFailed } from "@packages/linker";
 import { JobState } from "@packages/queue";
 import { MissionScriptRunOn, SymbolicLinkDestRoot } from "webapp";
 import type { Application } from "../application/Application.ts";
@@ -619,5 +620,93 @@ describe("toggleRelease", () => {
 
 		const release = app.deps.releaseRepository.getById(modAndReleaseData.releaseId);
 		expect(release?.enabled).toBe(false);
+	});
+});
+
+describe("PartialDisableFailure", () => {
+	let app: Application;
+	let tempDir: TestTempDir;
+	let modAndReleaseData: ModAndReleaseData;
+
+	beforeEach(() => {
+		const configured = buildConfiguredApp();
+		app = configured.app;
+		tempDir = configured.tempDir;
+		modAndReleaseData = {
+			releaseId: "test-release-id",
+			modId: "test-mod-id",
+			modName: "Test Mod",
+			dependencies: [],
+			version: "1.0.0",
+			versionHash: Date.now().toString(),
+			assets: [],
+			symbolicLinks: [
+				{
+					id: "link-1",
+					name: "Link A",
+					src: "sample/a.lua",
+					dest: "Scripts/a.lua",
+					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+				},
+				{
+					id: "link-2",
+					name: "Link B",
+					src: "sample/b.lua",
+					dest: "Scripts/b.lua",
+					destRoot: SymbolicLinkDestRoot.DCS_WORKING_DIR,
+				},
+			],
+			missionScripts: [],
+		};
+	});
+
+	afterEach(() => {
+		tempDir.cleanup();
+	});
+
+	it("should keep release enabled and return failures when some symlinks cannot be removed", async () => {
+		const [, addErr] = app.addRelease(modAndReleaseData);
+		expect(addErr).toBeNull();
+
+		// Create real source files so enable succeeds
+		createSourceFilesOnDisk(app, modAndReleaseData);
+
+		const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
+		expect(enableErr).toBeNull();
+
+		// Verify both links have installed paths
+		const linksBefore = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
+		expect(linksBefore.filter((l) => l.installedPath !== null).length).toBe(2);
+
+		// Monkey-patch the linker to simulate partial failure: link-1 removed, link-2 fails
+		app.deps.linker.disable = () => [
+			undefined,
+			{
+				removed: ["link-1"],
+				failed: [new RemovalFailed("link-2", "Permission denied")],
+			},
+		];
+
+		const [, disableErr] = app.disableRelease(modAndReleaseData.releaseId);
+
+		// (1) Error is a PartialDisableFailure with structured details
+		ok(disableErr);
+		expect(disableErr.reason).toBe("PartialDisableFailure");
+		if (disableErr.reason === "PartialDisableFailure") {
+			expect(disableErr.removedCount).toBe(1);
+			expect(disableErr.failedCount).toBe(1);
+			expect(disableErr.failures).toEqual([{ linkId: "link-2", message: expect.any(String) }]);
+		}
+
+		// (2) Release stays enabled
+		const release = app.deps.releaseRepository.getById(modAndReleaseData.releaseId);
+		expect(release?.enabled).toBe(true);
+
+		// (3) Only the successfully removed link has its installed path cleared
+		const linksAfter = app.deps.releaseRepository.getSymbolicLinksForRelease(modAndReleaseData.releaseId);
+		const link1 = linksAfter.find((l) => l.id === "link-1");
+		const link2 = linksAfter.find((l) => l.id === "link-2");
+		expect(link1?.installedPath).toBeNull();
+		expect(link2?.installedPath).not.toBeNull();
 	});
 });
