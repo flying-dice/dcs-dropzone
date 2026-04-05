@@ -1,4 +1,3 @@
-import * as assert from "node:assert";
 import { addReleaseToDaemonById, calculateDashboardMetrics } from "@packages/clients";
 import {
 	getGetAllDaemonReleasesUrl,
@@ -78,7 +77,8 @@ export function useDaemon() {
 			if (error) {
 				showError(error.message);
 			} else {
-				if (status === "Enabled") showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
+				if (status === "Enabled")
+					showSuccessNotification(t("MOD_ENABLED_SUCCESS_TITLE"), t("MOD_ENABLED_SUCCESS_DESC"));
 				else if (status === "Disabled")
 					showSuccessNotification(t("MOD_DISABLED_SUCCESS_TITLE"), t("MOD_DISABLED_SUCCESS_DESC"));
 			}
@@ -91,7 +91,7 @@ export function useDaemon() {
 		async (isUserMod: boolean, modId: string, currentReleaseId: string, latestReleaseId: string) => {
 			try {
 				const removeRes = await removeReleaseFromDaemon(currentReleaseId);
-				assert.ok(removeRes.status === StatusCodes.OK, "Failed to remove current release from daemon");
+				if (removeRes.status !== StatusCodes.OK) throw new Error("Failed to remove current release from daemon");
 
 				const [, error] = await addReleaseToDaemonById(isUserMod, { releaseId: latestReleaseId, modId });
 				if (error) {
