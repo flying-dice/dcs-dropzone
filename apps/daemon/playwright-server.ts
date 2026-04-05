@@ -25,7 +25,7 @@ const app = new ProdApplication({
 
 const honoApp = await HonoApplication.build(app, {
 	enableGenerateSchema: false,
-	uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://127.0.0.1:56499/" },
+	uiAppConfig: { webappUrl: "http://127.0.0.1:3000/", daemonUrl: "http://127.0.0.1:56499/" },
 });
 
 const server = serve({
