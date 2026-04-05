@@ -192,5 +192,5 @@ test("01 - Create Mod: full end-to-end flow", async ({ page }) => {
 
 	await expect(page.getByText(MOD.name, { exact: true })).toBeVisible();
 	await expect(page.getByText(MOD.description)).toBeVisible();
-	await expect(page.getByText(MOD.category, { exact: true })).toBeVisible();
+	await expect(page.getByTestId("mod-card-category").filter({ hasText: MOD.category })).toBeVisible();
 });

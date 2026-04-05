@@ -17,7 +17,8 @@ export function AppTagsInput(props: AppTagsInputProps) {
 	const validateInput = (value: string): [string, null] | [undefined, string] => {
 		const parseRes = ze.tag().safeParse(value);
 		if (!parseRes.success) {
-			return [undefined,
+			return [
+				undefined,
 				z
 					.treeifyError(parseRes.error)
 					.errors.map((error) => t(error as any))

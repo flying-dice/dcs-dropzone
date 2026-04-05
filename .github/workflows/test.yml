@@ -129,14 +129,6 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.head_ref || github.ref_name }}
 
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v5
-        if: success() || failure()
-        with:
-          report_paths: 'apps/**/unit.junit.xml,packages/**/unit.junit.xml'
-          detailed_summary: true
-          include_passed: true
-
       - name: Write Job Summary
         if: always()
         shell: pwsh

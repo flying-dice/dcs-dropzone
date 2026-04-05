@@ -66,7 +66,10 @@ export class UserMods {
 		return [ModData.parse(updated), null];
 	}
 
-	async deleteMod(user: UserData, modId: string): Promise<[ModData, null] | [undefined, ModNotFoundError | NotMaintainerError]> {
+	async deleteMod(
+		user: UserData,
+		modId: string,
+	): Promise<[ModData, null] | [undefined, ModNotFoundError | NotMaintainerError]> {
 		logger.info("Deleting mod", { userId: user.id, modId });
 		const [, checkErr] = await this.checkExistsAndUserAllowedToModify(user, modId);
 		if (checkErr) return [undefined, checkErr];
@@ -80,7 +83,10 @@ export class UserMods {
 		return [ModData.parse(deleted), null];
 	}
 
-	async findById(user: UserData, modId: string): Promise<[ModData, null] | [undefined, ModNotFoundError | NotMaintainerError]> {
+	async findById(
+		user: UserData,
+		modId: string,
+	): Promise<[ModData, null] | [undefined, ModNotFoundError | NotMaintainerError]> {
 		logger.debug("Fetching user mod", { userId: user.id, modId });
 		const [, checkErr] = await this.checkExistsAndUserAllowedToModify(user, modId);
 		if (checkErr) return [undefined, checkErr];

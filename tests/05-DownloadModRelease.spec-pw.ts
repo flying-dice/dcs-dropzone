@@ -192,7 +192,7 @@ test.describe("05 - Download Mod Release: E2E", () => {
 		// Verify the mod name appears in the downloaded table
 		await expect(page.getByText(MOD.name)).toBeVisible({ timeout: 10_000 });
 		// Verify the version is displayed
-		await expect(page.getByText(RELEASE.version)).toBeVisible();
+		await expect(page.getByTestId("downloaded-mod-version").filter({ hasText: RELEASE.version })).toBeVisible();
 
 		// ── Step 14 — Cleanup: remove from daemon and delete mod ────────────────
 		await request.delete(`${DAEMON_BASE_URL}/api/downloads/${releaseId}`);
