@@ -25,6 +25,9 @@ yarn-error.log
 # Exclude specific monorepo apps you don't need for this container
 apps/launcher/
 apps/daemon/
+# But keep OpenAPI schemas needed by @packages/clients
+!apps/daemon/openapi.schema.json
+!apps/webapp/openapi.schema.json
 
 # Exclude Docker-related files (optional but good practice)
 Dockerfile

@@ -29,7 +29,7 @@
 			[
 				"@semantic-release/exec",
 				{
-					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run launcher:build; iscc /DMyAppVersion=${nextRelease.version} apps/launcher/installer.iss; if (!$?) { exit 1 }; bun run daemon:build\""
+					"prepareCmd": "pwsh -NoProfile -Command \"$env:RELEASE_VERSION='${nextRelease.version}'; $env:RELEASE_TAG='${nextRelease.gitTag}'; bun run build; iscc /DMyAppVersion=${nextRelease.version} apps/launcher/installer.iss; if (!$?) { exit 1 }\""
 				}
 			],
 			[

@@ -1,3 +1,33 @@
+## [1.10.7](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.6...v1.10.7) (2026-04-05)
+
+
+### Bug Fixes
+
+* remove node:assert import from client-side useDaemon hook ([18e14c8](https://github.com/flying-dice/dcs-dropzone/commit/18e14c8f00ddf3a09f2d7bdced31f56897976eb4))
+
+## [1.10.6](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.5...v1.10.6) (2026-04-05)
+
+
+### Bug Fixes
+
+* restore .dockerignore exclusions, whitelist OpenAPI schemas ([c1388ba](https://github.com/flying-dice/dcs-dropzone/commit/c1388ba954b3ae20b47033ff3d0de7e5f0d51176))
+
+## [1.10.5](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.4...v1.10.5) (2026-04-05)
+
+
+### Bug Fixes
+
+* include daemon/launcher source in Docker context for full build ([35842e7](https://github.com/flying-dice/dcs-dropzone/commit/35842e7458af11d65d602020a8ec72a4da2046e7))
+
+## [1.10.4](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.3...v1.10.4) (2026-04-05)
+
+
+### Bug Fixes
+
+* add missing build scripts and scope Dockerfile build to webapp ([6f9a1b6](https://github.com/flying-dice/dcs-dropzone/commit/6f9a1b6b91ce08a9f1bae0c0153d0f9f37a97824))
+* use correct build script in webapp Dockerfile ([c97ea18](https://github.com/flying-dice/dcs-dropzone/commit/c97ea18b44033b2b58273db6a4ce7ebf04da8dd4))
+* use full build command everywhere, set CI=true in Dockerfile ([b9b37ea](https://github.com/flying-dice/dcs-dropzone/commit/b9b37eae0fc8f0eba5e0ef3983b3ff8b56a017c7))
+
 ## [1.10.3](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.2...v1.10.3) (2026-01-29)
 
 

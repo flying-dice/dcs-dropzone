@@ -51,7 +51,8 @@ jobs:
           DZ_WEBAPP_AUTH_SERVICE_GH: ${{ secrets.DZ_WEBAPP_AUTH_SERVICE_GH }}
 
       - name: Deploy to Cloudflare
-        run: bun run webapp:deploy
+        working-directory: packages/cloudflare
+        run: bun run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

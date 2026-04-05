@@ -7,7 +7,8 @@ COPY . .
 
 # Install dependencies and build
 RUN bun install
-RUN bun run webapp:build
+ENV CI=true
+RUN bun run build
 
 # Runtime stage
 FROM debian:stable-slim
