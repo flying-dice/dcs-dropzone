@@ -2,6 +2,14 @@ import { AppShell, Divider, Stack, Text } from "@mantine/core";
 import { type ModDataCategory, useGetCategories } from "@packages/clients/webapp";
 import type { I18nKeys } from "@packages/dzui";
 import { AppIcons, CategoryShortcut, DzNavLink, useAppTranslation } from "@packages/dzui";
+import {
+	BROWSE_MODS_BUTTON_TEST_ID,
+	DASHBOARD_BUTTON_TEST_ID,
+	DOWNLOADED_BUTTON_TEST_ID,
+	ENABLED_BUTTON_TEST_ID,
+	MY_MODS_BUTTON_TEST_ID,
+	UPDATES_BUTTON_TEST_ID,
+} from "@packages/testids";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDaemon } from "./hooks/useDaemon";
 
@@ -31,6 +39,7 @@ export function AppNavbar(props: AppNavbarProps) {
 			<Stack p={"md"} gap={"xl"}>
 				<Stack gap={"xs"}>
 					<DzNavLink
+						data-testid={DASHBOARD_BUTTON_TEST_ID}
 						icon={AppIcons.Home}
 						label={t("DASHBOARD")}
 						active={location.pathname === "/"}
@@ -38,7 +47,7 @@ export function AppNavbar(props: AppNavbarProps) {
 					/>
 
 					<DzNavLink
-						data-testid="nav-browse-mods"
+						data-testid={BROWSE_MODS_BUTTON_TEST_ID}
 						icon={AppIcons.Mods}
 						label={t("BROWSE_MODS")}
 						active={location.pathname === "/mods"}
@@ -46,7 +55,7 @@ export function AppNavbar(props: AppNavbarProps) {
 					/>
 
 					<DzNavLink
-						data-testid="nav-my-mods"
+						data-testid={MY_MODS_BUTTON_TEST_ID}
 						disabled={!props.withMyMods}
 						icon={AppIcons.UserMods}
 						label={t("MY_MODS")}
@@ -57,7 +66,7 @@ export function AppNavbar(props: AppNavbarProps) {
 					<Divider label={t("LIBRARY")} labelPosition={"center"} />
 
 					<DzNavLink
-						data-testid="nav-downloaded"
+						data-testid={DOWNLOADED_BUTTON_TEST_ID}
 						icon={AppIcons.Downloaded}
 						label={t("DOWNLOADED")}
 						active={location.pathname === "/downloaded"}
@@ -66,6 +75,7 @@ export function AppNavbar(props: AppNavbarProps) {
 						onClick={() => nav("/downloaded")}
 					/>
 					<DzNavLink
+						data-testid={ENABLED_BUTTON_TEST_ID}
 						icon={AppIcons.Enabled}
 						label={t("ENABLED")}
 						count={metrics.value?.enabled}
@@ -75,6 +85,7 @@ export function AppNavbar(props: AppNavbarProps) {
 						onClick={() => nav("/enabled")}
 					/>
 					<DzNavLink
+						data-testid={UPDATES_BUTTON_TEST_ID}
 						icon={AppIcons.Updates}
 						label={t("UPDATES")}
 						count={metrics.value?.outdated}

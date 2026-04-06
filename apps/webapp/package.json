@@ -28,6 +28,7 @@
 		"@monaco-editor/react": "^4.7.0",
 		"@packages/clients": "workspace:*",
 		"@packages/dzui": "workspace:*",
+		"@packages/testids": "workspace:*",
 		"@packages/hono": "workspace:*",
 		"@packages/dz-config": "workspace:*",
 		"@packages/zod": "workspace:*",

@@ -2,6 +2,7 @@ import { Paper, Stack, Text, ThemeIcon, useComputedColorScheme } from "@mantine/
 import type { IconType } from "react-icons";
 
 export type EmptyStateProps = {
+	"data-testid"?: string;
 	title: string;
 	description: string;
 	icon: IconType;
@@ -11,6 +12,7 @@ export function EmptyState(props: EmptyStateProps) {
 	const scheme = useComputedColorScheme();
 	return (
 		<Paper
+			data-testid={props["data-testid"]}
 			p={"xl"}
 			withBorder={!props.withoutBorder}
 			bg={scheme === "light" ? "gray.0" : "dark.8"}

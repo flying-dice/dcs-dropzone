@@ -1,0 +1,23 @@
+appenders:
+  console:
+    type: stdout
+
+  file:
+    type: file
+    filename: logs/__playwright__.webapp.log
+    flags: w
+
+  errorFile:
+    type: file
+    filename: logs/__playwright__.webapp.error.log
+    flags: w
+
+  onlyErrors:
+    type: logLevelFilter
+    appender: errorFile
+    level: error
+
+categories:
+  default:
+    appenders: [console, file, onlyErrors]
+    level: debug

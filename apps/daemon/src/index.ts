@@ -38,28 +38,32 @@ const bunServer = serve({
 
 logger.info(`🚀 Server running at ${bunServer.url}`);
 
-const webviewWorker: WebviewWorker = new WebviewWorker(appConfig.webviewWorkerModulePath);
+let webviewWorker: WebviewWorker | undefined;
 
-webviewWorker.onMessage(async (message) => {
-	switch (message.type) {
-		case "window-closed":
-			logger.info("Webview window closed by user.");
-			await handleGracefulShutdown();
-			break;
-		default:
-			logger.warn("Unknown message type from webview worker:", message);
-	}
-});
+if (appConfig.enableWebview) {
+	webviewWorker = new WebviewWorker(appConfig.webviewWorkerModulePath);
 
-webviewWorker.onError(async (error: ErrorEvent) => {
-	logger.error("Error in webview worker:", error.message);
-	await handleGracefulShutdown();
-});
+	webviewWorker.onMessage(async (message) => {
+		switch (message.type) {
+			case "window-closed":
+				logger.info("Webview window closed by user.");
+				await handleGracefulShutdown();
+				break;
+			default:
+				logger.warn("Unknown message type from webview worker:", message);
+		}
+	});
+
+	webviewWorker.onError(async (error: ErrorEvent) => {
+		logger.error("Error in webview worker:", error.message);
+		await handleGracefulShutdown();
+	});
+}
 
 async function handleGracefulShutdown() {
 	logger.info("Graceful shutdown initiated...");
 	logger.debug("Terminating webview worker...");
-	webviewWorker.terminate();
+	webviewWorker?.terminate();
 
 	logger.debug("Stopping Bun server...");
 	await bunServer.stop(true);

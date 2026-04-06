@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { resolve } from "node:path";
-import { envLocalDev } from "./env.ts";
+import { envLocalDev } from "./_env.ts";
 
 // Set env vars so config parsing succeeds
 const envParsed = Object.fromEntries(Object.entries(envLocalDev).map(([k, v]) => [k, String(v)]));

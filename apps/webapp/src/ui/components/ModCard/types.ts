@@ -2,6 +2,7 @@ import type { MantineColor } from "@mantine/core";
 import type { IconType } from "react-icons";
 
 export type ModCardProps = {
+	"data-testid"?: string;
 	imageUrl: string;
 	category: string;
 	title: string;

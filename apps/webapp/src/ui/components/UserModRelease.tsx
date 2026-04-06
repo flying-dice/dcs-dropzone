@@ -26,7 +26,12 @@ export function UserModRelease(props: UserModReleaseProps) {
 					<Text size={"sm"} fw={"bold"} data-testid="release-version">
 						{props.release.version}
 					</Text>
-					<Badge variant={"light"} color={colors[props.release.visibility]} style={{ textTransform: "none" }} data-testid="release-visibility-badge">
+					<Badge
+						variant={"light"}
+						color={colors[props.release.visibility]}
+						style={{ textTransform: "none" }}
+						data-testid="release-visibility-badge"
+					>
 						{props.release.visibility}
 					</Badge>
 				</Group>

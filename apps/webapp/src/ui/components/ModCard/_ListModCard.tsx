@@ -10,6 +10,7 @@ import type { ModCardProps } from "./types.ts";
 export function _ListModCard(props: ModCardProps) {
 	return (
 		<Card
+			data-testid={props["data-testid"]}
 			flex={"auto"}
 			radius={"md"}
 			withBorder
@@ -30,7 +31,9 @@ export function _ListModCard(props: ModCardProps) {
 							</Text>
 						</Stack>
 						<Group wrap={"nowrap"}>
-							<Badge variant={"light"} data-testid="mod-card-category">{props.category}</Badge>
+							<Badge variant={"light"} data-testid="mod-card-category">
+								{props.category}
+							</Badge>
 							<Group wrap={"nowrap"} gap={"xs"}>
 								<Stat icon={FaDownload} stat={props.downloads} />
 							</Group>

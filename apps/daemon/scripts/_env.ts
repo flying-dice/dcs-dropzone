@@ -5,6 +5,7 @@ export const envLocalDev: EnvConfig = {
 	DZ_DAEMON_PORT: 56499,
 	DZ_DAEMON_WEBVIEW_WINDOW_TITLE: "Dropzone",
 	DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG: true,
+	DZ_ENABLE_WEBVIEW: process.platform === "win32",
 	DZ_DAEMON_DATABASE_PATH: "data.sqlite",
 
 	DZ_WEBAPP_URL: "http://localhost:3000/",
@@ -19,6 +20,7 @@ export const envLocalTest: EnvConfig = {
 	DZ_DAEMON_PORT: 56499,
 	DZ_DAEMON_WEBVIEW_WINDOW_TITLE: "Dropzone",
 	DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG: false,
+	DZ_ENABLE_WEBVIEW: false,
 	DZ_DAEMON_DATABASE_PATH: ":memory:",
 
 	DZ_WEBAPP_URL: "http://localhost:3000/",
@@ -33,6 +35,7 @@ export const envLocalBuild: BuildConfig = {
 	DZ_DAEMON_PORT: 56499,
 	DZ_DAEMON_WEBVIEW_WINDOW_TITLE: "Dropzone",
 	DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG: false,
+	DZ_ENABLE_WEBVIEW: true,
 	DZ_DAEMON_DATABASE_PATH: "data.sqlite",
 
 	DZ_WEBAPP_URL: "http://localhost:3000/",
@@ -47,6 +50,7 @@ export const envProdBuild: BuildConfig = {
 	DZ_DAEMON_PORT: 56499,
 	DZ_DAEMON_WEBVIEW_WINDOW_TITLE: "Dropzone",
 	DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG: false,
+	DZ_ENABLE_WEBVIEW: true,
 	DZ_DAEMON_DATABASE_PATH: "data.sqlite",
 
 	DZ_WEBAPP_URL: "https://dcs-dropzone-container.flying-dice.workers.dev/",

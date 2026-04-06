@@ -134,7 +134,7 @@ Configuration is defined as typed TypeScript objects inside each app's `scripts/
 
 | App          | Config file                          | Exported configs                                       |
 |--------------|--------------------------------------|--------------------------------------------------------|
-| **Daemon**   | `apps/daemon/scripts/env.ts`         | `envLocalDev`, `envLocalTest`, `envLocalBuild`, `envProdBuild` |
+| **Daemon**   | `apps/daemon/scripts/_env.ts`         | `envLocalDev`, `envLocalTest`, `envLocalBuild`, `envProdBuild` |
 | **Webapp**   | `apps/webapp/scripts/_env.ts`        | `envLocalDev`, `envLocalTest`, `envLocalBuild`, `envProdBuild` |
 | **Launcher** | `apps/launcher/scripts/_env.ts`      | `envLocalBuild`, `envProdBuild`                        |
 

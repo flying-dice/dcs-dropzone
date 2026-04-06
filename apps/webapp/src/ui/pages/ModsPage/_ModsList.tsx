@@ -1,6 +1,7 @@
 import { Alert, Skeleton, Stack } from "@mantine/core";
 import { useGetMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
+import { BROWSE_MODS_NO_MODS_FOUND_TEST_ID, MOD_CARD_TEST_ID } from "@packages/testids";
 import { StatusCodes } from "http-status-codes";
 import { times } from "lodash";
 import { useNavigate } from "react-router-dom";
@@ -34,6 +35,7 @@ export function _ModsList(props: { page: number; size: number; filters: Record<s
 								res.data.data.map((mod) => (
 									<ModCard
 										key={mod.id}
+										data-testid={MOD_CARD_TEST_ID(mod.id)}
 										imageUrl={mod.thumbnail}
 										category={mod.category}
 										title={mod.name}
@@ -50,6 +52,7 @@ export function _ModsList(props: { page: number; size: number; filters: Record<s
 					(res) => res.status === StatusCodes.OK && res.data.data.length === 0,
 					() => (
 						<EmptyState
+							data-testid={BROWSE_MODS_NO_MODS_FOUND_TEST_ID}
 							withoutBorder
 							title={t("NO_MODS_FOUND_TITLE")}
 							description={t("NO_MODS_FOUND_SUBTITLE_DESC")}

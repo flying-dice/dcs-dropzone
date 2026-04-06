@@ -6,10 +6,11 @@ export type StatCardProps = {
 	label: string;
 	value: string | number;
 	iconColor?: MantineColor;
+	"data-testid"?: string;
 };
 export function StatCard(props: StatCardProps) {
 	return (
-		<Card withBorder radius={"md"} flex={"auto"}>
+		<Card withBorder radius={"md"} flex={"auto"} data-testid={props["data-testid"]}>
 			<Group>
 				<ThemeIcon size="xl" variant={"light"} color={props.iconColor}>
 					<props.icon />

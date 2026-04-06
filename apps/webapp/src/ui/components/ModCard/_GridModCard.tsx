@@ -10,6 +10,7 @@ import type { ModCardProps } from "./types.ts";
 export function _GridModCard(props: ModCardProps) {
 	return (
 		<Card
+			data-testid={props["data-testid"]}
 			flex={"auto"}
 			radius={"md"}
 			withBorder
@@ -32,7 +33,9 @@ export function _GridModCard(props: ModCardProps) {
 						</Text>
 					</Stack>
 					<Group justify="space-between">
-						<Badge variant={"light"} data-testid="mod-card-category">{props.category}</Badge>
+						<Badge variant={"light"} data-testid="mod-card-category">
+							{props.category}
+						</Badge>
 						<Group gap={"xs"}>
 							<Stat icon={FaDownload} stat={props.downloads} />
 						</Group>

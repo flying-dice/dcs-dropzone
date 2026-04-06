@@ -11,13 +11,13 @@
 		"launcher:dev": "cd apps/launcher && bun run dev",
 		"webapp:dev": "cd apps/webapp && bun run dev",
 		"webapp:deploy": "bun run --filter cloudflare deploy",
-		"build": "bun run --filter '*' --filter '-cloudflare' build",
-		"tests": "bun run --filter '*' --filter '-cloudflare' tests",
+		"build": "bun run --sequential --filter '*' --filter '-cloudflare' build",
+		"tests": "bun run --sequential --filter '*' --filter '-cloudflare' tests",
 		"test:playwright": "bunx playwright test",
+		"test:playwright:serve": "bunx playwright show-report .playwright-report",
 		"docs:dev": "vitepress dev docs",
 		"docs:build": "vitepress build docs",
-		"docs:preview": "vitepress preview docs",
-		"claude:qwen3": "ollama launch claude --model qwen3-coder-next"
+		"docs:preview": "vitepress preview docs"
 	},
 	"release": {
 		"branches": [

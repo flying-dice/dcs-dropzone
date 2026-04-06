@@ -5,7 +5,7 @@ import { z } from "zod";
 import { _checks } from "../../../scripts/_checks.ts";
 import { getForCurrentTargetEnv, TargetEnvironment } from "../../../scripts/_target-env.ts";
 import type { BuildConfig } from "../src/config/schemas.ts";
-import { envLocalBuild, envProdBuild } from "./env.ts";
+import { envLocalBuild, envProdBuild } from "./_env.ts";
 
 process.chdir(resolve(import.meta.dirname, "../"));
 

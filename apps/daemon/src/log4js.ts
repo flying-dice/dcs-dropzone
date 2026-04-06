@@ -2,7 +2,8 @@ import { mergeWith } from "lodash";
 import { type Configuration, configure, getLogger } from "log4js";
 
 try {
-	const file = Bun.file(`${process.cwd()}/log4js.yaml`);
+	const configPath = process.env.LOG4JS_CONFIG ?? `${process.cwd()}/log4js.yaml`;
+	const file = Bun.file(configPath);
 	const text = await file.text();
 	const config = <Configuration>Bun.YAML.parse(text);
 

@@ -1,6 +1,7 @@
 import { Center, Flex, Group, Stack, Text } from "@mantine/core";
 import { useGetFeaturedMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
+import { FEATURED_MODS_SECTION_TEST_ID } from "@packages/testids";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
@@ -12,7 +13,7 @@ export function _FeaturedMods() {
 	const featuredMods = useGetFeaturedMods();
 
 	return (
-		<Stack>
+		<Stack data-testid={FEATURED_MODS_SECTION_TEST_ID}>
 			<Text fz={"lg"} fw={"bold"}>
 				{t("FEATURED_MODS")}
 			</Text>

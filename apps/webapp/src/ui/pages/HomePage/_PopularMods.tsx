@@ -1,6 +1,7 @@
 import { Button, Group, Stack, Text } from "@mantine/core";
 import { useGetPopularMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
+import { POPULAR_MODS_SECTION_TEST_ID } from "@packages/testids";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
@@ -14,7 +15,7 @@ export function _PopularMods() {
 	const popularMods = useGetPopularMods();
 
 	return (
-		<Stack>
+		<Stack data-testid={POPULAR_MODS_SECTION_TEST_ID}>
 			<Text fz={"lg"} fw={"bold"}>
 				{t("POPULAR_MODS")}
 			</Text>

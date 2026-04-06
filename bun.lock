@@ -110,6 +110,7 @@
         "@packages/dz-config": "workspace:*",
         "@packages/dzui": "workspace:*",
         "@packages/hono": "workspace:*",
+        "@packages/testids": "workspace:*",
         "@packages/zod": "workspace:*",
         "@scalar/hono-api-reference": "^0.9.30",
         "@tanstack/react-query": "5.90.21",
@@ -189,6 +190,7 @@
       "name": "@packages/dzui",
       "dependencies": {
         "@packages/clients": "workspace:*",
+        "@packages/testids": "workspace:*",
       },
       "peerDependencies": {
         "@mantine/colors-generator": "8",
@@ -240,6 +242,12 @@
       "name": "@packages/queue",
       "peerDependencies": {
         "log4js": "^6.9.1",
+      },
+    },
+    "packages/testids": {
+      "name": "@packages/testids",
+      "devDependencies": {
+        "@types/bun": "1.3.11",
       },
     },
     "packages/zod": {
@@ -583,6 +591,8 @@
     "@packages/manifest": ["@packages/manifest@workspace:packages/manifest"],
 
     "@packages/queue": ["@packages/queue@workspace:packages/queue"],
+
+    "@packages/testids": ["@packages/testids@workspace:packages/testids"],
 
     "@packages/zod": ["@packages/zod@workspace:packages/zod"],
 

@@ -1,6 +1,12 @@
 import { Button, Group, Select, Stack, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ModDataCategory } from "@packages/clients/webapp";
+import {
+	NEW_MOD_CATEGORY_TEST_ID,
+	NEW_MOD_DESCRIPTION_TEST_ID,
+	NEW_MOD_NAME_TEST_ID,
+	NEW_MOD_SUBMIT_TEST_ID,
+} from "@packages/testids";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
 
@@ -31,16 +37,16 @@ export function NewModForm(props: NewModFormProps) {
 		<Stack>
 			<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 				<Stack>
-					<TextInput data-testid="new-mod-name" {...form.getInputProps("name")} label="Mod Name" />
+					<TextInput data-testid={NEW_MOD_NAME_TEST_ID} {...form.getInputProps("name")} label="Mod Name" />
 					<Textarea
-						data-testid="new-mod-description"
+						data-testid={NEW_MOD_DESCRIPTION_TEST_ID}
 						autosize
 						minRows={3}
 						{...form.getInputProps("description")}
 						label="Short Description"
 					/>
 					<Select
-						data-testid="new-mod-category"
+						data-testid={NEW_MOD_CATEGORY_TEST_ID}
 						{...form.getInputProps("category")}
 						label="Category"
 						data={Object.values(ModDataCategory)}
@@ -49,7 +55,7 @@ export function NewModForm(props: NewModFormProps) {
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel
 						</Button>
-						<Button data-testid="new-mod-submit" type="submit">
+						<Button data-testid={NEW_MOD_SUBMIT_TEST_ID} type="submit">
 							Create Mod
 						</Button>
 					</Group>
