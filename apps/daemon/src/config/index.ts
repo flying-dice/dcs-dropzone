@@ -15,6 +15,7 @@ export const appConfig = AppConfig.parse({
 
 	enableServeDevelopment: env.DZ_ENABLE_SERVE_DEVELOPMENT,
 	enableWebviewWorkerDebug: env.DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG,
+	enableWebview: env.DZ_ENABLE_WEBVIEW,
 	enableGenerateSchema: env.DZ_ENABLE_GENERATE_SCHEMA,
 
 	wgetPath: env.DZ_DAEMON_WGET_PATH ?? WGET_BINARIES.map(which).find(Boolean),

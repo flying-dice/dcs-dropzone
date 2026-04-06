@@ -1,9 +1,9 @@
 import { Avatar, Button, Group, Menu, Stack, Text, TextInput } from "@mantine/core";
 import { openModal } from "@mantine/modals";
+import { LOGIN_BUTTON_TEST_ID } from "@packages/testids";
 import { useTranslation } from "react-i18next";
 import { BiDetail, BiLogOut, BiLogoGithub, BiPackage } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
-import { LOGIN_BUTTON_TEST_ID } from "../../../../../playwright.constants.ts";
 import { useUserContext } from "../context/UserContext.ts";
 
 export function ProfileMenu() {

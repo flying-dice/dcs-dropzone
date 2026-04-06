@@ -1,7 +1,7 @@
 import { Button, Group } from "@mantine/core";
 import { useAppTranslation } from "@packages/dzui";
+import { USER_MODS_PUBLISH_NEW_MOD_BTN_TEST_ID } from "@packages/testids";
 import { FaPlus } from "react-icons/fa";
-import { USER_MODS_PUBLISH_NEW_MOD_BTN_TEST_ID } from "../../../../../../playwright.constants.ts";
 
 export function _UserModsHeader(props: { onNewMod: () => void }) {
 	const { t } = useAppTranslation();

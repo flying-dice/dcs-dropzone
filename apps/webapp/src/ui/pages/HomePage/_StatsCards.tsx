@@ -6,7 +6,7 @@ import {
 	STAT_CARD_TOTAL_DOWNLOADS_TEST_ID,
 	STAT_CARD_TOTAL_MODS_TEST_ID,
 	STAT_CARD_UPDATES_TEST_ID,
-} from "../../../../../../playwright.constants.ts";
+} from "@packages/testids";
 import { useDaemon } from "../../hooks/useDaemon.ts";
 import { orDefaultValue } from "../../utils/orDefaultValue.ts";
 

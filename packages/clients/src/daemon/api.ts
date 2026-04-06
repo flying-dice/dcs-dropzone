@@ -23,6 +23,24 @@ import type {
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { fetch } from "./client";
+export const DropzoneModsDirNotConfiguredErrorValue = {
+	reason: "DropzoneModsDirNotConfigured",
+} as const;
+export type DropzoneModsDirNotConfiguredError = typeof DropzoneModsDirNotConfiguredErrorValue;
+
+export type DropzoneModsDirInvalidErrorErrorCode =
+	(typeof DropzoneModsDirInvalidErrorErrorCode)[keyof typeof DropzoneModsDirInvalidErrorErrorCode];
+
+export const DropzoneModsDirInvalidErrorErrorCode = {
+	PATH_NOT_FOUND: "PATH_NOT_FOUND",
+} as const;
+
+export interface DropzoneModsDirInvalidError {
+	reason: "DropzoneModsDirInvalid";
+	errorCode: DropzoneModsDirInvalidErrorErrorCode;
+	path: string;
+}
+
 export type ModReleaseAssetStatusDataStatus =
 	(typeof ModReleaseAssetStatusDataStatus)[keyof typeof ModReleaseAssetStatusDataStatus];
 
@@ -146,6 +164,79 @@ export interface OkData {
 	ok?: boolean;
 }
 
+export const ReleaseNotFoundErrorValue = {
+	reason: "ReleaseNotFound",
+} as const;
+export type ReleaseNotFoundError = typeof ReleaseNotFoundErrorValue;
+
+export interface ReleaseNotReadyError {
+	reason: "ReleaseNotReady";
+	/**
+	 * @minimum -9007199254740991
+	 * @maximum 9007199254740991
+	 */
+	pendingCount: number;
+	/**
+	 * @minimum -9007199254740991
+	 * @maximum 9007199254740991
+	 */
+	failedCount: number;
+}
+
+export const DcsPathNotConfiguredErrorValue = {
+	reason: "DcsPathNotConfigured",
+} as const;
+export type DcsPathNotConfiguredError = typeof DcsPathNotConfiguredErrorValue;
+
+export type DcsPathInvalidErrorErrorCode =
+	(typeof DcsPathInvalidErrorErrorCode)[keyof typeof DcsPathInvalidErrorErrorCode];
+
+export const DcsPathInvalidErrorErrorCode = {
+	PATH_NOT_FOUND: "PATH_NOT_FOUND",
+} as const;
+
+export interface DcsPathInvalidError {
+	reason: "DcsPathInvalid";
+	errorCode: DcsPathInvalidErrorErrorCode;
+	path: string;
+}
+
+export type SymlinkCreationFailedErrorErrorCode =
+	(typeof SymlinkCreationFailedErrorErrorCode)[keyof typeof SymlinkCreationFailedErrorErrorCode];
+
+export const SymlinkCreationFailedErrorErrorCode = {
+	SOURCE_NOT_FOUND: "SOURCE_NOT_FOUND",
+	LINK_ALREADY_EXISTS: "LINK_ALREADY_EXISTS",
+	PERMISSION_DENIED: "PERMISSION_DENIED",
+	LINK_CREATION_FAILED: "LINK_CREATION_FAILED",
+} as const;
+
+export interface SymlinkCreationFailedError {
+	reason: "SymlinkCreationFailed";
+	errorCode: SymlinkCreationFailedErrorErrorCode;
+	systemError?: string;
+}
+
+export type PartialDisableFailureErrorFailuresItem = {
+	linkId: string;
+	message: string;
+};
+
+export interface PartialDisableFailureError {
+	reason: "PartialDisableFailure";
+	/**
+	 * @minimum -9007199254740991
+	 * @maximum 9007199254740991
+	 */
+	removedCount: number;
+	/**
+	 * @minimum -9007199254740991
+	 * @maximum 9007199254740991
+	 */
+	failedCount: number;
+	failures: PartialDisableFailureErrorFailuresItem[];
+}
+
 export interface ErrorData {
 	/**
 	 * @minimum 100
@@ -210,19 +301,6 @@ export type GetSettingsValidation200 = {
 	dropzoneModsDir: GetSettingsValidation200DropzoneModsDir;
 };
 
-export type AddReleaseToDaemon422Reason =
-	(typeof AddReleaseToDaemon422Reason)[keyof typeof AddReleaseToDaemon422Reason];
-
-export const AddReleaseToDaemon422Reason = {
-	DropzoneModsDirNotConfigured: "DropzoneModsDirNotConfigured",
-} as const;
-
-export type AddReleaseToDaemon422 = {
-	code?: 422;
-	message?: string;
-	reason: AddReleaseToDaemon422Reason;
-};
-
 export type GetDaemonHealth200 = {
 	status: "UP";
 	daemonInstanceId: string;
@@ -232,50 +310,6 @@ export type GetDaemonHealth503 = {
 	status: "DOWN";
 	daemonInstanceId: string;
 	error: string;
-};
-
-export type ToggleRelease422Reason = (typeof ToggleRelease422Reason)[keyof typeof ToggleRelease422Reason];
-
-export const ToggleRelease422Reason = {
-	DropzoneModsDirNotConfigured: "DropzoneModsDirNotConfigured",
-	DcsPathNotConfigured: "DcsPathNotConfigured",
-	ReleaseNotFound: "ReleaseNotFound",
-	ReleaseNotReady: "ReleaseNotReady",
-	SymlinkCreationFailed: "SymlinkCreationFailed",
-} as const;
-
-export type ToggleRelease422 = {
-	code?: 422;
-	message?: string;
-	reason: ToggleRelease422Reason;
-};
-
-export type EnableRelease422Reason = (typeof EnableRelease422Reason)[keyof typeof EnableRelease422Reason];
-
-export const EnableRelease422Reason = {
-	DropzoneModsDirNotConfigured: "DropzoneModsDirNotConfigured",
-	DcsPathNotConfigured: "DcsPathNotConfigured",
-	ReleaseNotFound: "ReleaseNotFound",
-	ReleaseNotReady: "ReleaseNotReady",
-	SymlinkCreationFailed: "SymlinkCreationFailed",
-} as const;
-
-export type EnableRelease422 = {
-	code?: 422;
-	message?: string;
-	reason: EnableRelease422Reason;
-};
-
-export type DisableRelease422Reason = (typeof DisableRelease422Reason)[keyof typeof DisableRelease422Reason];
-
-export const DisableRelease422Reason = {
-	DcsPathNotConfigured: "DcsPathNotConfigured",
-} as const;
-
-export type DisableRelease422 = {
-	code?: 422;
-	message?: string;
-	reason: DisableRelease422Reason;
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -795,7 +829,7 @@ export type addReleaseToDaemonResponse200 = {
 };
 
 export type addReleaseToDaemonResponse422 = {
-	data: AddReleaseToDaemon422;
+	data: DropzoneModsDirNotConfiguredError | DropzoneModsDirInvalidError;
 	status: 422;
 };
 
@@ -824,7 +858,10 @@ export const addReleaseToDaemon = async (
 	});
 };
 
-export const getAddReleaseToDaemonMutationOptions = <TError = AddReleaseToDaemon422, TContext = unknown>(options?: {
+export const getAddReleaseToDaemonMutationOptions = <
+	TError = DropzoneModsDirNotConfiguredError | DropzoneModsDirInvalidError,
+	TContext = unknown,
+>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof addReleaseToDaemon>>,
 		TError,
@@ -858,9 +895,12 @@ export const getAddReleaseToDaemonMutationOptions = <TError = AddReleaseToDaemon
 
 export type AddReleaseToDaemonMutationResult = NonNullable<Awaited<ReturnType<typeof addReleaseToDaemon>>>;
 export type AddReleaseToDaemonMutationBody = ModAndReleaseData;
-export type AddReleaseToDaemonMutationError = AddReleaseToDaemon422;
+export type AddReleaseToDaemonMutationError = DropzoneModsDirNotConfiguredError | DropzoneModsDirInvalidError;
 
-export const useAddReleaseToDaemon = <TError = AddReleaseToDaemon422, TContext = unknown>(
+export const useAddReleaseToDaemon = <
+	TError = DropzoneModsDirNotConfiguredError | DropzoneModsDirInvalidError,
+	TContext = unknown,
+>(
 	options?: {
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof addReleaseToDaemon>>,
@@ -1184,7 +1224,15 @@ export type toggleReleaseResponse200 = {
 };
 
 export type toggleReleaseResponse422 = {
-	data: ToggleRelease422;
+	data:
+		| ReleaseNotFoundError
+		| ReleaseNotReadyError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| SymlinkCreationFailedError
+		| PartialDisableFailureError;
 	status: 422;
 };
 
@@ -1213,7 +1261,19 @@ export const toggleRelease = async (releaseId: string, options?: RequestInit): P
 	});
 };
 
-export const getToggleReleaseMutationOptions = <TError = ToggleRelease422 | ErrorData, TContext = unknown>(options?: {
+export const getToggleReleaseMutationOptions = <
+	TError =
+		| ReleaseNotFoundError
+		| ReleaseNotReadyError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| SymlinkCreationFailedError
+		| PartialDisableFailureError
+		| ErrorData,
+	TContext = unknown,
+>(options?: {
 	mutation?: UseMutationOptions<Awaited<ReturnType<typeof toggleRelease>>, TError, { releaseId: string }, TContext>;
 	request?: SecondParameter<typeof fetch>;
 }): UseMutationOptions<Awaited<ReturnType<typeof toggleRelease>>, TError, { releaseId: string }, TContext> => {
@@ -1235,12 +1295,33 @@ export const getToggleReleaseMutationOptions = <TError = ToggleRelease422 | Erro
 
 export type ToggleReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof toggleRelease>>>;
 
-export type ToggleReleaseMutationError = ToggleRelease422 | ErrorData;
+export type ToggleReleaseMutationError =
+	| ReleaseNotFoundError
+	| ReleaseNotReadyError
+	| DropzoneModsDirNotConfiguredError
+	| DropzoneModsDirInvalidError
+	| DcsPathNotConfiguredError
+	| DcsPathInvalidError
+	| SymlinkCreationFailedError
+	| PartialDisableFailureError
+	| ErrorData;
 
 /**
  * @summary Toggle a release enabled state
  */
-export const useToggleRelease = <TError = ToggleRelease422 | ErrorData, TContext = unknown>(
+export const useToggleRelease = <
+	TError =
+		| ReleaseNotFoundError
+		| ReleaseNotReadyError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| SymlinkCreationFailedError
+		| PartialDisableFailureError
+		| ErrorData,
+	TContext = unknown,
+>(
 	options?: {
 		mutation?: UseMutationOptions<Awaited<ReturnType<typeof toggleRelease>>, TError, { releaseId: string }, TContext>;
 		request?: SecondParameter<typeof fetch>;
@@ -1259,7 +1340,14 @@ export type enableReleaseResponse200 = {
 };
 
 export type enableReleaseResponse422 = {
-	data: EnableRelease422;
+	data:
+		| ReleaseNotFoundError
+		| ReleaseNotReadyError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| SymlinkCreationFailedError;
 	status: 422;
 };
 
@@ -1288,7 +1376,18 @@ export const enableRelease = async (releaseId: string, options?: RequestInit): P
 	});
 };
 
-export const getEnableReleaseMutationOptions = <TError = EnableRelease422 | ErrorData, TContext = unknown>(options?: {
+export const getEnableReleaseMutationOptions = <
+	TError =
+		| ReleaseNotFoundError
+		| ReleaseNotReadyError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| SymlinkCreationFailedError
+		| ErrorData,
+	TContext = unknown,
+>(options?: {
 	mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
 	request?: SecondParameter<typeof fetch>;
 }): UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext> => {
@@ -1310,12 +1409,31 @@ export const getEnableReleaseMutationOptions = <TError = EnableRelease422 | Erro
 
 export type EnableReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof enableRelease>>>;
 
-export type EnableReleaseMutationError = EnableRelease422 | ErrorData;
+export type EnableReleaseMutationError =
+	| ReleaseNotFoundError
+	| ReleaseNotReadyError
+	| DropzoneModsDirNotConfiguredError
+	| DropzoneModsDirInvalidError
+	| DcsPathNotConfiguredError
+	| DcsPathInvalidError
+	| SymlinkCreationFailedError
+	| ErrorData;
 
 /**
  * @summary Enable a release by creating its symbolic links
  */
-export const useEnableRelease = <TError = EnableRelease422 | ErrorData, TContext = unknown>(
+export const useEnableRelease = <
+	TError =
+		| ReleaseNotFoundError
+		| ReleaseNotReadyError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| SymlinkCreationFailedError
+		| ErrorData,
+	TContext = unknown,
+>(
 	options?: {
 		mutation?: UseMutationOptions<Awaited<ReturnType<typeof enableRelease>>, TError, { releaseId: string }, TContext>;
 		request?: SecondParameter<typeof fetch>;
@@ -1334,7 +1452,13 @@ export type disableReleaseResponse200 = {
 };
 
 export type disableReleaseResponse422 = {
-	data: DisableRelease422;
+	data:
+		| ReleaseNotFoundError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| PartialDisableFailureError;
 	status: 422;
 };
 
@@ -1363,7 +1487,17 @@ export const disableRelease = async (releaseId: string, options?: RequestInit): 
 	});
 };
 
-export const getDisableReleaseMutationOptions = <TError = DisableRelease422 | ErrorData, TContext = unknown>(options?: {
+export const getDisableReleaseMutationOptions = <
+	TError =
+		| ReleaseNotFoundError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| PartialDisableFailureError
+		| ErrorData,
+	TContext = unknown,
+>(options?: {
 	mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
 	request?: SecondParameter<typeof fetch>;
 }): UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext> => {
@@ -1385,12 +1519,29 @@ export const getDisableReleaseMutationOptions = <TError = DisableRelease422 | Er
 
 export type DisableReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof disableRelease>>>;
 
-export type DisableReleaseMutationError = DisableRelease422 | ErrorData;
+export type DisableReleaseMutationError =
+	| ReleaseNotFoundError
+	| DropzoneModsDirNotConfiguredError
+	| DropzoneModsDirInvalidError
+	| DcsPathNotConfiguredError
+	| DcsPathInvalidError
+	| PartialDisableFailureError
+	| ErrorData;
 
 /**
  * @summary Disable a release by removing its symbolic links
  */
-export const useDisableRelease = <TError = DisableRelease422 | ErrorData, TContext = unknown>(
+export const useDisableRelease = <
+	TError =
+		| ReleaseNotFoundError
+		| DropzoneModsDirNotConfiguredError
+		| DropzoneModsDirInvalidError
+		| DcsPathNotConfiguredError
+		| DcsPathInvalidError
+		| PartialDisableFailureError
+		| ErrorData,
+	TContext = unknown,
+>(
 	options?: {
 		mutation?: UseMutationOptions<Awaited<ReturnType<typeof disableRelease>>, TError, { releaseId: string }, TContext>;
 		request?: SecondParameter<typeof fetch>;

@@ -1,6 +1,7 @@
 import { Container, Flex, Stack } from "@mantine/core";
 import { type ModData, type UserData, useGetUserModById, useGetUserMods } from "@packages/clients/webapp";
 import { DzMain } from "@packages/dzui";
+import { USER_MOD_FORM_TEST_ID } from "@packages/testids";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 import { _BasicInfo } from "./_BasicInfo.tsx";
 import { _Dependencies } from "./_Dependencies.tsx";
@@ -34,7 +35,7 @@ export function _UserModPage(props: UserModPageProps) {
 	return (
 		<DzMain>
 			<Container p={"md"}>
-				<form onSubmit={form.onSubmit(handleSubmit)}>
+				<form onSubmit={form.onSubmit(handleSubmit)} data-testid={USER_MOD_FORM_TEST_ID} mod-id={props.mod.id}>
 					<Flex gap={"md"} direction={breakpoint.isMd ? "column" : "row"}>
 						<Stack flex={"auto"} gap={"lg"}>
 							<_BasicInfo form={form} />

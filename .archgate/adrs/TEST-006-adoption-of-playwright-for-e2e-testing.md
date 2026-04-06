@@ -17,7 +17,7 @@ We need an E2E testing framework and a set of conventions that produce fast, sta
 
 We will adopt **Playwright** as the E2E testing framework for this project. Tests are organised by target service (`tests/webapp/`, `tests/daemon/`) with separate Playwright projects for each, configured in `playwright.config.js`. Test files use the `.spec-pw.ts` suffix.
 
-Element selection uses `data-testid` attributes via `page.getByTestId()` as the primary locator strategy. Test ID values are defined as shared constants in `playwright.constants.ts` and imported by both components and tests. For list elements, test ID constants are factory functions that embed the React `key`.
+Element selection uses `data-testid` attributes via `page.getByTestId()` as the primary locator strategy. Test ID values are defined as shared constants in `@packages/testids` and imported by both components and tests. For list elements, test ID constants are factory functions that embed the React `key`.
 
 ## Do's and Don'ts
 
@@ -33,22 +33,22 @@ Element selection uses `data-testid` attributes via `page.getByTestId()` as the 
   const loginBtn = page.getByTestId(LOGIN_BUTTON_TEST_ID);
   await loginBtn.click();
   ```
-- **Do** define all test ID values as named constants in `playwright.constants.ts` and import them in both components and tests. Never use inline string literals for test IDs.
+- **Do** define all test ID values as named constants in `@packages/testids` and import them in both components and tests. Never use inline string literals for test IDs.
   ```ts
-  // playwright.constants.ts
+  // @packages/testids
   export const LOGIN_BUTTON_TEST_ID = "__LOGIN_BUTTON_TEST_ID";
 
   // Component
   <button data-testid={LOGIN_BUTTON_TEST_ID}>Login</button>
 
   // Test
-  import { LOGIN_BUTTON_TEST_ID } from "../../playwright.constants.ts";
+  import { LOGIN_BUTTON_TEST_ID } from "../../@packages/testids";
   await page.getByTestId(LOGIN_BUTTON_TEST_ID).click();
   ```
 - **Do** use the `__SCREAMING_SNAKE_CASE_TEST_ID` naming convention for constant values — the double-underscore prefix and `_TEST_ID` suffix make them instantly identifiable in source and DOM.
 - **Do** embed the React `key` used for list items into the `data-testid`. For list/array elements, define test ID constants as factory functions that accept the key and produce a unique test ID. The key used in `data-testid` must be the same value used as the React `key` prop.
   ```ts
-  // playwright.constants.ts
+  // @packages/testids
   export const MOD_CARD_TEST_ID = (key: string) => `__MOD_CARD_TEST_ID-${key}`;
   export const MOD_CARD_DOWNLOAD_BTN_TEST_ID = (key: string) => `__MOD_CARD_DOWNLOAD_BTN_TEST_ID-${key}`;
 
@@ -86,6 +86,25 @@ Element selection uses `data-testid` attributes via `page.getByTestId()` as the 
   }
   ```
 - **Do** add a `data-testid` to any element that a Playwright test needs to locate or assert against.
+- **Do** extract entity IDs and dynamic values from DOM attributes rather than parsing URLs, cookies, or other indirect sources. Components should encode entity IDs as custom attributes (e.g., `mod-id={props.mod.id}`) on elements that already have a `data-testid`, so tests can read them with `getAttribute()`. This keeps tests coupled to the component contract, not to routing or application state.
+  ```ts
+  // Good — reads the ID from the DOM
+  const modId = await page.getByTestId(USER_MOD_FORM_TEST_ID).getAttribute("mod-id");
+
+  // Bad — parses the ID from the URL (couples test to routing structure)
+  const modId = page.url().split("/user-mods/")[1];
+  ```
+- **Do** use a guarded assertion when extracting values from the DOM for use later in the test. `getAttribute()` returns `string | null` — assert the value is non-null immediately so TypeScript narrows the type and the test fails early with a clear message if the attribute is missing.
+  ```ts
+  // Good — narrowed to string, later usage is type-safe
+  const modId = await page.getByTestId(USER_MOD_FORM_TEST_ID).getAttribute("mod-id");
+  if (!modId) throw new Error("mod-id attribute not found on form");
+  await page.getByTestId(MOD_CARD_TEST_ID(modId)).toBeVisible();
+
+  // Bad — null sneaks through, fails later with a confusing error
+  const modId = await page.getByTestId(USER_MOD_FORM_TEST_ID).getAttribute("mod-id");
+  await page.getByTestId(MOD_CARD_TEST_ID(modId!)).toBeVisible();
+  ```
 - **Do** generate fresh test data for each test to avoid cross-contamination when tests run in parallel. Never rely on pre-existing or shared data — each test must be self-contained and isolated.
   ```ts
   // Good — unique data per test
@@ -123,7 +142,7 @@ Element selection uses `data-testid` attributes via `page.getByTestId()` as the 
 
 ### Don't
 
-- **Don't** use magic strings — never pass a raw string literal to `getByTestId()`. Always reference a constant from `playwright.constants.ts`.
+- **Don't** use magic strings — never pass a raw string literal to `getByTestId()`. Always reference a constant from `@packages/testids`.
   ```ts
   // Bad — magic string
   await page.getByTestId("__LOGIN_BUTTON_TEST_ID").click();
@@ -155,7 +174,7 @@ Element selection uses `data-testid` attributes via `page.getByTestId()` as the 
 ### Negative
 
 - **Component Awareness of Tests:** Components must accept and forward `data-testid` attributes, which is a minor test concern leaking into production code.
-- **Constant Overhead:** Every testable element requires a constant in `playwright.constants.ts` and an import in both the component and the test.
+- **Constant Overhead:** Every testable element requires a constant in `@packages/testids` and an import in both the component and the test.
 
 ### Risks
 
@@ -167,7 +186,7 @@ Element selection uses `data-testid` attributes via `page.getByTestId()` as the 
 - All E2E tests use Playwright with the `.spec-pw.ts` suffix and live under `tests/`.
 - New Playwright tests must use `getByTestId()` with imported constants as the primary locator — enforced during code review.
 - `data-testid` values for list elements must use factory constants that embed the React `key` — enforced during code review.
-- Test ID constants live in `playwright.constants.ts` — no inline magic strings.
+- Test ID constants live in `@packages/testids` — no inline magic strings.
 - Each test must generate its own data and not depend on shared state.
 - Existing tests should be migrated opportunistically when modified.
 

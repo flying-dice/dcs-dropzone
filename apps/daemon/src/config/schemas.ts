@@ -10,6 +10,7 @@ export const AppConfig = z.object({
 
 	enableServeDevelopment: z.boolean(),
 	enableWebviewWorkerDebug: z.boolean(),
+	enableWebview: z.boolean(),
 	enableGenerateSchema: z.boolean(),
 
 	wgetPath: zen.path({ resolve: true, normalize: true, expandEnvVars: true }),
@@ -29,6 +30,7 @@ export const EnvConfig = z.object({
 	DZ_DAEMON_PORT: z.coerce.number().int().min(1).max(65535),
 	DZ_DAEMON_WEBVIEW_WINDOW_TITLE: z.string(),
 	DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG: z.coerce.boolean(),
+	DZ_ENABLE_WEBVIEW: z.coerce.boolean(),
 	DZ_DAEMON_WGET_PATH: z.string().optional(),
 	DZ_DAEMON_SEVENZIP_PATH: z.string().optional(),
 	DZ_DAEMON_DATABASE_PATH: z.string(),

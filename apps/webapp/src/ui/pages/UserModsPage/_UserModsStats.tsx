@@ -1,11 +1,8 @@
 import { Group } from "@mantine/core";
 import { useGetUserMods } from "@packages/clients/webapp";
 import { AppIcons, StatCard, useAppTranslation } from "@packages/dzui";
+import { USER_MODS_PUBLISHED_MODS_TEST_ID, USER_MODS_TOTAL_DOWNLOADS_TEST_ID } from "@packages/testids";
 import { StatusCodes } from "http-status-codes";
-import {
-	USER_MODS_PUBLISHED_MODS_TEST_ID,
-	USER_MODS_TOTAL_DOWNLOADS_TEST_ID,
-} from "../../../../../../playwright.constants.ts";
 
 export function _UserModsStats() {
 	const { t } = useAppTranslation();

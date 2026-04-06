@@ -1,14 +1,14 @@
 import { Button, Group, Select, Stack, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ModDataCategory } from "@packages/clients/webapp";
+import {
+	NEW_MOD_CATEGORY_TEST_ID,
+	NEW_MOD_DESCRIPTION_TEST_ID,
+	NEW_MOD_NAME_TEST_ID,
+	NEW_MOD_SUBMIT_TEST_ID,
+} from "@packages/testids";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
-import {
-	NEW_MOD_NAME_TEST_ID,
-	NEW_MOD_DESCRIPTION_TEST_ID,
-	NEW_MOD_CATEGORY_TEST_ID,
-	NEW_MOD_SUBMIT_TEST_ID,
-} from "../../../../../playwright.constants.ts";
 
 export const NewModFormSchema = z.object({
 	name: z.string().min(2, { message: "Name should have at least 2 letters" }),

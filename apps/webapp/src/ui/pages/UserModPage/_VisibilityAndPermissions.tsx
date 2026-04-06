@@ -1,6 +1,6 @@
 import { Card, Select, Stack, Text } from "@mantine/core";
 import { ModDataVisibility } from "@packages/clients/webapp";
-import { MOD_VISIBILITY_TEST_ID } from "../../../../../../playwright.constants.ts";
+import { MOD_VISIBILITY_TEST_ID } from "@packages/testids";
 import type { UserModForm } from "./form.ts";
 
 export function _VisibilityAndPermissions(props: { form: UserModForm }) {

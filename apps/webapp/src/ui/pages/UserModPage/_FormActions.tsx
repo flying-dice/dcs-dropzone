@@ -2,8 +2,8 @@ import { Button, Card, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
 import { deleteUserMod, type ModData, useGetUserMods } from "@packages/clients/webapp";
 import { showSuccessNotification, useAppTranslation } from "@packages/dzui";
+import { MOD_BACK_TO_MODS_TEST_ID, MOD_SAVE_CHANGES_TEST_ID } from "@packages/testids";
 import { useNavigate } from "react-router-dom";
-import { MOD_SAVE_CHANGES_TEST_ID, MOD_BACK_TO_MODS_TEST_ID } from "../../../../../../playwright.constants.ts";
 import type { UserModForm } from "./form.ts";
 
 export function _FormActions(props: { form: UserModForm; mod: ModData }) {

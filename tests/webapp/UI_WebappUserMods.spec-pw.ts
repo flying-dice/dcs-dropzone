@@ -11,10 +11,11 @@ import {
 	NEW_MOD_DESCRIPTION_TEST_ID,
 	NEW_MOD_NAME_TEST_ID,
 	NEW_MOD_SUBMIT_TEST_ID,
+	USER_MOD_FORM_TEST_ID,
 	USER_MODS_PUBLISH_NEW_MOD_BTN_TEST_ID,
 	USER_MODS_PUBLISHED_MODS_TEST_ID,
 	USER_MODS_TOTAL_DOWNLOADS_TEST_ID,
-} from "../../playwright.constants.ts";
+} from "../../packages/testids/src/index.ts";
 
 test.describe("Webapp: User Mods", () => {
 	test("User can login and view My Mods page", async ({ page }) => {
@@ -65,9 +66,9 @@ test.describe("Webapp: User Mods", () => {
 		// Verify the mod is created as PRIVATE by default
 		await expect(page.getByTestId(MOD_VISIBILITY_TEST_ID)).toHaveValue("PRIVATE");
 
-		// Extract the mod ID from the URL for later assertions
-		const url = page.url();
-		const modId = url.split("/user-mods/")[1];
+		// Extract the mod ID from the form attribute
+		const modId = await page.getByTestId(USER_MOD_FORM_TEST_ID).getAttribute("mod-id");
+		if (!modId) throw new Error("mod-id attribute not found on form");
 
 		// Navigate to Browse Mods and confirm the private mod is NOT listed
 		await page.getByTestId(BROWSE_MODS_BUTTON_TEST_ID).click();

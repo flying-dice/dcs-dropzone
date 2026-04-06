@@ -1,11 +1,11 @@
 import { Alert, Skeleton, Stack } from "@mantine/core";
 import { useGetMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
+import { BROWSE_MODS_NO_MODS_FOUND_TEST_ID, MOD_CARD_TEST_ID } from "@packages/testids";
 import { StatusCodes } from "http-status-codes";
 import { times } from "lodash";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import { BROWSE_MODS_NO_MODS_FOUND_TEST_ID, MOD_CARD_TEST_ID } from "../../../../../../playwright.constants.ts";
 import { ModCard } from "../../components/ModCard";
 import { useBreakpoint } from "../../hooks/useBreakpoint.ts";
 

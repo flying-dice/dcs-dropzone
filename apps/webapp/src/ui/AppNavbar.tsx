@@ -2,7 +2,6 @@ import { AppShell, Divider, Stack, Text } from "@mantine/core";
 import { type ModDataCategory, useGetCategories } from "@packages/clients/webapp";
 import type { I18nKeys } from "@packages/dzui";
 import { AppIcons, CategoryShortcut, DzNavLink, useAppTranslation } from "@packages/dzui";
-import { useLocation, useNavigate } from "react-router-dom";
 import {
 	BROWSE_MODS_BUTTON_TEST_ID,
 	DASHBOARD_BUTTON_TEST_ID,
@@ -10,7 +9,8 @@ import {
 	ENABLED_BUTTON_TEST_ID,
 	MY_MODS_BUTTON_TEST_ID,
 	UPDATES_BUTTON_TEST_ID,
-} from "../../../../playwright.constants.ts";
+} from "@packages/testids";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDaemon } from "./hooks/useDaemon";
 
 export type AppNavbarProps = {

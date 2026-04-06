@@ -34,13 +34,13 @@ Use the `mcp__playwright__*` tools to navigate, snapshot, click, and inspect pag
    ```bash
    playwright-cli eval "el => el.getAttribute('data-testid')" e5
    ```
-5. **If test IDs are missing**, go to the component source and add them using constants from `playwright.constants.ts` before writing the test. Do not write a test that relies on CSS or DOM selectors when a test ID can be introduced instead.
+5. **If test IDs are missing**, go to the component source and add them using constants from `@packages/testids` before writing the test. Do not write a test that relies on CSS or DOM selectors when a test ID can be introduced instead.
 6. **Then write the test** — you now know exactly what the UI looks like, what elements to target, and what assertions to make.
 
 ## Project structure
 
 - Config: `playwright.config.js`
-- Constants: `playwright.constants.ts`
+- Constants: `@packages/testids`
 - Tests: `tests/webapp/*.spec-pw.ts` and `tests/daemon/*.spec-pw.ts`
 - Test suffix: `.spec-pw.ts`
 
@@ -67,14 +67,14 @@ If you find yourself reaching for a CSS selector, **stop and add a `data-testid`
 
 ### Use constants, never magic strings
 
-All test IDs are defined in `playwright.constants.ts`. Import them in both the component and the test. Never pass a raw string to `getByTestId()`.
+All test IDs are defined in `@packages/testids`. Import them in both the component and the test. Never pass a raw string to `getByTestId()`.
 
 ```ts
 // BAD
 await page.getByTestId('__LOGIN_BUTTON_TEST_ID').click();
 
 // GOOD
-import { LOGIN_BUTTON_TEST_ID } from '../../playwright.constants';
+import { LOGIN_BUTTON_TEST_ID } from '@packages/testids';
 await page.getByTestId(LOGIN_BUTTON_TEST_ID).click();
 ```
 
@@ -83,7 +83,7 @@ await page.getByTestId(LOGIN_BUTTON_TEST_ID).click();
 For elements rendered in a list, define test ID constants as factory functions that embed the React `key`:
 
 ```ts
-// playwright.constants.ts
+// @packages/testids
 export const MOD_CARD_TEST_ID = (key: string) => `__MOD_CARD_TEST_ID-${key}`;
 
 // Test
@@ -109,6 +109,32 @@ Assert visibility of key elements before performing actions:
 await expect(page.getByTestId(HEADER_LOGO_TEST_ID)).toBeVisible();
 await expect(page.getByTestId(LOGIN_BUTTON_TEST_ID)).toBeVisible();
 await page.getByTestId(LOGIN_BUTTON_TEST_ID).click();
+```
+
+### Extract entity IDs from DOM attributes, not URLs
+
+When a test needs a dynamic value (entity ID, slug, etc.) produced by a prior action, read it from a DOM attribute on an element with a `data-testid` — not from the URL, cookies, or other indirect sources. Components should encode IDs as custom attributes (e.g., `mod-id={props.mod.id}`) so tests stay coupled to the component contract, not routing.
+
+```ts
+// GOOD — reads from DOM
+const modId = await page.getByTestId(USER_MOD_FORM_TEST_ID).getAttribute("mod-id");
+
+// BAD — parses from URL (breaks if route structure changes)
+const modId = page.url().split("/user-mods/")[1];
+```
+
+### Guard DOM-extracted values with a type-narrowing assertion
+
+When you call `getAttribute()` to extract a value for use later in the test, immediately assert it is non-null. This narrows the TypeScript type from `string | null` to `string` and fails early with a clear message.
+
+```ts
+// GOOD — narrowed, type-safe downstream
+const modId = await page.getByTestId(USER_MOD_FORM_TEST_ID).getAttribute("mod-id");
+if (!modId) throw new Error("mod-id attribute not found on form");
+
+// BAD — non-null assertion, no runtime safety
+const modId = await page.getByTestId(USER_MOD_FORM_TEST_ID).getAttribute("mod-id");
+await page.getByTestId(MOD_CARD_TEST_ID(modId!)).toBeVisible();
 ```
 
 ### Test isolation
@@ -145,7 +171,7 @@ More resilient to minor copy changes and whitespace.
 
 When a component needs a new `data-testid`:
 
-1. Add the constant to `playwright.constants.ts` using `__SCREAMING_SNAKE_CASE_TEST_ID` format.
+1. Add the constant to `@packages/testids` using `__SCREAMING_SNAKE_CASE_TEST_ID` format.
 2. Import and apply it in the component: `<button data-testid={MY_BUTTON_TEST_ID}>`.
 3. For custom components, accept `data-testid` as a prop name (not `testId` or `tid`) and drill it to the root element.
 4. Only add `data-testid` to elements that a test actually needs — keep the DOM clean.
@@ -183,7 +209,7 @@ playwright-cli eval "el => el.getAttribute('data-testid')" e5
 ## Checklist before finishing a test
 
 - [ ] Explored the UI interactively first (playwright-cli or MCP)
-- [ ] All targeted elements have `data-testid` attributes with constants from `playwright.constants.ts`
+- [ ] All targeted elements have `data-testid` attributes with constants from `@packages/testids`
 - [ ] No CSS selectors, class names, tag names, or DOM position selectors used
 - [ ] No magic strings passed to `getByTestId()`
 - [ ] No locators stored in variables — all `getByTestId()` calls are inline

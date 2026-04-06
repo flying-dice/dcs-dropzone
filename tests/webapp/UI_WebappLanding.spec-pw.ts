@@ -12,7 +12,7 @@ import {
 	STAT_CARD_TOTAL_DOWNLOADS_TEST_ID,
 	STAT_CARD_TOTAL_MODS_TEST_ID,
 	STAT_CARD_UPDATES_TEST_ID,
-} from "../../playwright.constants.ts";
+} from "../../packages/testids/src/index.ts";
 
 test.describe("Webapp Health: UI Tests", () => {
 	test("GET / renders page structure", async ({ page }) => {
@@ -34,10 +34,7 @@ test.describe("Webapp Health: UI Tests", () => {
 			page.getByTestId(STAT_CARD_UPDATES_TEST_ID),
 		];
 
-		const sections = [
-			page.getByTestId(FEATURED_MODS_SECTION_TEST_ID),
-			page.getByTestId(POPULAR_MODS_SECTION_TEST_ID),
-		];
+		const sections = [page.getByTestId(FEATURED_MODS_SECTION_TEST_ID), page.getByTestId(POPULAR_MODS_SECTION_TEST_ID)];
 
 		for (const element of [...header, ...statsCards, ...sections]) {
 			await expect(element).toBeVisible();

@@ -1,10 +1,10 @@
 import { Center, Flex, Group, Stack, Text } from "@mantine/core";
 import { useGetFeaturedMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
+import { FEATURED_MODS_SECTION_TEST_ID } from "@packages/testids";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
-import { FEATURED_MODS_SECTION_TEST_ID } from "../../../../../../playwright.constants.ts";
 import { ModCard } from "../../components/ModCard";
 
 export function _FeaturedMods() {

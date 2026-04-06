@@ -40,9 +40,7 @@ logger.info(`🚀 Server running at ${bunServer.url}`);
 
 let webviewWorker: WebviewWorker | undefined;
 
-if (process.env.CI) {
-	logger.info("CI environment detected — skipping webview worker");
-} else {
+if (appConfig.enableWebview) {
 	webviewWorker = new WebviewWorker(appConfig.webviewWorkerModulePath);
 
 	webviewWorker.onMessage(async (message) => {

@@ -1,15 +1,15 @@
 import { AppShell, type AppShellProps, Burger, Button, Group, Image, Stack } from "@mantine/core";
 import type { UseDisclosureReturnValue } from "@mantine/hooks";
-import type { ReactNode } from "react";
-import type { IconType } from "react-icons";
-import { useAsyncFn } from "react-use";
-import { match } from "ts-pattern";
 import {
 	DISCOVER_BUTTON_TEST_ID,
 	HEADER_LOGO_TEST_ID,
 	LIBRARY_BUTTON_TEST_ID,
 	SETTINGS_BUTTON_TEST_ID,
-} from "../../../playwright.constants.ts";
+} from "@packages/testids";
+import type { ReactNode } from "react";
+import type { IconType } from "react-icons";
+import { useAsyncFn } from "react-use";
+import { match } from "ts-pattern";
 import icon from "./assets/icon.svg";
 import logo from "./assets/logo.svg";
 import { AppIcons } from "./icons.ts";
