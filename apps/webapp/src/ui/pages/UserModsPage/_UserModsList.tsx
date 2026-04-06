@@ -1,6 +1,7 @@
 import { Stack } from "@mantine/core";
 import { useGetUserMods } from "@packages/clients/webapp";
 import { AppIcons, EmptyState, useAppTranslation } from "@packages/dzui";
+import { MOD_CARD_TEST_ID } from "@packages/testids";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
@@ -24,6 +25,7 @@ export function _UserModsList() {
 						res.data.data.map((mod) => (
 							<ModCard
 								key={mod.id}
+								data-testid={MOD_CARD_TEST_ID(mod.id)}
 								imageUrl={mod.thumbnail}
 								category={mod.category}
 								title={mod.name}

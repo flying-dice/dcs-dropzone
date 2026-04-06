@@ -5,6 +5,8 @@ import {
 	LOGIN_BUTTON_TEST_ID,
 	MOD_BACK_TO_MODS_TEST_ID,
 	MOD_CARD_TEST_ID,
+	MOD_DELETE_CONFIRM_TEST_ID,
+	MOD_DELETE_TEST_ID,
 	MOD_SAVE_CHANGES_TEST_ID,
 	MOD_VISIBILITY_TEST_ID,
 	MY_MODS_BUTTON_TEST_ID,
@@ -77,8 +79,9 @@ test.describe("Webapp: User Mods", () => {
 		await page.getByTestId(MY_MODS_BUTTON_TEST_ID).click();
 		await expect(page.getByTestId(USER_MODS_PUBLISH_NEW_MOD_BTN_TEST_ID)).toBeVisible();
 
-		// Click on the mod we just created — it should be listed in user mods
-		await page.getByText(modName).click();
+		// Click on the mod we just created — target by test ID, not text
+		await expect(page.getByTestId(MOD_CARD_TEST_ID(modId))).toBeVisible();
+		await page.getByTestId(MOD_CARD_TEST_ID(modId)).click();
 		await expect(page).toHaveURL(/.*\/user-mods\/[a-f0-9-]+/);
 
 		// Change visibility to PUBLIC
@@ -97,5 +100,27 @@ test.describe("Webapp: User Mods", () => {
 		await page.getByTestId(BROWSE_MODS_BUTTON_TEST_ID).click();
 		await expect(page.getByTestId(MOD_CARD_TEST_ID(modId))).toBeVisible();
 		await expect(page.getByTestId(MOD_CARD_TEST_ID(modId))).toContainText(modName);
+
+		// Navigate back to My Mods and open the mod to delete it
+		await page.getByTestId(MY_MODS_BUTTON_TEST_ID).click();
+		await expect(page.getByTestId(MOD_CARD_TEST_ID(modId))).toBeVisible();
+		await page.getByTestId(MOD_CARD_TEST_ID(modId)).click();
+		await expect(page).toHaveURL(/.*\/user-mods\/[a-f0-9-]+/);
+
+		// Click Delete and confirm
+		await page.getByTestId(MOD_DELETE_TEST_ID).click();
+		await page.getByTestId(MOD_DELETE_CONFIRM_TEST_ID).click();
+
+		// Should land back on the user-mods listing
+		await expect(page).toHaveURL(/.*\/user-mods$/);
+		await expect(page.getByTestId(MOD_CARD_TEST_ID(modId))).toHaveCount(0);
+
+		// Confirm the mod is also gone from Browse Mods (full reload to bypass cache)
+		await page.goto("/");
+		await page.getByTestId(BROWSE_MODS_BUTTON_TEST_ID).click();
+		await expect(page.getByTestId(MOD_CARD_TEST_ID(modId))).toHaveCount(0);
+
+		// Brief settle pause
+		await page.waitForTimeout(2000);
 	});
 });
