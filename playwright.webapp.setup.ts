@@ -1,4 +1,5 @@
 import { $ } from "bun";
+import { resolve } from "node:path";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { z } from "zod";
 import { envLocalTest } from "./apps/webapp/scripts/_env.ts";
@@ -11,5 +12,6 @@ await $`bun src/index.ts`
 		...z.record(z.string(), z.coerce.string()).parse(envLocalTest),
 		...process.env,
 		DZ_WEBAPP_MONGO_URI: mongoMemoryServer.getUri(),
+		LOG4JS_CONFIG: resolve("./apps/webapp/log4js.playwright.yaml"),
 	})
 	.cwd("./apps/webapp");

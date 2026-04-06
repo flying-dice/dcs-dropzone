@@ -5,7 +5,8 @@ addLayout("json", (_) => {
 });
 
 try {
-	const file = Bun.file(`${process.cwd()}/log4js.yaml`);
+	const configPath = process.env.LOG4JS_CONFIG ?? `${process.cwd()}/log4js.yaml`;
+	const file = Bun.file(configPath);
 	const text = await file.text();
 	const config = Bun.YAML.parse(text);
 
