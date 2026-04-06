@@ -119,8 +119,5 @@ test.describe("Webapp: User Mods", () => {
 		await page.goto("/");
 		await page.getByTestId(BROWSE_MODS_BUTTON_TEST_ID).click();
 		await expect(page.getByTestId(MOD_CARD_TEST_ID(modId))).toHaveCount(0);
-
-		// Brief settle pause
-		await page.waitForTimeout(2000);
 	});
 });
