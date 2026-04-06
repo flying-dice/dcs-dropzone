@@ -21,16 +21,15 @@ test.describe("Webapp: User Mods", () => {
 	test("User can login and view My Mods page", async ({ page }) => {
 		await page.goto("/");
 
-		await expect(page.getByTestId(MY_MODS_BUTTON_TEST_ID)).toHaveAttribute("data-disabled");
-		expect(await page.getByTestId(MY_MODS_BUTTON_TEST_ID).getAttribute("data-disabled")).toBe("true");
+		await expect(page.getByTestId(MY_MODS_BUTTON_TEST_ID)).toHaveAttribute("data-disabled", "true");
 
 		await page.getByTestId(LOGIN_BUTTON_TEST_ID).click();
 
-		const cookies = await page.context().cookies();
-
-		expect(cookies).toContainEqual(expect.objectContaining({ name: "USERID" }));
-
+		// Wait for authenticated UI state before checking cookies
 		await expect(page.getByTestId(MY_MODS_BUTTON_TEST_ID)).not.toHaveAttribute("data-disabled");
+
+		const cookies = await page.context().cookies();
+		expect(cookies).toContainEqual(expect.objectContaining({ name: "USERID" }));
 		await page.getByTestId(MY_MODS_BUTTON_TEST_ID).click();
 
 		await expect(page.getByTestId(USER_MODS_PUBLISHED_MODS_TEST_ID)).toBeVisible();

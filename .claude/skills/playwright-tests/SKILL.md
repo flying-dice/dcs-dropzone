@@ -1,7 +1,7 @@
 ---
 name: playwright-tests
 description: Write and debug Playwright E2E tests following project ADR TEST-006 conventions.
-allowed-tools: Bash(playwright-cli:*) Bash(npx:*) Bash(npm:*) mcp__playwright__*
+allowed-tools: Bash(playwright-cli:*) Bash(bunx:*) Bash(bun:*) mcp__playwright__*
 ---
 
 # Writing Playwright E2E Tests
@@ -180,23 +180,23 @@ When a component needs a new `data-testid`:
 
 ```bash
 # Run all tests
-PLAYWRIGHT_HTML_OPEN=never npx playwright test
+PLAYWRIGHT_HTML_OPEN=never bunx playwright test
 
 # Run a specific test file
-PLAYWRIGHT_HTML_OPEN=never npx playwright test tests/webapp/UI_WebappLanding.spec-pw.ts
+PLAYWRIGHT_HTML_OPEN=never bunx playwright test tests/webapp/UI_WebappLanding.spec-pw.ts
 
 # Run a specific project
-PLAYWRIGHT_HTML_OPEN=never npx playwright test --project=webapp
+PLAYWRIGHT_HTML_OPEN=never bunx playwright test --project=webapp
 
 # Debug a failing test
-PLAYWRIGHT_HTML_OPEN=never npx playwright test --debug=cli
+PLAYWRIGHT_HTML_OPEN=never bunx playwright test --debug=cli
 ```
 
 ## Debugging with playwright-cli
 
 ```bash
 # Run the failing test in debug mode (background)
-PLAYWRIGHT_HTML_OPEN=never npx playwright test tests/webapp/UI_WebappLanding.spec-pw.ts --debug=cli
+PLAYWRIGHT_HTML_OPEN=never bunx playwright test tests/webapp/UI_WebappLanding.spec-pw.ts --debug=cli
 
 # Attach to the paused session
 playwright-cli attach tw-abcdef

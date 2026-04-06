@@ -18,26 +18,19 @@ test.describe("Webapp Health: UI Tests", () => {
 	test("GET / renders page structure", async ({ page }) => {
 		await page.goto("/");
 
-		const header = [
-			page.getByTestId(HEADER_LOGO_TEST_ID),
-			page.getByTestId(DISCOVER_BUTTON_TEST_ID),
-			page.getByTestId(LIBRARY_BUTTON_TEST_ID),
-			page.getByTestId(SETTINGS_BUTTON_TEST_ID),
-			page.getByTestId(LOGIN_BUTTON_TEST_ID),
-		];
+		await expect(page.getByTestId(HEADER_LOGO_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(DISCOVER_BUTTON_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(LIBRARY_BUTTON_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(SETTINGS_BUTTON_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(LOGIN_BUTTON_TEST_ID)).toBeVisible();
 
-		const statsCards = [
-			page.getByTestId(STAT_CARD_TOTAL_MODS_TEST_ID),
-			page.getByTestId(STAT_CARD_TOTAL_DOWNLOADS_TEST_ID),
-			page.getByTestId(STAT_CARD_DOWNLOADS_TEST_ID),
-			page.getByTestId(STAT_CARD_ENABLED_TEST_ID),
-			page.getByTestId(STAT_CARD_UPDATES_TEST_ID),
-		];
+		await expect(page.getByTestId(STAT_CARD_TOTAL_MODS_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(STAT_CARD_TOTAL_DOWNLOADS_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(STAT_CARD_DOWNLOADS_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(STAT_CARD_ENABLED_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(STAT_CARD_UPDATES_TEST_ID)).toBeVisible();
 
-		const sections = [page.getByTestId(FEATURED_MODS_SECTION_TEST_ID), page.getByTestId(POPULAR_MODS_SECTION_TEST_ID)];
-
-		for (const element of [...header, ...statsCards, ...sections]) {
-			await expect(element).toBeVisible();
-		}
+		await expect(page.getByTestId(FEATURED_MODS_SECTION_TEST_ID)).toBeVisible();
+		await expect(page.getByTestId(POPULAR_MODS_SECTION_TEST_ID)).toBeVisible();
 	});
 });

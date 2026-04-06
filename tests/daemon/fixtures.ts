@@ -23,9 +23,12 @@ export const test = base.extend<{
 		mkdirSync(dcsWorkingDir, { recursive: true });
 		mkdirSync(dcsInstallDir, { recursive: true });
 
-		await request.put("/api/settings", {
+		const response = await request.put("/api/settings", {
 			data: { dropzoneModsDir: modsDir, dcsWorkingDir, dcsInstallDir },
 		});
+		if (!response.ok()) {
+			throw new Error(`Failed to seed daemon settings: ${response.status()} ${response.statusText()}`);
+		}
 
 		await use({ root, modsDir, dcsWorkingDir, dcsInstallDir });
 

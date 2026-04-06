@@ -27,12 +27,12 @@ export default defineConfig({
 	projects: [
 		{
 			name: "webapp",
-			testMatch: "tests/webapp/*.spec-pw.ts",
+			testMatch: "webapp/*.spec-pw.ts",
 			use: { ...devices["Desktop Chrome"], baseURL: PW_WEBAPP_BASE_URL },
 		},
 		{
 			name: "daemon",
-			testMatch: "tests/daemon/*.spec-pw.ts",
+			testMatch: "daemon/*.spec-pw.ts",
 			use: { ...devices["Desktop Chrome"], baseURL: PW_DAEMON_BASE_URL },
 		},
 	],
