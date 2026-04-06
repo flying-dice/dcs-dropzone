@@ -1,11 +1,8 @@
+import { ze } from "@packages/zod/ze";
 import { z } from "zod";
 import { GithubAuthenticationProviderConfig } from "../authentication/GithubAuthenticationProvider.ts";
 
-/**
- * z.coerce.boolean() uses Boolean(value) which treats any non-empty string as
- * true — including "false" and "0". This helper handles string env vars correctly.
- */
-const envBoolean = z.preprocess((v) => (typeof v === "string" ? v === "true" || v === "1" : v), z.coerce.boolean());
+const envBoolean = ze.parseBoolean();
 
 export const AppConfig = z.object({
 	port: z.coerce.number().int().min(1).max(65535),
