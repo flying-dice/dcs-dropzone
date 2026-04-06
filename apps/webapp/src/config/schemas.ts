@@ -1,6 +1,15 @@
 import { z } from "zod";
 import { GithubAuthenticationProviderConfig } from "../authentication/GithubAuthenticationProvider.ts";
 
+/**
+ * envBoolean uses Boolean(value) which treats any non-empty string as
+ * true — including "false" and "0". This helper handles string env vars correctly.
+ */
+const envBoolean = z.preprocess(
+	(v) => (typeof v === "string" ? v === "true" || v === "1" : v),
+	envBoolean,
+);
+
 export const AppConfig = z.object({
 	port: z.coerce.number().int().min(1).max(65535),
 	mongoUri: z.string().nonempty(),
@@ -13,8 +22,8 @@ export const AppConfig = z.object({
 	webappUrl: z.url(),
 	daemonUrl: z.url(),
 
-	enableServeDevelopment: z.coerce.boolean(),
-	enableGenerateSchema: z.coerce.boolean(),
+	enableServeDevelopment: envBoolean,
+	enableGenerateSchema: envBoolean,
 });
 
 export const UiAppConfig = AppConfig.pick({ webappUrl: true, daemonUrl: true });
@@ -34,8 +43,8 @@ export const EnvConfig = z.object({
 	DZ_DAEMON_URL: z.url(),
 	DZ_WEBAPP_URL: z.url(),
 
-	DZ_ENABLE_SERVE_DEVELOPMENT: z.coerce.boolean(),
-	DZ_ENABLE_GENERATE_SCHEMA: z.coerce.boolean(),
+	DZ_ENABLE_SERVE_DEVELOPMENT: envBoolean,
+	DZ_ENABLE_GENERATE_SCHEMA: envBoolean,
 });
 
 export type EnvConfig = z.infer<typeof EnvConfig>;
