@@ -1,7 +1,6 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { mkdirSync } from "node:fs";
 import { test as base } from "playwright/test";
 
 /**
@@ -11,7 +10,9 @@ import { test as base } from "playwright/test";
  * Usage: import { test } from "./fixtures" instead of "playwright/test"
  * in any daemon test that may trigger file operations (downloads, toggles, etc).
  */
-export const test = base.extend<{ tempDirs: { root: string; modsDir: string; dcsWorkingDir: string; dcsInstallDir: string } }>({
+export const test = base.extend<{
+	tempDirs: { root: string; modsDir: string; dcsWorkingDir: string; dcsInstallDir: string };
+}>({
 	tempDirs: async ({ request }, use) => {
 		const root = mkdtempSync(join(tmpdir(), "dcs-dropzone-pw-daemon__"));
 		const modsDir = join(root, "mods");

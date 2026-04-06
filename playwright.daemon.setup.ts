@@ -1,5 +1,5 @@
-import { $ } from "bun";
 import { resolve } from "node:path";
+import { $ } from "bun";
 import { envLocalTest } from "daemon/scripts/_env.ts";
 import { z } from "zod";
 

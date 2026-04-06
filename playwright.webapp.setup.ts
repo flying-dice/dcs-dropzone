@@ -1,5 +1,5 @@
-import { $ } from "bun";
 import { resolve } from "node:path";
+import { $ } from "bun";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { z } from "zod";
 import { envLocalTest } from "./apps/webapp/scripts/_env.ts";
