@@ -24,7 +24,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('bun.lock', '**/package.json') }}
 
       - name: Install dependencies
         if: steps.node_modules_cache.outputs.cache-hit != 'true'
@@ -35,7 +35,7 @@ jobs:
         id: playwright-cache
         with:
           path: ~\AppData\Local\ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('bun.lock', '**/package.json') }}
           restore-keys: |
             ${{ runner.os }}-playwright-chromium-
 
