@@ -2,8 +2,6 @@ import { ze } from "@packages/zod/ze";
 import { z } from "zod";
 import { GithubAuthenticationProviderConfig } from "../authentication/GithubAuthenticationProvider.ts";
 
-const envBoolean = ze.parseBoolean();
-
 export const AppConfig = z.object({
 	port: z.coerce.number().int().min(1).max(65535),
 	mongoUri: z.string().nonempty(),
@@ -16,8 +14,8 @@ export const AppConfig = z.object({
 	webappUrl: z.url(),
 	daemonUrl: z.url(),
 
-	enableServeDevelopment: envBoolean,
-	enableGenerateSchema: envBoolean,
+	enableServeDevelopment: ze.parseBoolean(),
+	enableGenerateSchema: ze.parseBoolean(),
 });
 
 export const UiAppConfig = AppConfig.pick({ webappUrl: true, daemonUrl: true });
@@ -37,8 +35,8 @@ export const EnvConfig = z.object({
 	DZ_DAEMON_URL: z.url(),
 	DZ_WEBAPP_URL: z.url(),
 
-	DZ_ENABLE_SERVE_DEVELOPMENT: envBoolean,
-	DZ_ENABLE_GENERATE_SCHEMA: envBoolean,
+	DZ_ENABLE_SERVE_DEVELOPMENT: ze.parseBoolean(),
+	DZ_ENABLE_GENERATE_SCHEMA: ze.parseBoolean(),
 });
 
 export type EnvConfig = z.infer<typeof EnvConfig>;

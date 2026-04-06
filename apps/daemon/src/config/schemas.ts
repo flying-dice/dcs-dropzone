@@ -2,8 +2,6 @@ import { ze } from "@packages/zod/ze";
 import { zen } from "@packages/zod/zen";
 import { z } from "zod";
 
-const envBoolean = ze.parseBoolean();
-
 export const AppConfig = z.object({
 	host: z.ipv4(),
 	port: z.number().int().min(1).max(65535),
@@ -32,8 +30,8 @@ export const EnvConfig = z.object({
 	DZ_DAEMON_HOST: z.ipv4(),
 	DZ_DAEMON_PORT: z.coerce.number().int().min(1).max(65535),
 	DZ_DAEMON_WEBVIEW_WINDOW_TITLE: z.string(),
-	DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG: envBoolean,
-	DZ_ENABLE_WEBVIEW: envBoolean,
+	DZ_DAEMON_ENABLE_WEBVIEW_WORKER_DEBUG: ze.parseBoolean(),
+	DZ_ENABLE_WEBVIEW: ze.parseBoolean(),
 	DZ_DAEMON_WGET_PATH: z.string().optional(),
 	DZ_DAEMON_SEVENZIP_PATH: z.string().optional(),
 	DZ_DAEMON_DATABASE_PATH: z.string(),
@@ -41,8 +39,8 @@ export const EnvConfig = z.object({
 
 	DZ_DAEMON_URL: z.url(),
 	DZ_WEBAPP_URL: z.url(),
-	DZ_ENABLE_SERVE_DEVELOPMENT: envBoolean,
-	DZ_ENABLE_GENERATE_SCHEMA: envBoolean,
+	DZ_ENABLE_SERVE_DEVELOPMENT: ze.parseBoolean(),
+	DZ_ENABLE_GENERATE_SCHEMA: ze.parseBoolean(),
 });
 
 export type EnvConfig = z.infer<typeof EnvConfig>;
