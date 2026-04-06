@@ -3,6 +3,7 @@ import { modals, openConfirmModal } from "@mantine/modals";
 import { deleteUserMod, type ModData, useGetUserMods } from "@packages/clients/webapp";
 import { showSuccessNotification, useAppTranslation } from "@packages/dzui";
 import { useNavigate } from "react-router-dom";
+import { MOD_SAVE_CHANGES_TEST_ID, MOD_BACK_TO_MODS_TEST_ID } from "../../../../../../playwright.constants.ts";
 import type { UserModForm } from "./form.ts";
 
 export function _FormActions(props: { form: UserModForm; mod: ModData }) {
@@ -41,7 +42,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 	return (
 		<Card withBorder>
 			<Stack>
-				<Button data-testid="mod-save-changes" type="submit">
+				<Button data-testid={MOD_SAVE_CHANGES_TEST_ID} type="submit">
 					{t("SAVE_CHANGES")}
 				</Button>
 				{props.form.isTouched() ? (
@@ -49,7 +50,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 						{t("DISCARD_CHANGES")}
 					</Button>
 				) : (
-					<Button data-testid="mod-back-to-mods" variant={"default"} onClick={() => nav("/user-mods")}>
+					<Button data-testid={MOD_BACK_TO_MODS_TEST_ID} variant={"default"} onClick={() => nav("/user-mods")}>
 						{t("BACK_TO_MODS_PAGE")}
 					</Button>
 				)}

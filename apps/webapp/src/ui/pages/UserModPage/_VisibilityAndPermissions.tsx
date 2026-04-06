@@ -1,5 +1,6 @@
 import { Card, Select, Stack, Text } from "@mantine/core";
 import { ModDataVisibility } from "@packages/clients/webapp";
+import { MOD_VISIBILITY_TEST_ID } from "../../../../../../playwright.constants.ts";
 import type { UserModForm } from "./form.ts";
 
 export function _VisibilityAndPermissions(props: { form: UserModForm }) {
@@ -10,7 +11,7 @@ export function _VisibilityAndPermissions(props: { form: UserModForm }) {
 					Visibility & Permissions
 				</Text>
 				<Select
-					data-testid="mod-visibility"
+					data-testid={MOD_VISIBILITY_TEST_ID}
 					label={"Visibility"}
 					{...props.form.getInputProps("visibility")}
 					data={Object.values(ModDataVisibility)}

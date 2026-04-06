@@ -10,6 +10,7 @@ import type { ModCardProps } from "./types.ts";
 export function _GridModCard(props: ModCardProps) {
 	return (
 		<Card
+			data-testid={props["data-testid"]}
 			flex={"auto"}
 			radius={"md"}
 			withBorder
