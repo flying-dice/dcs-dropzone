@@ -8,11 +8,58 @@ allowed-tools: Bash(playwright-cli:*) Bash(bunx:*) Bash(bun:*) mcp__playwright__
 
 This skill covers writing, exploring, and debugging Playwright end-to-end tests for this project. It enforces the conventions defined in ADR TEST-006 (`/.archgate/adrs/TEST-006-adoption-of-playwright-for-e2e-testing.md`).
 
+## Setup (one-time per machine)
+
+### 1. Install Playwright browsers — Chrome only
+
+This project standardises on **Chrome** for both `playwright-cli` exploration and the Playwright MCP browser tools (`mcp__playwright__browser_*`). Both expect Chrome at `/opt/google/chrome/chrome` on Linux. Do not substitute Chromium or Firefox — they each have subtle rendering and font differences that diverge from CI.
+
+Install Chrome via Playwright (requires sudo for the OS-level dependencies):
+
+```bash
+sudo bunx playwright install chrome --with-deps
+```
+
+If `sudo bunx` errors with `command not found` (because sudo resets `PATH` and drops `~/.bun/bin`), use the absolute path to `bunx`:
+
+```bash
+sudo "$(which bunx)" playwright install chrome --with-deps
+```
+
+Verify the binary landed where Playwright expects it:
+
+```bash
+ls -la /opt/google/chrome/chrome
+```
+
+### 2. Install the project's Playwright dependency
+
+Playwright is a workspace dev dependency — `bun install` at the repo root pulls it in. You should not need to install it separately.
+
+### 3. Verify
+
+```bash
+playwright-cli open https://www.google.com
+```
+
+A Chrome window (or headless session) should open and report a successful navigation. If you see `Chromium distribution 'chrome' is not found at /opt/google/chrome/chrome`, repeat step 1.
+
+## Exploration tools
+
+You have **two** tools for interactively driving the browser, and both back onto the same Chrome install from setup. Pick whichever fits the moment:
+
+| Tool | When to use |
+|------|-------------|
+| **`playwright-cli`** (terminal binary) | Quick one-off navigation, snapshot, click, eval. Best when you're already in a shell and want to script several steps. |
+| **Playwright MCP** (`mcp__playwright__browser_*` tools) | Interactive exploration where you want to see structured results in the conversation, take screenshots, or chain many steps without leaving tool-call mode. |
+
+Both follow the same exploration discipline (see "Explore First, Code Second" below).
+
 ## Explore First, Code Second
 
-Before writing any test, **use the browser to explore the UI as a user would**. You have two tools for this:
+Before writing any test, **use the browser to explore the UI as a user would**.
 
-### playwright-cli (terminal)
+Quick `playwright-cli` example:
 
 ```bash
 playwright-cli open http://localhost:4000
@@ -21,9 +68,7 @@ playwright-cli click e3
 playwright-cli snapshot
 ```
 
-### Playwright MCP server (tool calls)
-
-Use the `mcp__playwright__*` tools to navigate, snapshot, click, and inspect pages interactively.
+The Playwright MCP equivalents (`browser_navigate`, `browser_snapshot`, `browser_click`, etc.) work the same way and return structured results inline.
 
 ### The workflow
 

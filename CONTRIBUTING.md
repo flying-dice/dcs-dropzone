@@ -245,11 +245,24 @@ Reserve Mockist tests for Port Adapters and true pure functions.
 
 ### End-to-end (Playwright) tests
 
-E2E tests live under `tests/` and use Playwright. The full conventions are in [`.archgate/adrs/TEST-006-adoption-of-playwright-for-e2e-testing.md`](.archgate/adrs/TEST-006-adoption-of-playwright-for-e2e-testing.md) and the [`playwright-tests` skill](.claude/skills/playwright-tests/SKILL.md). The non-negotiables:
+E2E tests live under `tests/` and use Playwright. The full conventions, exploration workflow (`playwright-cli` + Playwright MCP), and setup steps are documented in the in-repo [`playwright-tests` skill](.claude/skills/playwright-tests/SKILL.md), with the underlying decision in [`.archgate/adrs/TEST-006-adoption-of-playwright-for-e2e-testing.md`](.archgate/adrs/TEST-006-adoption-of-playwright-for-e2e-testing.md). **Read those before writing or modifying an E2E test.**
+
+#### One-time setup
+
+This project standardises on **Chrome** (not Chromium or Firefox) for both `playwright-cli` and the Playwright MCP browser tools. Install it once per machine:
+
+```sh
+sudo bunx playwright install chrome --with-deps
+```
+
+If `sudo bunx` fails with `command not found`, use the absolute path: `sudo "$(which bunx)" playwright install chrome --with-deps`.
+
+#### Non-negotiables (recap)
 
 - **Locate elements by `data-testid`, not by text.** Add new IDs to `packages/testids/src/index.ts` and reference them from both the component and the spec. Text-based locators (`getByText`, `getByRole({ name })`) are fragile across i18n, refactors, and locale changes — they pass locally and fail in CI.
 - **Never use `page.waitForTimeout()`.** It is always either too slow or a race. Use web-first assertions (`toBeVisible`, `toHaveCount`, `toHaveURL`, etc.) — they auto-settle with the right timeouts.
 - **Always run E2E tests with the project flag**, e.g. `bunx playwright test tests/webapp/UI_WebappUserMods.spec-pw.ts --project=webapp`. The `webapp` and `daemon` projects have different webServer configs and cannot be mixed in a single run.
+- **Explore the UI interactively before writing the test.** Use `playwright-cli open <url>` or the Playwright MCP `browser_*` tools to take snapshots, find existing test IDs, and understand the flow — then write the spec.
 
 ### Running tests
 
