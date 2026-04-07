@@ -2,7 +2,7 @@
 
 Welcome, and thank you for your interest in contributing! This guide covers everything you need to get a productive local development environment up and running and to submit high-quality changes.
 
-> **Stuck?** Open an issue, ping us in [our Discord](https://discord.gg/bT7BEHn5RD), or — for maintainers and regular contributors — drop a note in the `#dcs-dropzone` Slack channel. We are happy to help.
+> **Stuck?** Open an issue or join [our Discord](https://discord.gg/bT7BEHn5RD) — we are happy to help.
 
 ---
 
