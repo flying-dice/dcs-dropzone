@@ -2,7 +2,12 @@ import { Button, Card, Stack, Text } from "@mantine/core";
 import { modals, openConfirmModal } from "@mantine/modals";
 import { deleteUserMod, type ModData, useGetUserMods } from "@packages/clients/webapp";
 import { showSuccessNotification, useAppTranslation } from "@packages/dzui";
-import { MOD_BACK_TO_MODS_TEST_ID, MOD_SAVE_CHANGES_TEST_ID } from "@packages/testids";
+import {
+	MOD_BACK_TO_MODS_TEST_ID,
+	MOD_DELETE_CONFIRM_TEST_ID,
+	MOD_DELETE_TEST_ID,
+	MOD_SAVE_CHANGES_TEST_ID,
+} from "@packages/testids";
 import { useNavigate } from "react-router-dom";
 import type { UserModForm } from "./form.ts";
 
@@ -28,7 +33,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 			title: "Confirm Deletion",
 			children: <Text>{t("DELETE_MOD_CONFIRMATION")}</Text>,
 			labels: { confirm: "Delete", cancel: "Cancel" },
-			confirmProps: { color: "red" },
+			confirmProps: { color: "red", "data-testid": MOD_DELETE_CONFIRM_TEST_ID },
 			onCancel: modals.closeAll,
 			onConfirm: async () => {
 				await deleteUserMod(props.mod.id);
@@ -54,7 +59,7 @@ export function _FormActions(props: { form: UserModForm; mod: ModData }) {
 						{t("BACK_TO_MODS_PAGE")}
 					</Button>
 				)}
-				<Button color={"red"} variant={"outline"} onClick={handleDelete}>
+				<Button data-testid={MOD_DELETE_TEST_ID} color={"red"} variant={"outline"} onClick={handleDelete}>
 					{t("DELETE_MOD")}
 				</Button>
 			</Stack>
