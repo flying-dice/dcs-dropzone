@@ -13,6 +13,7 @@ import {
 	NEW_RELEASE_VERSION_TEST_ID,
 	RELEASE_BACK_TO_MOD_TEST_ID,
 	RELEASE_SAVE_CHANGES_TEST_ID,
+	RELEASE_VERSION_TEST_ID,
 	USER_MOD_FORM_TEST_ID,
 	USER_MODS_PUBLISH_NEW_MOD_BTN_TEST_ID,
 } from "../../packages/testids/src/index.ts";
@@ -71,7 +72,7 @@ test.describe("Webapp: User Mod Releases", () => {
 		await expect(page).toHaveURL(/.*\/user-mods\/[a-f0-9-]+$/);
 
 		// The release should appear in the releases list
-		await expect(page.getByTestId("release-version").filter({ hasText: releaseVersion })).toBeVisible();
+		await expect(page.getByTestId(RELEASE_VERSION_TEST_ID).filter({ hasText: releaseVersion })).toBeVisible();
 
 		// Cleanup — delete the mod
 		await page.getByTestId(MOD_DELETE_TEST_ID).click();

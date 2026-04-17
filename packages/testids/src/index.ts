@@ -44,5 +44,6 @@ export const MOD_CARD_TEST_ID = (key: string) => `__MOD_CARD_TEST_ID-${key}`;
 export const NEW_RELEASE_BUTTON_TEST_ID = "new-release-button";
 export const NEW_RELEASE_VERSION_TEST_ID = "new-release-version";
 export const CREATE_RELEASE_SUBMIT_TEST_ID = "create-release-submit";
+export const RELEASE_VERSION_TEST_ID = "release-version";
 export const RELEASE_SAVE_CHANGES_TEST_ID = "release-save-changes";
 export const RELEASE_BACK_TO_MOD_TEST_ID = "release-back-to-mod";
