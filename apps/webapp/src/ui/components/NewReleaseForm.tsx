@@ -1,5 +1,6 @@
 import { Button, Group, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { CREATE_RELEASE_SUBMIT_TEST_ID, NEW_RELEASE_VERSION_TEST_ID } from "@packages/testids";
 import { zod4Resolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
 
@@ -26,12 +27,12 @@ export function NewReleaseForm(props: NewReleaseFormProps) {
 		<Stack>
 			<form onSubmit={form.onSubmit((values) => props.onSubmit(values))}>
 				<Stack>
-					<TextInput data-testid="new-release-version" {...form.getInputProps("version")} label="Release Version" />
+					<TextInput data-testid={NEW_RELEASE_VERSION_TEST_ID} {...form.getInputProps("version")} label="Release Version" />
 					<Group>
 						<Button variant={"default"} onClick={props.onCancel}>
 							Cancel
 						</Button>
-						<Button data-testid="create-release-submit" type="submit">
+						<Button data-testid={CREATE_RELEASE_SUBMIT_TEST_ID} type="submit">
 							Create Release
 						</Button>
 					</Group>
