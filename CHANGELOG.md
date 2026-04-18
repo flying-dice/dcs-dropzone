@@ -1,3 +1,10 @@
+## [1.10.9](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.8...v1.10.9) (2026-04-18)
+
+
+### Bug Fixes
+
+* validate wget and 7-Zip availability at daemon startup ([#130](https://github.com/flying-dice/dcs-dropzone/issues/130)) ([7635443](https://github.com/flying-dice/dcs-dropzone/commit/76354432019eaddb5f3d3a44cab5cfb5bb0cbe20)), closes [#102](https://github.com/flying-dice/dcs-dropzone/issues/102)
+
 ## [1.10.8](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.7...v1.10.8) (2026-04-18)
 
 
