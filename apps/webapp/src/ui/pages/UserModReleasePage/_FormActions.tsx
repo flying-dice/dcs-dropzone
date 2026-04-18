@@ -7,6 +7,7 @@ import {
 	useGetUserModReleases,
 } from "@packages/clients/webapp";
 import { showSuccessNotification, useAppTranslation } from "@packages/dzui";
+import { RELEASE_BACK_TO_MOD_TEST_ID, RELEASE_SAVE_CHANGES_TEST_ID } from "@packages/testids";
 import { useNavigate } from "react-router-dom";
 import { ModReleaseDaemonControls } from "../../components/ModReleaseDaemonControls.tsx";
 import type { UserModReleaseForm } from "./form.ts";
@@ -47,7 +48,7 @@ export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; re
 	return (
 		<Card withBorder>
 			<Stack>
-				<Button data-testid="release-save-changes" type="submit">
+				<Button data-testid={RELEASE_SAVE_CHANGES_TEST_ID} type="submit">
 					{t("SAVE_CHANGES")}
 				</Button>
 				<Divider />
@@ -57,7 +58,7 @@ export function _FormActions(props: { form: UserModReleaseForm; mod: ModData; re
 					</Button>
 				) : (
 					<Button
-						data-testid="release-back-to-mod"
+						data-testid={RELEASE_BACK_TO_MOD_TEST_ID}
 						variant={"default"}
 						onClick={() => nav(`/user-mods/${props.mod.id}`)}
 					>

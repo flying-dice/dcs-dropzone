@@ -1,6 +1,7 @@
 import { Button, Card, Divider, Group, Select, Stack, Text } from "@mantine/core";
 import { modals, openModal } from "@mantine/modals";
 import { createUserModRelease, type ModData, useGetUserModReleases } from "@packages/clients/webapp";
+import { NEW_RELEASE_BUTTON_TEST_ID } from "@packages/testids";
 import { AppIcons, EmptyState, showErrorNotification, useAppTranslation } from "@packages/dzui";
 import { StatusCodes } from "http-status-codes";
 import { useNavigate } from "react-router-dom";
@@ -58,7 +59,7 @@ export function _Releases(props: { form: UserModForm; mod: ModData }) {
 					<Text size={"lg"} fw={"bold"}>
 						Releases
 					</Text>
-					<Button data-testid="new-release-button" size={"xs"} variant={"light"} onClick={handleNewRelease}>
+					<Button data-testid={NEW_RELEASE_BUTTON_TEST_ID} size={"xs"} variant={"light"} onClick={handleNewRelease}>
 						New Release
 					</Button>
 				</Group>

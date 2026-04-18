@@ -1,5 +1,6 @@
 import { Alert, Badge, Group, type MantineColor, Text } from "@mantine/core";
 import type { ModDataVisibility, ModReleaseData } from "@packages/clients/webapp";
+import { RELEASE_VERSION_TEST_ID } from "@packages/testids";
 import { VisibilityIcons } from "@packages/dzui";
 import { formatDistanceToNow } from "date-fns";
 import type { IconType } from "react-icons";
@@ -23,7 +24,7 @@ export function UserModRelease(props: UserModReleaseProps) {
 			color={colors[props.release.visibility]}
 			title={
 				<Group>
-					<Text size={"sm"} fw={"bold"} data-testid="release-version">
+					<Text size={"sm"} fw={"bold"} data-testid={RELEASE_VERSION_TEST_ID}>
 						{props.release.version}
 					</Text>
 					<Badge
