@@ -5,7 +5,7 @@ import { TestTempDir } from "../__tests__/TestTempDir.ts";
 import { SYSTEM_7ZIP_PATH, SYSTEM_WGET_PATH } from "../__tests__/utils.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { ProdApplication } from "../ProdApplication.ts";
-import { HonoApplication } from "./HonoApplication.ts";
+import { buildHonoApp, type HonoApp } from "./HonoApplication.ts";
 
 function buildConfiguredApp() {
 	const tempDir = new TestTempDir();
@@ -40,7 +40,7 @@ describe("HonoApplication", () => {
 		});
 
 		it("should add Access-Control-Allow-Private-Network header when request includes Access-Control-Request-Private-Network", async () => {
-			const honoApp = await HonoApplication.build(app, {
+			const honoApp = await buildHonoApp(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
 			});
@@ -58,7 +58,7 @@ describe("HonoApplication", () => {
 		});
 
 		it("should not add Access-Control-Allow-Private-Network header when request does not include Access-Control-Request-Private-Network", async () => {
-			const honoApp = await HonoApplication.build(app, {
+			const honoApp = await buildHonoApp(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
 			});
@@ -75,7 +75,7 @@ describe("HonoApplication", () => {
 		});
 
 		it("should add Access-Control-Allow-Private-Network header for POST preflight requests with PNA header", async () => {
-			const honoApp = await HonoApplication.build(app, {
+			const honoApp = await buildHonoApp(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
 			});
@@ -96,7 +96,7 @@ describe("HonoApplication", () => {
 
 	describe("Toggle routes", () => {
 		let app: ProdApplication;
-		let honoApp: HonoApplication;
+		let honoApp: HonoApp;
 		let tempDir: TestTempDir;
 
 		// A release with no assets is immediately "ready" — no jobs to wait for
@@ -129,7 +129,7 @@ describe("HonoApplication", () => {
 			const configured = buildConfiguredApp();
 			app = configured.app;
 			tempDir = configured.tempDir;
-			honoApp = await HonoApplication.build(app, {
+			honoApp = await buildHonoApp(app, {
 				enableGenerateSchema: false,
 				uiAppConfig: { webappUrl: "http://localhost:3000/", daemonUrl: "http://localhost:56499/" },
 			});

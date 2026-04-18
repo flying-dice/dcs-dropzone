@@ -9,14 +9,14 @@ Object.assign(process.env, envParsed);
 process.chdir(resolve(import.meta.dirname, "../"));
 
 const { ProdApplication } = await import("../src/ProdApplication.ts");
-const { HonoApplication } = await import("../src/hono/HonoApplication.ts");
+const { buildHonoApp } = await import("../src/hono/HonoApplication.ts");
 
 const app = new ProdApplication({
 	databaseUrl: ":memory:",
 	wgetExecutablePath: "wget",
 	sevenZipExecutablePath: "7za",
 });
-await HonoApplication.build(app, {
+await buildHonoApp(app, {
 	enableGenerateSchema: true,
 	uiAppConfig: {
 		webappUrl: envLocalDev.DZ_WEBAPP_URL,

@@ -3,7 +3,7 @@ import { serve } from "bun";
 import { getLogger } from "log4js";
 import { appConfig } from "./config";
 import { UiAppConfig } from "./config/schemas.ts";
-import { HonoApplication } from "./hono/HonoApplication.ts";
+import { buildHonoApp } from "./hono/HonoApplication.ts";
 import { ProdApplication } from "./ProdApplication.ts";
 import index from "./ui/index.html";
 import { WebviewWorker } from "./webview";
@@ -18,7 +18,7 @@ const app = new ProdApplication({
 });
 
 logger.debug("Creating Hono application wrapper...");
-const honoApp = await HonoApplication.build(app, {
+const honoApp = await buildHonoApp(app, {
 	enableGenerateSchema: appConfig.enableGenerateSchema,
 	uiAppConfig: UiAppConfig.parse(appConfig),
 });
