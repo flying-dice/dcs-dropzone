@@ -43,7 +43,10 @@ export const GetLatestModReleaseById = ApplicationFactory.createHandlers(
 
 		if (releaseError) {
 			return c.json(
-				zParse({ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name }, ErrorData),
+				zParse(
+					{ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name },
+					TypedErrorData(LatestModReleaseErrors),
+				),
 				StatusCodes.NOT_FOUND,
 			);
 		}
