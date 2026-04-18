@@ -2,26 +2,12 @@ import "./log4js.ts";
 import { serve } from "bun";
 import { getLogger } from "log4js";
 import { appConfig } from "./config";
-import { UiAppConfig } from "./config/schemas.ts";
-import { HonoApplication } from "./hono/HonoApplication.ts";
-import { ProdApplication } from "./ProdApplication.ts";
+import { application } from "./hono/ApplicationFactory.ts";
+import { app } from "./hono/app.ts";
 import index from "./ui/index.html";
 import { WebviewWorker } from "./webview";
 
 const logger = getLogger("bootstrap");
-
-logger.debug("Creating ProdApplication instance...");
-const app = new ProdApplication({
-	databaseUrl: appConfig.databasePath,
-	wgetExecutablePath: appConfig.wgetPath,
-	sevenZipExecutablePath: appConfig.sevenzipPath,
-});
-
-logger.debug("Creating Hono application wrapper...");
-const honoApp = await HonoApplication.build(app, {
-	enableGenerateSchema: appConfig.enableGenerateSchema,
-	uiAppConfig: UiAppConfig.parse(appConfig),
-});
 
 logger.debug("Starting Bun server...");
 const bunServer = serve({
@@ -30,9 +16,9 @@ const bunServer = serve({
 	development: appConfig.enableServeDevelopment,
 	routes: {
 		"/*": index,
-		"/api": honoApp.fetch,
-		"/api/**": honoApp.fetch,
-		"/v3/api-docs": honoApp.fetch,
+		"/api": app.fetch,
+		"/api/**": app.fetch,
+		"/v3/api-docs": app.fetch,
 	},
 });
 
@@ -69,7 +55,7 @@ async function handleGracefulShutdown() {
 	await bunServer.stop(true);
 
 	logger.debug("Closing application...");
-	app.close();
+	application.close();
 
 	logger.info("Shutdown complete.");
 }

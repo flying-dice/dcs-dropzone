@@ -1,27 +1,17 @@
 #!/usr/bin/env bun
-import { resolve } from "node:path";
-import { envLocalDev } from "./_env.ts";
+import "./_setup-schema-env.ts";
+import { generateSpecs } from "hono-openapi";
+import { app } from "../src/hono/app.ts";
 
-// Set env vars so config parsing succeeds
-const envParsed = Object.fromEntries(Object.entries(envLocalDev).map(([k, v]) => [k, String(v)]));
-Object.assign(process.env, envParsed);
-
-process.chdir(resolve(import.meta.dirname, "../"));
-
-const { ProdApplication } = await import("../src/ProdApplication.ts");
-const { HonoApplication } = await import("../src/hono/HonoApplication.ts");
-
-const app = new ProdApplication({
-	databaseUrl: ":memory:",
-	wgetExecutablePath: "wget",
-	sevenZipExecutablePath: "7za",
-});
-await HonoApplication.build(app, {
-	enableGenerateSchema: true,
-	uiAppConfig: {
-		webappUrl: envLocalDev.DZ_WEBAPP_URL,
-		daemonUrl: envLocalDev.DZ_DAEMON_URL,
+const spec = await generateSpecs(app, {
+	documentation: {
+		info: {
+			title: "DCS Dropzone Daemon API",
+			version: "1.0.0",
+			description: "API documentation for the DCS Dropzone Daemon.",
+		},
 	},
 });
+await Bun.write("openapi.schema.json", JSON.stringify(spec, undefined, 2));
 
 console.log("Schema written to openapi.schema.json");
