@@ -9,7 +9,7 @@ Object.assign(process.env, envParsed);
 process.chdir(resolve(import.meta.dirname, "../"));
 
 const { ProdApplication } = await import("../src/ProdApplication.ts");
-const { buildHonoApp } = await import("../src/hono/HonoApplication.ts");
+const { buildHonoApp } = await import("../src/hono/app.ts");
 
 const app = new ProdApplication({
 	databaseUrl: ":memory:",

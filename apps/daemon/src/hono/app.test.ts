@@ -5,7 +5,7 @@ import { TestTempDir } from "../__tests__/TestTempDir.ts";
 import { SYSTEM_7ZIP_PATH, SYSTEM_WGET_PATH } from "../__tests__/utils.ts";
 import type { ModAndReleaseData } from "../application/schemas/ModAndReleaseData.ts";
 import { ProdApplication } from "../ProdApplication.ts";
-import { buildHonoApp, type HonoApp } from "./HonoApplication.ts";
+import { buildHonoApp, type HonoApp } from "./app.ts";
 
 function buildConfiguredApp() {
 	const tempDir = new TestTempDir();

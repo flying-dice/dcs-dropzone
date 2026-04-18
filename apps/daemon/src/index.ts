@@ -3,7 +3,7 @@ import { serve } from "bun";
 import { getLogger } from "log4js";
 import { appConfig } from "./config";
 import { UiAppConfig } from "./config/schemas.ts";
-import { buildHonoApp } from "./hono/HonoApplication.ts";
+import { buildHonoApp } from "./hono/app.ts";
 import { ProdApplication } from "./ProdApplication.ts";
 import index from "./ui/index.html";
 import { WebviewWorker } from "./webview";

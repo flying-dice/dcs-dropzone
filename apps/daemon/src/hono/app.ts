@@ -1,4 +1,3 @@
-import { setApp } from "@packages/hono/createApplicationFactory";
 import { jsonErrorTransformer } from "@packages/hono/jsonErrorTransformer";
 import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { Scalar } from "@scalar/hono-api-reference";
@@ -21,7 +20,7 @@ import { GetSettingsValidation } from "../routes/GetSettingsValidation.ts";
 import { PutSettings } from "../routes/PutSettings.ts";
 import { RemoveReleaseFromDaemon } from "../routes/RemoveReleaseFromDaemon.ts";
 import { ToggleRelease } from "../routes/ToggleRelease.ts";
-import ApplicationFactory from "./ApplicationFactory.ts";
+import ApplicationFactory, { setApp } from "./ApplicationFactory.ts";
 
 type BuildOptions = {
 	enableGenerateSchema: boolean;

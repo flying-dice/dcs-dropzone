@@ -1,14 +1,20 @@
-import { createApplicationFactory } from "@packages/hono/createApplicationFactory";
+import type { MiddlewareHandler } from "hono";
+import { createFactory } from "hono/factory";
 import type { Application } from "../application/Application.ts";
 
-/**
- * Typed Hono factory for the daemon's {@link Application}.
- *
- * Route files under `../routes/` import this to build handler arrays
- * via `ApplicationFactory.createHandlers(...)`. Handlers reach the
- * Application through `c.var.app` — routes must not import the
- * Application directly.
- */
-export const ApplicationFactory = createApplicationFactory<Application>();
+type Env = {
+	Variables: {
+		app: Application;
+	};
+};
+
+export function setApp(app: Application): MiddlewareHandler<Env> {
+	return async (c, next) => {
+		c.set("app", app);
+		await next();
+	};
+}
+
+const ApplicationFactory = createFactory<Env>();
 
 export default ApplicationFactory;
