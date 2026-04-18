@@ -14,6 +14,7 @@ const logger = getLogger("GetLatestModReleaseById");
 const loggingHook = getLoggingHook(logger);
 
 const LatestModReleaseErrors = z.enum(["ModNotFoundError", "ReleaseNotFoundError"]);
+const LatestModReleaseNotFound = TypedErrorData(LatestModReleaseErrors);
 
 export const GetLatestModReleaseById = ApplicationFactory.createHandlers(
 	describeJsonRoute({
@@ -23,7 +24,7 @@ export const GetLatestModReleaseById = ApplicationFactory.createHandlers(
 		tags: ["Mod Releases"],
 		responses: {
 			[StatusCodes.OK]: ModReleaseData,
-			[StatusCodes.NOT_FOUND]: TypedErrorData(LatestModReleaseErrors),
+			[StatusCodes.NOT_FOUND]: LatestModReleaseNotFound,
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
@@ -43,10 +44,7 @@ export const GetLatestModReleaseById = ApplicationFactory.createHandlers(
 
 		if (releaseError) {
 			return c.json(
-				zParse(
-					{ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name },
-					TypedErrorData(LatestModReleaseErrors),
-				),
+				zParse({ code: StatusCodes.NOT_FOUND, error: releaseError.name }, LatestModReleaseNotFound),
 				StatusCodes.NOT_FOUND,
 			);
 		}
