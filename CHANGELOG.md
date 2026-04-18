@@ -1,3 +1,10 @@
+## [1.10.8](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.7...v1.10.8) (2026-04-18)
+
+
+### Bug Fixes
+
+* extract hardcoded release-version test ID to constant ([9c97187](https://github.com/flying-dice/dcs-dropzone/commit/9c97187343620632db1b80838f609e8d7ae0b390))
+
 ## [1.10.7](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.6...v1.10.7) (2026-04-05)
 
 
