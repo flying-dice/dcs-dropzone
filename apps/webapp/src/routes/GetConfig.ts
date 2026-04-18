@@ -3,8 +3,6 @@ import { StatusCodes } from "http-status-codes";
 import { appConfig, UiAppConfig } from "../config";
 import ApplicationFactory from "../hono/ApplicationFactory.ts";
 
-const uiAppConfig = UiAppConfig.parse(appConfig);
-
 export const GetConfig = ApplicationFactory.createHandlers(
 	describeJsonRoute({
 		operationId: "getConfig",
@@ -16,6 +14,6 @@ export const GetConfig = ApplicationFactory.createHandlers(
 		},
 	}),
 	async (c) => {
-		return c.json(uiAppConfig);
+		return c.json(UiAppConfig.parse(appConfig));
 	},
 );

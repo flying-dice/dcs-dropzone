@@ -43,7 +43,10 @@ export const RegisterModReleaseDownloadById = ApplicationFactory.createHandlers(
 		const [, releaseError] = await c.var.app.publicMods.findPublicModReleaseById(id, releaseId);
 
 		if (releaseError) {
-			return c.json(zParse({ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name }, ErrorData));
+			return c.json(
+				zParse({ code: StatusCodes.NOT_FOUND, error: releaseError.constructor.name }, ErrorData),
+				StatusCodes.NOT_FOUND,
+			);
 		}
 
 		await c.var.app.downloads.registerModReleaseDownload(id, releaseId, daemonInstanceId);
