@@ -152,9 +152,6 @@
     },
     "packages/clients": {
       "name": "@packages/clients",
-      "dependencies": {
-        "http-status-codes": "^2.3.0",
-      },
       "devDependencies": {
         "orval": "^8.0.3",
       },

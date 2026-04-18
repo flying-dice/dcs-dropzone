@@ -1,6 +1,10 @@
-import { StatusCodes } from "http-status-codes";
 import { DropzoneClientError } from "./DropzoneClientError.ts";
-import { getAllDaemonReleases, ModAndReleaseDataStatus, toggleRelease } from "./daemon";
+import {
+	getAllDaemonReleases,
+	type getAllDaemonReleasesResponse,
+	ModAndReleaseDataStatus,
+	toggleRelease,
+} from "./daemon";
 
 export class FailedToGetDaemonReleasesError extends DropzoneClientError {
 	readonly type = "FailedToGetDaemonReleasesError" as const;
@@ -32,8 +36,21 @@ export async function toggleReleaseById(props: {
 }): Promise<["Enabled" | "Disabled", null] | [undefined, ToggleReleaseByIdResultError]> {
 	const { releaseId } = props;
 
-	const releases = await getAllDaemonReleases();
-	if (releases.status !== StatusCodes.OK || !releases.data) {
+	let releases: getAllDaemonReleasesResponse;
+	try {
+		releases = await getAllDaemonReleases();
+	} catch (e) {
+		return [
+			undefined,
+			new FailedToGetDaemonReleasesError({
+				message: "Failed to get daemon releases",
+				data: e instanceof DropzoneClientError ? e.data : undefined,
+				status: e instanceof DropzoneClientError ? e.status : 0,
+			}),
+		];
+	}
+
+	if (!releases.data) {
 		return [
 			undefined,
 			new FailedToGetDaemonReleasesError({
@@ -51,33 +68,44 @@ export async function toggleReleaseById(props: {
 			new FailedToFindDaemonReleaseError({
 				message: `Release '${releaseId}' not found in daemon`,
 				data: undefined,
-				status: StatusCodes.NOT_FOUND,
+				status: 404,
 			}),
 		];
 	}
 
 	const wasEnabled = release.status === ModAndReleaseDataStatus.ENABLED;
 
-	const result = await toggleRelease(releaseId);
-	if (result.status !== StatusCodes.OK) {
-		const errorData = result.data as {
-			reason?: string;
-			systemError?: string;
-			failures?: { linkId: string; message: string }[];
-		};
-		const reason = errorData?.reason;
-		const detail = errorData?.systemError ?? errorData?.failures?.map((f) => `${f.linkId}: ${f.message}`).join("; ");
-		const message = detail
-			? reason
-				? `${reason}: ${detail}`
-				: `Failed to toggle release: ${detail}`
-			: (reason ?? "Failed to toggle release");
+	try {
+		await toggleRelease(releaseId);
+	} catch (e) {
+		if (e instanceof DropzoneClientError) {
+			const errorData = e.data as {
+				reason?: string;
+				systemError?: string;
+				failures?: { linkId: string; message: string }[];
+			};
+			const reason = errorData?.reason;
+			const detail = errorData?.systemError ?? errorData?.failures?.map((f) => `${f.linkId}: ${f.message}`).join("; ");
+			const message = detail
+				? reason
+					? `${reason}: ${detail}`
+					: `Failed to toggle release: ${detail}`
+				: (reason ?? "Failed to toggle release");
+			return [
+				undefined,
+				new ToggleReleaseError({
+					message,
+					data: e.data,
+					status: e.status,
+				}),
+			];
+		}
 		return [
 			undefined,
 			new ToggleReleaseError({
-				message,
-				data: result.data,
-				status: result.status,
+				message: "Failed to toggle release",
+				data: undefined,
+				status: 0,
 			}),
 		];
 	}
