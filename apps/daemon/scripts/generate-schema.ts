@@ -1,16 +1,7 @@
 #!/usr/bin/env bun
-import { resolve } from "node:path";
+import "./_setup-schema-env.ts";
 import { generateSpecs } from "hono-openapi";
-import { envLocalDev } from "./_env.ts";
-
-// Set env vars so config parsing succeeds
-const envParsed = Object.fromEntries(Object.entries(envLocalDev).map(([k, v]) => [k, String(v)]));
-Object.assign(process.env, envParsed);
-process.env.DZ_DAEMON_DATABASE_PATH = ":memory:";
-
-process.chdir(resolve(import.meta.dirname, "../"));
-
-const { app } = await import("../src/hono/app.ts");
+import { app } from "../src/hono/app.ts";
 
 const spec = await generateSpecs(app, {
 	documentation: {
