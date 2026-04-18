@@ -1,20 +1,28 @@
-import type { MiddlewareHandler } from "hono";
 import { createFactory } from "hono/factory";
-import type { Application } from "../application/Application.ts";
+import { getLogger } from "log4js";
+import { appConfig } from "../config";
+import { ProdApplication } from "../ProdApplication.ts";
+
+const logger = getLogger("ApplicationFactory");
 
 type Env = {
 	Variables: {
-		app: Application;
+		app: ProdApplication;
 	};
 };
 
-export function setApp(app: Application): MiddlewareHandler<Env> {
-	return async (c, next) => {
-		c.set("app", app);
-		await next();
-	};
-}
+logger.debug("Creating ProdApplication instance...");
+export const application = new ProdApplication({
+	databaseUrl: appConfig.databasePath,
+	wgetExecutablePath: appConfig.wgetPath,
+	sevenZipExecutablePath: appConfig.sevenzipPath,
+});
 
-const ApplicationFactory = createFactory<Env>();
-
-export default ApplicationFactory;
+export default createFactory<Env>({
+	initApp: (app) => {
+		app.use(async (c, next) => {
+			c.set("app", application);
+			await next();
+		});
+	},
+});

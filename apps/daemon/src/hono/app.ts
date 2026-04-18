@@ -3,11 +3,7 @@ import { requestResponseLogger } from "@packages/hono/requestResponseLogger";
 import { Scalar } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
-import type { BlankSchema } from "hono/types";
-import { generateSpecs, openAPIRouteHandler } from "hono-openapi";
-import type { z } from "zod";
-import type { Application } from "../application/Application.ts";
-import type { UiAppConfig } from "../config/schemas.ts";
+import { openAPIRouteHandler } from "hono-openapi";
 import { AddReleaseToDaemon } from "../routes/AddReleaseToDaemon.ts";
 import { DisableRelease } from "../routes/DisableRelease.ts";
 import { EnableRelease } from "../routes/EnableRelease.ts";
@@ -20,66 +16,49 @@ import { GetSettingsValidation } from "../routes/GetSettingsValidation.ts";
 import { PutSettings } from "../routes/PutSettings.ts";
 import { RemoveReleaseFromDaemon } from "../routes/RemoveReleaseFromDaemon.ts";
 import { ToggleRelease } from "../routes/ToggleRelease.ts";
-import ApplicationFactory, { setApp } from "./ApplicationFactory.ts";
+import ApplicationFactory from "./ApplicationFactory.ts";
 
-type BuildOptions = {
-	enableGenerateSchema: boolean;
-	uiAppConfig: z.infer<typeof UiAppConfig>;
-};
+export const app = ApplicationFactory.createApp();
 
-const openapiSchema: BlankSchema = {
-	documentation: {
-		info: {
-			title: "DCS Dropzone Daemon API",
-			version: "1.0.0",
-			description: "API documentation for the DCS Dropzone Daemon.",
-		},
-	},
-};
-
-export type HonoApp = Awaited<ReturnType<typeof buildHonoApp>>;
-
-export async function buildHonoApp(app: Application, options: BuildOptions) {
-	const honoApp = ApplicationFactory.createApp();
-
-	honoApp.use("*", setApp(app));
-
-	// Handle Private Network Access (PNA) preflight requests
-	// https://developer.chrome.com/blog/private-network-access-preflight
-	honoApp.use("*", async (c, next) => {
-		const hasPnaHeader = c.req.header("Access-Control-Request-Private-Network") === "true";
-		await next();
-		if (hasPnaHeader) {
-			c.res.headers.set("Access-Control-Allow-Private-Network", "true");
-		}
-	});
-
-	honoApp.use("/*", cors());
-	honoApp.use(requestId());
-	honoApp.use("*", requestResponseLogger);
-
-	honoApp.get("/api/config", ...GetConfig(options.uiAppConfig));
-	honoApp.get("/api/settings", ...GetSettings);
-	honoApp.get("/api/settings/suggestions", ...GetSettingsSuggestions);
-	honoApp.get("/api/settings/validate", ...GetSettingsValidation);
-	honoApp.put("/api/settings", ...PutSettings);
-	honoApp.post("/api/downloads", ...AddReleaseToDaemon);
-	honoApp.get("/api/downloads", ...GetAllDaemonReleases);
-	honoApp.delete("/api/downloads/:releaseId", ...RemoveReleaseFromDaemon);
-	honoApp.get("/api/health", ...GetDaemonHealth);
-	honoApp.post("/api/toggle/:releaseId", ...ToggleRelease);
-	honoApp.post("/api/toggle/:releaseId/enable", ...EnableRelease);
-	honoApp.post("/api/toggle/:releaseId/disable", ...DisableRelease);
-
-	honoApp.get("/v3/api-docs", openAPIRouteHandler(honoApp, openapiSchema));
-	honoApp.get("/api", Scalar({ url: "/v3/api-docs" }));
-
-	honoApp.onError(jsonErrorTransformer);
-
-	if (options.enableGenerateSchema) {
-		const spec = await generateSpecs(honoApp, openapiSchema);
-		await Bun.write("openapi.schema.json", JSON.stringify(spec, undefined, 2));
+// Handle Private Network Access (PNA) preflight requests.
+// https://developer.chrome.com/blog/private-network-access-preflight
+app.use("*", async (c, next) => {
+	const hasPnaHeader = c.req.header("Access-Control-Request-Private-Network") === "true";
+	await next();
+	if (hasPnaHeader) {
+		c.res.headers.set("Access-Control-Allow-Private-Network", "true");
 	}
+});
 
-	return honoApp;
-}
+app.use("/*", cors());
+app.use(requestId());
+app.use("*", requestResponseLogger);
+
+app.get("/api/config", ...GetConfig);
+app.get("/api/settings", ...GetSettings);
+app.get("/api/settings/suggestions", ...GetSettingsSuggestions);
+app.get("/api/settings/validate", ...GetSettingsValidation);
+app.put("/api/settings", ...PutSettings);
+app.post("/api/downloads", ...AddReleaseToDaemon);
+app.get("/api/downloads", ...GetAllDaemonReleases);
+app.delete("/api/downloads/:releaseId", ...RemoveReleaseFromDaemon);
+app.get("/api/health", ...GetDaemonHealth);
+app.post("/api/toggle/:releaseId", ...ToggleRelease);
+app.post("/api/toggle/:releaseId/enable", ...EnableRelease);
+app.post("/api/toggle/:releaseId/disable", ...DisableRelease);
+
+app.get(
+	"/v3/api-docs",
+	openAPIRouteHandler(app, {
+		documentation: {
+			info: {
+				title: "DCS Dropzone Daemon API",
+				version: "1.0.0",
+				description: "API documentation for the DCS Dropzone Daemon.",
+			},
+		},
+	}),
+);
+app.get("/api", Scalar({ url: "/v3/api-docs" }));
+
+app.onError(jsonErrorTransformer);
