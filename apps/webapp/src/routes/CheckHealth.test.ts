@@ -5,6 +5,7 @@ const mockPing = mock(() => Promise.resolve(true));
 
 mock.module("../database", () => ({
 	default: { ping: mockPing },
+	applyDatabaseMigrations: async () => {},
 }));
 
 mock.module("../hono/ApplicationFactory.ts", () => {
