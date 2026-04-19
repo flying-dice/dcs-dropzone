@@ -27,6 +27,10 @@
       "description": "Mod tag endpoints"
     },
     {
+      "name": "Config",
+      "description": "Application configuration endpoints"
+    },
+    {
       "name": "Mods",
       "description": "Public mod catalogue endpoints"
     },
