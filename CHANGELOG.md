@@ -1,3 +1,10 @@
+## [1.10.11](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.10...v1.10.11) (2026-04-19)
+
+
+### Bug Fixes
+
+* **webapp:** align GetModById 404 schema with TypedErrorData contract ([#143](https://github.com/flying-dice/dcs-dropzone/issues/143)) ([ef11e8c](https://github.com/flying-dice/dcs-dropzone/commit/ef11e8c7565d539b0a016306fa2bc8732044610d))
+
 ## [1.10.10](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.9...v1.10.10) (2026-04-19)
 
 
