@@ -1,3 +1,10 @@
+## [1.10.12](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.11...v1.10.12) (2026-04-19)
+
+
+### Bug Fixes
+
+* **webapp:** return 503 when Database.ping() resolves false ([#144](https://github.com/flying-dice/dcs-dropzone/issues/144)) ([cd5961c](https://github.com/flying-dice/dcs-dropzone/commit/cd5961ca0678283f01310ca54f0aecd283e65163)), closes [#137](https://github.com/flying-dice/dcs-dropzone/issues/137) [#137](https://github.com/flying-dice/dcs-dropzone/issues/137)
+
 ## [1.10.11](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.10...v1.10.11) (2026-04-19)
 
 
