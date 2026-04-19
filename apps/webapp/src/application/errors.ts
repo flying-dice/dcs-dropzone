@@ -5,12 +5,14 @@ export class UserNotFoundError extends Error {
 }
 
 export class ModNotFoundError extends Error {
+	override readonly name = "ModNotFoundError";
 	constructor() {
 		super("Mod not found");
 	}
 }
 
 export class ReleaseNotFoundError extends Error {
+	override readonly name = "ReleaseNotFoundError";
 	constructor() {
 		super("Release not found");
 	}
