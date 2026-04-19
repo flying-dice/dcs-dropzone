@@ -14,6 +14,7 @@ export const openapiSchema: BlankSchema = {
 			{ name: "Dashboard", description: "Dashboard and metrics endpoints" },
 			{ name: "Categories", description: "Mod category endpoints" },
 			{ name: "Tags", description: "Mod tag endpoints" },
+			{ name: "Config", description: "Application configuration endpoints" },
 			{ name: "Mods", description: "Public mod catalogue endpoints" },
 			{ name: "Mod Releases", description: "Public mod release endpoints" },
 			{ name: "Mod Release Downloads", description: "Mod release download endpoints" },
