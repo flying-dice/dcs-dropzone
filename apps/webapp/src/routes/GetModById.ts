@@ -7,8 +7,12 @@ import { getLogger } from "log4js";
 import { z } from "zod";
 import { ErrorData } from "../application/schemas/ErrorData.ts";
 import { ModData } from "../application/schemas/ModData.ts";
+import { TypedErrorData } from "../application/schemas/TypedErrorData.ts";
 import { UserData } from "../application/schemas/UserData.ts";
 import ApplicationFactory from "../hono/ApplicationFactory.ts";
+
+const ModByIdErrors = z.enum(["ModNotFoundError"]);
+const ModByIdNotFound = TypedErrorData(ModByIdErrors);
 
 const logger = getLogger("GetModById");
 const loggingHook = getLoggingHook(logger);
@@ -24,9 +28,7 @@ export const GetModById = ApplicationFactory.createHandlers(
 				mod: ModData,
 				maintainers: UserData.array(),
 			}),
-			[StatusCodes.NOT_FOUND]: z.object({
-				message: z.string(),
-			}),
+			[StatusCodes.NOT_FOUND]: ModByIdNotFound,
 			[StatusCodes.INTERNAL_SERVER_ERROR]: ErrorData,
 		},
 	}),
@@ -44,7 +46,7 @@ export const GetModById = ApplicationFactory.createHandlers(
 
 		if (modError) {
 			return c.json(
-				zParse({ code: StatusCodes.NOT_FOUND, error: modError.constructor.name }, ErrorData),
+				zParse({ code: StatusCodes.NOT_FOUND, error: modError.name }, ModByIdNotFound),
 				StatusCodes.NOT_FOUND,
 			);
 		}
