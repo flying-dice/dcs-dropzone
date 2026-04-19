@@ -1,3 +1,10 @@
+## [1.10.10](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.9...v1.10.10) (2026-04-19)
+
+
+### Bug Fixes
+
+* **webapp:** align 404 runtime parse with TypedErrorData contract ([#141](https://github.com/flying-dice/dcs-dropzone/issues/141)) ([cd19b47](https://github.com/flying-dice/dcs-dropzone/commit/cd19b473ff00029cb5f9a314953e597fbfdd0aca))
+
 ## [1.10.9](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.8...v1.10.9) (2026-04-18)
 
 
