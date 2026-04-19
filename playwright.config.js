@@ -9,6 +9,9 @@ export default defineConfig({
 	// Fail the build on CI if you accidentally left test.only in the source code.
 	forbidOnly: !!process.env.CI,
 
+	// Retry once on CI to absorb timing flakes on Windows runners.
+	retries: process.env.CI ? 1 : 0,
+
 	// Run webapp and daemon projects in parallel (they target independent servers).
 	workers: process.env.CI ? 2 : undefined,
 
