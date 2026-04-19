@@ -110,6 +110,8 @@ jobs:
         run: |
           if (Test-Path .playwright-report) {
             Move-Item .playwright-report playwright-report
+          } else {
+            New-Item -ItemType Directory -Path playwright-report -Force | Out-Null
           }
 
       - name: Upload Playwright Report
