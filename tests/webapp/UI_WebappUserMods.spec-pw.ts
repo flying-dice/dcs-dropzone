@@ -75,7 +75,8 @@ test.describe("Webapp: User Mods", () => {
 		await page.getByTestId(BROWSE_MODS_BUTTON_TEST_ID).click();
 		await expect(page.getByTestId(BROWSE_MODS_NO_MODS_FOUND_TEST_ID)).toBeVisible();
 
-		// Navigate back to My Mods and open the mod
+		// Navigate back to My Mods — full page reload to bypass stale React Query cache
+		await page.goto("/");
 		await page.getByTestId(MY_MODS_BUTTON_TEST_ID).click();
 		await expect(page.getByTestId(USER_MODS_PUBLISH_NEW_MOD_BTN_TEST_ID)).toBeVisible();
 
