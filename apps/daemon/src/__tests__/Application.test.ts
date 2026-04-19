@@ -208,7 +208,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 			const [, addErr] = app.addRelease(modAndReleaseData);
 			expect(addErr).toBeNull();
 
-			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 15);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const downloadJobs = app.deps.jobRecordRepository.findAllForProcessor("download");
@@ -237,7 +237,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should write Mission Scripting Files", async () => {
 			const [, addErr] = app.addRelease(modAndReleaseData);
 			expect(addErr).toBeNull();
-			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 15);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
@@ -258,7 +258,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should reflect ENABLED status in getAllReleasesWithStatus after enabling", async () => {
 			const [, addErr] = app.addRelease(modAndReleaseData);
 			expect(addErr).toBeNull();
-			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 15);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
@@ -272,7 +272,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should reflect DISABLED status in getAllReleasesWithStatus after disabling", async () => {
 			const [, addErr] = app.addRelease(modAndReleaseData);
 			expect(addErr).toBeNull();
-			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 15);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
@@ -288,7 +288,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should generate removeSymlinks.bat after enabling a release", async () => {
 			const [, addErr] = app.addRelease(modAndReleaseData);
 			expect(addErr).toBeNull();
-			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 15);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);
@@ -304,7 +304,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 		it("should regenerate removeSymlinks.bat after disabling a release", async () => {
 			const [, addErr] = app.addRelease(modAndReleaseData);
 			expect(addErr).toBeNull();
-			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 5);
+			await waitForJobsForRelease(app.deps, modAndReleaseData.releaseId, 15);
 			createSourceFilesOnDisk(app, modAndReleaseData);
 
 			const [, enableErr] = await app.enableRelease(modAndReleaseData.releaseId);

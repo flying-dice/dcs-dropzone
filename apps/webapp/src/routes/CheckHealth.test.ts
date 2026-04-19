@@ -3,9 +3,11 @@ import { StatusCodes } from "http-status-codes";
 
 const mockPing = mock(() => Promise.resolve(true));
 
+const { applyDatabaseMigrations } = await import("../database");
+
 mock.module("../database", () => ({
 	default: { ping: mockPing },
-	applyDatabaseMigrations: async () => {},
+	applyDatabaseMigrations,
 }));
 
 mock.module("../hono/ApplicationFactory.ts", () => {
