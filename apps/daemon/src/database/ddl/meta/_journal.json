@@ -8,6 +8,13 @@
 			"when": 1773702676967,
 			"tag": "0000_init",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1776605400000,
+			"tag": "0001_add_mods_dir",
+			"breakpoints": true
 		}
 	]
 }

@@ -110,6 +110,7 @@ describe.each(TestCases)("$label", ({ build }) => {
 				versionHash: modAndReleaseData.versionHash,
 				dependencies: [],
 				enabled: false,
+				modsDir: expect.any(String),
 			});
 
 			expect(assetsForRelease.length).toEqual(modAndReleaseData.assets.length);

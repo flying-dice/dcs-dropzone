@@ -15,6 +15,7 @@ type Deps = {
 	releaseRepository: ReleaseRepository;
 	fileSystem: FileSystem;
 	releaseAssetManager: ReleaseAssetManager;
+	getDropzoneModsFolder: () => string | undefined;
 };
 
 export class ReleaseCatalog {
@@ -27,7 +28,11 @@ export class ReleaseCatalog {
 		const [, pathCheckErr] = this.deps.pathResolver.resolveReleasePath(data.releaseId);
 		if (pathCheckErr) return [undefined, pathCheckErr] as const;
 
-		this.deps.releaseRepository.saveRelease(data);
+		// Capture the current modsDir at download time so enable/remove use the correct path
+		// even if the user changes the setting later
+		const modsDir = this.deps.getDropzoneModsFolder() ?? null;
+
+		this.deps.releaseRepository.saveRelease({ ...data, modsDir });
 		const [, addErr] = this.deps.releaseAssetManager.addRelease(data.releaseId);
 		if (addErr) return [undefined, addErr] as const;
 

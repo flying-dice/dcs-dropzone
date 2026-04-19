@@ -86,6 +86,7 @@ export abstract class Application {
 			...this.deps,
 			releaseAssetManager: this.releaseAssetManager,
 			pathResolver,
+			getDropzoneModsFolder: () => this.settings.getDropzoneModsDir(),
 		});
 	}
 
