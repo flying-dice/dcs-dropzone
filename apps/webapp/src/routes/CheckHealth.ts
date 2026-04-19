@@ -22,11 +22,17 @@ export const CheckHealth = ApplicationFactory.createHandlers(
 	}),
 	async (c) => {
 		try {
-			await Database.ping();
+			const mongoStatus = await Database.ping();
+			if (!mongoStatus) {
+				return c.json(
+					zParse({ error: "MongoDB ping returned false", code: StatusCodes.SERVICE_UNAVAILABLE }, ErrorData),
+					StatusCodes.SERVICE_UNAVAILABLE,
+				);
+			}
 			return c.json(
 				{
 					status: "ok" as const,
-					mongoStatus: await Database.ping(),
+					mongoStatus,
 				},
 				StatusCodes.OK,
 			);
