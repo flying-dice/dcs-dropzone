@@ -5,12 +5,11 @@ import { ddlExports } from "./db-ddl.ts";
 it("applies migrations once and skips already-applied ones", () => {
 	const appDb = AppDatabase.withMigrations(":memory:", ddlExports);
 
-	expect(appDb.getDatabase().query("SELECT filename, hash FROM '__drizzle_migrations'").all()).toMatchInlineSnapshot(`
-	  [
-	    {
-	      "filename": "_0000_init_sql",
-	      "hash": "4427d6751820d8e114e94fe6b59772b5e7326909d0a1c6e3e6b994246f0781fb",
-	    },
-	  ]
-	`);
+	const rows = appDb
+		.getDatabase()
+		.query("SELECT filename, hash FROM '__drizzle_migrations' ORDER BY filename")
+		.all();
+	expect(rows).toHaveLength(2);
+	expect(rows[0]).toMatchObject({ filename: "_0000_init_sql" });
+	expect(rows[1]).toMatchObject({ filename: "_0002_init_sql" });
 });

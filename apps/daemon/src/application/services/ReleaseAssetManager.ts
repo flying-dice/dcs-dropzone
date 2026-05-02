@@ -110,7 +110,14 @@ export class ReleaseAssetManager {
 			}
 		}
 
-		const [releaseFolder, releaseFolderErr] = this.deps.pathResolver.resolveReleasePath(releaseId);
+		const release = this.deps.releaseRepository.getById(releaseId);
+		const storedModsDir = release?.modsDir;
+
+		const [releaseFolder, releaseFolderErr] = this.deps.pathResolver.resolveReleasePath(
+			releaseId,
+			undefined,
+			storedModsDir,
+		);
 		if (releaseFolder) {
 			this.deps.fileSystem.removeDir(releaseFolder);
 		} else {

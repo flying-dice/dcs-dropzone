@@ -1,0 +1,1 @@
+ALTER TABLE `MOD_RELEASES` ADD `mods_dir` text;

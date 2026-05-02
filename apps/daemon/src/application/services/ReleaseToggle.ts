@@ -28,13 +28,16 @@ export class ReleaseToggle {
 		const [, readyErr] = this.checkReleaseIsReady(releaseId);
 		if (readyErr) return [undefined, readyErr] as const;
 
+		const release = this.deps.releaseRepository.getById(releaseId);
+		const storedModsDir = release?.modsDir;
+
 		const links = this.deps.releaseRepository.getSymbolicLinksForRelease(releaseId);
 		logger.debug(`Found ${links.length} symbolic links for release ${releaseId}`);
 
 		const linkDefinitions: LinkDefinition[] = [];
 
 		for (const link of links) {
-			const [srcAbs, srcAbsErr] = this.deps.pathResolver.resolveReleasePath(releaseId, link.src);
+			const [srcAbs, srcAbsErr] = this.deps.pathResolver.resolveReleasePath(releaseId, link.src, storedModsDir);
 			if (srcAbsErr) return [undefined, srcAbsErr] as const;
 
 			const [destAbs, destAbsErr] = this.deps.pathResolver.resolveSymbolicLinkPath(link.destRoot, link.dest);

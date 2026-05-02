@@ -93,6 +93,7 @@ export class DrizzleReleaseRepository implements ReleaseRepository {
 						version: data.version,
 						versionHash: data.versionHash,
 						dependencies: data.dependencies,
+						modsDir: data.modsDir ?? null,
 					})
 					.run();
 

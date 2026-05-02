@@ -84,6 +84,7 @@ export const ModAndReleaseData = z
 		assets: ModReleaseAssetData.array(),
 		symbolicLinks: ModReleaseSymbolicLinkData.array(),
 		missionScripts: ModReleaseMissionScriptData.array(),
+		modsDir: z.string().nullable().optional(),
 		status: z.enum(DownloadedReleaseStatus).optional(),
 		overallPercentProgress: z.number().optional(),
 	})

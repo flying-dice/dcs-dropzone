@@ -28,8 +28,12 @@ type Deps = {
 export class PathResolver {
 	constructor(protected deps: Deps) {}
 
-	resolveReleasePath(releaseId: string, path?: string): [string, null] | [undefined, DropzoneModsDirError] {
-		const dropzoneModsFolder = this.deps.getDropzoneModsFolder();
+	resolveReleasePath(
+		releaseId: string,
+		path?: string,
+		explicitModsDir?: string | null,
+	): [string, null] | [undefined, DropzoneModsDirError] {
+		const dropzoneModsFolder = explicitModsDir ?? this.deps.getDropzoneModsFolder();
 
 		if (!dropzoneModsFolder) {
 			return [undefined, { reason: "DropzoneModsDirNotConfigured" as const }];
