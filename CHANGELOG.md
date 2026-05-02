@@ -1,3 +1,11 @@
+## [1.10.13](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.12...v1.10.13) (2026-05-02)
+
+
+### Bug Fixes
+
+* **daemon:** store modsDir per release to survive setting changes ([a04d969](https://github.com/flying-dice/dcs-dropzone/commit/a04d9695b6b3089d44fe0e6ad9b2f7265e3642cd)), closes [#89](https://github.com/flying-dice/dcs-dropzone/issues/89)
+* **daemon:** use drizzle-kit generated migration instead of manual DDL ([6fa0d65](https://github.com/flying-dice/dcs-dropzone/commit/6fa0d65d793e80f4d93780046320ed78d44e7b11))
+
 ## [1.10.12](https://github.com/flying-dice/dcs-dropzone/compare/v1.10.11...v1.10.12) (2026-04-19)
 
 
